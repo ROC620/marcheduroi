@@ -163,6 +163,7 @@ export default function App() {
   };
 
   const logout = async () => { await supabase.auth.signOut(); setUser(null); setView("home"); notify("À bientôt !"); };
+  const canEdit = user && user.isPremium;
 
   const addPost = () => {
     if (!postForm.title || !postForm.description) { notify("Titre et description requis", "error"); return; }
