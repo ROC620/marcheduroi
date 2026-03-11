@@ -131,27 +131,38 @@ export default function App() {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const USERS_DB = {
-    "admin@app.com": { id: "u1", name: "Admin", role: "admin", isPremium: true, password: "admin123" },
-    "user@app.com": { id: "u2", name: "Sophie M.", role: "user", isPremium: true, password: "user123" },
-    "free@app.com": { id: "u6", name: "Jean Visiteur", role: "user", isPremium: false, password: "free123" },
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        supabase.from("profiles").select("*").eq("id", session.user.id).single()
+          .then(({ data }) => {
+            if (data) setUser({ id: session.user.id, name: data.name, role: data.role || "user", isPremium: data.is_premium || false, plan: data.plan });
+          });
+      }
+    });
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) setUser(null);
+    });
+  }, []);
+
+  const login = async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email: authForm.email, password: authForm.password });
+    if (error) { notify("Email ou mot de passe incorrect", "error"); return; }
+    const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
+    if (profile) setUser({ id: data.user.id, name: profile.name, role: profile.role || "user", isPremium: profile.is_premium || false, plan: profile.plan });
+    setView("home"); notify(`Bienvenue !`);
   };
 
-  const login = () => {
-    const found = USERS_DB[authForm.email];
-    if (found && found.password === authForm.password) { setUser(found); setView("home"); notify(`Bienvenue, ${found.name} !`); }
-    else notify("Email ou mot de passe incorrect", "error");
-  };
-
-  const register = () => {
+  const register = async () => {
     if (!authForm.name || !authForm.email || !authForm.password) { notify("Remplissez tous les champs", "error"); return; }
-    setUser({ id: "u" + Date.now(), name: authForm.name, role: "user", isPremium: false });
+    const { data, error } = await supabase.auth.signUp({ email: authForm.email, password: authForm.password });
+    if (error) { notify("Erreur : " + error.message, "error"); return; }
+    await supabase.from("profiles").insert({ id: data.user.id, name: authForm.name, role: "user", is_premium: false });
+    setUser({ id: data.user.id, name: authForm.name, role: "user", isPremium: false });
     setView("pricing"); notify("Compte créé ! Choisissez votre abonnement.");
   };
 
-  const logout = () => { setUser(null); setView("home"); notify("À bientôt !"); };
-  const activatePremium = (plan) => { setUser(u => ({ ...u, isPremium: true, plan: plan.label })); setModal(null); setView("home"); notify(`Abonnement ${plan.label} activé !`); };
-  const canEdit = user && user.isPremium;
+  const logout = async () => { await supabase.auth.signOut(); setUser(null); setView("home"); notify("À bientôt !"); };
 
   const addPost = () => {
     if (!postForm.title || !postForm.description) { notify("Titre et description requis", "error"); return; }
