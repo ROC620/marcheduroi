@@ -1,12 +1,11 @@
-import { useState, useEffect, useRef } from "react";
-import { supabase } from"./supabase";
+import { useState, useRef, useEffect } from "react";
+import { supabase } from "./supabase";
 
-// ─── Simulated Storage ───────────────────────────────────────────────────────
 const INITIAL_POSTS = [
-  { id: 1, title: "Villa à louer - Côte d'Azur", category: "Immobilier", description: "Magnifique villa avec piscine, 4 chambres, vue mer. Disponible juillet-août.", author: "Sophie M.", authorId: "u2", price: "3 500€/sem", date: "2026-03-01", likes: 12, contact: "sophie@email.com" },
-  { id: 2, title: "iPhone 15 Pro Max - Excellent état", category: "Électronique", description: "Vendu avec boîte originale, chargeur et coque. 256Go, couleur titane naturel.", author: "Karim B.", authorId: "u3", price: "950€", date: "2026-03-05", likes: 8, contact: "karim@email.com" },
-  { id: 3, title: "Cours de guitare - Tous niveaux", category: "Services", description: "Professeur diplômé, 10 ans d'expérience. Cours à domicile ou en ligne.", author: "Léa P.", authorId: "u4", price: "40€/h", date: "2026-03-08", likes: 21, contact: "lea@email.com" },
-  { id: 4, title: "Vélo électrique Decathlon", category: "Sport", description: "Vélo électrique Rockrider E-ST 900, batterie longue durée, parfait état.", author: "Marc D.", authorId: "u5", price: "1 200€", date: "2026-03-09", likes: 5, contact: "marc@email.com" },
+  { id: 1, title: "Villa à louer - Côte d'Azur", category: "Immobilier", description: "Magnifique villa avec piscine, 4 chambres, vue mer. Disponible juillet-août.", author: "Sophie M.", authorId: "u2", price: "3 500€/sem", date: "2026-03-01", likes: 12, contact: "sophie@email.com", phone: "+22997000001", photos: [] },
+  { id: 2, title: "iPhone 15 Pro Max - Excellent état", category: "Électronique", description: "Vendu avec boîte originale, chargeur et coque. 256Go, couleur titane naturel.", author: "Karim B.", authorId: "u3", price: "950€", date: "2026-03-05", likes: 8, contact: "karim@email.com", phone: "+22997000002", photos: [] },
+  { id: 3, title: "Cours de guitare - Tous niveaux", category: "Services", description: "Professeur diplômé, 10 ans d'expérience. Cours à domicile ou en ligne.", author: "Léa P.", authorId: "u4", price: "40€/h", date: "2026-03-08", likes: 21, contact: "lea@email.com", phone: "", photos: [] },
+  { id: 4, title: "Vélo électrique Decathlon", category: "Sport", description: "Vélo électrique Rockrider E-ST 900, batterie longue durée, parfait état.", author: "Marc D.", authorId: "u5", price: "1 200€", date: "2026-03-09", likes: 5, contact: "marc@email.com", phone: "+22997000004", photos: [] },
 ];
 
 const CATEGORIES = ["Toutes", "Immobilier", "Électronique", "Services", "Sport", "Mode", "Autre"];
@@ -17,7 +16,15 @@ const PLANS = [
   { id: "lifetime", label: "À vie", price: "149€", period: " unique", color: "#43C6AC", desc: "Accès illimité pour toujours" },
 ];
 
-// ─── Icons ───────────────────────────────────────────────────────────────────
+const BACKGROUNDS = [
+  { id: "dark", label: "Sombre", bg: "#0D0F1A", card: "#1A1D30", border: "#2A2D45", text: "#E8E8F0", sub: "#9A9AB0" },
+  { id: "light", label: "Clair", bg: "#F4F6FB", card: "#FFFFFF", border: "#E0E4F0", text: "#1A1D30", sub: "#6B7280" },
+  { id: "green", label: "Forêt", bg: "#0A1A10", card: "#122018", border: "#1E3A28", text: "#E0F0E8", sub: "#7AAB8A" },
+  { id: "blue", label: "Océan", bg: "#050E1F", card: "#0D1E38", border: "#1A3258", text: "#D8E8FF", sub: "#6A9ACF" },
+  { id: "purple", label: "Galaxie", bg: "#0E0818", card: "#1A1030", border: "#2E1A50", text: "#EAD8FF", sub: "#9A78CF" },
+  { id: "sunset", label: "Coucher de soleil", bg: "#1A0A00", card: "#2A1408", border: "#4A2010", text: "#FFE8D0", sub: "#CF8A5A" },
+];
+
 const Icon = ({ name, size = 18 }) => {
   const icons = {
     plus: <svg width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
@@ -34,30 +41,96 @@ const Icon = ({ name, size = 18 }) => {
     tag: <svg width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
     eye: <svg width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
     logout: <svg width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+    image: <svg width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>,
+    chevronLeft: <svg width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>,
+    chevronRight: <svg width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>,
+    phone: <svg width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+    whatsapp: <svg width={size} height={size} fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>,
+    palette: <svg width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20 2 2 0 0 1 0-4 2 2 0 0 0 0-4 2 2 0 0 1 0-4 10 10 0 0 1 0-8z"/></svg>,
+    suggestion: <svg width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
   };
   return icons[name] || null;
 };
 
-// ─── Main App ────────────────────────────────────────────────────────────────
+function PhotoCarousel({ photos }) {
+  const [current, setCurrent] = useState(0);
+  if (!photos || photos.length === 0) return null;
+  return (
+    <div style={{ position: "relative", width: "100%", height: 180, overflow: "hidden" }}>
+      <img src={photos[current]} alt="photo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      {photos.length > 1 && (
+        <>
+          <button onClick={() => setCurrent(c => (c - 1 + photos.length) % photos.length)} style={{ position:"absolute",left:6,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,0.5)",border:"none",color:"#fff",borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer" }}><Icon name="chevronLeft" size={14}/></button>
+          <button onClick={() => setCurrent(c => (c + 1) % photos.length)} style={{ position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,0.5)",border:"none",color:"#fff",borderRadius:"50%",width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer" }}><Icon name="chevronRight" size={14}/></button>
+          <div style={{ position:"absolute",bottom:8,left:"50%",transform:"translateX(-50%)",display:"flex",gap:4 }}>
+            {photos.map((_, i) => <div key={i} onClick={() => setCurrent(i)} style={{ width:6,height:6,borderRadius:"50%",background:i===current?"#fff":"rgba(255,255,255,0.5)",cursor:"pointer" }} />)}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function PhotoUploader({ photos, setPhotos, theme }) {
+  const fileRef = useRef();
+  const handleFiles = (e) => {
+    const files = Array.from(e.target.files);
+    files.slice(0, 3 - photos.length).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => setPhotos(prev => [...prev, ev.target.result]);
+      reader.readAsDataURL(file);
+    });
+  };
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:8 }}>Photos ({photos.length}/3)</label>
+      <div style={{ display:"flex",gap:10,flexWrap:"wrap" }}>
+        {photos.map((photo, i) => (
+          <div key={i} style={{ position:"relative",width:90,height:90,borderRadius:10,overflow:"hidden",border:`1px solid ${theme.border}` }}>
+            <img src={photo} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }} />
+            <button onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))} style={{ position:"absolute",top:4,right:4,background:"rgba(255,71,87,0.9)",border:"none",color:"#fff",borderRadius:"50%",width:20,height:20,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer" }}><Icon name="x" size={10}/></button>
+          </div>
+        ))}
+        {photos.length < 3 && (
+          <div onClick={() => fileRef.current.click()} style={{ width:90,height:90,borderRadius:10,border:`2px dashed ${theme.border}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",color:theme.sub,gap:4 }}>
+            <Icon name="image" size={20}/><span style={{ fontSize:10,fontWeight:600 }}>Ajouter</span>
+          </div>
+        )}
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" multiple style={{ display:"none" }} onChange={handleFiles} />
+      <p style={{ fontSize:11,color:theme.sub,marginTop:6 }}>Maximum 3 photos · JPG, PNG, WEBP</p>
+    </div>
+  );
+}
+
 export default function App() {
   const [posts, setPosts] = useState(INITIAL_POSTS);
-  const [user, setUser] = useState(null); // null = visiteur
-  const [view, setView] = useState("home"); // home | login | register | pricing | dashboard | admin
+  const [suggestions, setSuggestions] = useState([
+    { id: 1, text: "Ajouter un système de messagerie interne", author: "Visiteur anonyme", date: "2026-03-10", status: "en attente" },
+  ]);
+  const [user, setUser] = useState(null);
+  const [view, setView] = useState("home");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Toutes");
-  const [modal, setModal] = useState(null); // null | {type: 'add'|'edit'|'delete'|'contact'|'pay', data?}
+  const [modal, setModal] = useState(null);
   const [notification, setNotification] = useState(null);
   const [likedPosts, setLikedPosts] = useState([]);
   const [authForm, setAuthForm] = useState({ email: "", password: "", name: "" });
-  const [postForm, setPostForm] = useState({ title: "", category: "Autre", description: "", price: "", contact: "" });
+  const [postForm, setPostForm] = useState({ title: "", category: "Autre", description: "", price: "", contact: "", phone: "" });
+  const [postPhotos, setPostPhotos] = useState([]);
+  const [themeId, setThemeId] = useState("dark");
+  const [suggestionText, setSuggestionText] = useState("");
+  const [suggestionName, setSuggestionName] = useState("");
+  const [showBgPicker, setShowBgPicker] = useState(false);
   const nextId = useRef(100);
+
+  const theme = BACKGROUNDS.find(b => b.id === themeId) || BACKGROUNDS[0];
 
   const notify = (msg, type = "success") => {
     setNotification({ msg, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
   const USERS_DB = {
     "admin@app.com": { id: "u1", name: "Admin", role: "admin", isPremium: true, password: "admin123" },
     "user@app.com": { id: "u2", name: "Sophie M.", role: "user", isPremium: true, password: "user123" },
@@ -66,55 +139,33 @@ export default function App() {
 
   const login = () => {
     const found = USERS_DB[authForm.email];
-    if (found && found.password === authForm.password) {
-      setUser(found);
-      setView("home");
-      notify(`Bienvenue, ${found.name} !`);
-    } else {
-      notify("Email ou mot de passe incorrect", "error");
-    }
+    if (found && found.password === authForm.password) { setUser(found); setView("home"); notify(`Bienvenue, ${found.name} !`); }
+    else notify("Email ou mot de passe incorrect", "error");
   };
 
   const register = () => {
     if (!authForm.name || !authForm.email || !authForm.password) { notify("Remplissez tous les champs", "error"); return; }
-    const newUser = { id: "u" + Date.now(), name: authForm.name, role: "user", isPremium: false };
-    setUser(newUser);
-    setView("pricing");
-    notify("Compte créé ! Choisissez votre abonnement.");
+    setUser({ id: "u" + Date.now(), name: authForm.name, role: "user", isPremium: false });
+    setView("pricing"); notify("Compte créé ! Choisissez votre abonnement.");
   };
 
   const logout = () => { setUser(null); setView("home"); notify("À bientôt !"); };
-
-  const activatePremium = (plan) => {
-    setUser(u => ({ ...u, isPremium: true, plan: plan.label }));
-    setModal(null);
-    setView("home");
-    notify(`🎉 Abonnement ${plan.label} activé ! Vous pouvez maintenant publier.`);
-  };
-
-  // ── Posts CRUD ────────────────────────────────────────────────────────────
+  const activatePremium = (plan) => { setUser(u => ({ ...u, isPremium: true, plan: plan.label })); setModal(null); setView("home"); notify(`Abonnement ${plan.label} activé !`); };
   const canEdit = user && user.isPremium;
 
   const addPost = () => {
     if (!postForm.title || !postForm.description) { notify("Titre et description requis", "error"); return; }
-    const newPost = { ...postForm, id: nextId.current++, author: user.name, authorId: user.id, date: new Date().toISOString().slice(0, 10), likes: 0 };
-    setPosts(p => [newPost, ...p]);
-    setModal(null);
-    setPostForm({ title: "", category: "Autre", description: "", price: "", contact: "" });
-    notify("✅ Annonce publiée avec succès !");
+    setPosts(p => [{ ...postForm, id: nextId.current++, author: user.name, authorId: user.id, date: new Date().toISOString().slice(0, 10), likes: 0, photos: postPhotos }, ...p]);
+    setModal(null); setPostForm({ title: "", category: "Autre", description: "", price: "", contact: "", phone: "" }); setPostPhotos([]);
+    notify("Annonce publiée !");
   };
 
   const editPost = () => {
-    setPosts(p => p.map(post => post.id === modal.data.id ? { ...post, ...postForm } : post));
-    setModal(null);
-    notify("✅ Annonce modifiée !");
+    setPosts(p => p.map(post => post.id === modal.data.id ? { ...post, ...postForm, photos: postPhotos } : post));
+    setModal(null); notify("Annonce modifiée !");
   };
 
-  const deletePost = (id) => {
-    setPosts(p => p.filter(post => post.id !== id));
-    setModal(null);
-    notify("🗑️ Annonce supprimée.");
-  };
+  const deletePost = (id) => { setPosts(p => p.filter(post => post.id !== id)); setModal(null); notify("Annonce supprimée."); };
 
   const likePost = (id) => {
     if (likedPosts.includes(id)) return;
@@ -123,339 +174,344 @@ export default function App() {
   };
 
   const openEdit = (post) => {
-    setPostForm({ title: post.title, category: post.category, description: post.description, price: post.price || "", contact: post.contact || "" });
+    setPostForm({ title: post.title, category: post.category, description: post.description, price: post.price || "", contact: post.contact || "", phone: post.phone || "" });
+    setPostPhotos(post.photos || []);
     setModal({ type: "edit", data: post });
   };
 
-  // ── Filtered posts ────────────────────────────────────────────────────────
-  const filtered = posts.filter(p => {
-    const matchCat = category === "Toutes" || p.category === category;
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const submitSuggestion = () => {
+    if (!suggestionText.trim()) { notify("Écrivez votre suggestion", "error"); return; }
+    setSuggestions(s => [{ id: Date.now(), text: suggestionText, author: suggestionName || "Visiteur anonyme", date: new Date().toISOString().slice(0, 10), status: "en attente" }, ...s]);
+    setSuggestionText(""); setSuggestionName("");
+    setModal(null); notify("Merci pour votre suggestion !");
+  };
 
+  const filtered = posts.filter(p => (category === "Toutes" || p.category === category) && (p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase())));
   const myPosts = user ? posts.filter(p => p.authorId === user.id) : [];
 
-  // ─────────────────────────────────────────────────────────────────────────
+  const inputStyle = { width:"100%", padding:"12px 16px", background:theme.bg, border:`1px solid ${theme.border}`, borderRadius:10, color:theme.text, fontSize:14, fontFamily:"inherit" };
+  const cardStyle = { background:theme.card, border:`1px solid ${theme.border}` };
+
   return (
-    <div style={{ minHeight: "100vh", background: "#0D0F1A", color: "#E8E8F0", fontFamily: "'Sora', 'Segoe UI', sans-serif" }}>
+    <div style={{ minHeight:"100vh", width:"100vw", background:theme.bg, color:theme.text, fontFamily:"'Sora','Segoe UI',sans-serif", overflowX:"hidden" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0D0F1A; }
-        ::-webkit-scrollbar-thumb { background: #2A2D45; border-radius: 3px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #2A2D45; border-radius: 3px; }
         input, textarea, select { outline: none; font-family: inherit; }
         button { cursor: pointer; font-family: inherit; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         @keyframes notifIn { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
-        .card-hover { transition: all 0.25s ease; }
-        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(108,99,255,0.2) !important; }
+        .card-hover { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(108,99,255,0.18) !important; }
         .btn-glow:hover { box-shadow: 0 0 24px rgba(108,99,255,0.5); }
-        .tag { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.5px; }
+        .tag { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600; }
+        .bg-opt:hover { transform: scale(1.08); }
+        .bg-opt { transition: transform 0.15s; cursor: pointer; }
       `}</style>
 
-      {/* ── Notification ── */}
+      {/* Notification */}
       {notification && (
-        <div style={{ position:"fixed",top:20,right:20,zIndex:9999,animation:"notifIn 0.3s ease",background: notification.type==="error"?"#FF4757":"#43C6AC",color:"#fff",padding:"12px 20px",borderRadius:12,fontWeight:600,fontSize:14,boxShadow:"0 8px 30px rgba(0,0,0,0.3)" }}>
+        <div style={{ position:"fixed",top:20,right:20,zIndex:9999,animation:"notifIn 0.3s ease",background:notification.type==="error"?"#FF4757":"#43C6AC",color:"#fff",padding:"12px 20px",borderRadius:12,fontWeight:600,fontSize:14,boxShadow:"0 8px 30px rgba(0,0,0,0.3)" }}>
           {notification.msg}
         </div>
       )}
 
-      {/* ── Navbar ── */}
-      <nav style={{ background:"rgba(13,15,26,0.95)",borderBottom:"1px solid #1E2035",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)" }}>
-        <div style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer" }} onClick={()=>setView("home")}>
-          <div style={{ width:32,height:32,background:"linear-gradient(135deg,#6C63FF,#FF6584)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center" }}>
-            <Icon name="tag" size={16}/>
+      {/* Background picker popup */}
+      {showBgPicker && (
+        <div onClick={() => setShowBgPicker(false)} style={{ position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,0.3)" }}>
+          <div onClick={e => e.stopPropagation()} style={{ position:"absolute",top:72,right:16,...cardStyle,borderRadius:16,padding:20,width:280,boxShadow:"0 20px 60px rgba(0,0,0,0.4)" }}>
+            <p style={{ fontWeight:700,fontSize:14,marginBottom:14,color:theme.text }}>🎨 Choisir l'arrière-plan</p>
+            <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10 }}>
+              {BACKGROUNDS.map(bg => (
+                <div key={bg.id} className="bg-opt" onClick={() => { setThemeId(bg.id); setShowBgPicker(false); }} style={{ background:bg.bg,border:`2px solid ${themeId===bg.id?"#6C63FF":bg.border}`,borderRadius:12,padding:"14px 8px",textAlign:"center",boxShadow:themeId===bg.id?"0 0 12px rgba(108,99,255,0.5)":"none" }}>
+                  <div style={{ width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${bg.card},${bg.border})`,margin:"0 auto 6px" }}/>
+                  <p style={{ fontSize:10,fontWeight:600,color:bg.text }}>{bg.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
+      )}
+
+      {/* Navbar */}
+      <nav style={{ background:`${theme.bg}EE`,borderBottom:`1px solid ${theme.border}`,padding:"0 32px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)",width:"100%" }}>
+        <div style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer" }} onClick={() => setView("home")}>
+          <div style={{ width:32,height:32,background:"linear-gradient(135deg,#6C63FF,#FF6584)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center" }}><Icon name="tag" size={16}/></div>
           <span style={{ fontWeight:800,fontSize:18,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span>
         </div>
 
-        <div style={{ display:"flex",gap:8,alignItems:"center" }}>
-          {["home","pricing"].map(v=>(
-            <button key={v} onClick={()=>setView(v)} style={{ background:view===v?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view===v?"#6C63FF":"#9A9AB0",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13,transition:"all 0.2s" }}>
+        <div style={{ display:"flex",gap:6,alignItems:"center",flexWrap:"wrap" }}>
+          {["home","pricing"].map(v => (
+            <button key={v} onClick={() => setView(v)} style={{ background:view===v?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view===v?"#6C63FF":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
               {v==="home"?"Annonces":"Tarifs"}
             </button>
           ))}
-          {user && user.role==="admin" && (
-            <button onClick={()=>setView("admin")} style={{ background:view==="admin"?"rgba(255,101,132,0.2)":"transparent",border:"none",color:"#FF6584",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>Admin</button>
-          )}
+          <button onClick={() => setModal({type:"suggestion"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
+            <Icon name="suggestion" size={14}/>Suggestion
+          </button>
+          {user?.role==="admin" && <button onClick={() => setView("admin")} style={{ background:"transparent",border:"none",color:"#FF6584",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Admin</button>}
+
+          {/* Background picker button */}
+          <button onClick={() => setShowBgPicker(p => !p)} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 12px",borderRadius:8,display:"flex",alignItems:"center",gap:6,fontWeight:600,fontSize:13 }}>
+            <Icon name="palette" size={14}/>Thème
+          </button>
+
           {user ? (
-            <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+            <div style={{ display:"flex",alignItems:"center",gap:6 }}>
               {user.isPremium && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700,display:"flex",alignItems:"center",gap:4 }}><Icon name="crown" size={10}/>PRO</span>}
-              <button onClick={()=>setView("dashboard")} style={{ background:"#1A1D30",border:"1px solid #2A2D45",color:"#E8E8F0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}><Icon name="user" size={14}/>{user.name.split(" ")[0]}</button>
-              <button onClick={logout} style={{ background:"transparent",border:"none",color:"#9A9AB0",padding:"8px",borderRadius:8 }}><Icon name="logout" size={16}/></button>
+              <button onClick={() => setView("dashboard")} style={{ ...cardStyle,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,border:`1px solid ${theme.border}`,color:theme.text }}><Icon name="user" size={14}/>{user.name.split(" ")[0]}</button>
+              <button onClick={logout} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px" }}><Icon name="logout" size={16}/></button>
             </div>
           ) : (
-            <div style={{ display:"flex",gap:8 }}>
-              <button onClick={()=>setView("login")} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#E8E8F0",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>Connexion</button>
-              <button onClick={()=>setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13,transition:"box-shadow 0.2s" }}>S'inscrire</button>
+            <div style={{ display:"flex",gap:6 }}>
+              <button onClick={() => setView("login")} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Connexion</button>
+              <button onClick={() => setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,transition:"box-shadow 0.2s" }}>S'inscrire</button>
             </div>
           )}
         </div>
       </nav>
 
-      {/* ════════ HOME ════════ */}
+      {/* ═══ HOME ═══ */}
       {view === "home" && (
-        <div style={{ maxWidth:1100,margin:"0 auto",padding:"32px 24px",animation:"fadeIn 0.4s ease" }}>
-          {/* Hero */}
+        <div style={{ width:"100%",padding:"32px 40px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:48 }}>
-            <h1 style={{ fontSize:48,fontWeight:800,lineHeight:1.1,marginBottom:16 }}>
+            <h1 style={{ fontSize:52,fontWeight:800,lineHeight:1.1,marginBottom:16,color:theme.text }}>
               Découvrez des{" "}
               <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>annonces uniques</span>
             </h1>
-            <p style={{ color:"#9A9AB0",fontSize:17,marginBottom:28 }}>Consultez gratuitement · Publiez avec un abonnement</p>
-
-            {/* Search */}
-            <div style={{ maxWidth:520,margin:"0 auto",position:"relative" }}>
-              <Icon name="search" size={16}/>
-              <div style={{ position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:"#9A9AB0",pointerEvents:"none" }}><Icon name="search" size={16}/></div>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une annonce..." style={{ width:"100%",padding:"14px 20px 14px 44px",background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:12,color:"#E8E8F0",fontSize:15 }}/>
+            <p style={{ color:theme.sub,fontSize:17,marginBottom:28 }}>Consultez gratuitement · Publiez avec un abonnement</p>
+            <div style={{ maxWidth:600,margin:"0 auto",position:"relative" }}>
+              <div style={{ position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={16}/></div>
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher une annonce..." style={{ ...inputStyle,padding:"14px 20px 14px 44px",borderRadius:12,fontSize:15 }}/>
             </div>
           </div>
 
-          {/* Categories */}
           <div style={{ display:"flex",gap:8,flexWrap:"wrap",marginBottom:28,justifyContent:"center" }}>
-            {CATEGORIES.map(c=>(
-              <button key={c} onClick={()=>setCategory(c)} style={{ background:category===c?"linear-gradient(135deg,#6C63FF,#8B84FF)":"#1A1D30",border:category===c?"none":"1px solid #2A2D45",color:category===c?"#fff":"#9A9AB0",padding:"8px 18px",borderRadius:24,fontWeight:600,fontSize:13,transition:"all 0.2s" }}>{c}</button>
+            {CATEGORIES.map(c => (
+              <button key={c} onClick={() => setCategory(c)} style={{ background:category===c?"linear-gradient(135deg,#6C63FF,#8B84FF)":theme.card,border:category===c?"none":`1px solid ${theme.border}`,color:category===c?"#fff":theme.sub,padding:"8px 18px",borderRadius:24,fontWeight:600,fontSize:13,transition:"all 0.2s" }}>{c}</button>
             ))}
           </div>
 
-          {/* Add button for premium */}
           <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-            <p style={{ color:"#9A9AB0",fontSize:14 }}>{filtered.length} annonce{filtered.length!==1?"s":""}</p>
+            <p style={{ color:theme.sub,fontSize:14 }}>{filtered.length} annonce{filtered.length!==1?"s":""}</p>
             {canEdit ? (
-              <button onClick={()=>{ setPostForm({ title:"",category:"Autre",description:"",price:"",contact:"" }); setModal({type:"add"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
+              <button onClick={() => { setPostForm({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"" }); setPostPhotos([]); setModal({type:"add"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
                 <Icon name="plus" size={16}/>Publier une annonce
               </button>
             ) : (
-              <button onClick={()=>user?setView("pricing"):setView("register")} style={{ background:"#1A1D30",border:"1px dashed #6C63FF",color:"#6C63FF",padding:"10px 20px",borderRadius:10,fontWeight:600,fontSize:14,display:"flex",alignItems:"center",gap:8 }}>
+              <button onClick={() => user?setView("pricing"):setView("register")} style={{ ...cardStyle,border:`1px dashed #6C63FF`,color:"#6C63FF",padding:"10px 20px",borderRadius:10,fontWeight:600,fontSize:14,display:"flex",alignItems:"center",gap:8 }}>
                 <Icon name="lock" size={14}/>{user?"Passer PRO pour publier":"Créer un compte"}
               </button>
             )}
           </div>
 
-          {/* Posts Grid */}
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:20 }}>
-            {filtered.map(post=>(
-              <div key={post.id} className="card-hover" style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:16,padding:24,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",animation:"fadeIn 0.4s ease" }}>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12 }}>
-                  <span className="tag" style={{ background:"rgba(108,99,255,0.15)",color:"#8B84FF" }}>{post.category}</span>
-                  {post.price && <span style={{ fontWeight:700,color:"#43C6AC",fontSize:15 }}>{post.price}</span>}
-                </div>
-                <h3 style={{ fontWeight:700,fontSize:16,marginBottom:8,lineHeight:1.3 }}>{post.title}</h3>
-                <p style={{ color:"#9A9AB0",fontSize:13,lineHeight:1.5,marginBottom:16 }}>{post.description.length>100?post.description.slice(0,100)+"...":post.description}</p>
-                <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between" }}>
-                  <div style={{ display:"flex",alignItems:"center",gap:6 }}>
-                    <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700 }}>{post.author[0]}</div>
-                    <div>
-                      <p style={{ fontSize:12,fontWeight:600 }}>{post.author}</p>
-                      <p style={{ fontSize:11,color:"#9A9AB0" }}>{post.date}</p>
-                    </div>
+            {filtered.map(post => (
+              <div key={post.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)",animation:"fadeIn 0.4s ease" }}>
+                {post.photos&&post.photos.length>0 && <PhotoCarousel photos={post.photos}/>}
+                <div style={{ padding:20 }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
+                    <span className="tag" style={{ background:"rgba(108,99,255,0.15)",color:"#8B84FF" }}>{post.category}</span>
+                    {post.price && <span style={{ fontWeight:700,color:"#43C6AC",fontSize:15 }}>{post.price}</span>}
                   </div>
-                  <div style={{ display:"flex",gap:8,alignItems:"center" }}>
-                    <button onClick={()=>likePost(post.id)} style={{ background:likedPosts.includes(post.id)?"rgba(255,101,132,0.2)":"transparent",border:"none",color:likedPosts.includes(post.id)?"#FF6584":"#9A9AB0",display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{post.likes}</button>
-                    <button onClick={()=>setModal({type:"contact",data:post})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"6px 12px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="mail" size={13}/>Contact</button>
-                    {(user && (user.id===post.authorId||user.role==="admin")) && canEdit && (
-                      <>
-                        <button onClick={()=>openEdit(post)} style={{ background:"transparent",border:"none",color:"#6C63FF",padding:6,borderRadius:6 }}><Icon name="edit" size={14}/></button>
-                        <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"transparent",border:"none",color:"#FF4757",padding:6,borderRadius:6 }}><Icon name="trash" size={14}/></button>
-                      </>
-                    )}
+                  <h3 style={{ fontWeight:700,fontSize:16,marginBottom:8,lineHeight:1.3,color:theme.text }}>{post.title}</h3>
+                  <p style={{ color:theme.sub,fontSize:13,lineHeight:1.5,marginBottom:14 }}>{post.description.length>100?post.description.slice(0,100)+"...":post.description}</p>
+                  <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8 }}>
+                    <div style={{ display:"flex",alignItems:"center",gap:6 }}>
+                      <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff" }}>{post.author[0]}</div>
+                      <div><p style={{ fontSize:12,fontWeight:600,color:theme.text }}>{post.author}</p><p style={{ fontSize:11,color:theme.sub }}>{post.date}</p></div>
+                    </div>
+                    <div style={{ display:"flex",gap:4,alignItems:"center",flexWrap:"wrap" }}>
+                      <button onClick={() => likePost(post.id)} style={{ background:likedPosts.includes(post.id)?"rgba(255,101,132,0.2)":"transparent",border:"none",color:likedPosts.includes(post.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{post.likes}</button>
+                      <button onClick={() => setModal({type:"contact",data:post})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="mail" size={13}/>Contact</button>
+                      {user&&(user.id===post.authorId||user.role==="admin")&&canEdit&&(
+                        <>
+                          <button onClick={() => openEdit(post)} style={{ background:"transparent",border:"none",color:"#6C63FF",padding:6,borderRadius:6 }}><Icon name="edit" size={14}/></button>
+                          <button onClick={() => setModal({type:"delete",data:post})} style={{ background:"transparent",border:"none",color:"#FF4757",padding:6,borderRadius:6 }}><Icon name="trash" size={14}/></button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-          {filtered.length===0 && <div style={{ textAlign:"center",padding:"60px 0",color:"#9A9AB0" }}><p style={{ fontSize:40,marginBottom:12 }}>🔍</p><p>Aucune annonce trouvée</p></div>}
+          {filtered.length===0 && <div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40,marginBottom:12 }}>🔍</p><p>Aucune annonce trouvée</p></div>}
         </div>
       )}
 
-      {/* ════════ PRICING ════════ */}
+      {/* ═══ PRICING ═══ */}
       {view === "pricing" && (
-        <div style={{ maxWidth:900,margin:"0 auto",padding:"48px 24px",animation:"fadeIn 0.4s ease" }}>
+        <div style={{ width:"100%",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:48 }}>
-            <h2 style={{ fontSize:40,fontWeight:800,marginBottom:12 }}>Choisissez votre <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>formule</span></h2>
-            <p style={{ color:"#9A9AB0",fontSize:16 }}>Lecture gratuite · Publiez, modifiez, supprimez avec un abonnement</p>
+            <h2 style={{ fontSize:40,fontWeight:800,marginBottom:12,color:theme.text }}>Choisissez votre <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>formule</span></h2>
+            <p style={{ color:theme.sub,fontSize:16 }}>Lecture gratuite · Publiez avec photos avec un abonnement</p>
           </div>
-          <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20 }}>
-            {PLANS.map(plan=>(
-              <div key={plan.id} className="card-hover" style={{ background:"#1A1D30",border:`2px solid ${plan.popular?"#6C63FF":"#2A2D45"}`,borderRadius:20,padding:32,position:"relative",boxShadow:plan.popular?"0 0 40px rgba(108,99,255,0.15)":"none" }}>
-                {plan.popular && <div style={{ position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",color:"#fff",padding:"4px 16px",borderRadius:20,fontSize:11,fontWeight:700,whiteSpace:"nowrap" }}>⭐ POPULAIRE</div>}
-                <div style={{ width:48,height:48,borderRadius:14,background:`${plan.color}22`,border:`1px solid ${plan.color}44`,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:20,color:plan.color }}>
-                  <Icon name="crown" size={20}/>
-                </div>
-                <h3 style={{ fontWeight:700,fontSize:20,marginBottom:4 }}>{plan.label}</h3>
-                <p style={{ color:"#9A9AB0",fontSize:13,marginBottom:24 }}>{plan.desc}</p>
-                <div style={{ marginBottom:28 }}>
-                  <span style={{ fontSize:36,fontWeight:800,color:plan.color }}>{plan.price}</span>
-                  <span style={{ color:"#9A9AB0",fontSize:14 }}>{plan.period}</span>
-                </div>
-                {["Publier des annonces","Modifier vos annonces","Supprimer vos annonces","Contact visible","Badge PRO"].map(f=>(
-                  <div key={f} style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10,fontSize:13,color:"#C8C8D8" }}>
-                    <span style={{ color:"#43C6AC" }}><Icon name="check" size={14}/></span>{f}
-                  </div>
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:20,maxWidth:900,margin:"0 auto" }}>
+            {PLANS.map(plan => (
+              <div key={plan.id} className="card-hover" style={{ ...cardStyle,borderRadius:20,padding:32,position:"relative",border:`2px solid ${plan.popular?"#6C63FF":theme.border}` }}>
+                {plan.popular && <div style={{ position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",color:"#fff",padding:"4px 16px",borderRadius:20,fontSize:11,fontWeight:700,whiteSpace:"nowrap" }}>POPULAIRE</div>}
+                <div style={{ width:48,height:48,borderRadius:14,background:`${plan.color}22`,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:20,color:plan.color }}><Icon name="crown" size={20}/></div>
+                <h3 style={{ fontWeight:700,fontSize:20,marginBottom:4,color:theme.text }}>{plan.label}</h3>
+                <p style={{ color:theme.sub,fontSize:13,marginBottom:24 }}>{plan.desc}</p>
+                <div style={{ marginBottom:28 }}><span style={{ fontSize:36,fontWeight:800,color:plan.color }}>{plan.price}</span><span style={{ color:theme.sub,fontSize:14 }}>{plan.period}</span></div>
+                {["Publier des annonces","1 à 3 photos par annonce","Contact email, téléphone, WhatsApp","Modifier vos annonces","Supprimer vos annonces","Badge PRO"].map(f => (
+                  <div key={f} style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10,fontSize:13,color:theme.text }}><span style={{ color:"#43C6AC" }}><Icon name="check" size={14}/></span>{f}</div>
                 ))}
-                <button onClick={()=>user?activatePremium(plan):setView("register")} className="btn-glow" style={{ width:"100%",marginTop:24,padding:"14px",background:`linear-gradient(135deg,${plan.color},${plan.color}BB)`,border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
+                <button onClick={() => user?activatePremium(plan):setView("register")} className="btn-glow" style={{ width:"100%",marginTop:24,padding:"14px",background:`linear-gradient(135deg,${plan.color},${plan.color}BB)`,border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
                   {user?"Choisir ce plan":"S'inscrire d'abord"}
                 </button>
               </div>
             ))}
           </div>
-          <p style={{ textAlign:"center",color:"#9A9AB0",fontSize:13,marginTop:32 }}>✨ Lecture et contact des annonces toujours gratuits · Paiement sécurisé simulé</p>
         </div>
       )}
 
-      {/* ════════ DASHBOARD ════════ */}
+      {/* ═══ DASHBOARD ═══ */}
       {view === "dashboard" && user && (
-        <div style={{ maxWidth:800,margin:"0 auto",padding:"32px 24px",animation:"fadeIn 0.4s ease" }}>
-          <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:20,padding:32,marginBottom:24 }}>
+        <div style={{ width:"100%",maxWidth:900,margin:"0 auto",padding:"32px 40px",animation:"fadeIn 0.4s ease" }}>
+          <div style={{ ...cardStyle,borderRadius:20,padding:32,marginBottom:24 }}>
             <div style={{ display:"flex",alignItems:"center",gap:16,marginBottom:20 }}>
-              <div style={{ width:60,height:60,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:800 }}>{user.name[0]}</div>
+              <div style={{ width:60,height:60,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:800,color:"#fff" }}>{user.name[0]}</div>
               <div>
-                <h2 style={{ fontWeight:800,fontSize:22 }}>{user.name}</h2>
+                <h2 style={{ fontWeight:800,fontSize:22,color:theme.text }}>{user.name}</h2>
                 <div style={{ display:"flex",gap:8,marginTop:4 }}>
-                  {user.isPremium ? <span className="tag" style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700" }}><Icon name="crown" size={10}/>PRO · {user.plan}</span> : <span className="tag" style={{ background:"rgba(154,154,176,0.15)",color:"#9A9AB0" }}><Icon name="eye" size={10}/>Visiteur</span>}
-                  {user.role==="admin" && <span className="tag" style={{ background:"rgba(255,101,132,0.15)",color:"#FF6584" }}>Admin</span>}
+                  {user.isPremium?<span className="tag" style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700" }}><Icon name="crown" size={10}/>PRO</span>:<span className="tag" style={{ background:"rgba(154,154,176,0.15)",color:theme.sub }}>Visiteur</span>}
                 </div>
               </div>
             </div>
-            {!user.isPremium && (
-              <button onClick={()=>setView("pricing")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 24px",borderRadius:12,fontWeight:700,fontSize:14,transition:"box-shadow 0.2s" }}>
-                🚀 Passer à l'abonnement PRO
-              </button>
-            )}
+            {!user.isPremium && <button onClick={() => setView("pricing")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 24px",borderRadius:12,fontWeight:700,fontSize:14,transition:"box-shadow 0.2s" }}>Passer PRO</button>}
           </div>
-          <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16 }}>Mes annonces ({myPosts.length})</h3>
-          {myPosts.length===0 ? (
-            <div style={{ textAlign:"center",padding:"40px",background:"#1A1D30",borderRadius:16,border:"1px dashed #2A2D45",color:"#9A9AB0" }}>
-              {canEdit ? <><p style={{ fontSize:32,marginBottom:8 }}>📝</p><p>Aucune annonce publiée</p><button onClick={()=>{ setView("home"); setModal({type:"add"}); }} style={{ marginTop:16,background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:600,cursor:"pointer" }}>Créer ma première annonce</button></> : <><p>Passez PRO pour publier des annonces</p><button onClick={()=>setView("pricing")} style={{ marginTop:12,background:"#6C63FF",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:600,cursor:"pointer" }}>Voir les tarifs</button></>}
-            </div>
-          ) : myPosts.map(post=>(
-            <div key={post.id} style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:20,marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-              <div>
-                <p style={{ fontWeight:700,marginBottom:4 }}>{post.title}</p>
-                <div style={{ display:"flex",gap:8 }}>
-                  <span className="tag" style={{ background:"rgba(108,99,255,0.15)",color:"#8B84FF" }}>{post.category}</span>
-                  <span style={{ color:"#9A9AB0",fontSize:12 }}>{post.likes} ♥ · {post.date}</span>
-                </div>
+          <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text }}>Mes annonces ({myPosts.length})</h3>
+          {myPosts.map(post => (
+            <div key={post.id} style={{ ...cardStyle,borderRadius:14,padding:16,marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
+              <div style={{ display:"flex",gap:12,alignItems:"center" }}>
+                {post.photos&&post.photos.length>0 && <img src={post.photos[0]} alt="" style={{ width:50,height:50,borderRadius:8,objectFit:"cover" }}/>}
+                <div><p style={{ fontWeight:700,marginBottom:4,color:theme.text }}>{post.title}</p><p style={{ color:theme.sub,fontSize:12 }}>{post.category} · {post.photos?.length||0} photo(s) · {post.date}</p></div>
               </div>
-              <div style={{ display:"flex",gap:8 }}>
-                <button onClick={()=>openEdit(post)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:4 }}><Icon name="edit" size={13}/>Modifier</button>
-                <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:4 }}><Icon name="trash" size={13}/>Supprimer</button>
+              <div style={{ display:"flex",gap:8,flexShrink:0 }}>
+                <button onClick={() => openEdit(post)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Modifier</button>
+                <button onClick={() => setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Supprimer</button>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* ════════ ADMIN ════════ */}
+      {/* ═══ ADMIN ═══ */}
       {view === "admin" && user?.role === "admin" && (
-        <div style={{ maxWidth:900,margin:"0 auto",padding:"32px 24px",animation:"fadeIn 0.4s ease" }}>
-          <h2 style={{ fontWeight:800,fontSize:28,marginBottom:8 }}>🛡️ Panneau Admin</h2>
-          <p style={{ color:"#9A9AB0",marginBottom:28 }}>Gérer toutes les annonces de la plateforme</p>
-          <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,marginBottom:32 }}>
-            {[{label:"Total annonces",val:posts.length,color:"#6C63FF"},{label:"Annonces aujourd'hui",val:posts.filter(p=>p.date===new Date().toISOString().slice(0,10)).length,color:"#43C6AC"},{label:"Total likes",val:posts.reduce((a,p)=>a+p.likes,0),color:"#FF6584"}].map(s=>(
-              <div key={s.label} style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:20,textAlign:"center" }}>
-                <p style={{ fontSize:36,fontWeight:800,color:s.color }}>{s.val}</p>
-                <p style={{ color:"#9A9AB0",fontSize:13 }}>{s.label}</p>
-              </div>
+        <div style={{ width:"100%",padding:"32px 40px",animation:"fadeIn 0.4s ease" }}>
+          <h2 style={{ fontWeight:800,fontSize:28,marginBottom:8,color:theme.text }}>Panneau Admin</h2>
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:16,marginBottom:32,maxWidth:700 }}>
+            {[{label:"Annonces",val:posts.length,color:"#6C63FF"},{label:"Suggestions",val:suggestions.length,color:"#43C6AC"},{label:"Total likes",val:posts.reduce((a,p)=>a+p.likes,0),color:"#FF6584"}].map(s=>(
+              <div key={s.label} style={{ ...cardStyle,borderRadius:14,padding:20,textAlign:"center" }}><p style={{ fontSize:36,fontWeight:800,color:s.color }}>{s.val}</p><p style={{ color:theme.sub,fontSize:13 }}>{s.label}</p></div>
             ))}
           </div>
-          {posts.map(post=>(
-            <div key={post.id} style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+
+          <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text }}>Suggestions des visiteurs</h3>
+          {suggestions.map(s => (
+            <div key={s.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
               <div>
-                <p style={{ fontWeight:700,fontSize:15 }}>{post.title}</p>
-                <p style={{ color:"#9A9AB0",fontSize:12 }}>Par {post.author} · {post.category} · {post.date}</p>
+                <p style={{ fontWeight:600,color:theme.text,marginBottom:4 }}>{s.text}</p>
+                <p style={{ color:theme.sub,fontSize:12 }}>Par {s.author} · {s.date}</p>
               </div>
-              <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>Supprimer</button>
+              <span style={{ background:"rgba(67,198,172,0.1)",color:"#43C6AC",padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:600,whiteSpace:"nowrap" }}>{s.status}</span>
+            </div>
+          ))}
+
+          <h3 style={{ fontWeight:700,fontSize:18,margin:"24px 0 16px",color:theme.text }}>Toutes les annonces</h3>
+          {posts.map(post => (
+            <div key={post.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+              <div style={{ display:"flex",gap:12,alignItems:"center" }}>
+                {post.photos&&post.photos.length>0 && <img src={post.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
+                <div><p style={{ fontWeight:700,color:theme.text }}>{post.title}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {post.author} · {post.category}</p></div>
+              </div>
+              <button onClick={() => setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>Supprimer</button>
             </div>
           ))}
         </div>
       )}
 
-      {/* ════════ LOGIN ════════ */}
+      {/* ═══ LOGIN ═══ */}
       {view === "login" && (
         <div style={{ maxWidth:420,margin:"60px auto",padding:"0 24px",animation:"fadeIn 0.4s ease" }}>
-          <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:20,padding:36 }}>
-            <h2 style={{ fontWeight:800,fontSize:26,marginBottom:6 }}>Connexion</h2>
-            <p style={{ color:"#9A9AB0",fontSize:13,marginBottom:28 }}>Essayez: user@app.com / user123</p>
-            {[{label:"Email",key:"email",type:"email"},{label:"Mot de passe",key:"password",type:"password"}].map(f=>(
+          <div style={{ ...cardStyle,borderRadius:20,padding:36 }}>
+            <h2 style={{ fontWeight:800,fontSize:26,marginBottom:6,color:theme.text }}>Connexion</h2>
+            <p style={{ color:theme.sub,fontSize:13,marginBottom:28 }}>Essayez: user@app.com / user123</p>
+            {[{label:"Email",key:"email",type:"email"},{label:"Mot de passe",key:"password",type:"password"}].map(f => (
               <div key={f.key} style={{ marginBottom:16 }}>
-                <label style={{ fontSize:13,fontWeight:600,color:"#9A9AB0",display:"block",marginBottom:6 }}>{f.label}</label>
-                <input type={f.type} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} style={{ width:"100%",padding:"12px 16px",background:"#0D0F1A",border:"1px solid #2A2D45",borderRadius:10,color:"#E8E8F0",fontSize:14 }}/>
+                <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
+                <input type={f.type} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} style={inputStyle}/>
               </div>
             ))}
             <button onClick={login} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s" }}>Se connecter</button>
-            <p style={{ textAlign:"center",marginTop:20,color:"#9A9AB0",fontSize:13 }}>Pas de compte ? <button onClick={()=>setView("register")} style={{ background:"none",border:"none",color:"#6C63FF",fontWeight:600,cursor:"pointer" }}>S'inscrire</button></p>
+            <p style={{ textAlign:"center",marginTop:20,color:theme.sub,fontSize:13 }}>Pas de compte ? <button onClick={() => setView("register")} style={{ background:"none",border:"none",color:"#6C63FF",fontWeight:600,cursor:"pointer" }}>S'inscrire</button></p>
           </div>
         </div>
       )}
 
-      {/* ════════ REGISTER ════════ */}
+      {/* ═══ REGISTER ═══ */}
       {view === "register" && (
         <div style={{ maxWidth:420,margin:"60px auto",padding:"0 24px",animation:"fadeIn 0.4s ease" }}>
-          <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:20,padding:36 }}>
-            <h2 style={{ fontWeight:800,fontSize:26,marginBottom:6 }}>Créer un compte</h2>
-            <p style={{ color:"#9A9AB0",fontSize:13,marginBottom:28 }}>Lecture toujours gratuite</p>
-            {[{label:"Nom complet",key:"name",type:"text"},{label:"Email",key:"email",type:"email"},{label:"Mot de passe",key:"password",type:"password"}].map(f=>(
+          <div style={{ ...cardStyle,borderRadius:20,padding:36 }}>
+            <h2 style={{ fontWeight:800,fontSize:26,marginBottom:6,color:theme.text }}>Créer un compte</h2>
+            <p style={{ color:theme.sub,fontSize:13,marginBottom:28 }}>Lecture toujours gratuite</p>
+            {[{label:"Nom complet",key:"name",type:"text"},{label:"Email",key:"email",type:"email"},{label:"Mot de passe",key:"password",type:"password"}].map(f => (
               <div key={f.key} style={{ marginBottom:16 }}>
-                <label style={{ fontSize:13,fontWeight:600,color:"#9A9AB0",display:"block",marginBottom:6 }}>{f.label}</label>
-                <input type={f.type} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} style={{ width:"100%",padding:"12px 16px",background:"#0D0F1A",border:"1px solid #2A2D45",borderRadius:10,color:"#E8E8F0",fontSize:14 }}/>
+                <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
+                <input type={f.type} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} style={inputStyle}/>
               </div>
             ))}
             <button onClick={register} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s" }}>Créer mon compte</button>
-            <p style={{ textAlign:"center",marginTop:20,color:"#9A9AB0",fontSize:13 }}>Déjà inscrit ? <button onClick={()=>setView("login")} style={{ background:"none",border:"none",color:"#6C63FF",fontWeight:600,cursor:"pointer" }}>Se connecter</button></p>
+            <p style={{ textAlign:"center",marginTop:20,color:theme.sub,fontSize:13 }}>Déjà inscrit ? <button onClick={() => setView("login")} style={{ background:"none",border:"none",color:"#6C63FF",fontWeight:600,cursor:"pointer" }}>Se connecter</button></p>
           </div>
         </div>
       )}
 
-      {/* ════════ MODALS ════════ */}
+      {/* ═══ MODALS ═══ */}
       {modal && (
         <div onClick={e=>{if(e.target===e.currentTarget)setModal(null)}} style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:24,backdropFilter:"blur(4px)" }}>
-          <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:20,padding:32,width:"100%",maxWidth:480,animation:"fadeIn 0.25s ease",maxHeight:"90vh",overflowY:"auto" }}>
+          <div style={{ ...cardStyle,borderRadius:20,padding:32,width:"100%",maxWidth:520,animation:"fadeIn 0.25s ease",maxHeight:"90vh",overflowY:"auto" }}>
 
-            {/* Add / Edit Form */}
+            {/* Add / Edit */}
             {(modal.type==="add"||modal.type==="edit") && (
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20 }}>{modal.type==="add"?"📝 Nouvelle annonce":"✏️ Modifier l'annonce"}</h3>
-                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:"#9A9AB0",padding:4 }}><Icon name="x" size={20}/></button>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>{modal.type==="add"?"Nouvelle annonce":"Modifier l'annonce"}</h3>
+                  <button onClick={() => setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
-                {[{label:"Titre",key:"title",type:"input"},{label:"Description",key:"description",type:"textarea"},{label:"Prix (optionnel)",key:"price",type:"input"},{label:"Contact email",key:"contact",type:"input"}].map(f=>(
+                <PhotoUploader photos={postPhotos} setPhotos={setPostPhotos} theme={theme}/>
+                {[{label:"Titre *",key:"title",type:"input"},{label:"Description *",key:"description",type:"textarea"},{label:"Prix (optionnel)",key:"price",type:"input"},{label:"Email de contact",key:"contact",type:"input"},{label:"Numéro de téléphone / WhatsApp",key:"phone",type:"input"}].map(f => (
                   <div key={f.key} style={{ marginBottom:16 }}>
-                    <label style={{ fontSize:13,fontWeight:600,color:"#9A9AB0",display:"block",marginBottom:6 }}>{f.label}</label>
-                    {f.type==="textarea" ? (
-                      <textarea value={postForm[f.key]} onChange={e=>setPostForm(p=>({...p,[f.key]:e.target.value}))} rows={3} style={{ width:"100%",padding:"12px 16px",background:"#0D0F1A",border:"1px solid #2A2D45",borderRadius:10,color:"#E8E8F0",fontSize:14,resize:"vertical" }}/>
-                    ) : (
-                      <input value={postForm[f.key]} onChange={e=>setPostForm(p=>({...p,[f.key]:e.target.value}))} style={{ width:"100%",padding:"12px 16px",background:"#0D0F1A",border:"1px solid #2A2D45",borderRadius:10,color:"#E8E8F0",fontSize:14 }}/>
-                    )}
+                    <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
+                    {f.type==="textarea"?<textarea value={postForm[f.key]} onChange={e=>setPostForm(p=>({...p,[f.key]:e.target.value}))} rows={3} style={{ ...inputStyle,resize:"vertical" }}/>:<input value={postForm[f.key]} onChange={e=>setPostForm(p=>({...p,[f.key]:e.target.value}))} placeholder={f.key==="phone"?"+229 XX XX XX XX":""} style={inputStyle}/>}
                   </div>
                 ))}
                 <div style={{ marginBottom:24 }}>
-                  <label style={{ fontSize:13,fontWeight:600,color:"#9A9AB0",display:"block",marginBottom:6 }}>Catégorie</label>
-                  <select value={postForm.category} onChange={e=>setPostForm(p=>({...p,category:e.target.value}))} style={{ width:"100%",padding:"12px 16px",background:"#0D0F1A",border:"1px solid #2A2D45",borderRadius:10,color:"#E8E8F0",fontSize:14 }}>
+                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Catégorie</label>
+                  <select value={postForm.category} onChange={e=>setPostForm(p=>({...p,category:e.target.value}))} style={inputStyle}>
                     {CATEGORIES.filter(c=>c!=="Toutes").map(c=><option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <button onClick={modal.type==="add"?addPost:editPost} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-                  {modal.type==="add"?"Publier l'annonce":"Enregistrer les modifications"}
+                  {modal.type==="add"?"Publier l'annonce":"Enregistrer"}
                 </button>
               </>
             )}
 
-            {/* Delete confirm */}
+            {/* Delete */}
             {modal.type==="delete" && (
               <>
                 <div style={{ textAlign:"center",marginBottom:24 }}>
                   <div style={{ fontSize:48,marginBottom:12 }}>🗑️</div>
-                  <h3 style={{ fontWeight:800,fontSize:20,marginBottom:8 }}>Supprimer cette annonce ?</h3>
-                  <p style={{ color:"#9A9AB0",fontSize:14 }}>"{modal.data.title}" sera définitivement supprimée.</p>
+                  <h3 style={{ fontWeight:800,fontSize:20,marginBottom:8,color:theme.text }}>Supprimer cette annonce ?</h3>
+                  <p style={{ color:theme.sub,fontSize:14 }}>"{modal.data.title}" sera définitivement supprimée.</p>
                 </div>
                 <div style={{ display:"flex",gap:12 }}>
-                  <button onClick={()=>setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:"1px solid #2A2D45",color:"#E8E8F0",borderRadius:12,fontWeight:600,fontSize:14 }}>Annuler</button>
-                  <button onClick={()=>deletePost(modal.data.id)} style={{ flex:1,padding:"12px",background:"linear-gradient(135deg,#FF4757,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:14 }}>Supprimer</button>
+                  <button onClick={() => setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,borderRadius:12,fontWeight:600,fontSize:14 }}>Annuler</button>
+                  <button onClick={() => deletePost(modal.data.id)} style={{ flex:1,padding:"12px",background:"linear-gradient(135deg,#FF4757,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:14 }}>Supprimer</button>
                 </div>
               </>
             )}
@@ -464,24 +520,75 @@ export default function App() {
             {modal.type==="contact" && (
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20 }}>💬 Contacter le vendeur</h3>
-                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:"#9A9AB0" }}><Icon name="x" size={20}/></button>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>Contacter le vendeur</h3>
+                  <button onClick={() => setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
-                <div style={{ background:"#0D0F1A",borderRadius:12,padding:20,marginBottom:20 }}>
-                  <p style={{ fontWeight:700,marginBottom:4 }}>{modal.data.title}</p>
-                  <p style={{ color:"#9A9AB0",fontSize:13 }}>Publié par {modal.data.author}</p>
+                {modal.data.photos&&modal.data.photos.length>0 && <div style={{ borderRadius:12,overflow:"hidden",marginBottom:16 }}><PhotoCarousel photos={modal.data.photos}/></div>}
+                <div style={{ background:theme.bg,borderRadius:12,padding:20,marginBottom:20 }}>
+                  <p style={{ fontWeight:700,marginBottom:4,color:theme.text }}>{modal.data.title}</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Publié par {modal.data.author} · {modal.data.price||""}</p>
                 </div>
-                {modal.data.contact ? (
-                  <div style={{ background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:12,padding:20,textAlign:"center" }}>
-                    <Icon name="mail" size={24}/>
-                    <p style={{ fontWeight:700,fontSize:16,marginTop:8 }}>{modal.data.contact}</p>
-                    <p style={{ color:"#9A9AB0",fontSize:12,marginTop:4 }}>Envoyez un email directement</p>
-                  </div>
-                ) : (
-                  <p style={{ textAlign:"center",color:"#9A9AB0" }}>Aucun contact renseigné</p>
-                )}
+
+                <div style={{ display:"flex",flexDirection:"column",gap:12 }}>
+                  {/* Email */}
+                  {modal.data.contact && (
+                    <a href={`mailto:${modal.data.contact}`} style={{ textDecoration:"none" }}>
+                      <div style={{ background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:12,padding:16,display:"flex",alignItems:"center",gap:12,cursor:"pointer" }}>
+                        <div style={{ width:40,height:40,borderRadius:"50%",background:"rgba(67,198,172,0.2)",display:"flex",alignItems:"center",justifyContent:"center",color:"#43C6AC",flexShrink:0 }}><Icon name="mail" size={18}/></div>
+                        <div><p style={{ fontWeight:700,fontSize:14,color:"#43C6AC" }}>Email</p><p style={{ color:theme.sub,fontSize:13 }}>{modal.data.contact}</p></div>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* Phone */}
+                  {modal.data.phone && (
+                    <a href={`tel:${modal.data.phone}`} style={{ textDecoration:"none" }}>
+                      <div style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:12,padding:16,display:"flex",alignItems:"center",gap:12,cursor:"pointer" }}>
+                        <div style={{ width:40,height:40,borderRadius:"50%",background:"rgba(108,99,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",color:"#6C63FF",flexShrink:0 }}><Icon name="phone" size={18}/></div>
+                        <div><p style={{ fontWeight:700,fontSize:14,color:"#6C63FF" }}>Appel téléphonique</p><p style={{ color:theme.sub,fontSize:13 }}>{modal.data.phone}</p></div>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* WhatsApp */}
+                  {modal.data.phone && (
+                    <a href={`https://wa.me/${modal.data.phone.replace(/[\s+\-]/g,"")}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                      <div style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:12,padding:16,display:"flex",alignItems:"center",gap:12,cursor:"pointer" }}>
+                        <div style={{ width:40,height:40,borderRadius:"50%",background:"rgba(37,211,102,0.2)",display:"flex",alignItems:"center",justifyContent:"center",color:"#25D366",flexShrink:0 }}><Icon name="whatsapp" size={18}/></div>
+                        <div><p style={{ fontWeight:700,fontSize:14,color:"#25D366" }}>WhatsApp</p><p style={{ color:theme.sub,fontSize:13 }}>{modal.data.phone}</p></div>
+                      </div>
+                    </a>
+                  )}
+
+                  {!modal.data.contact && !modal.data.phone && (
+                    <p style={{ textAlign:"center",color:theme.sub,padding:20 }}>Aucun moyen de contact renseigné</p>
+                  )}
+                </div>
               </>
             )}
+
+            {/* Suggestion */}
+            {modal.type==="suggestion" && (
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>💡 Envoyer une suggestion</h3>
+                  <button onClick={() => setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <p style={{ color:theme.sub,fontSize:14,marginBottom:24,lineHeight:1.5 }}>Partagez vos idées pour améliorer MarketFlow ! Toutes les suggestions sont lues par l'équipe.</p>
+                <div style={{ marginBottom:16 }}>
+                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre nom (optionnel)</label>
+                  <input value={suggestionName} onChange={e=>setSuggestionName(e.target.value)} placeholder="Visiteur anonyme" style={inputStyle}/>
+                </div>
+                <div style={{ marginBottom:24 }}>
+                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre suggestion *</label>
+                  <textarea value={suggestionText} onChange={e=>setSuggestionText(e.target.value)} rows={4} placeholder="Décrivez votre idée ou amélioration souhaitée..." style={{ ...inputStyle,resize:"vertical" }}/>
+                </div>
+                <button onClick={submitSuggestion} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
+                  Envoyer ma suggestion
+                </button>
+              </>
+            )}
+
           </div>
         </div>
       )}
