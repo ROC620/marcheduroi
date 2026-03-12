@@ -332,7 +332,8 @@ export default function App() {
   const [themeId, setThemeId] = useState("dark");
   const [suggestionText, setSuggestionText] = useState("");
   const [suggestionName, setSuggestionName] = useState("");
-  const [showBgPicker, setShowBgPicker] = useState(false);
+ const [showBgPicker, setShowBgPicker] = useState(false);
+const [loading, setLoading] = useState(true);
   const nextId = useRef(100);
 
   const theme = BACKGROUNDS.find(b=>b.id===themeId)||BACKGROUNDS[0];
@@ -345,7 +346,10 @@ export default function App() {
         supabase.from("profiles").select("*").eq("id", session.user.id).single()
           .then(({ data }) => {
             if (data) setUser({ id:session.user.id, name:data.name, role:data.role||"user", isPremium:data.is_premium||false, plan:data.plan });
+            setLoading(false);
           });
+      } else {
+        setLoading(false);
       }
     });
     supabase.auth.onAuthStateChange((_event, session) => { if (!session) setUser(null); });
@@ -467,7 +471,9 @@ export default function App() {
           <button onClick={()=>setModal({type:"suggestion"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}><Icon name="suggestion" size={14}/>Suggestion</button>
           {user?.role==="admin"&&<button onClick={()=>setView("admin")} style={{ background:"transparent",border:"none",color:"#FF6584",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Admin</button>}
           <button onClick={()=>setShowBgPicker(p=>!p)} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 12px",borderRadius:8,display:"flex",alignItems:"center",gap:6,fontWeight:600,fontSize:13 }}><Icon name="palette" size={14}/>Thème</button>
-          {user?(
+          {loading ? (
+  <div style={{ width:80,height:32,background:theme.border,borderRadius:8 }}/>
+) : user?(
             <div style={{ display:"flex",alignItems:"center",gap:6 }}>
               {user.isPremium&&<span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700,display:"flex",alignItems:"center",gap:4 }}><Icon name="crown" size={10}/>PRO</span>}
               <button onClick={()=>setView("dashboard")} style={{ ...cardStyle,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,color:theme.text }}><Icon name="user" size={14}/>{user.name.split(" ")[0]}</button>
