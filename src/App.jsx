@@ -370,7 +370,7 @@ export default function App() {
 
   const logout = async () => { await supabase.auth.signOut(); setUser(null); setView("home"); notify("À bientôt !"); };
   const activatePremium = (plan) => { setUser(u=>({...u,isPremium:true,plan:plan.label})); setModal(null); setView("home"); notify(`Abonnement ${plan.label} activé !`); };
-  const canEdit = user && user.isPremium;
+  const canEdit = user && (user.isPremium || user.role === "admin");
 
   const isVehicle = postForm.category === "Véhicules";
 
