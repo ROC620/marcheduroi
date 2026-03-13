@@ -168,11 +168,7 @@ const INITIAL_POSTS = [
 
 const CATEGORIES = ["Toutes", "Immobilier", "Électronique", "Véhicules", "Services", "Sport", "Mode", "Autre"];
 
-const PLANS = [
-  { id: "monthly", label: "Mensuel", price: "9,99€", period: "/mois", color: "#6C63FF", desc: "Idéal pour commencer" },
-  { id: "yearly", label: "Annuel", price: "79€", period: "/an", color: "#FF6584", desc: "2 mois offerts ✨", popular: true },
-  { id: "lifetime", label: "À vie", price: "149€", period: " unique", color: "#43C6AC", desc: "Accès illimité pour toujours" },
-];
+
 
 const BACKGROUNDS = [
   { id: "dark", label: "Sombre", bg: "#0D0F1A", card: "#1A1D30", border: "#2A2D45", text: "#E8E8F0", sub: "#9A9AB0" },
@@ -333,6 +329,32 @@ export default function App() {
   const [suggestionText, setSuggestionText] = useState("");
   const [suggestionName, setSuggestionName] = useState("");
   const [showBgPicker, setShowBgPicker] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [visitors, setVisitors] = useState({ today: 0, month: 0, total: 0 });
+
+useEffect(() => {
+  const today = new Date().toISOString().slice(0, 10);
+  const month = new Date().toISOString().slice(0, 7);
+  const stored = JSON.parse(localStorage.getItem("mf_visitors") || "{}");
+  const newData = {
+    today: stored.date === today ? stored.today + 1 : 1,
+    month: stored.month === month ? stored.monthCount + 1 : 1,
+    total: (stored.total || 0) + 1,
+    date: today,
+    monthStr: month,
+    monthCount: stored.month === month ? stored.monthCount + 1 : 1,
+  };
+  localStorage.setItem("mf_visitors", JSON.stringify(newData));
+  setVisitors({ today: newData.today, month: newData.month, total: newData.total });
+}, []);
+
+useEffect(() => {
+  const handleScroll = () => setShowScrollTop(window.scrollY > 300);
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
   const nextId = useRef(100);
 
   const theme = BACKGROUNDS.find(b=>b.id===themeId)||BACKGROUNDS[0];
@@ -365,12 +387,11 @@ export default function App() {
     if (error) { notify("Erreur : "+error.message,"error"); return; }
     await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", is_premium:false });
     setUser({ id:data.user.id, name:authForm.name, role:"user", isPremium:false });
-    setView("pricing"); notify("Compte créé ! Choisissez votre abonnement.");
+    setView("home"); notify("Compte créé ! Vous pouvez maintenant publier des annonces.");
   };
 
   const logout = async () => { await supabase.auth.signOut(); setUser(null); setView("home"); notify("À bientôt !"); };
-  const activatePremium = (plan) => { setUser(u=>({...u,isPremium:true,plan:plan.label})); setModal(null); setView("home"); notify(`Abonnement ${plan.label} activé !`); };
-  const canEdit = user && (user.isPremium || user.role === "admin");
+  const canEdit = user !== null;
   const isVehicle = postForm.category === "Véhicules";
   const [months, setMonths] = useState(1);
   const PRICE_PER_MONTH = 1500;
@@ -467,7 +488,13 @@ export default function App() {
         .tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
         .bg-opt{transition:transform 0.15s;cursor:pointer;} .bg-opt:hover{transform:scale(1.08);}
       `}</style>
-
+      {/* Bouton WhatsApp Support flottant */}
+<a href="https://wa.me/2290147562640?text=Bonjour%20MarketFlow%20Support%2C%20j'ai%20besoin%20d'aide%20concernant%20ma%20publication." target="_blank" rel="noopener noreferrer" style={{ position:"fixed",bottom:90,right:30,zIndex:999,width:52,height:52,borderRadius:"50%",background:"#25D366",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(37,211,102,0.5)",cursor:"pointer",textDecoration:"none" }}>
+  <svg width="26" height="26" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+</a>
+{showScrollTop && (
+  <button onClick={scrollToTop} style={{ position:"fixed",bottom:30,right:30,zIndex:999,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(108,99,255,0.5)",cursor:"pointer",fontSize:20 }}>↑</button>
+)}
       {notification && <div style={{ position:"fixed",top:20,right:20,zIndex:9999,animation:"notifIn 0.3s ease",background:notification.type==="error"?"#FF4757":"#43C6AC",color:"#fff",padding:"12px 20px",borderRadius:12,fontWeight:600,fontSize:14,boxShadow:"0 8px 30px rgba(0,0,0,0.3)" }}>{notification.msg}</div>}
 
       {/* Background picker */}
@@ -494,17 +521,18 @@ export default function App() {
           <span style={{ fontWeight:800,fontSize:18,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span>
         </div>
         <div style={{ display:"flex",gap:6,alignItems:"center",flexWrap:"wrap" }}>
-          {["home","pricing"].map(v=>(
-            <button key={v} onClick={()=>setView(v)} style={{ background:view===v?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view===v?"#6C63FF":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
-              {v==="home"?"Annonces":"Tarifs"}
-            </button>
-          ))}
+          <button onClick={()=>setView("home")} style={{ background:view==="home"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="home"?"#6C63FF":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
+            Annonces
+          </button>
+          <button onClick={()=>setModal({type:"howto"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
+            💡 Comment publier ?
+          </button>
           <button onClick={()=>setModal({type:"suggestion"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}><Icon name="suggestion" size={14}/>Suggestion</button>
           {user?.role==="admin"&&<button onClick={()=>setView("admin")} style={{ background:"transparent",border:"none",color:"#FF6584",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Admin</button>}
           <button onClick={()=>setShowBgPicker(p=>!p)} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 12px",borderRadius:8,display:"flex",alignItems:"center",gap:6,fontWeight:600,fontSize:13 }}><Icon name="palette" size={14}/>Thème</button>
           {user?(
             <div style={{ display:"flex",alignItems:"center",gap:6 }}>
-              {user.isPremium&&<span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700,display:"flex",alignItems:"center",gap:4 }}><Icon name="crown" size={10}/>PRO</span>}
+
               <button onClick={()=>setView("dashboard")} style={{ ...cardStyle,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,color:theme.text }}><Icon name="user" size={14}/>{user.name.split(" ")[0]}</button>
               <button onClick={logout} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px" }}><Icon name="logout" size={16}/></button>
             </div>
@@ -606,32 +634,7 @@ export default function App() {
         </div>
       )}
 
-      {/* PRICING */}
-      {view==="pricing"&&(
-        <div style={{ width:"100%",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
-          <div style={{ textAlign:"center",marginBottom:48 }}>
-            <h2 style={{ fontSize:40,fontWeight:800,marginBottom:12,color:theme.text }}>Choisissez votre <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>formule</span></h2>
-            <p style={{ color:theme.sub,fontSize:16 }}>Lecture gratuite · Publiez avec photos avec un abonnement</p>
-          </div>
-          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:20,maxWidth:900,margin:"0 auto" }}>
-            {PLANS.map(plan=>(
-              <div key={plan.id} className="card-hover" style={{ ...cardStyle,borderRadius:20,padding:32,position:"relative",border:`2px solid ${plan.popular?"#6C63FF":theme.border}` }}>
-                {plan.popular&&<div style={{ position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",color:"#fff",padding:"4px 16px",borderRadius:20,fontSize:11,fontWeight:700,whiteSpace:"nowrap" }}>POPULAIRE</div>}
-                <div style={{ width:48,height:48,borderRadius:14,background:`${plan.color}22`,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:20,color:plan.color }}><Icon name="crown" size={20}/></div>
-                <h3 style={{ fontWeight:700,fontSize:20,marginBottom:4,color:theme.text }}>{plan.label}</h3>
-                <p style={{ color:theme.sub,fontSize:13,marginBottom:24 }}>{plan.desc}</p>
-                <div style={{ marginBottom:28 }}><span style={{ fontSize:36,fontWeight:800,color:plan.color }}>{plan.price}</span><span style={{ color:theme.sub,fontSize:14 }}>{plan.period}</span></div>
-                {["Publier toutes catégories","Annonces véhicules détaillées","1 à 3 photos par annonce","Contact email, téléphone, WhatsApp","Modifier & supprimer vos annonces","Badge PRO"].map(f=>(
-                  <div key={f} style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10,fontSize:13,color:theme.text }}><span style={{ color:"#43C6AC" }}><Icon name="check" size={14}/></span>{f}</div>
-                ))}
-                <button onClick={()=>user?activatePremium(plan):setView("register")} className="btn-glow" style={{ width:"100%",marginTop:24,padding:"14px",background:`linear-gradient(135deg,${plan.color},${plan.color}BB)`,border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-                  {user?"Choisir ce plan":"S'inscrire d'abord"}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+
 
       {/* DASHBOARD */}
       {view==="dashboard"&&user&&(
@@ -646,7 +649,7 @@ export default function App() {
                 </div>
               </div>
             </div>
-            {!user.isPremium&&<button onClick={()=>setView("pricing")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 24px",borderRadius:12,fontWeight:700,fontSize:14,transition:"box-shadow 0.2s" }}>Passer PRO</button>}
+
           </div>
           <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text }}>Mes annonces ({myPosts.length})</h3>
           {myPosts.map(post=>(
@@ -675,7 +678,8 @@ export default function App() {
         <div style={{ width:"100%",padding:"32px 40px",animation:"fadeIn 0.4s ease" }}>
           <h2 style={{ fontWeight:800,fontSize:28,marginBottom:8,color:theme.text }}>Panneau Admin</h2>
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:16,marginBottom:32,maxWidth:700 }}>
-            {[{label:"Annonces",val:posts.length,color:"#6C63FF"},{label:"Véhicules",val:posts.filter(p=>p.category==="Véhicules").length,color:"#FF6584"},{label:"Suggestions",val:suggestions.length,color:"#43C6AC"}].map(s=>(
+            
+            {[{label:"Annonces",val:posts.length,color:"#6C63FF"},{label:"Véhicules",val:posts.filter(p=>p.category==="Véhicules").length,color:"#FF6584"},{label:"Suggestions",val:suggestions.length,color:"#43C6AC"},{label:"Visiteurs aujourd'hui",val:visitors.today,color:"#FFD700"},{label:"Visiteurs ce mois",val:visitors.month,color:"#FF6584"},{label:"Total visiteurs",val:visitors.total,color:"#43C6AC"}].map(s=>(
               <div key={s.label} style={{ ...cardStyle,borderRadius:14,padding:20,textAlign:"center" }}><p style={{ fontSize:36,fontWeight:800,color:s.color }}>{s.val}</p><p style={{ color:theme.sub,fontSize:13 }}>{s.label}</p></div>
             ))}
           </div>
@@ -868,6 +872,36 @@ export default function App() {
                   )}
                   {!modal.data.contact&&!modal.data.phone&&<p style={{ textAlign:"center",color:theme.sub,padding:20 }}>Aucun moyen de contact renseigné</p>}
                 </div>
+              </>
+            )}
+
+            {/* HOWTO */}
+            {modal.type==="howto"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>💡 Comment publier une annonce ?</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                {[
+                  { step:"1", icon:"👤", title:"Créez un compte gratuit", desc:"Inscrivez-vous avec votre email et mot de passe. C'est gratuit et rapide !" },
+                  { step:"2", icon:"📝", title:"Rédigez votre annonce", desc:"Remplissez le titre, la description, le prix et ajoutez jusqu'à 3 photos." },
+                  { step:"3", icon:"📅", title:"Choisissez la durée", desc:"Sélectionnez le nombre de mois souhaité. 1 500 FCFA par mois." },
+                  { step:"4", icon:"💳", title:"Payez via Mobile Money", desc:"Paiement sécurisé MTN Money ou Moov Money via FedaPay. (Bientôt disponible)" },
+                  { step:"5", icon:"🚀", title:"Votre annonce est en ligne !", desc:"Elle sera visible par tous les visiteurs jusqu'à la date d'expiration." },
+                ].map(s=>(
+                  <div key={s.step} style={{ display:"flex",gap:14,marginBottom:16,alignItems:"flex-start" }}>
+                    <div style={{ width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:14,flexShrink:0 }}>{s.step}</div>
+                    <div>
+                      <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:2 }}>{s.icon} {s.title}</p>
+                      <p style={{ fontSize:13,color:theme.sub,lineHeight:1.5 }}>{s.desc}</p>
+                    </div>
+                  </div>
+                ))}
+                <div style={{ background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:12,padding:16,marginTop:8,textAlign:"center" }}>
+                  <p style={{ fontWeight:700,color:"#43C6AC",fontSize:16 }}>1 500 FCFA / mois / annonce</p>
+                  <p style={{ color:theme.sub,fontSize:13,marginTop:4 }}>Prolongez à tout moment depuis votre tableau de bord</p>
+                </div>
+                {!user && <button onClick={()=>{setModal(null);setView("register");}} className="btn-glow" style={{ width:"100%",marginTop:16,padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>Créer mon compte gratuitement</button>}
               </>
             )}
 
