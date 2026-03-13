@@ -332,7 +332,17 @@ export default function App() {
   const [themeId, setThemeId] = useState("dark");
   const [suggestionText, setSuggestionText] = useState("");
   const [suggestionName, setSuggestionName] = useState("");
-  const [showBgPicker, setShowBgPicker] = useState(false);
+ const [showBgPicker, setShowBgPicker] = useState(false);
+const [showScrollTop, setShowScrollTop] = useState(false);
+
+useEffect(() => {
+  const handleScroll = () => setShowScrollTop(window.scrollY > 300);
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+const [loading, setLoading] = useState(true);
   const nextId = useRef(100);
 
   const theme = BACKGROUNDS.find(b=>b.id===themeId)||BACKGROUNDS[0];
@@ -345,7 +355,10 @@ export default function App() {
         supabase.from("profiles").select("*").eq("id", session.user.id).single()
           .then(({ data }) => {
             if (data) setUser({ id:session.user.id, name:data.name, role:data.role||"user", isPremium:data.is_premium||false, plan:data.plan });
+            setLoading(false);
           });
+      } else {
+        setLoading(false);
       }
     });
     supabase.auth.onAuthStateChange((_event, session) => { if (!session) setUser(null); });
@@ -371,51 +384,16 @@ export default function App() {
   const logout = async () => { await supabase.auth.signOut(); setUser(null); setView("home"); notify("À bientôt !"); };
   const activatePremium = (plan) => { setUser(u=>({...u,isPremium:true,plan:plan.label})); setModal(null); setView("home"); notify(`Abonnement ${plan.label} activé !`); };
   const canEdit = user && (user.isPremium || user.role === "admin");
+
   const isVehicle = postForm.category === "Véhicules";
-  const [months, setMonths] = useState(1);
-  const PRICE_PER_MONTH = 1500;
-
-  useEffect(() => {
-    const today = new Date();
-    setPosts(prev => prev.map(post => {
-      if (!post.expiresAt) return post;
-      const expDate = new Date(post.expiresAt);
-      const daysLeft = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
-      if (daysLeft <= 0) return { ...post, expired: true };
-      if (daysLeft <= 7) return { ...post, expiringSoon: true };
-      return post;
-    }));
-  }, []);
-
-  const getDaysLeft = (expiresAt) => {
-    if (!expiresAt) return null;
-    const diff = new Date(expiresAt) - new Date();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  };
 
   const addPost = () => {
     if (!postForm.title||!postForm.description) { notify("Titre et description requis","error"); return; }
     if (isVehicle && !vehicleForm.marque) { notify("La marque du véhicule est requise","error"); return; }
-    const isAdmin = user.role === "admin";
-    const expDate = new Date();
-    expDate.setMonth(expDate.getMonth() + months);
-    const newPost = {
-      ...postForm,
-      id: nextId.current++,
-      author: user.name,
-      authorId: user.id,
-      date: new Date().toISOString().slice(0,10),
-      likes: 0,
-      photos: postPhotos,
-      vehicle: isVehicle ? vehicleForm : null,
-      expiresAt: isAdmin ? null : expDate.toISOString().slice(0,10),
-      months: isAdmin ? null : months,
-    };
+    const newPost = { ...postForm, id:nextId.current++, author:user.name, authorId:user.id, date:new Date().toISOString().slice(0,10), likes:0, photos:postPhotos, vehicle:isVehicle?vehicleForm:null };
     setPosts(p=>[newPost,...p]);
-    setModal(null);
-    setPostForm({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"" });
-    setPostPhotos([]); setVehicleForm({}); setMonths(1);
-    notify(isAdmin ? "Annonce publiée !" : "Annonce publiée pour " + months + " mois · " + (months * 1500).toLocaleString() + " FCFA !");
+    setModal(null); setPostForm({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"" }); setPostPhotos([]); setVehicleForm({});
+    notify("Annonce publiée !");
   };
 
   const editPost = () => {
@@ -444,7 +422,7 @@ export default function App() {
     setSuggestionText(""); setSuggestionName(""); setModal(null); notify("Merci pour votre suggestion !");
   };
 
-  const filtered = posts.filter(p=>!p.expired&&(category==="Toutes"||p.category===category)&&(p.title.toLowerCase().includes(search.toLowerCase())||p.description.toLowerCase().includes(search.toLowerCase())));
+  const filtered = posts.filter(p=>(category==="Toutes"||p.category===category)&&(p.title.toLowerCase().includes(search.toLowerCase())||p.description.toLowerCase().includes(search.toLowerCase())));
   const myPosts = user?posts.filter(p=>p.authorId===user.id):[];
 
   const inputStyle = { width:"100%",padding:"12px 16px",background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:10,color:theme.text,fontSize:14,fontFamily:"inherit" };
@@ -467,7 +445,9 @@ export default function App() {
         .tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
         .bg-opt{transition:transform 0.15s;cursor:pointer;} .bg-opt:hover{transform:scale(1.08);}
       `}</style>
-
+{showScrollTop && (
+  <button onClick={scrollToTop} style={{ position:"fixed",bottom:30,right:30,zIndex:999,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(108,99,255,0.5)",cursor:"pointer",fontSize:20 }}>↑</button>
+)}
       {notification && <div style={{ position:"fixed",top:20,right:20,zIndex:9999,animation:"notifIn 0.3s ease",background:notification.type==="error"?"#FF4757":"#43C6AC",color:"#fff",padding:"12px 20px",borderRadius:12,fontWeight:600,fontSize:14,boxShadow:"0 8px 30px rgba(0,0,0,0.3)" }}>{notification.msg}</div>}
 
       {/* Background picker */}
@@ -502,7 +482,9 @@ export default function App() {
           <button onClick={()=>setModal({type:"suggestion"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}><Icon name="suggestion" size={14}/>Suggestion</button>
           {user?.role==="admin"&&<button onClick={()=>setView("admin")} style={{ background:"transparent",border:"none",color:"#FF6584",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Admin</button>}
           <button onClick={()=>setShowBgPicker(p=>!p)} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 12px",borderRadius:8,display:"flex",alignItems:"center",gap:6,fontWeight:600,fontSize:13 }}><Icon name="palette" size={14}/>Thème</button>
-          {user?(
+          {loading ? (
+  <div style={{ width:80,height:32,background:theme.border,borderRadius:8 }}/>
+) : user?(
             <div style={{ display:"flex",alignItems:"center",gap:6 }}>
               {user.isPremium&&<span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700,display:"flex",alignItems:"center",gap:4 }}><Icon name="crown" size={10}/>PRO</span>}
               <button onClick={()=>setView("dashboard")} style={{ ...cardStyle,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,color:theme.text }}><Icon name="user" size={14}/>{user.name.split(" ")[0]}</button>
@@ -561,17 +543,6 @@ export default function App() {
                     </span>
                     {post.price&&<span style={{ fontWeight:700,color:"#43C6AC",fontSize:15 }}>{post.price}</span>}
                   </div>
-                  {/* Badge expiration */}
-                  {post.expiresAt && (() => { const d = getDaysLeft(post.expiresAt); return d !== null && d <= 7 ? (
-                    <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6 }}>
-                      <span style={{ fontSize:12 }}>⚠️</span>
-                      <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""} · Prolongez depuis votre tableau de bord</p>
-                    </div>
-                  ) : d !== null && d <= 30 ? (
-                    <div style={{ background:"rgba(255,165,0,0.1)",border:"1px solid rgba(255,165,0,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8 }}>
-                      <p style={{ fontSize:12,color:"#FFA500",fontWeight:600 }}>⏳ Expire le {post.expiresAt}</p>
-                    </div>
-                  ) : null; })()}
                   <h3 style={{ fontWeight:700,fontSize:16,marginBottom:8,lineHeight:1.3,color:theme.text }}>{post.title}</h3>
 
                   {/* Mini fiche véhicule sur la carte */}
@@ -658,10 +629,7 @@ export default function App() {
                   <p style={{ color:theme.sub,fontSize:12 }}>{post.category}{post.vehicle?` · ${post.vehicle.marque} ${post.vehicle.modele}`:""} · {post.date}</p>
                 </div>
               </div>
-              <div style={{ display:"flex",gap:8,flexShrink:0,flexWrap:"wrap" }}>
-                {post.expiresAt && (
-                  <button onClick={()=>setModal({type:"prolong",data:post})} style={{ background:"rgba(67,198,172,0.15)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>⏳ Prolonger</button>
-                )}
+              <div style={{ display:"flex",gap:8,flexShrink:0 }}>
                 <button onClick={()=>openEdit(post)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Modifier</button>
                 <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Supprimer</button>
               </div>
@@ -784,28 +752,8 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Sélecteur de mois et paiement simulé - seulement pour les non-admins */}
-                {modal.type==="add" && user?.role !== "admin" && (
-                  <div style={{ background:theme.bg,border:`1px solid #6C63FF44`,borderRadius:14,padding:20,marginTop:16 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4 }}>💰 Durée de publication</p>
-                    <p style={{ fontSize:12,color:theme.sub,marginBottom:16 }}>1 500 FCFA par mois · L'annonce disparaît automatiquement à expiration</p>
-                    <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:16 }}>
-                      <button onClick={()=>setMonths(m=>Math.max(1,m-1))} style={{ width:36,height:36,borderRadius:"50%",background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",fontSize:20,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center" }}>-</button>
-                      <div style={{ flex:1,textAlign:"center" }}>
-                        <p style={{ fontSize:28,fontWeight:800,color:"#6C63FF" }}>{months}</p>
-                        <p style={{ fontSize:12,color:theme.sub }}>mois</p>
-                      </div>
-                      <button onClick={()=>setMonths(m=>m+1)} style={{ width:36,height:36,borderRadius:"50%",background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",fontSize:20,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center" }}>+</button>
-                    </div>
-                    <div style={{ background:"rgba(108,99,255,0.1)",borderRadius:10,padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4 }}>
-                      <span style={{ color:theme.sub,fontSize:13 }}>Total à payer</span>
-                      <span style={{ fontWeight:800,fontSize:18,color:"#43C6AC" }}>{(months*1500).toLocaleString()} FCFA</span>
-                    </div>
-                    <p style={{ fontSize:11,color:theme.sub,textAlign:"center" }}>⚠️ Paiement FedaPay (MTN/Moov Money) bientôt disponible</p>
-                  </div>
-                )}
-                <button onClick={modal.type==="add"?addPost:editPost} className="btn-glow" style={{ width:"100%",marginTop:16,padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-                  {modal.type==="add" ? (user?.role==="admin" ? "Publier l'annonce" : `Publier · ${(months*1500).toLocaleString()} FCFA`) : "Enregistrer"}
+                <button onClick={modal.type==="add"?addPost:editPost} className="btn-glow" style={{ width:"100%",marginTop:24,padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
+                  {modal.type==="add"?"Publier l'annonce":"Enregistrer"}
                 </button>
               </>
             )}
@@ -868,43 +816,6 @@ export default function App() {
                   )}
                   {!modal.data.contact&&!modal.data.phone&&<p style={{ textAlign:"center",color:theme.sub,padding:20 }}>Aucun moyen de contact renseigné</p>}
                 </div>
-              </>
-            )}
-
-            {/* PROLONGATION */}
-            {modal.type==="prolong"&&(
-              <>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>⏳ Prolonger l'annonce</h3>
-                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
-                </div>
-                <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
-                  <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>{modal.data.title}</p>
-                  <p style={{ color:theme.sub,fontSize:13 }}>Expire le : <strong style={{ color:"#FF4757" }}>{modal.data.expiresAt}</strong></p>
-                </div>
-                <p style={{ fontSize:13,color:theme.sub,marginBottom:16 }}>Choisissez le nombre de mois à ajouter :</p>
-                <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:16 }}>
-                  <button onClick={()=>setMonths(m=>Math.max(1,m-1))} style={{ width:36,height:36,borderRadius:"50%",background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",fontSize:20,fontWeight:700 }}>-</button>
-                  <div style={{ flex:1,textAlign:"center" }}>
-                    <p style={{ fontSize:28,fontWeight:800,color:"#6C63FF" }}>{months}</p>
-                    <p style={{ fontSize:12,color:theme.sub }}>mois supplémentaire{months>1?"s":""}</p>
-                  </div>
-                  <button onClick={()=>setMonths(m=>m+1)} style={{ width:36,height:36,borderRadius:"50%",background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",fontSize:20,fontWeight:700 }}>+</button>
-                </div>
-                <div style={{ background:"rgba(67,198,172,0.1)",borderRadius:10,padding:"12px 16px",display:"flex",justifyContent:"space-between",marginBottom:4 }}>
-                  <span style={{ color:theme.sub,fontSize:13 }}>Total à payer</span>
-                  <span style={{ fontWeight:800,fontSize:18,color:"#43C6AC" }}>{(months*1500).toLocaleString()} FCFA</span>
-                </div>
-                <p style={{ fontSize:11,color:theme.sub,textAlign:"center",marginBottom:20 }}>⚠️ Paiement FedaPay bientôt disponible</p>
-                <button onClick={()=>{
-                  const newExp = new Date(modal.data.expiresAt);
-                  newExp.setMonth(newExp.getMonth()+months);
-                  setPosts(p=>p.map(post=>post.id===modal.data.id?{...post,expiresAt:newExp.toISOString().slice(0,10),expired:false,expiringSoon:false}:post));
-                  setModal(null); setMonths(1);
-                  notify("Annonce prolongée de "+months+" mois !");
-                }} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-                  Prolonger · {(months*1500).toLocaleString()} FCFA
-                </button>
               </>
             )}
 
