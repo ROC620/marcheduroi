@@ -261,6 +261,60 @@ const INITIAL_ATELIERS = [
   },
 ];
 
+const RESTO_TYPES = ["Restaurant","Bar","Maquis","Buvette","Fast-food","Café / Salon de thé","Pizzeria","Grillade","Fruits de mer","Autre"];
+const RESTO_SERVICES = ["Sur place","À emporter","Livraison","Salle climatisée","Terrasse","Privatisation possible","Wifi disponible"];
+
+const INITIAL_RESTOS = [
+  {
+    id: "r1", name: "Maquis Chez Maman Africa", type: "Maquis",
+    specialite: "Cuisine béninoise traditionnelle",
+    plats: "Sauce arachide, Riz au gras, Igname pilée, Poisson braisé, Akassa",
+    prixMoyen: "1 500 - 5 000 FCFA", capacite: "40 couverts",
+    services: "Sur place, À emporter, Terrasse",
+    description: "Maquis familial proposant les meilleurs plats traditionnels béninois dans une ambiance chaleureuse. Idéal pour les repas en famille ou entre amis.",
+    ville: "Cotonou", quartier: "Cadjehoun", von: "Von de l'aéroport",
+    horaires: "Lun-Dim 7h-22h",
+    contact: "mamanafrika@email.com", phone: "+22997400001",
+    author: "Mama Africa", authorId: "r_u1", date: "2026-03-01", likes: 35,
+    photos: [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80",
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80"
+    ], video: null, keywords: "cuisine béninoise maquis traditionnel repas famille", expiresAt: null
+  },
+  {
+    id: "r2", name: "Bar Le Cocotier", type: "Bar",
+    specialite: "Cocktails tropicaux et bières fraîches",
+    plats: "Brochettes, Arachides grillées, Poisson frit, Accras",
+    prixMoyen: "500 - 3 000 FCFA", capacite: "60 couverts",
+    services: "Sur place, Terrasse, Wifi disponible",
+    description: "Bar tendance en bord de mer avec une vue imprenable. Ambiance détendue, musique live le week-end. Le meilleur endroit pour se retrouver entre amis.",
+    ville: "Ouidah", quartier: "Plage", von: "Von de la plage de Ouidah",
+    horaires: "Mar-Dim 16h-02h",
+    contact: "cocotier@email.com", phone: "+22997400002",
+    author: "Patrick L.", authorId: "r_u2", date: "2026-03-03", likes: 28,
+    photos: [
+      "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&q=80",
+      "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=600&q=80"
+    ], video: null, keywords: "bar cocktails bières terrasse mer musique", expiresAt: null
+  },
+  {
+    id: "r3", name: "Fast Food Le Goût", type: "Fast-food",
+    specialite: "Burgers, Sandwichs et Grillades",
+    plats: "Burger maison, Sandwich poulet, Brochettes bœuf, Frites, Boissons fraîches",
+    prixMoyen: "1 000 - 4 000 FCFA", capacite: "25 couverts",
+    services: "Sur place, À emporter, Livraison, Salle climatisée",
+    description: "Fast-food moderne proposant des burgers faits maison, des grillades et des sandwichs. Livraison rapide dans tout Cotonou. Qualité garantie !",
+    ville: "Cotonou", quartier: "Akpakpa", von: "Von du carrefour Missébo",
+    horaires: "Lun-Dim 10h-23h",
+    contact: "legout@email.com", phone: "+22997400003",
+    author: "Hervé G.", authorId: "r_u3", date: "2026-03-05", likes: 19,
+    photos: [
+      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80",
+      "https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&q=80"
+    ], video: null, keywords: "burger fast food livraison grillades sandwich", expiresAt: null
+  },
+];
+
 const BOUTIQUE_TYPES = ["Cosmétiques & Beauté","Alimentation & Restauration","Électronique & Informatique","Mode & Vêtements","Pharmacie & Santé","Matériaux & Construction","Agriculture & Élevage","Librairie & Papeterie","Sport & Loisirs","Autre"];
 const ATELIER_TYPES = ["Couture/Mode","Mécanique","Menuiserie/Soudure","Artistique (peinture, musique...)","Électricité & Plomberie","Coiffure & Beauté","Imprimerie & Communication","Autre"];
 const IMMO_TYPES = ["Maison","Appartement","Parcelle","Domaine / Terrain","Local commercial","Villa"];
@@ -474,6 +528,7 @@ export default function App() {
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [boutiques, setBoutiques] = useState(INITIAL_BOUTIQUES);
   const [ateliers, setAteliers] = useState(INITIAL_ATELIERS);
+  const [restos, setRestos] = useState(INITIAL_RESTOS);
   const [suggestions, setSuggestions] = useState([{ id:1,text:"Ajouter un système de messagerie interne",author:"Visiteur anonyme",date:"2026-03-10",status:"en attente" }]);
   const [user, setUser] = useState(null);
   const [view, setView] = useState("landing");
@@ -629,6 +684,26 @@ export default function App() {
     setSuggestionText(""); setSuggestionName(""); setModal(null); notify("Merci pour votre suggestion !");
   };
 
+  const addResto = () => {
+    if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
+    const isAdmin = user.role === "admin";
+    const expDate = new Date();
+    expDate.setMonth(expDate.getMonth() + months);
+    const newResto = {
+      ...shopForm,
+      id: "r" + nextId.current++,
+      author: user.name, authorId: user.id,
+      date: new Date().toISOString().slice(0,10),
+      likes: 0, photos: shopPhotos, video: shopVideo,
+      expiresAt: isAdmin ? null : expDate.toISOString().slice(0,10),
+    };
+    setRestos(r=>[newResto,...r]);
+    setModal(null);
+    setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"" });
+    setShopPhotos([]); setShopVideo(null); setMonths(1);
+    notify("Restaurant/Bar publié !");
+  };
+
   const addShop = () => {
     if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
     const isAdmin = user.role === "admin";
@@ -780,6 +855,7 @@ export default function App() {
               { val:posts.length, label:"Annonces", color:"#6C63FF", icon:"📋" },
               { val:boutiques.length, label:"Boutiques", color:"#FF6584", icon:"🛍️" },
               { val:ateliers.length, label:"Ateliers", color:"#43C6AC", icon:"🔧" },
+              { val:restos.length, label:"Restos & Bars", color:"#FF8C00", icon:"🍽️" },
               { val:CATEGORIES.length-1, label:"Catégories", color:"#FFD700", icon:"🗂️" },
             ].map(s=>(
               <div key={s.label} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:16,padding:"20px 28px",textAlign:"center",minWidth:120 }}>
@@ -827,6 +903,9 @@ export default function App() {
             <button onClick={()=>setView("ateliers")} style={{ background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",color:"#43C6AC",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
               🔧 Ateliers <span style={{ background:"rgba(67,198,172,0.2)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{ateliers.length}</span>
             </button>
+            <button onClick={()=>setView("restos")} style={{ background:"rgba(255,140,0,0.1)",border:"1px solid rgba(255,140,0,0.3)",color:"#FF8C00",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+              🍽️ Restos & Bars <span style={{ background:"rgba(255,140,0,0.2)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{restos.length}</span>
+            </button>
           </div>
 
           {/* Footer landing */}
@@ -855,6 +934,9 @@ export default function App() {
             </button>
             <button onClick={()=>setView("ateliers")} className="card-hover" style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,boxShadow:"0 4px 15px rgba(67,198,172,0.3)",cursor:"pointer" }}>
               🔧 Ateliers <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{ateliers.length}</span>
+            </button>
+            <button onClick={()=>setView("restos")} className="card-hover" style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,boxShadow:"0 4px 15px rgba(255,140,0,0.3)",cursor:"pointer" }}>
+              🍽️ Restaurants & Bars <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{restos.length}</span>
             </button>
           </div>
 
@@ -1038,7 +1120,7 @@ export default function App() {
         <div style={{ width:"100%",padding:"32px 40px",animation:"fadeIn 0.4s ease" }}>
           <h2 style={{ fontWeight:800,fontSize:28,marginBottom:8,color:theme.text }}>Panneau Admin</h2>
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:16,marginBottom:32,maxWidth:700 }}>
-            {[{label:"Annonces",val:posts.length,color:"#6C63FF"},{label:"Véhicules",val:posts.filter(p=>p.category==="Véhicules").length,color:"#FF6584"},{label:"Suggestions",val:suggestions.length,color:"#43C6AC"}].map(s=>(
+            {[{label:"Annonces",val:posts.length,color:"#6C63FF"},{label:"Véhicules",val:posts.filter(p=>p.category==="Véhicules").length,color:"#FF6584"},{label:"Boutiques",val:boutiques.length,color:"#FF6584"},{label:"Ateliers",val:ateliers.length,color:"#43C6AC"},{label:"Restos & Bars",val:restos.length,color:"#FF8C00"},{label:"Suggestions",val:suggestions.length,color:"#43C6AC"}].map(s=>(
               <div key={s.label} style={{ ...cardStyle,borderRadius:14,padding:20,textAlign:"center" }}><p style={{ fontSize:36,fontWeight:800,color:s.color }}>{s.val}</p><p style={{ color:theme.sub,fontSize:13 }}>{s.label}</p></div>
             ))}
           </div>
@@ -1286,6 +1368,73 @@ export default function App() {
           {ateliers.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>🔧</p><p>Aucun atelier pour le moment</p></div>}
         </div>
       )}
+      {/* RESTAURANTS & BARS */}
+      {view==="restos"&&(
+        <div style={{ width:"100%",padding:"32px 40px",animation:"fadeIn 0.4s ease" }}>
+          <div style={{ textAlign:"center",marginBottom:40 }}>
+            <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>🍽️ <span style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Restaurants & Bars</span></h1>
+            <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Rendez votre établissement visible partout · 3 000 FCFA/mois</p>
+            <div style={{ maxWidth:500,margin:"0 auto",position:"relative" }}>
+              <div style={{ position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={16}/></div>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un restaurant, bar, maquis..." style={{ width:"100%",padding:"14px 20px 14px 44px",background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,color:theme.text,fontSize:14,fontFamily:"inherit",outline:"none" }}/>
+            </div>
+          </div>
+
+          <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:24 }}>
+            {canEdit ? (
+              <button onClick={()=>{ setShopMode("resto"); setShopForm({name:"",type:"",description:"",specialite:"",plats:"",prixMoyen:"",capacite:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addresto"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
+                <Icon name="plus" size={16}/>Publier mon établissement
+              </button>
+            ) : (
+              <button onClick={()=>setView("register")} style={{ ...cardStyle,border:"1px dashed #FF8C00",color:"#FF8C00",padding:"10px 20px",borderRadius:10,fontWeight:600,fontSize:14,display:"flex",alignItems:"center",gap:8 }}>
+                <Icon name="lock" size={14}/>Créer un compte pour publier
+              </button>
+            )}
+          </div>
+
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
+            {restos.filter(r=>!search||(r.name+r.description+(r.keywords||"")+(r.type||"")+(r.specialite||"")).toLowerCase().includes(search.toLowerCase())).map(r=>(
+              <div key={r.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
+                {r.video && <video src={r.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
+                {!r.video && r.photos&&r.photos.length>0 && <PhotoCarousel photos={r.photos}/>}
+                <div style={{ padding:20 }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
+                    <span className="tag" style={{ background:"rgba(255,140,0,0.15)",color:"#FF8C00" }}>🍽️ {r.type}</span>
+                    {r.prixMoyen && <span style={{ fontSize:12,color:theme.sub,fontWeight:600 }}>{r.prixMoyen}</span>}
+                  </div>
+                  <h3 style={{ fontWeight:800,fontSize:17,marginBottom:4,color:theme.text }}>{r.name}</h3>
+                  {r.specialite && <p style={{ fontSize:13,color:"#FF8C00",fontWeight:600,marginBottom:8 }}>✨ {r.specialite}</p>}
+                  {r.plats && <p style={{ fontSize:12,color:theme.sub,marginBottom:8 }}>🍴 {r.plats.length>60?r.plats.slice(0,60)+"...":r.plats}</p>}
+                  {r.services && (
+                    <div style={{ display:"flex",flexWrap:"wrap",gap:4,marginBottom:10 }}>
+                      {r.services.split(",").map(s=>(
+                        <span key={s} className="tag" style={{ background:"rgba(255,140,0,0.1)",color:"#FF8C00",fontSize:10 }}>{s.trim()}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:10 }}>
+                    <Icon name="pin" size={13}/>
+                    <p style={{ fontSize:12,color:theme.sub }}>{r.ville}{r.quartier?`, ${r.quartier}`:""}{r.von?` · ${r.von}`:""}</p>
+                  </div>
+                  {r.horaires && <p style={{ fontSize:12,color:"#43C6AC",marginBottom:12 }}>🕐 {r.horaires}</p>}
+                  <div style={{ display:"flex",gap:8 }}>
+                    <button onClick={()=>likePost(r.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(r.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{r.likes}</button>
+                    <button onClick={()=>setModal({type:"contact",data:{...r,title:r.name}})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
+                    <a href={"https://wa.me/?text="+encodeURIComponent("*"+r.name+"*"+"\n"+"Type: "+r.type+"\n"+"Voir sur MarketFlow: https://marketflow-delta.vercel.app")} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                      <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}>
+                        <svg width="12" height="12" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                        Partager
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {restos.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>🍽️</p><p>Aucun établissement pour le moment</p></div>}
+        </div>
+      )}
+
       {/* CONDITIONS GÉNÉRALES D'UTILISATION */}
       {view==="terms"&&(
         <div style={{ width:"100%",maxWidth:900,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
@@ -1653,6 +1802,89 @@ export default function App() {
                     </div>
                   );
                 })()}
+              </>
+            )}
+
+            {/* ADD RESTAURANT / BAR */}
+            {modal.type==="addresto"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>🍽️ Publier mon établissement</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+
+                <VideoUploader video={shopVideo} setVideo={setShopVideo} theme={theme}/>
+                <PhotoUploader photos={shopPhotos} setPhotos={setShopPhotos} theme={theme}/>
+
+                <div style={{ marginBottom:16 }}>
+                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Type d'établissement *</label>
+                  <select value={shopForm.type} onChange={e=>setShopForm(s=>({...s,type:e.target.value}))} style={inputStyle}>
+                    <option value="">-- Choisir --</option>
+                    {RESTO_TYPES.map(t=><option key={t}>{t}</option>)}
+                  </select>
+                </div>
+
+                {[
+                  {label:"Nom de l'établissement *",key:"name"},
+                  {label:"Description *",key:"description",textarea:true},
+                  {label:"Spécialité",key:"specialite",placeholder:"Ex: Cuisine béninoise, Grillades..."},
+                  {label:"Plats / Menu phare",key:"plats",textarea:true,placeholder:"Ex: Sauce arachide, Riz au gras, Poisson braisé..."},
+                  {label:"Prix moyen par repas",key:"prixMoyen",placeholder:"Ex: 1 500 - 5 000 FCFA"},
+                  {label:"Capacité",key:"capacite",placeholder:"Ex: 40 couverts"},
+                  {label:"Services proposés",key:"services",placeholder:"Sur place, À emporter, Livraison..."},
+                  {label:"Mots clés",key:"keywords",placeholder:"Ex: maquis, traditionnel, livraison, famille..."},
+                  {label:"Horaires",key:"horaires",placeholder:"Ex: Lun-Dim 7h-22h"},
+                  {label:"Téléphone / WhatsApp",key:"phone",placeholder:"+229 XX XX XX XX"},
+                  {label:"Email",key:"contact"},
+                ].map(f=>(
+                  <div key={f.key} style={{ marginBottom:16 }}>
+                    <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
+                    {f.textarea
+                      ? <textarea value={shopForm[f.key]||""} onChange={e=>setShopForm(s=>({...s,[f.key]:e.target.value}))} rows={2} placeholder={f.placeholder||""} style={{ ...inputStyle,resize:"vertical" }}/>
+                      : <input value={shopForm[f.key]||""} onChange={e=>setShopForm(s=>({...s,[f.key]:e.target.value}))} placeholder={f.placeholder||""} style={inputStyle}/>
+                    }
+                  </div>
+                ))}
+
+                <div style={{ background:theme.bg,border:`1px solid #FF8C0044`,borderRadius:12,padding:16,marginBottom:16 }}>
+                  <p style={{ fontWeight:700,color:"#FF8C00",fontSize:13,marginBottom:12,display:"flex",alignItems:"center",gap:6 }}><Icon name="pin" size={13}/>Localisation</p>
+                  <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+                    {[{label:"Ville *",key:"ville"},{label:"Quartier",key:"quartier"}].map(f=>(
+                      <div key={f.key}>
+                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>{f.label}</label>
+                        <input value={shopForm[f.key]||""} onChange={e=>setShopForm(s=>({...s,[f.key]:e.target.value}))} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
+                      </div>
+                    ))}
+                    <div style={{ gridColumn:"1/-1" }}>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Von de...</label>
+                      <input value={shopForm.von||""} onChange={e=>setShopForm(s=>({...s,von:e.target.value}))} placeholder="Ex: Von du marché central..." style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
+                    </div>
+                  </div>
+                </div>
+
+                {user?.role !== "admin" && (
+                  <div style={{ background:theme.bg,border:`1px solid #FF8C0044`,borderRadius:14,padding:20,marginBottom:16 }}>
+                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4 }}>💰 Durée de publication</p>
+                    <p style={{ fontSize:12,color:theme.sub,marginBottom:16 }}>3 000 FCFA par mois</p>
+                    <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:12 }}>
+                      <button onClick={()=>setMonths(m=>Math.max(1,m-1))} style={{ width:36,height:36,borderRadius:"50%",background:"rgba(255,140,0,0.15)",border:"none",color:"#FF8C00",fontSize:20,fontWeight:700 }}>-</button>
+                      <div style={{ flex:1,textAlign:"center" }}>
+                        <p style={{ fontSize:28,fontWeight:800,color:"#FF8C00" }}>{months}</p>
+                        <p style={{ fontSize:12,color:theme.sub }}>mois</p>
+                      </div>
+                      <button onClick={()=>setMonths(m=>m+1)} style={{ width:36,height:36,borderRadius:"50%",background:"rgba(255,140,0,0.15)",border:"none",color:"#FF8C00",fontSize:20,fontWeight:700 }}>+</button>
+                    </div>
+                    <div style={{ background:"rgba(255,140,0,0.1)",borderRadius:10,padding:"12px 16px",display:"flex",justifyContent:"space-between" }}>
+                      <span style={{ color:theme.sub,fontSize:13 }}>Total</span>
+                      <span style={{ fontWeight:800,fontSize:18,color:"#FF8C00" }}>{(months*3000).toLocaleString()} FCFA</span>
+                    </div>
+                    <p style={{ fontSize:11,color:theme.sub,textAlign:"center",marginTop:8 }}>⚠️ Paiement FedaPay bientôt disponible</p>
+                  </div>
+                )}
+
+                <button onClick={addResto} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
+                  {user?.role==="admin" ? "Publier l'établissement" : `Publier · ${(months*3000).toLocaleString()} FCFA`}
+                </button>
               </>
             )}
 
