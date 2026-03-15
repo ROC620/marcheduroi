@@ -476,7 +476,7 @@ export default function App() {
   const [ateliers, setAteliers] = useState(INITIAL_ATELIERS);
   const [suggestions, setSuggestions] = useState([{ id:1,text:"Ajouter un système de messagerie interne",author:"Visiteur anonyme",date:"2026-03-10",status:"en attente" }]);
   const [user, setUser] = useState(null);
-  const [view, setView] = useState("home");
+  const [view, setView] = useState("landing");
   const [shopForm, setShopForm] = useState({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"" });
   const [immoForm, setImmoForm] = useState({ sousType:"Maison", transaction:"Vente", superficie:"", pieces:"", titre:"", ville:"", quartier:"", von:"", eau:"Oui", electricite:"Oui", etat:"Bon état", recasee:"", autres:"" });
   const [shopPhotos, setShopPhotos] = useState([]);
@@ -717,7 +717,7 @@ export default function App() {
 
       {/* Navbar */}
       <nav style={{ background:`${theme.bg}EE`,borderBottom:`1px solid ${theme.border}`,padding:"0 32px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)",width:"100%" }}>
-        <div style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer" }} onClick={()=>setView("home")}>
+        <div style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer" }} onClick={()=>setView("landing")}>
           <img src="/logo.svg" alt="MarketFlow" style={{ width:40,height:40,borderRadius:8 }}/>
           <span style={{ fontWeight:800,fontSize:18,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span>
         </div>
@@ -751,6 +751,90 @@ export default function App() {
           )}
         </div>
       </nav>
+
+      {/* LANDING PAGE */}
+      {view==="landing"&&(
+        <div style={{ width:"100%",minHeight:"calc(100vh - 64px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 24px",animation:"fadeIn 0.6s ease",position:"relative",overflow:"hidden" }}>
+
+          {/* Background decoration */}
+          <div style={{ position:"absolute",top:-100,left:-100,width:400,height:400,borderRadius:"50%",background:"rgba(108,99,255,0.06)",pointerEvents:"none" }}/>
+          <div style={{ position:"absolute",bottom:-100,right:-100,width:500,height:500,borderRadius:"50%",background:"rgba(255,101,132,0.05)",pointerEvents:"none" }}/>
+
+          {/* Logo */}
+          <img src="/logo.svg" alt="MarketFlow" style={{ width:160,height:160,marginBottom:24,filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.3))" }}/>
+
+          {/* Titre */}
+          <h1 style={{ fontSize:56,fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:16,color:theme.text }}>
+            Bienvenue sur{" "}
+            <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span>
+          </h1>
+
+          {/* Slogan */}
+          <p style={{ fontSize:20,color:theme.sub,textAlign:"center",maxWidth:600,lineHeight:1.7,marginBottom:40 }}>
+            La plateforme qui connecte commerçants, entreprises et particuliers au <strong style={{ color:theme.text }}>Bénin</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
+          </p>
+
+          {/* Statistiques */}
+          <div style={{ display:"flex",gap:20,marginBottom:48,flexWrap:"wrap",justifyContent:"center" }}>
+            {[
+              { val:posts.length, label:"Annonces", color:"#6C63FF", icon:"📋" },
+              { val:boutiques.length, label:"Boutiques", color:"#FF6584", icon:"🛍️" },
+              { val:ateliers.length, label:"Ateliers", color:"#43C6AC", icon:"🔧" },
+              { val:CATEGORIES.length-1, label:"Catégories", color:"#FFD700", icon:"🗂️" },
+            ].map(s=>(
+              <div key={s.label} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:16,padding:"20px 28px",textAlign:"center",minWidth:120 }}>
+                <p style={{ fontSize:24,marginBottom:4 }}>{s.icon}</p>
+                <p style={{ fontSize:32,fontWeight:800,color:s.color }}>{s.val}</p>
+                <p style={{ fontSize:13,color:theme.sub,fontWeight:600 }}>{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Catégories vitrine */}
+          <div style={{ display:"flex",gap:10,flexWrap:"wrap",justifyContent:"center",marginBottom:48,maxWidth:800 }}>
+            {[
+              { label:"Immobilier", icon:"🏠", color:"#6C63FF" },
+              { label:"Véhicules", icon:"🚗", color:"#FF6584" },
+              { label:"Électronique", icon:"📱", color:"#43C6AC" },
+              { label:"Services", icon:"🔧", color:"#FFD700" },
+              { label:"Sport", icon:"⚽", color:"#FF6584" },
+              { label:"Mode", icon:"👗", color:"#9A78CF" },
+              { label:"Autre", icon:"🍳", color:"#43C6AC" },
+            ].map(c=>(
+              <button key={c.label} onClick={()=>{ setCategory(c.label); setView("home"); }} style={{ background:`${c.color}15`,border:`1px solid ${c.color}44`,color:c.color,padding:"10px 20px",borderRadius:24,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:8,transition:"all 0.2s" }}>
+                {c.icon} {c.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Boutons CTA */}
+          <div style={{ display:"flex",gap:16,flexWrap:"wrap",justifyContent:"center",marginBottom:32 }}>
+            <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"16px 40px",borderRadius:14,fontWeight:800,fontSize:18,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
+              Voir les annonces →
+            </button>
+            {!user && (
+              <button onClick={()=>setView("register")} style={{ background:"transparent",border:`2px solid ${theme.border}`,color:theme.text,padding:"16px 40px",borderRadius:14,fontWeight:700,fontSize:18,cursor:"pointer" }}>
+                Créer un compte
+              </button>
+            )}
+          </div>
+
+          {/* Boutiques & Ateliers */}
+          <div style={{ display:"flex",gap:12,flexWrap:"wrap",justifyContent:"center" }}>
+            <button onClick={()=>setView("boutiques")} style={{ background:"rgba(255,101,132,0.1)",border:"1px solid rgba(255,101,132,0.3)",color:"#FF6584",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+              🛍️ Boutiques <span style={{ background:"rgba(255,101,132,0.2)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{boutiques.length}</span>
+            </button>
+            <button onClick={()=>setView("ateliers")} style={{ background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",color:"#43C6AC",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+              🔧 Ateliers <span style={{ background:"rgba(67,198,172,0.2)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{ateliers.length}</span>
+            </button>
+          </div>
+
+          {/* Footer landing */}
+          <p style={{ color:theme.sub,fontSize:13,marginTop:40,textAlign:"center" }}>
+            © 2026 MarketFlow · Ouidah, Bénin 🇧🇯 · <button onClick={()=>setView("terms")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>CGU</button> · <button onClick={()=>setView("about")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>À propos</button>
+          </p>
+        </div>
+      )}
 
       {/* HOME */}
       {view==="home"&&(
@@ -1544,6 +1628,31 @@ export default function App() {
                   )}
                   {!modal.data.contact&&!modal.data.phone&&<p style={{ textAlign:"center",color:theme.sub,padding:20 }}>Aucun moyen de contact renseigné</p>}
                 </div>
+
+                {/* Annonces similaires */}
+                {(() => {
+                  const similaires = posts.filter(p=>p.id!==modal.data.id && p.category===modal.data.category && !p.expired).slice(0,3);
+                  if (similaires.length===0) return null;
+                  return (
+                    <div style={{ marginTop:24,borderTop:`1px solid ${theme.border}`,paddingTop:20 }}>
+                      <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:14 }}>📋 Annonces similaires</p>
+                      <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
+                        {similaires.map(p=>(
+                          <div key={p.id} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:12,padding:12,display:"flex",gap:12,alignItems:"center" }}>
+                            {p.photos&&p.photos.length>0 && <img src={p.photos[0]} alt="" style={{ width:52,height:52,borderRadius:8,objectFit:"cover",flexShrink:0 }}/>}
+                            <div style={{ flex:1,minWidth:0 }}>
+                              <p style={{ fontWeight:700,fontSize:13,color:theme.text,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{p.title}</p>
+                              <p style={{ color:"#43C6AC",fontWeight:700,fontSize:13 }}>{p.price||""}</p>
+                            </div>
+                            <button onClick={()=>setModal({type:"contact",data:p})} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,flexShrink:0,cursor:"pointer" }}>
+                              Voir →
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </>
             )}
 
