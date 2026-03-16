@@ -699,6 +699,7 @@ function AppContent() {
 
   useEffect(() => { setVisibleCount(12); }, [search, category, priceMin, priceMax]);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [userLocation, setUserLocation] = useState(null);
   const [sortByDistance, setSortByDistance] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -707,7 +708,18 @@ function AppContent() {
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 300);
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handleOnline = () => { setIsOnline(true); notify("Connexion rétablie ! ✅"); };
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
   }, []);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
