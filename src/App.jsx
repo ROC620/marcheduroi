@@ -534,7 +534,7 @@ function AppContent() {
   const [suggestions, setSuggestions] = useState([{ id:1,text:"Ajouter un système de messagerie interne",author:"Visiteur anonyme",date:"2026-03-10",status:"en attente" }]);
   const [user, setUser] = useState(null);
   const [view, setView] = useState("landing");
-  const [shopForm, setShopForm] = useState({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"" });
+  const [shopForm, setShopForm] = useState({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"",lat:"",lng:"" });
   const [immoForm, setImmoForm] = useState({ sousType:"Maison", transaction:"Vente", superficie:"", pieces:"", titre:"", ville:"", quartier:"", von:"", eau:"Oui", electricite:"Oui", etat:"Bon état", recasee:"", autres:"" });
   const [shopPhotos, setShopPhotos] = useState([]);
   const [shopVideo, setShopVideo] = useState(null);
@@ -557,7 +557,7 @@ function AppContent() {
     });
   };
   const [authForm, setAuthForm] = useState({ email:"",password:"",name:"" });
-  const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"" });
+  const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"",lat:"",lng:"" });
   const [postPhotos, setPostPhotos] = useState([]);
   const [vehicleForm, setVehicleForm] = useState({});
   const [themeId, setThemeId] = useState("dark");
@@ -740,6 +740,14 @@ function AppContent() {
       }
     }
     return true;
+  }).map(p=>({
+    ...p,
+    distance: userLocation && p.lat && p.lng ? getDistance(userLocation.lat, userLocation.lng, parseFloat(p.lat), parseFloat(p.lng)) : null
+  })).sort((a,b)=>{
+    if (!sortByDistance) return 0;
+    if (a.distance===null) return 1;
+    if (b.distance===null) return -1;
+    return a.distance - b.distance;
   });
   const myPosts = user?posts.filter(p=>p.authorId===user.id):[];
 
@@ -929,6 +937,19 @@ function AppContent() {
             </div>
           </div>
 
+          {/* Bouton géolocalisation */}
+          <div style={{ display:"flex",justifyContent:"center",marginBottom:16,gap:10,flexWrap:"wrap" }}>
+            <button onClick={getUserLocation} style={{ background:userLocation?"rgba(67,198,172,0.15)":"rgba(108,99,255,0.1)",border:`1px solid ${userLocation?"rgba(67,198,172,0.5)":"rgba(108,99,255,0.3)"}`,color:userLocation?"#43C6AC":"#6C63FF",padding:"8px 20px",borderRadius:24,fontWeight:600,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+              {locationLoading?"⏳ Détection...":userLocation?"📍 Position détectée":"📍 Près de moi"}
+            </button>
+            {userLocation && (
+              <button onClick={()=>setSortByDistance(s=>!s)} style={{ background:sortByDistance?"rgba(67,198,172,0.15)":"transparent",border:`1px solid ${theme.border}`,color:sortByDistance?"#43C6AC":theme.sub,padding:"8px 20px",borderRadius:24,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+                {sortByDistance?"✅ Trié par distance":"Trier par distance"}
+              </button>
+            )}
+            {userLocation && <button onClick={()=>{setUserLocation(null);setSortByDistance(false);}} style={{ background:"transparent",border:"none",color:theme.sub,fontSize:12,cursor:"pointer" }}>✕ Effacer position</button>}
+          </div>
+
           {/* Boutons Boutiques & Ateliers */}
           <div style={{ display:"flex",gap:12,justifyContent:"center",marginBottom:20,flexWrap:"wrap" }}>
             <button onClick={()=>setView("boutiques")} className="card-hover" style={{ background:"linear-gradient(135deg,#FF6584,#FFB347)",border:"none",color:"#fff",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,boxShadow:"0 4px 15px rgba(255,101,132,0.3)",cursor:"pointer" }}>
@@ -1005,6 +1026,11 @@ function AppContent() {
                       <p style={{ fontSize:12,color:"#FFA500",fontWeight:600 }}>⏳ Expire le {post.expiresAt}</p>
                     </div>
                   ) : null; })()}
+                  {post.distance!==null && (
+                    <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>
+                      📍 {formatDistance(post.distance)}
+                    </div>
+                  )}
                   <h3 style={{ fontWeight:700,fontSize:16,marginBottom:8,lineHeight:1.3,color:theme.text }}>{post.title}</h3>
 
                   {/* Mini fiche immobilière sur la carte */}
@@ -1276,7 +1302,10 @@ function AppContent() {
               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une boutique par nom, type, mots clés..." style={{ width:"100%",padding:"14px 20px 14px 44px",background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,color:theme.text,fontSize:14,fontFamily:"inherit",outline:"none" }}/>
             </div>
           </div>
-          <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:24 }}>
+          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24,flexWrap:"wrap",gap:10 }}>
+            <button onClick={getUserLocation} style={{ background:userLocation?"rgba(67,198,172,0.15)":"rgba(108,99,255,0.1)",border:`1px solid ${userLocation?"rgba(67,198,172,0.5)":"rgba(108,99,255,0.3)"}`,color:userLocation?"#43C6AC":"#6C63FF",padding:"8px 16px",borderRadius:24,fontWeight:600,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
+              {locationLoading?"⏳...":userLocation?"📍 Position active":"📍 Près de moi"}
+            </button>
             {canEdit ? (
               <button onClick={()=>{ setShopMode("boutique"); setShopForm({name:"",type:"",description:"",services:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addshop"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#FF6584,#FFB347)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
                 <Icon name="plus" size={16}/>Publier ma boutique
@@ -1288,7 +1317,10 @@ function AppContent() {
             )}
           </div>
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
-            {boutiques.filter(b=>!search||(b.name+b.description+(b.keywords||"")+(b.type||"")).toLowerCase().includes(search.toLowerCase())).map(b=>(
+            {boutiques.filter(b=>!search||(b.name+b.description+(b.keywords||"")+(b.type||"")).toLowerCase().includes(search.toLowerCase()))
+            .map(b=>({...b, distance: userLocation&&b.lat&&b.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(b.lat),parseFloat(b.lng)) : null}))
+            .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
+            .map(b=>(
               <div key={b.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
                 {b.video && <video src={b.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
                 {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
@@ -1297,6 +1329,7 @@ function AppContent() {
                     <span className="tag" style={{ background:"rgba(255,101,132,0.15)",color:"#FF6584" }}>🛍️ {b.type}</span>
                   </div>
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:6,color:theme.text }}>{b.name}</h3>
+                  {b.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(b.distance)}</div>}
                   <p style={{ color:theme.sub,fontSize:13,lineHeight:1.5,marginBottom:12 }}>{b.description.length>100?b.description.slice(0,100)+"...":b.description}</p>
                   <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:12 }}>
                     <Icon name="pin" size={13}/>
@@ -1344,7 +1377,10 @@ function AppContent() {
             )}
           </div>
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
-            {ateliers.filter(a=>!search||(a.name+a.description+(a.keywords||"")+(a.type||"")+(a.services||"")).toLowerCase().includes(search.toLowerCase())).map(a=>(
+            {ateliers.filter(a=>!search||(a.name+a.description+(a.keywords||"")+(a.type||"")+(a.services||"")).toLowerCase().includes(search.toLowerCase()))
+            .map(a=>({...a, distance: userLocation&&a.lat&&a.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(a.lat),parseFloat(a.lng)) : null}))
+            .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
+            .map(a=>(
               <div key={a.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
                 {a.video && <video src={a.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
                 {!a.video && a.photos&&a.photos.length>0 && <PhotoCarousel photos={a.photos}/>}
@@ -1353,6 +1389,7 @@ function AppContent() {
                     <span className="tag" style={{ background:"rgba(67,198,172,0.15)",color:"#43C6AC" }}>🔧 {a.type}</span>
                   </div>
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:6,color:theme.text }}>{a.name}</h3>
+                  {a.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(a.distance)}</div>}
                   <p style={{ color:theme.sub,fontSize:13,lineHeight:1.5,marginBottom:10 }}>{a.description.length>100?a.description.slice(0,100)+"...":a.description}</p>
                   {a.services && (
                     <div style={{ marginBottom:10 }}>
@@ -1407,7 +1444,10 @@ function AppContent() {
           </div>
 
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
-            {restos.filter(r=>!search||(r.name+r.description+(r.keywords||"")+(r.type||"")+(r.specialite||"")).toLowerCase().includes(search.toLowerCase())).map(r=>(
+            {restos.filter(r=>!search||(r.name+r.description+(r.keywords||"")+(r.type||"")+(r.specialite||"")).toLowerCase().includes(search.toLowerCase()))
+            .map(r=>({...r, distance: userLocation&&r.lat&&r.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(r.lat),parseFloat(r.lng)) : null}))
+            .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
+            .map(r=>(
               <div key={r.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
                 {r.video && <video src={r.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
                 {!r.video && r.photos&&r.photos.length>0 && <PhotoCarousel photos={r.photos}/>}
@@ -1416,6 +1456,7 @@ function AppContent() {
                     <span className="tag" style={{ background:"rgba(255,140,0,0.15)",color:"#FF8C00" }}>🍽️ {r.type}</span>
                     {r.prixMoyen && <span style={{ fontSize:12,color:theme.sub,fontWeight:600 }}>{r.prixMoyen}</span>}
                   </div>
+                  {r.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(r.distance)}</div>}
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:4,color:theme.text }}>{r.name}</h3>
                   {r.specialite && <p style={{ fontSize:13,color:"#FF8C00",fontWeight:600,marginBottom:8 }}>✨ {r.specialite}</p>}
                   {r.plats && <p style={{ fontSize:12,color:theme.sub,marginBottom:8 }}>🍴 {r.plats.length>60?r.plats.slice(0,60)+"...":r.plats}</p>}
@@ -1862,6 +1903,14 @@ function AppContent() {
 
                 <div style={{ background:theme.bg,border:`1px solid #FF8C0044`,borderRadius:12,padding:16,marginBottom:16 }}>
                   <p style={{ fontWeight:700,color:"#FF8C00",fontSize:13,marginBottom:12,display:"flex",alignItems:"center",gap:6 }}><Icon name="pin" size={13}/>Localisation</p>
+                  <button type="button" onClick={()=>{
+                    navigator.geolocation.getCurrentPosition(
+                      pos=>{ setShopForm(s=>({...s,lat:pos.coords.latitude.toString(),lng:pos.coords.longitude.toString()})); notify("Position GPS capturée ! 📍"); },
+                      ()=>notify("Impossible d'accéder au GPS","error")
+                    );
+                  }} style={{ width:"100%",padding:"10px",background:"rgba(255,140,0,0.1)",border:"1px solid rgba(255,140,0,0.3)",borderRadius:10,color:"#FF8C00",fontWeight:600,fontSize:13,cursor:"pointer",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+                    📍 {shopForm.lat ? "Position GPS capturée ✅" : "Capturer ma position GPS"}
+                  </button>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
                     {[{label:"Ville *",key:"ville"},{label:"Quartier",key:"quartier"}].map(f=>(
                       <div key={f.key}>
@@ -1944,6 +1993,14 @@ function AppContent() {
                 {/* Localisation */}
                 <div style={{ background:theme.bg,border:`1px solid #43C6AC44`,borderRadius:12,padding:16,marginBottom:16 }}>
                   <p style={{ fontWeight:700,color:"#43C6AC",fontSize:13,marginBottom:12,display:"flex",alignItems:"center",gap:6 }}><Icon name="pin" size={13}/>Localisation</p>
+                  <button type="button" onClick={()=>{
+                    navigator.geolocation.getCurrentPosition(
+                      pos=>{ setShopForm(s=>({...s,lat:pos.coords.latitude.toString(),lng:pos.coords.longitude.toString()})); notify("Position GPS capturée ! 📍"); },
+                      ()=>notify("Impossible d'accéder au GPS","error")
+                    );
+                  }} style={{ width:"100%",padding:"10px",background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:10,color:"#43C6AC",fontWeight:600,fontSize:13,cursor:"pointer",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+                    📍 {shopForm.lat ? "Position GPS capturée ✅" : "Capturer ma position GPS"}
+                  </button>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
                     {[{label:"Ville *",key:"ville",placeholder:"Ex: Cotonou"},{label:"Quartier",key:"quartier",placeholder:"Ex: Akpakpa"}].map(f=>(
                       <div key={f.key}>
