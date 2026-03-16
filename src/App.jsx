@@ -1073,80 +1073,84 @@ function AppContent() {
       {/* HOME */}
       {view==="home"&&(
         <div style={{ width:"100%",padding:"32px 40px",animation:"fadeIn 0.4s ease" }}>
-          <div style={{ textAlign:"center",marginBottom:48 }}>
-            <h1 style={{ fontSize:52,fontWeight:800,lineHeight:1.1,marginBottom:16,color:theme.text }}>Découvrez des <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>annonces uniques</span></h1>
-            <p style={{ color:theme.sub,fontSize:17,marginBottom:28 }}>Consultez gratuitement · Publiez avec un abonnement</p>
-            <div style={{ maxWidth:700,margin:"0 auto",display:"flex",gap:10,alignItems:"center" }}>
-              <div style={{ flex:1,position:"relative" }}>
-                <div style={{ position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={16}/></div>
-                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une annonce..." style={{ ...inputStyle,padding:"14px 20px 14px 44px",borderRadius:12,fontSize:15,width:"100%" }}/>
+          <div style={{ marginBottom:12 }}>
+            <h1 style={{ fontSize:40,fontWeight:800,lineHeight:1.1,marginBottom:8,color:theme.text,textAlign:"center" }}>Découvrez des <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>annonces uniques</span></h1>
+
+            {/* Info + Publier sur la même ligne */}
+            <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:10 }}>
+              <div style={{ display:"flex",alignItems:"center",gap:10,flexWrap:"wrap" }}>
+                <p style={{ color:theme.sub,fontSize:13 }}>Consultez gratuitement · Publiez avec un abonnement</p>
+                <span style={{ background:theme.card,border:`1px solid ${theme.border}`,color:theme.sub,padding:"2px 10px",borderRadius:20,fontSize:12,fontWeight:600 }}>{filtered.length} annonce{filtered.length!==1?"s":""}</span>
               </div>
-              <button onClick={getUserLocation} style={{ background:userLocation?"rgba(67,198,172,0.15)":"rgba(108,99,255,0.1)",border:`1px solid ${userLocation?"rgba(67,198,172,0.5)":"rgba(108,99,255,0.3)"}`,color:userLocation?"#43C6AC":"#6C63FF",padding:"14px 16px",borderRadius:12,fontWeight:600,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,whiteSpace:"nowrap",flexShrink:0 }}>
+              {canEdit?(
+                <button onClick={()=>{setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:""});setPostPhotos([]);setVehicleForm({});setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" }); setMonths(1); setModal({type:"add"});}} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"9px 18px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6,transition:"box-shadow 0.2s",flexShrink:0 }}>
+                  <Icon name="plus" size={14}/>Publier une annonce
+                </button>
+              ):(
+                <button onClick={()=>setView("register")} style={{ ...cardStyle,border:`1px dashed #6C63FF`,color:"#6C63FF",padding:"9px 14px",borderRadius:10,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,flexShrink:0 }}>
+                  <Icon name="lock" size={13}/>Créer un compte
+                </button>
+              )}
+            </div>
+
+            {/* Recherche + GPS + Tri distance - tous sur la même ligne */}
+            <div style={{ display:"flex",gap:6,alignItems:"center",marginBottom:8 }}>
+              {/* Barre de recherche fixe 50 caractères */}
+              <div style={{ position:"relative",width:"50ch",flexShrink:0 }}>
+                <div style={{ position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={15}/></div>
+                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une annonce..." maxLength={100} style={{ ...inputStyle,padding:"11px 16px 11px 40px",borderRadius:10,fontSize:13,width:"100%" }}/>
+              </div>
+              {/* Bouton Près de moi - toujours visible */}
+              <button onClick={getUserLocation} style={{ background:userLocation?"rgba(67,198,172,0.15)":"rgba(108,99,255,0.1)",border:`1px solid ${userLocation?"rgba(67,198,172,0.5)":"rgba(108,99,255,0.3)"}`,color:userLocation?"#43C6AC":"#6C63FF",padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap",flexShrink:0 }}>
                 {locationLoading?"⏳":userLocation?"📍 Actif":"📍 Près de moi"}
               </button>
-            </div>
-            {userLocation && (
-              <div style={{ display:"flex",gap:10,justifyContent:"center",marginTop:10,flexWrap:"wrap" }}>
-                <button onClick={()=>setSortByDistance(s=>!s)} style={{ background:sortByDistance?"rgba(67,198,172,0.15)":"transparent",border:`1px solid ${theme.border}`,color:sortByDistance?"#43C6AC":theme.sub,padding:"6px 16px",borderRadius:20,fontWeight:600,fontSize:12,cursor:"pointer" }}>
-                  {sortByDistance?"✅ Trié par distance":"Trier par distance"}
-                </button>
-                <button onClick={()=>{setUserLocation(null);setSortByDistance(false);}} style={{ background:"transparent",border:"none",color:theme.sub,fontSize:12,cursor:"pointer" }}>✕ Effacer position</button>
-              </div>
-            )}
-          </div>
-
-          {/* Boutons Boutiques & Ateliers */}
-          <div style={{ display:"flex",gap:12,justifyContent:"center",marginBottom:20,flexWrap:"wrap" }}>
-            <button onClick={()=>setView("boutiques")} className="card-hover" style={{ background:"linear-gradient(135deg,#FF6584,#FFB347)",border:"none",color:"#fff",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,boxShadow:"0 4px 15px rgba(255,101,132,0.3)",cursor:"pointer" }}>
-              🛍️ Boutiques <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{boutiques.length}</span>
-            </button>
-            <button onClick={()=>setView("ateliers")} className="card-hover" style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,boxShadow:"0 4px 15px rgba(67,198,172,0.3)",cursor:"pointer" }}>
-              🔧 Ateliers <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{ateliers.length}</span>
-            </button>
-            <button onClick={()=>setView("restos")} className="card-hover" style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,boxShadow:"0 4px 15px rgba(255,140,0,0.3)",cursor:"pointer" }}>
-              🍽️ Restaurants & Bars <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{restos.length}</span>
-            </button>
-          </div>
-
-          <div style={{ display:"flex",gap:8,flexWrap:"wrap",marginBottom:28,justifyContent:"center" }}>
-            {CATEGORIES.map(c=>(
-              <button key={c} onClick={()=>setCategory(c)} style={{ background:category===c?"linear-gradient(135deg,#6C63FF,#8B84FF)":theme.card,border:category===c?"none":`1px solid ${theme.border}`,color:category===c?"#fff":theme.sub,padding:"8px 18px",borderRadius:24,fontWeight:600,fontSize:13,transition:"all 0.2s",display:"flex",alignItems:"center",gap:6 }}>
-                {c==="Véhicules"&&<Icon name="car" size={12}/>}{c}
+              {/* Boutons Par distance + Effacer - réservés même espace invisible */}
+              <button onClick={()=>userLocation&&setSortByDistance(s=>!s)} style={{ background:sortByDistance?"rgba(67,198,172,0.15)":"rgba(255,255,255,0.04)",border:`1px solid ${sortByDistance?theme.border:theme.border}`,color:sortByDistance?"#43C6AC":theme.sub,padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:userLocation?"pointer":"default",whiteSpace:"nowrap",flexShrink:0,opacity:userLocation?1:0.3 }}>
+                {sortByDistance?"✅ Par distance":"Par distance"}
               </button>
-            ))}
-          </div>
-
-          {/* Filtre par prix */}
-          <div style={{ display:"flex",gap:12,justifyContent:"center",alignItems:"center",marginBottom:24,flexWrap:"wrap" }}>
-            <div style={{ display:"flex",alignItems:"center",gap:8,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:"8px 16px" }}>
-              <span style={{ color:theme.sub,fontSize:13,fontWeight:600,whiteSpace:"nowrap" }}>Prix min</span>
-              <input value={priceMin} onChange={e=>setPriceMin(e.target.value)} placeholder="0" type="number" style={{ width:100,background:"transparent",border:"none",color:theme.text,fontSize:14,fontFamily:"inherit",outline:"none" }}/>
-              <span style={{ color:theme.sub,fontSize:12 }}>FCFA</span>
-            </div>
-            <span style={{ color:theme.sub,fontSize:16 }}>—</span>
-            <div style={{ display:"flex",alignItems:"center",gap:8,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:"8px 16px" }}>
-              <span style={{ color:theme.sub,fontSize:13,fontWeight:600,whiteSpace:"nowrap" }}>Prix max</span>
-              <input value={priceMax} onChange={e=>setPriceMax(e.target.value)} placeholder="∞" type="number" style={{ width:100,background:"transparent",border:"none",color:theme.text,fontSize:14,fontFamily:"inherit",outline:"none" }}/>
-              <span style={{ color:theme.sub,fontSize:12 }}>FCFA</span>
-            </div>
-            {(priceMin||priceMax) && (
-              <button onClick={()=>{setPriceMin("");setPriceMax("");}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:10,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+              <button onClick={()=>{ if(userLocation){setUserLocation(null);setSortByDistance(false);}}} style={{ background:"rgba(255,71,87,0.08)",border:`1px solid rgba(255,71,87,${userLocation?0.3:0.1})`,color:userLocation?"#FF4757":"rgba(255,71,87,0.3)",padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:userLocation?"pointer":"default",whiteSpace:"nowrap",flexShrink:0 }}>
                 ✕ Effacer
               </button>
-            )}
-          </div>
+            </div>
 
-          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-            <p style={{ color:theme.sub,fontSize:14 }}>{filtered.length} annonce{filtered.length!==1?"s":""}</p>
-            {canEdit?(
-              <button onClick={()=>{setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:""});setPostPhotos([]);setVehicleForm({});setModal({type:"add"});}} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
-                <Icon name="plus" size={16}/>Publier une annonce
+            {/* Boutiques Ateliers Restos */}
+            <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:8 }}>
+              <button onClick={()=>setView("boutiques")} style={{ background:"linear-gradient(135deg,#FF6584,#FFB347)",border:"none",color:"#fff",padding:"6px 14px",borderRadius:18,fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,cursor:"pointer" }}>
+                🛍️ Boutiques <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:10,padding:"1px 6px",fontSize:11 }}>{boutiques.length}</span>
               </button>
-            ):(
-              <button onClick={()=>user?setView("pricing"):setView("register")} style={{ ...cardStyle,border:`1px dashed #6C63FF`,color:"#6C63FF",padding:"10px 20px",borderRadius:10,fontWeight:600,fontSize:14,display:"flex",alignItems:"center",gap:8 }}>
-                <Icon name="lock" size={14}/>{user?"Passer PRO pour publier":"Créer un compte"}
+              <button onClick={()=>setView("ateliers")} style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",padding:"6px 14px",borderRadius:18,fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,cursor:"pointer" }}>
+                🔧 Ateliers <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:10,padding:"1px 6px",fontSize:11 }}>{ateliers.length}</span>
               </button>
-            )}
+              <button onClick={()=>setView("restos")} style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",padding:"6px 14px",borderRadius:18,fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,cursor:"pointer" }}>
+                🍽️ Restos & Bars <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:10,padding:"1px 6px",fontSize:11 }}>{restos.length}</span>
+              </button>
+            </div>
+
+            {/* Catégories */}
+            <div style={{ display:"flex",gap:5,flexWrap:"wrap",marginBottom:8 }}>
+              {CATEGORIES.map(c=>(
+                <button key={c} onClick={()=>setCategory(c)} style={{ background:category===c?"linear-gradient(135deg,#6C63FF,#8B84FF)":theme.card,border:category===c?"none":`1px solid ${theme.border}`,color:category===c?"#fff":theme.sub,padding:"5px 12px",borderRadius:18,fontWeight:600,fontSize:12,transition:"all 0.2s",display:"flex",alignItems:"center",gap:4 }}>
+                  {c==="Véhicules"&&<Icon name="car" size={11}/>}{c}
+                </button>
+              ))}
+            </div>
+
+            {/* Filtre prix + tri distance */}
+            <div style={{ display:"flex",gap:6,alignItems:"center",flexWrap:"wrap" }}>
+              <div style={{ display:"flex",alignItems:"center",gap:5,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:8,padding:"5px 10px" }}>
+                <span style={{ color:theme.sub,fontSize:11,fontWeight:600 }}>Min</span>
+                <input value={priceMin} onChange={e=>setPriceMin(e.target.value)} placeholder="0" type="number" style={{ width:70,background:"transparent",border:"none",color:theme.text,fontSize:12,fontFamily:"inherit",outline:"none" }}/>
+                <span style={{ color:theme.sub,fontSize:11 }}>FCFA</span>
+              </div>
+              <span style={{ color:theme.sub,fontSize:13 }}>—</span>
+              <div style={{ display:"flex",alignItems:"center",gap:5,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:8,padding:"5px 10px" }}>
+                <span style={{ color:theme.sub,fontSize:11,fontWeight:600 }}>Max</span>
+                <input value={priceMax} onChange={e=>setPriceMax(e.target.value)} placeholder="∞" type="number" style={{ width:70,background:"transparent",border:"none",color:theme.text,fontSize:12,fontFamily:"inherit",outline:"none" }}/>
+                <span style={{ color:theme.sub,fontSize:11 }}>FCFA</span>
+              </div>
+              {(priceMin||priceMax) && <button onClick={()=>{setPriceMin("");setPriceMax("");}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"5px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>✕</button>}
+
+            </div>
           </div>
 
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
