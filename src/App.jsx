@@ -649,8 +649,29 @@ function AppContent() {
   const [priceMax, setPriceMax] = useState("");
   const [visibleCount, setVisibleCount] = useState(12);
   const POSTS_PER_PAGE = 12;
+  const SPONSOR_PRICES = { week: 500, month: 1500 };
 
   useEffect(() => { setVisibleCount(12); }, [search, category, priceMin, priceMax]);
+
+  // Check sponsored expiry and downgrade to normal
+  useEffect(() => {
+    const today = new Date();
+    setPosts(prev => prev.map(post => {
+      if (!post.sponsoredUntil) return post;
+      const sponsorExp = new Date(post.sponsoredUntil);
+      if (sponsorExp < today) return { ...post, sponsored: false, sponsoredUntil: null };
+      return post;
+    }));
+  }, []);
+
+  const sponsorPost = (postId, duration) => {
+    const expDate = new Date();
+    if (duration === "week") expDate.setDate(expDate.getDate() + 7);
+    else expDate.setMonth(expDate.getMonth() + 1);
+    setPosts(p => p.map(post => post.id === postId ? { ...post, sponsored: true, sponsoredUntil: expDate.toISOString().slice(0,10) } : post));
+    setModal(null);
+    notify("Annonce sponsorisée jusqu'au " + expDate.toISOString().slice(0,10) + " !");
+  };
 
   useEffect(() => { setVisibleCount(12); }, [search, category, priceMin, priceMax]);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -862,10 +883,16 @@ function AppContent() {
     ...p,
     distance: userLocation && p.lat && p.lng ? getDistance(userLocation.lat, userLocation.lng, parseFloat(p.lat), parseFloat(p.lng)) : null
   })).sort((a,b)=>{
-    if (!sortByDistance) return 0;
-    if (a.distance===null) return 1;
-    if (b.distance===null) return -1;
-    return a.distance - b.distance;
+    // Sponsored first
+    if (a.sponsored && !b.sponsored) return -1;
+    if (!a.sponsored && b.sponsored) return 1;
+    // Then by distance if active
+    if (sortByDistance) {
+      if (a.distance===null) return 1;
+      if (b.distance===null) return -1;
+      return a.distance - b.distance;
+    }
+    return 0;
   });
   const myPosts = user?posts.filter(p=>p.authorId===user.id):[];
 
@@ -1124,7 +1151,7 @@ function AppContent() {
 
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
             {filtered.slice(0, visibleCount).map(post=>(
-              <div key={post.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)",animation:"fadeIn 0.4s ease" }}>
+              <div key={post.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:post.sponsored?"0 4px 24px rgba(255,215,0,0.3)":"0 4px 20px rgba(0,0,0,0.15)",animation:"fadeIn 0.4s ease",border:post.sponsored?`2px solid #FFD700`:`1px solid ${theme.border}` }}>
                 {post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>}
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
@@ -1144,6 +1171,11 @@ function AppContent() {
                       <p style={{ fontSize:12,color:"#FFA500",fontWeight:600 }}>⏳ Expire le {post.expiresAt}</p>
                     </div>
                   ) : null; })()}
+                  {post.sponsored && (
+                    <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:20,padding:"3px 12px",marginBottom:8,fontSize:11,fontWeight:800,color:"#000" }}>
+                      🌟 Sponsorisé
+                    </div>
+                  )}
                   {post.distance!==null && (
                     <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>
                       📍 {formatDistance(post.distance)}
@@ -1345,7 +1377,10 @@ function AppContent() {
                 {post.photos&&post.photos.length>0&&<img src={post.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
                 <div><p style={{ fontWeight:700,color:theme.text }}>{post.title}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {post.author} · {post.category}</p></div>
               </div>
-              <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>Supprimer</button>
+              <div style={{ display:"flex",gap:8 }}>
+                {!post.sponsored && <button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
+                <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>Supprimer</button>
+              </div>
             </div>
           ))}
         </div>
@@ -2308,6 +2343,42 @@ function AppContent() {
                   <p style={{ color:theme.sub,fontSize:13,marginTop:4 }}>Prolongez à tout moment depuis votre tableau de bord</p>
                 </div>
                 {!user && <button onClick={()=>{setModal(null);setView("register");}} className="btn-glow" style={{ width:"100%",marginTop:16,padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>Créer mon compte gratuitement</button>}
+              </>
+            )}
+
+            {/* SPONSORING */}
+            {modal.type==="sponsor"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>🌟 Sponsoriser l'annonce</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
+                  <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>{modal.data.title}</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce apparaîtra en premier avec un badge 🌟</p>
+                </div>
+                <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
+                  <div onClick={()=>sponsorPost(modal.data.id,"week")} style={{ background:theme.card,border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer" }}>
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                      <div>
+                        <p style={{ fontWeight:800,fontSize:16,color:"#FFD700",marginBottom:4 }}>🌟 Sponsoring 1 semaine</p>
+                        <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en tête pendant 7 jours</p>
+                      </div>
+                      <span style={{ fontWeight:800,fontSize:20,color:"#FFD700" }}>500 FCFA</span>
+                    </div>
+                  </div>
+                  <div onClick={()=>sponsorPost(modal.data.id,"month")} style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFA500",borderRadius:14,padding:20,cursor:"pointer",position:"relative" }}>
+                    <div style={{ position:"absolute",top:-12,right:16,background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:800 }}>POPULAIRE</div>
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                      <div>
+                        <p style={{ fontWeight:800,fontSize:16,color:"#FFA500",marginBottom:4 }}>🌟 Sponsoring 1 mois</p>
+                        <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en tête pendant 30 jours</p>
+                      </div>
+                      <span style={{ fontWeight:800,fontSize:20,color:"#FFA500" }}>1 500 FCFA</span>
+                    </div>
+                  </div>
+                </div>
+                <p style={{ fontSize:11,color:theme.sub,textAlign:"center" }}>⚠️ Paiement FedaPay bientôt disponible · Après expiration, l'annonce reste visible normalement</p>
               </>
             )}
 
