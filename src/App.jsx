@@ -785,6 +785,36 @@ function AppContent() {
   const [authForm, setAuthForm] = useState({ email:"",password:"",name:"" });
   const [profileForm, setProfileForm] = useState({ name:"", phone:"", bio:"", ville:"", photo:"" });
   const [editingProfile, setEditingProfile] = useState(false);
+  const [modifHistory, setModifHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("mf_modifs") || "{}"); }
+    catch { return {}; }
+  });
+
+  const MODIF_PRICES = { simple: 200, pro: 300 };
+
+  const canModifyFree = (post) => {
+    const publishedAt = new Date(post.date);
+    const now = new Date();
+    const hoursDiff = (now - publishedAt) / (1000 * 60 * 60);
+    return hoursDiff <= 24;
+  };
+
+  const getModifPrice = (post) => {
+    const isSimple = !["Boutiques","Ateliers","Restos","Beauté"].includes(post.category);
+    return isSimple ? MODIF_PRICES.simple : MODIF_PRICES.pro;
+  };
+
+  const canModifyThisMonth = (postId) => {
+    const currentMonth = new Date().toISOString().slice(0,7);
+    return !modifHistory[postId] || modifHistory[postId] !== currentMonth;
+  };
+
+  const recordModification = (postId) => {
+    const currentMonth = new Date().toISOString().slice(0,7);
+    const updated = { ...modifHistory, [postId]: currentMonth };
+    setModifHistory(updated);
+    localStorage.setItem("mf_modifs", JSON.stringify(updated));
+  };
   const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"",lat:"",lng:"" });
   const [postPhotos, setPostPhotos] = useState([]);
   const [vehicleForm, setVehicleForm] = useState({});
@@ -1024,6 +1054,17 @@ function AppContent() {
   };
 
   const openEdit = (post) => {
+    const isFree = canModifyFree(post);
+    const canModif = canModifyThisMonth(post.id);
+    if (!isFree && !canModif) {
+      notify("Vous avez deja modifie cette annonce ce mois-ci","error");
+      return;
+    }
+    if (!isFree) {
+      const price = getModifPrice(post);
+      setModal({ type:"confirmEdit", data:post, price });
+      return;
+    }
     setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"" });
     setPostPhotos(post.photos||[]);
     setVehicleForm(post.vehicle||{});
@@ -1377,6 +1418,9 @@ function AppContent() {
             <button onClick={()=>setView("beaute")} style={{ background:"rgba(255,105,180,0.1)",border:"1px solid rgba(255,105,180,0.3)",color:"#FF69B4",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
               💇 Beauté & Coiffure <span style={{ background:"rgba(255,105,180,0.2)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{beaute.length}</span>
             </button>
+            <button onClick={()=>{setView("home");setCategory("Mode");}} style={{ background:"rgba(155,89,182,0.1)",border:"1px solid rgba(155,89,182,0.3)",color:"#9B59B6",padding:"10px 24px",borderRadius:24,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+              👗 Mode <span style={{ background:"rgba(155,89,182,0.2)",borderRadius:12,padding:"2px 8px",fontSize:12 }}>{posts.filter(p=>p.category==="Mode").length}</span>
+            </button>
           </div>
 
           {/* Footer landing */}
@@ -1442,6 +1486,9 @@ function AppContent() {
               </button>
               <button onClick={()=>setView("beaute")} style={{ background:"linear-gradient(135deg,#FF69B4,#FF1493)",border:"none",color:"#fff",padding:"6px 14px",borderRadius:18,fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,cursor:"pointer" }}>
                 💇 Beauté <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:10,padding:"1px 6px",fontSize:11 }}>{beaute.length}</span>
+              </button>
+              <button onClick={()=>setCategory("Mode")} style={{ background:"linear-gradient(135deg,#9B59B6,#E91E8C)",border:"none",color:"#fff",padding:"6px 14px",borderRadius:18,fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,cursor:"pointer" }}>
+                👗 Mode <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:10,padding:"1px 6px",fontSize:11 }}>{posts.filter(p=>p.category==="Mode").length}</span>
               </button>
             </div>
 
@@ -2247,7 +2294,7 @@ function AppContent() {
               num:"3",
               title:"Publication d'annonces et tarification",
               icon:"💰",
-              content:`La publication d'une annonce est payante à raison de 1 500 FCFA par mois. L'utilisateur choisit librement la durée de publication souhaitée. Passé le délai payé, l'annonce est automatiquement retirée de la plateforme. L'utilisateur peut prolonger la durée de publication depuis son tableau de bord. Les paiements s'effectuent via Mobile Money (MTN Money, Moov Money) via la plateforme FedaPay. Tout paiement effectué est non remboursable, sauf en cas de défaillance technique prouvée de la plateforme.`
+              content:`TARIFS DE PUBLICATION - Annonce simple : 1 500 FCFA/mois. Boutique : 3 000 FCFA/mois. Atelier : 3 000 FCFA/mois. Restaurant et Bar : 3 000 FCFA/mois. Salon Beaute et Coiffure : 3 000 FCFA/mois. SPONSORING - 1 semaine : 500 FCFA. 1 mois : 1 500 FCFA. MODIFICATION - Gratuite dans les 24 heures suivant la publication. Apres 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 1 modification payante par mois par annonce. L'utilisateur choisit librement la duree de publication. Passe le delai paye, l'annonce est automatiquement retiree. Les paiements s'effectuent via Mobile Money (MTN Money, Moov Money) via FedaPay. Tout paiement est non remboursable sauf defaillance technique prouvee.`
             },
             {
               num:"4",
@@ -3046,6 +3093,40 @@ function AppContent() {
                 <p style={{ textAlign:"center",marginTop:16,color:theme.sub,fontSize:12 }}>
                   Vérifiez aussi vos spams si vous ne recevez pas l'email.
                 </p>
+              </>
+            )}
+
+            {/* CONFIRMATION MODIFICATION PAYANTE */}
+            {modal.type==="confirmEdit"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>✏️ Modification payante</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
+                  <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>{modal.data.title}</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Publiée le {modal.data.date}</p>
+                </div>
+                <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:12,padding:20,marginBottom:20,textAlign:"center" }}>
+                  <p style={{ color:theme.sub,fontSize:14,marginBottom:8 }}>Le délai de 24h gratuit est écoulé.</p>
+                  <p style={{ fontWeight:800,fontSize:28,color:"#6C63FF" }}>{modal.price} FCFA</p>
+                  <p style={{ color:theme.sub,fontSize:13,marginTop:4 }}>≈ ${(modal.price/600).toFixed(2)} USD · 1 modification ce mois</p>
+                  <p style={{ fontSize:11,color:theme.sub,marginTop:8 }}>⚠️ Paiement FedaPay bientôt disponible</p>
+                </div>
+                <div style={{ display:"flex",gap:12 }}>
+                  <button onClick={()=>setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,borderRadius:12,fontWeight:600,cursor:"pointer" }}>Annuler</button>
+                  <button onClick={()=>{
+                    recordModification(modal.data.id);
+                    setPostForm({ title:modal.data.title, category:modal.data.category, description:modal.data.description, price:modal.data.price||"", contact:modal.data.contact||"", phone:modal.data.phone||"" });
+                    setPostPhotos(modal.data.photos||[]);
+                    setVehicleForm(modal.data.vehicle||{});
+                    setImmoForm(modal.data.immo||{ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" });
+                    setModal({ type:"edit", data:modal.data });
+                    notify("Modification enregistrée · "+modal.price+" FCFA débité");
+                  }} className="btn-glow" style={{ flex:2,padding:"12px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,cursor:"pointer",transition:"box-shadow 0.2s" }}>
+                    Payer {modal.price} FCFA et modifier
+                  </button>
+                </div>
               </>
             )}
 
