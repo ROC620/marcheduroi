@@ -796,6 +796,7 @@ function AppContent() {
   const [suggestionText, setSuggestionText] = useState("");
   const [suggestionName, setSuggestionName] = useState("");
   const [showBgPicker, setShowBgPicker] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [lang, setLang] = useState(() => localStorage.getItem("mf_lang") || "fr");
   const t = {
     fr: { annonces:"Annonces", rechercher:"Rechercher une annonce...", publier:"Publier une annonce", connexion:"Connexion", inscrire:"S'inscrire", gratuitement:"Consultez gratuitement · Publiez avec un abonnement", decouvrez:"Découvrez des", uniques:"annonces uniques" },
@@ -1207,35 +1208,40 @@ function AppContent() {
           <img src="/logo.svg" alt="MarketFlow" style={{ width:40,height:40,borderRadius:8 }}/>
           <span style={{ fontWeight:800,fontSize:18,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span>
         </div>
-        <div style={{ display:"flex",gap:6,alignItems:"center",flexWrap:"wrap" }}>
-          <button onClick={()=>setView("home")} style={{ background:view==="home"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="home"?"#6C63FF":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
+        <div style={{ display:"flex",gap:6,alignItems:"center" }}>
+          <button onClick={()=>setView("home")} style={{ background:view==="home"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="home"?"#6C63FF":theme.sub,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
             Annonces
           </button>
-          <button onClick={()=>setModal({type:"howto"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
-            💡 Comment publier ?
+          <button onClick={()=>setModal({type:"howto"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
+            💡 Publier ?
           </button>
-          <button onClick={()=>setView("stats")} style={{ background:view==="stats"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="stats"?"#6C63FF":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
-            📊 Stats
+          {user?.role==="admin"&&<button onClick={()=>setView("admin")} style={{ background:"transparent",border:"none",color:"#FF6584",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>Admin</button>}
+          <button onClick={()=>{ const newLang = lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); }} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
+            {lang==="fr"?"🇬🇧":"🇫🇷"}
           </button>
-          <button onClick={()=>setView("parrainage")} style={{ background:view==="parrainage"?"rgba(255,215,0,0.2)":"transparent",border:"none",color:view==="parrainage"?"#FFD700":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
-            🎁 Parrainage
-          </button>
-          <button onClick={()=>setModal({type:"newsletter"})} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
-            📧 Newsletter
-          </button>
-          {/* Langue */}
-          <button onClick={()=>{ const newLang = lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); }} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
-            {lang==="fr"?"🇬🇧 EN":"🇫🇷 FR"}
-          </button>
-          <button onClick={()=>setView("about")} style={{ background:view==="about"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="about"?"#6C63FF":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
-            À propos
-          </button>
-          <button onClick={()=>setView("terms")} style={{ background:view==="terms"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="terms"?"#6C63FF":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
-            CGU
-          </button>
-          <button onClick={()=>setModal({type:"suggestion"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}><Icon name="suggestion" size={14}/>Suggestion</button>
-          {user?.role==="admin"&&<button onClick={()=>setView("admin")} style={{ background:"transparent",border:"none",color:"#FF6584",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Admin</button>}
-          <button onClick={()=>setShowBgPicker(p=>!p)} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 12px",borderRadius:8,display:"flex",alignItems:"center",gap:6,fontWeight:600,fontSize:13 }}><Icon name="palette" size={14}/>Thème</button>
+          <button onClick={()=>setShowBgPicker(p=>!p)} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 10px",borderRadius:8,display:"flex",alignItems:"center",gap:4,fontWeight:600,fontSize:13 }}><Icon name="palette" size={14}/></button>
+          {/* Menu Plus ▾ */}
+          <div style={{ position:"relative" }}>
+            <button onClick={e=>{e.stopPropagation();setShowMoreMenu(m=>!m);}} style={{ background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+              Plus ▾
+            </button>
+            {showMoreMenu && (
+              <div onClick={e=>e.stopPropagation()} style={{ position:"absolute",right:0,top:44,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:14,boxShadow:"0 20px 60px rgba(0,0,0,0.3)",zIndex:300,minWidth:200,overflow:"hidden" }}>
+                {[
+                  { label:"📊 Statistiques", action:()=>{setView("stats");setShowMoreMenu(false);} },
+                  { label:"🎁 Parrainage", action:()=>{setView("parrainage");setShowMoreMenu(false);} },
+                  { label:"📧 Newsletter", action:()=>{setModal({type:"newsletter"});setShowMoreMenu(false);} },
+                  { label:"💬 Suggestion", action:()=>{setModal({type:"suggestion"});setShowMoreMenu(false);} },
+                  { label:"ℹ️ À propos", action:()=>{setView("about");setShowMoreMenu(false);} },
+                  { label:"📋 CGU", action:()=>{setView("terms");setShowMoreMenu(false);} },
+                ].map(item=>(
+                  <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"12px 16px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:13,cursor:"pointer",textAlign:"left",borderBottom:`1px solid ${theme.border}` }}>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           {user?(
             <div style={{ display:"flex",alignItems:"center",gap:6 }}>
 
@@ -2315,7 +2321,11 @@ function AppContent() {
           <div style={{ textAlign:"center",marginBottom:40 }}>
             <p style={{ fontSize:48,marginBottom:12 }}>🎁</p>
             <h1 style={{ fontSize:38,fontWeight:800,marginBottom:12,color:theme.text }}>Programme de <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Parrainage</span></h1>
-            <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez vos amis sur MarketFlow et gagnez tous les deux <strong style={{ color:"#FFD700" }}>1 mois gratuit</strong> !</p>
+            <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez vos amis sur MarketFlow et gagnez <strong style={{ color:"#FFD700" }}>1 mois de publication gratuit</strong> pour une annonce simple !</p>
+            <div style={{ background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:12,padding:"12px 20px",marginTop:12,display:"inline-block" }}>
+              <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>🎁 Récompense : 1 annonce gratuite (valeur 1 500 FCFA)</p>
+              <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>⚠️ Valable uniquement pour les annonces simples · Non applicable aux boutiques, ateliers, restos et salons</p>
+            </div>
           </div>
           {user ? (
             <div style={{ ...cardStyle,borderRadius:20,padding:32 }}>
