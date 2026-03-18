@@ -1481,7 +1481,16 @@ function AppContent() {
                     <span className="tag" style={{ background:post.category==="Véhicules"?"rgba(255,101,132,0.15)":"rgba(108,99,255,0.15)",color:post.category==="Véhicules"?"#FF6584":"#8B84FF",display:"flex",alignItems:"center",gap:4 }}>
                       {post.category==="Véhicules"&&<Icon name="car" size={10}/>}{post.category}
                     </span>
-                    {post.price&&<span style={{ fontWeight:700,color:"#43C6AC",fontSize:15 }}>{post.price}</span>}
+                    {post.price&&(
+                    <div style={{ textAlign:"right" }}>
+                      <p style={{ fontWeight:700,color:"#43C6AC",fontSize:15 }}>{post.price}</p>
+                      {(() => {
+                        const num = parseInt((post.price||"").replace(/[^0-9]/g,""));
+                        if (num > 0) return <p style={{ color:theme.sub,fontSize:11 }}>≈ ${(num/600).toFixed(2)} USD</p>;
+                        return null;
+                      })()}
+                    </div>
+                  )}
                   </div>
                   {/* Badge expiration */}
                   {post.expiresAt && (() => { const d = getDaysLeft(post.expiresAt); return d !== null && d <= 7 ? (
@@ -2290,6 +2299,12 @@ function AppContent() {
             },
             {
               num:"12",
+              title:"Programme de Parrainage",
+              icon:"🎁",
+              content:"MarketFlow propose un programme de parrainage. L'utilisateur doit parrainer 10 nouveaux inscrits via son lien unique pour obtenir 1 mois de publication gratuit (valeur 1 500 FCFA) pour une annonce simple uniquement. Non applicable aux boutiques, ateliers, restaurants, bars ou salons. Les credits ne sont pas remboursables. Toute fraude entraine la suppression du compte."
+            },
+            {
+              num:"13",
               title:"Contact et réclamations",
               icon:"📞",
               content:`Pour toute question, réclamation ou signalement d'abus, contactez-nous : Email : thza@live.fr · WhatsApp : +229 01 47 56 26 40 · Localisation : Ouidah, Bénin. Nous nous engageons à répondre à toute réclamation dans un délai de 48 heures ouvrables.`
@@ -2321,10 +2336,30 @@ function AppContent() {
           <div style={{ textAlign:"center",marginBottom:40 }}>
             <p style={{ fontSize:48,marginBottom:12 }}>🎁</p>
             <h1 style={{ fontSize:38,fontWeight:800,marginBottom:12,color:theme.text }}>Programme de <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Parrainage</span></h1>
-            <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez vos amis sur MarketFlow et gagnez <strong style={{ color:"#FFD700" }}>1 mois de publication gratuit</strong> pour une annonce simple !</p>
+            <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez <strong style={{ color:"#FFD700" }}>10 amis</strong> sur MarketFlow et gagnez <strong style={{ color:"#FFD700" }}>1 mois de publication gratuit</strong> !</p>
             <div style={{ background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:12,padding:"12px 20px",marginTop:12,display:"inline-block" }}>
-              <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>🎁 Récompense : 1 annonce gratuite (valeur 1 500 FCFA)</p>
+              <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>🎁 10 parrainages = 1 annonce simple gratuite (valeur 1 500 FCFA)</p>
               <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>⚠️ Valable uniquement pour les annonces simples · Non applicable aux boutiques, ateliers, restos et salons</p>
+            </div>
+          </div>
+          {/* Règles claires */}
+          <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24 }}>
+            <h3 style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:16 }}>📋 Comment ça marche ?</h3>
+            {[
+              { num:"1", text:"Partagez votre lien unique à vos amis et contacts" },
+              { num:"2", text:"Chaque ami qui s'inscrit via votre lien compte comme 1 parrainage" },
+              { num:"3", text:"Après 10 parrainages confirmés, vous gagnez 1 mois gratuit" },
+              { num:"4", text:"Valable uniquement pour 1 annonce simple (valeur 1 500 FCFA)" },
+              { num:"5", text:"Non applicable aux boutiques, ateliers, restos et salons de beauté" },
+              { num:"6", text:"Les crédits ne sont pas transférables ni remboursables en argent" },
+            ].map(r=>(
+              <div key={r.num} style={{ display:"flex",gap:12,marginBottom:12,alignItems:"flex-start" }}>
+                <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#FFD700,#FFA500)",display:"flex",alignItems:"center",justifyContent:"center",color:"#000",fontWeight:800,fontSize:13,flexShrink:0 }}>{r.num}</div>
+                <p style={{ color:theme.sub,fontSize:14,lineHeight:1.5,paddingTop:4 }}>{r.text}</p>
+              </div>
+            ))}
+            <div style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:10,padding:"12px 16px",marginTop:8,textAlign:"center" }}>
+              <p style={{ color:"#FFD700",fontWeight:800,fontSize:16 }}>🎯 10 parrainages = 1 mois gratuit (1 500 FCFA)</p>
             </div>
           </div>
           {user ? (
