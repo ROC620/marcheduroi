@@ -1325,6 +1325,9 @@ function AppContent() {
               <button onClick={()=>setView("restos")} style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",padding:"6px 14px",borderRadius:18,fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,cursor:"pointer" }}>
                 🍽️ Restos & Bars <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:10,padding:"1px 6px",fontSize:11 }}>{restos.length}</span>
               </button>
+              <button onClick={()=>setView("beaute")} style={{ background:"linear-gradient(135deg,#FF69B4,#FF1493)",border:"none",color:"#fff",padding:"6px 14px",borderRadius:18,fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,cursor:"pointer" }}>
+                💇 Beauté <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:10,padding:"1px 6px",fontSize:11 }}>{beaute.length}</span>
+              </button>
             </div>
 
             {/* Catégories */}
