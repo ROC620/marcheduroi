@@ -740,11 +740,17 @@ function AppContent() {
     setUserRatings(newUserRatings);
     setRatings(r => {
       const existing = r[itemId] || { total: 0, count: 0, comments: [] };
-      return { ...r, [itemId]: {
+      const newRating = {
         total: existing.total + stars,
         count: existing.count + 1,
         comments: comment ? [...existing.comments, { stars, comment, userName: user.name, date: new Date().toISOString().slice(0,10) }] : existing.comments
-      }};
+      };
+      // Auto badge vérifié après 5 avis positifs (4+ étoiles)
+      const post = posts.find(p=>p.id===itemId);
+      if (post && stars >= 4 && newRating.count >= 5) {
+        setPosts(prev => prev.map(p => p.id===itemId ? {...p, ownerVerified:true} : p));
+      }
+      return { ...r, [itemId]: newRating };
     });
     notify("Merci pour votre note !");
   };
@@ -777,13 +783,24 @@ function AppContent() {
     });
   };
   const [authForm, setAuthForm] = useState({ email:"",password:"",name:"" });
+  const [profileForm, setProfileForm] = useState({ name:"", phone:"", bio:"", ville:"", photo:"" });
+  const [editingProfile, setEditingProfile] = useState(false);
   const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"",lat:"",lng:"" });
   const [postPhotos, setPostPhotos] = useState([]);
   const [vehicleForm, setVehicleForm] = useState({});
-  const [themeId, setThemeId] = useState("dark");
+  const [themeId, setThemeId] = useState(() => {
+    const saved = localStorage.getItem("mf_theme");
+    if (saved) return saved;
+    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  });
   const [suggestionText, setSuggestionText] = useState("");
   const [suggestionName, setSuggestionName] = useState("");
   const [showBgPicker, setShowBgPicker] = useState(false);
+  const [lang, setLang] = useState(() => localStorage.getItem("mf_lang") || "fr");
+  const t = {
+    fr: { annonces:"Annonces", rechercher:"Rechercher une annonce...", publier:"Publier une annonce", connexion:"Connexion", inscrire:"S'inscrire", gratuitement:"Consultez gratuitement · Publiez avec un abonnement", decouvrez:"Découvrez des", uniques:"annonces uniques" },
+    en: { annonces:"Listings", rechercher:"Search a listing...", publier:"Post a listing", connexion:"Login", inscrire:"Sign up", gratuitement:"Browse free · Post with a subscription", decouvrez:"Discover", uniques:"unique listings" }
+  }[lang];
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
   const [visibleCount, setVisibleCount] = useState(12);
@@ -898,6 +915,7 @@ function AppContent() {
   };
 
   const theme = BACKGROUNDS.find(b=>b.id===themeId)||BACKGROUNDS[0];
+  useEffect(() => { localStorage.setItem("mf_theme", themeId); }, [themeId]);
 
   const notify = (msg, type="success") => { setNotification({msg,type}); setTimeout(()=>setNotification(null),3000); };
 
@@ -1196,6 +1214,19 @@ function AppContent() {
           <button onClick={()=>setModal({type:"howto"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
             💡 Comment publier ?
           </button>
+          <button onClick={()=>setView("stats")} style={{ background:view==="stats"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="stats"?"#6C63FF":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
+            📊 Stats
+          </button>
+          <button onClick={()=>setView("parrainage")} style={{ background:view==="parrainage"?"rgba(255,215,0,0.2)":"transparent",border:"none",color:view==="parrainage"?"#FFD700":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
+            🎁 Parrainage
+          </button>
+          <button onClick={()=>setModal({type:"newsletter"})} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
+            📧 Newsletter
+          </button>
+          {/* Langue */}
+          <button onClick={()=>{ const newLang = lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); }} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
+            {lang==="fr"?"🇬🇧 EN":"🇫🇷 FR"}
+          </button>
           <button onClick={()=>setView("about")} style={{ background:view==="about"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="about"?"#6C63FF":theme.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>
             À propos
           </button>
@@ -1457,11 +1488,18 @@ function AppContent() {
                       <p style={{ fontSize:12,color:"#FFA500",fontWeight:600 }}>⏳ Expire le {post.expiresAt}</p>
                     </div>
                   ) : null; })()}
-                  {post.sponsored && (
-                    <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:20,padding:"3px 12px",marginBottom:8,fontSize:11,fontWeight:800,color:"#000" }}>
-                      🌟 Sponsorisé
-                    </div>
-                  )}
+                  <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
+                    {post.sponsored && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,color:"#000" }}>
+                        🌟 Sponsorisé
+                      </div>
+                    )}
+                    {post.ownerVerified && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.15)",border:"1px solid rgba(67,198,172,0.4)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,color:"#43C6AC" }}>
+                        ✅ Vendeur vérifié
+                      </div>
+                    )}
+                  </div>
                   {post.distance!==null && (
                     <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>
                       📍 {formatDistance(post.distance)}
@@ -1579,6 +1617,28 @@ function AppContent() {
                   <div style={{ display:"flex",gap:8 }}>
                     <button onClick={()=>setModal({type:"contact",data:post})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Contact</button>
                     <button onClick={()=>toggleFavorite(post.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Retirer</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Historique des transactions */}
+          {myPosts.filter(p=>p.expired).length > 0 && (
+            <div style={{ marginBottom:24 }}>
+              <h3 style={{ fontWeight:700,fontSize:16,marginBottom:12,color:theme.sub,display:"flex",alignItems:"center",gap:8 }}>
+                📋 Historique ({myPosts.filter(p=>p.expired).length} expirées)
+              </h3>
+              {myPosts.filter(p=>p.expired).map(post=>(
+                <div key={post.id} style={{ ...cardStyle,borderRadius:12,padding:14,marginBottom:8,opacity:0.7 }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                    <div>
+                      <p style={{ fontWeight:600,color:theme.text,marginBottom:2 }}>{post.title}</p>
+                      <p style={{ color:theme.sub,fontSize:12 }}>{post.category} · Expirée le {post.expiresAt}</p>
+                    </div>
+                    <button onClick={()=>setModal({type:"sponsor",data:{...post,expiresAt:null}})} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
+                      🔄 Republier
+                    </button>
                   </div>
                 </div>
               ))}
@@ -2098,6 +2158,41 @@ function AppContent() {
         </div>
       )}
 
+      {/* PAGE STATISTIQUES PUBLIQUES */}
+      {view==="stats"&&(
+        <div style={{ width:"100%",maxWidth:900,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
+          <div style={{ textAlign:"center",marginBottom:48 }}>
+            <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>📊 MarketFlow en <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>chiffres</span></h1>
+            <p style={{ color:theme.sub,fontSize:16 }}>La plateforme qui grandit chaque jour au Bénin et en Afrique</p>
+          </div>
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:20,marginBottom:40 }}>
+            {[
+              { val:posts.length, label:"Annonces publiées", icon:"📋", color:"#6C63FF" },
+              { val:boutiques.length, label:"Boutiques", icon:"🛍️", color:"#FF6584" },
+              { val:ateliers.length, label:"Ateliers", icon:"🔧", color:"#43C6AC" },
+              { val:restos.length, label:"Restaurants & Bars", icon:"🍽️", color:"#FF8C00" },
+              { val:beaute.length, label:"Salons Beauté", icon:"💇", color:"#FF69B4" },
+              { val:posts.reduce((a,p)=>a+p.likes,0), label:"Likes totaux", icon:"❤️", color:"#FF6584" },
+              { val:CATEGORIES.length-1, label:"Catégories", icon:"🗂️", color:"#FFD700" },
+              { val:"Bénin 🇧🇯", label:"Pays principal", icon:"🌍", color:"#43C6AC" },
+            ].map(s=>(
+              <div key={s.label} className="card-hover" style={{ ...cardStyle,borderRadius:16,padding:28,textAlign:"center" }}>
+                <p style={{ fontSize:36,marginBottom:8 }}>{s.icon}</p>
+                <p style={{ fontSize:36,fontWeight:800,color:s.color,marginBottom:4 }}>{s.val}</p>
+                <p style={{ color:theme.sub,fontSize:13,fontWeight:600 }}>{s.label}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ ...cardStyle,borderRadius:16,padding:28,textAlign:"center" }}>
+            <p style={{ fontSize:18,fontWeight:700,color:theme.text,marginBottom:8 }}>🚀 Rejoignez la communauté MarketFlow</p>
+            <p style={{ color:theme.sub,marginBottom:20 }}>Publiez vos annonces et rejoignez des milliers de commerçants au Bénin</p>
+            <button onClick={()=>user?setModal({type:"add"}):setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"14px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
+              {user?"Publier une annonce →":"Créer mon compte gratuitement →"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* CONDITIONS GÉNÉRALES D'UTILISATION */}
       {view==="terms"&&(
         <div style={{ width:"100%",maxWidth:900,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
@@ -2211,6 +2306,46 @@ function AppContent() {
               Retour aux annonces →
             </button>
           </div>
+        </div>
+      )}
+
+      {/* PARRAINAGE */}
+      {view==="parrainage"&&(
+        <div style={{ width:"100%",maxWidth:700,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
+          <div style={{ textAlign:"center",marginBottom:40 }}>
+            <p style={{ fontSize:48,marginBottom:12 }}>🎁</p>
+            <h1 style={{ fontSize:38,fontWeight:800,marginBottom:12,color:theme.text }}>Programme de <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Parrainage</span></h1>
+            <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez vos amis sur MarketFlow et gagnez tous les deux <strong style={{ color:"#FFD700" }}>1 mois gratuit</strong> !</p>
+          </div>
+          {user ? (
+            <div style={{ ...cardStyle,borderRadius:20,padding:32 }}>
+              <p style={{ fontWeight:700,fontSize:16,color:theme.text,marginBottom:8 }}>Votre lien de parrainage :</p>
+              <div style={{ display:"flex",gap:8,marginBottom:20 }}>
+                <input readOnly value={`https://marketflow-delta.vercel.app?ref=${user.id}`} style={{ ...inputStyle,flex:1,background:theme.bg }} onClick={e=>e.target.select()}/>
+                <button onClick={()=>{ navigator.clipboard.writeText(`https://marketflow-delta.vercel.app?ref=${user.id}`); notify("Lien copié ! 📋"); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 16px",borderRadius:10,fontWeight:700,cursor:"pointer" }}>Copier</button>
+              </div>
+              <a href={`https://wa.me/?text=${encodeURIComponent("Rejoins-moi sur MarketFlow, la plateforme de petites annonces au Benin ! https://marketflow-delta.vercel.app?ref="+user.id)}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"block" }}>
+                <button style={{ width:"100%",padding:"14px",background:"#25D366",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+                  <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                  Partager sur WhatsApp
+                </button>
+              </a>
+              <div style={{ marginTop:24,display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,textAlign:"center" }}>
+                {[{icon:"👥",val:"0",label:"Filleuls"},{icon:"🎁",val:"0",label:"Mois gagnés"},{icon:"💰",val:"0 FCFA",label:"Économisé"}].map(s=>(
+                  <div key={s.label} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:12,padding:16 }}>
+                    <p style={{ fontSize:24 }}>{s.icon}</p>
+                    <p style={{ fontWeight:800,color:"#FFD700",fontSize:20 }}>{s.val}</p>
+                    <p style={{ color:theme.sub,fontSize:11 }}>{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div style={{ textAlign:"center" }}>
+              <p style={{ color:theme.sub,marginBottom:20 }}>Connectez-vous pour accéder à votre lien de parrainage</p>
+              <button onClick={()=>setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",padding:"14px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>Créer un compte</button>
+            </div>
+          )}
         </div>
       )}
 
@@ -2816,6 +2951,27 @@ function AppContent() {
                 <p style={{ fontSize:12,color:theme.sub,textAlign:"center" }}>
                   Après envoi, vous aurez <strong>5 minutes</strong> pour annuler votre signalement.
                 </p>
+              </>
+            )}
+
+            {/* NEWSLETTER */}
+            {modal.type==="newsletter"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>📧 Newsletter MarketFlow</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <p style={{ color:theme.sub,fontSize:14,marginBottom:20,lineHeight:1.6 }}>
+                  Recevez chaque semaine les meilleures annonces, boutiques et bons plans directement dans votre boîte mail ! 🎉
+                </p>
+                <div style={{ marginBottom:16 }}>
+                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre email</label>
+                  <input type="email" value={authForm.email} onChange={e=>setAuthForm(a=>({...a,email:e.target.value}))} placeholder="votre@email.com" style={inputStyle}/>
+                </div>
+                <button onClick={()=>{ if(!authForm.email){notify("Entrez votre email","error");return;} notify("Abonnement confirmé ! Merci 🎉"); setModal(null); }} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
+                  S'abonner à la newsletter
+                </button>
+                <p style={{ fontSize:11,color:theme.sub,textAlign:"center",marginTop:12 }}>Désabonnement possible à tout moment · Pas de spam</p>
               </>
             )}
 
