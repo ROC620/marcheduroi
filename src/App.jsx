@@ -2007,6 +2007,12 @@ function AppContent() {
                         Partager
                       </div>
                     </a>
+                    {user&&(user.id===b.authorId||user.role==="admin")&&(
+                      <>
+                        <button onClick={()=>{ setShopMode("boutique"); setShopForm({name:b.name,type:b.type||"",description:b.description,services:b.services||"",keywords:b.keywords||"",ville:b.ville||"",quartier:b.quartier||"",von:b.von||"",horaires:b.horaires||"",contact:b.contact||"",phone:b.phone||""}); setShopPhotos(b.photos||[]); setShopVideo(b.video||null); setMonths(1); setModal({type:"addshop",data:b,editing:true}); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2074,6 +2080,12 @@ function AppContent() {
                         Partager
                       </div>
                     </a>
+                    {user&&(user.id===a.authorId||user.role==="admin")&&(
+                      <>
+                        <button onClick={()=>{ setShopMode("atelier"); setShopForm({name:a.name,type:a.type||"",description:a.description,services:a.services||"",keywords:a.keywords||"",ville:a.ville||"",quartier:a.quartier||"",von:a.von||"",horaires:a.horaires||"",contact:a.contact||"",phone:a.phone||""}); setShopPhotos(a.photos||[]); setShopVideo(a.video||null); setMonths(1); setModal({type:"addshop",data:a,editing:true}); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2139,7 +2151,13 @@ function AppContent() {
                   <div style={{ display:"flex",gap:8 }}>
                     <button onClick={()=>likePost(r.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(r.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{r.likes}</button>
                     <button onClick={()=>setModal({type:"contact",data:{...r,title:r.name}})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
-                    <a href={"https://wa.me/?text="+encodeURIComponent("*"+r.name+"*"+"\n"+"Type: "+r.type+"\n"+"Voir l'établissement: https://marketflow-delta.vercel.app/resto/"+r.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                    <a href={"https://wa.me/?text="+encodeURIComponent("*"+r.name+"*"+"\n"+"Type: "+r.type+"\n"+"Voir l'établissement: https://marketflow-delta.vercel.app/resto/"+r.id)}
+                    {user&&(user.id===r.authorId||user.role==="admin")&&(
+                      <>
+                        <button onClick={()=>{ setShopMode("resto"); setShopForm({name:r.name,type:r.type,description:r.description,services:r.services||"",keywords:r.keywords||"",ville:r.ville||"",quartier:r.quartier||"",von:r.von||"",horaires:r.horaires||"",contact:r.contact||"",phone:r.phone||""}); setShopPhotos(r.photos||[]); setShopVideo(r.video||null); setMonths(1); setModal({type:"editresto",data:r}); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
+                      </>
+                    )} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}>
                         <svg width="12" height="12" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                         Partager
@@ -2205,7 +2223,13 @@ function AppContent() {
                   <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
                     <button onClick={()=>likePost(b.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(b.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{b.likes}</button>
                     <button onClick={()=>setModal({type:"contact",data:{...b,title:b.name}})} style={{ background:"rgba(255,105,180,0.1)",border:"none",color:"#FF69B4",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
-                    <a href={"https://wa.me/?text="+encodeURIComponent("*"+b.name+"*"+"\n"+"Type: "+b.type+"\n"+"Voir le salon: https://marketflow-delta.vercel.app/beaute/"+b.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                    <a href={"https://wa.me/?text="+encodeURIComponent("*"+b.name+"*"+"\n"+"Type: "+b.type+"\n"+"Voir le salon: https://marketflow-delta.vercel.app/beaute/"+b.id)}
+                    {user&&(user.id===b.authorId||user.role==="admin")&&(
+                      <>
+                        <button onClick={()=>{ setShopMode("beaute"); setShopForm({name:b.name,type:b.type,description:b.description,services:b.services||"",keywords:b.keywords||"",ville:b.ville||"",quartier:b.quartier||"",von:b.von||"",horaires:b.horaires||"",contact:b.contact||"",phone:b.phone||""}); setShopPhotos(b.photos||[]); setShopVideo(b.video||null); setMonths(1); setModal({type:"editbeaute",data:b}); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
+                      </>
+                    )} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}>
                         <svg width="12" height="12" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                         Partager
@@ -3093,6 +3117,27 @@ function AppContent() {
                 <p style={{ textAlign:"center",marginTop:16,color:theme.sub,fontSize:12 }}>
                   Vérifiez aussi vos spams si vous ne recevez pas l'email.
                 </p>
+              </>
+            )}
+
+            {/* SUPPRIMER BOUTIQUE/ATELIER/RESTO/BEAUTE */}
+            {modal.type==="deleteshop"&&(
+              <>
+                <div style={{ textAlign:"center",marginBottom:24 }}>
+                  <div style={{ fontSize:48,marginBottom:12 }}>🗑️</div>
+                  <h3 style={{ fontWeight:800,fontSize:20,marginBottom:8,color:theme.text }}>Supprimer ?</h3>
+                  <p style={{ color:theme.sub,fontSize:14 }}>"{modal.data.name}" sera supprimé définitivement.</p>
+                </div>
+                <div style={{ display:"flex",gap:12 }}>
+                  <button onClick={()=>setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,borderRadius:12,fontWeight:600 }}>Annuler</button>
+                  <button onClick={()=>{
+                    if(modal.shopType==="boutique") setBoutiques(b=>b.filter(x=>x.id!==modal.data.id));
+                    else if(modal.shopType==="atelier") setAteliers(a=>a.filter(x=>x.id!==modal.data.id));
+                    else if(modal.shopType==="resto") setRestos(r=>r.filter(x=>x.id!==modal.data.id));
+                    else if(modal.shopType==="beaute") setBeaute(b=>b.filter(x=>x.id!==modal.data.id));
+                    setModal(null); notify("Supprimé avec succès !");
+                  }} style={{ flex:1,padding:"12px",background:"linear-gradient(135deg,#FF4757,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700 }}>Supprimer</button>
+                </div>
               </>
             )}
 
