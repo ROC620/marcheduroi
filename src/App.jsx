@@ -900,6 +900,7 @@ function AppContent() {
   const [suggestionName, setSuggestionName] = useState("");
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [adminSearch, setAdminSearch] = useState("");
   const [lang, setLang] = useState(() => localStorage.getItem("mf_lang") || "fr");
   const t = {
     fr: { annonces:"Annonces", rechercher:"Rechercher une annonce...", publier:"Publier une annonce", connexion:"Connexion", inscrire:"S'inscrire", gratuitement:"Consultez gratuitement · Publiez avec un abonnement", decouvrez:"Découvrez des", uniques:"annonces uniques" },
@@ -2031,7 +2032,13 @@ function AppContent() {
           )}
 
           <h3 style={{ fontWeight:700,fontSize:18,margin:"24px 0 16px",color:theme.text }}>Toutes les annonces</h3>
-          {posts.map(post=>(
+          <div style={{ position:"relative",marginBottom:16 }}>
+            <div style={{ position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={15}/></div>
+            <input value={adminSearch} onChange={e=>setAdminSearch(e.target.value)} placeholder="Rechercher une annonce par titre, auteur, catégorie..." style={{ ...inputStyle,padding:"11px 16px 11px 40px",borderRadius:10,fontSize:13,width:"100%" }}/>
+            {adminSearch && <button onClick={()=>setAdminSearch("")} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:16 }}>✕</button>}
+          </div>
+          {adminSearch && <p style={{ color:theme.sub,fontSize:12,marginBottom:12 }}>{posts.filter(p=>(p.title+p.author+p.category).toLowerCase().includes(adminSearch.toLowerCase())).length} résultat(s) trouvé(s)</p>}
+          {posts.filter(p=>!adminSearch||(p.title+p.author+p.category).toLowerCase().includes(adminSearch.toLowerCase())).map(post=>(
             <div key={post.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
               <div style={{ display:"flex",gap:12,alignItems:"center" }}>
                 {post.photos&&post.photos.length>0&&<img src={post.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
