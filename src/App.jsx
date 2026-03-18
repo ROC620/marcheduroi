@@ -641,6 +641,12 @@ function AppContent() {
   const [likedPosts, setLikedPosts] = useState([]);
   const [ratings, setRatings] = useState({});
   const [reports, setReports] = useState([]);
+  const [featuredPosts, setFeaturedPosts] = useState([]);
+
+  const toggleFeatured = (postId) => {
+    setFeaturedPosts(f => f.includes(postId) ? f.filter(id=>id!==postId) : [...f, postId]);
+    notify(featuredPosts.includes(postId) ? "Retiré des vedettes" : "Ajouté en vedette 🏆 !");
+  };
   const [reportOtp, setReportOtp] = useState({ phone:"", code:"", generated:"", verified:false, postData:null });
   const [cancelableReports, setCancelableReports] = useState({});
 
@@ -1519,6 +1525,33 @@ function AppContent() {
             </div>
           </div>
 
+          {/* Annonces en vedette */}
+          {featuredPosts.length > 0 && (
+            <div style={{ marginBottom:32 }}>
+              <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:16 }}>
+                <span style={{ fontSize:22 }}>🏆</span>
+                <h2 style={{ fontWeight:800,fontSize:20,color:theme.text }}>Coups de cœur <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span></h2>
+              </div>
+              <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
+                {posts.filter(p=>featuredPosts.includes(p.id)&&!p.expired).map(post=>(
+                  <div key={post.id} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",border:"2px solid #FFD700",boxShadow:"0 4px 24px rgba(255,215,0,0.25)",position:"relative" }}>
+                    <div style={{ position:"absolute",top:12,left:12,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:800,color:"#000",zIndex:2 }}>🏆 Coup de cœur</div>
+                    {post.photos&&post.photos.length>0&&<img src={post.photos[0]} alt="" style={{ width:"100%",height:180,objectFit:"cover" }}/>}
+                    <div style={{ padding:16 }}>
+                      <h3 style={{ fontWeight:700,fontSize:16,color:theme.text,marginBottom:6 }}>{post.title}</h3>
+                      <p style={{ color:"#43C6AC",fontWeight:700,fontSize:15,marginBottom:8 }}>{post.price}</p>
+                      <p style={{ color:theme.sub,fontSize:13,marginBottom:12 }}>{post.description?.slice(0,80)}...</p>
+                      <button onClick={()=>setModal({type:"contact",data:post})} style={{ width:"100%",padding:"10px",background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                        Voir l'annonce →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ borderBottom:`1px solid ${theme.border}`,marginTop:24,marginBottom:8 }}/>
+            </div>
+          )}
+
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
             {filtered.slice(0, visibleCount).map(post=>(
               <div key={post.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:post.sponsored?"0 4px 24px rgba(255,215,0,0.3)":"0 4px 20px rgba(0,0,0,0.15)",animation:"fadeIn 0.4s ease",border:post.sponsored?`2px solid #FFD700`:`1px solid ${theme.border}` }}>
@@ -1608,6 +1641,11 @@ function AppContent() {
                         <div style={{ background:"rgba(37,211,102,0.1)",border:"none",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4,cursor:"pointer" }}>
                           <svg width="13" height="13" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                           Partager
+                        </div>
+                      </a>
+                      <a href={"https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent("https://marketflow-delta.vercel.app/annonce/"+post.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                        <div style={{ background:"rgba(24,119,242,0.1)",color:"#1877F2",padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:3,cursor:"pointer" }}>
+                          <svg width="13" height="13" fill="#1877F2" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                         </div>
                       </a>
                       <button onClick={()=>setModal({type:"report",data:post})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:3 }} title="Signaler cette annonce">
@@ -1823,6 +1861,7 @@ function AppContent() {
               </div>
               <div style={{ display:"flex",gap:8 }}>
                 {!post.sponsored && <button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
+                <button onClick={()=>toggleFeatured(post.id)} style={{ background:featuredPosts.includes(post.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(post.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
                 <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>Supprimer</button>
               </div>
             </div>
