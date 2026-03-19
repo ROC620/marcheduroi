@@ -1164,15 +1164,16 @@ function AppContent() {
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   };
 
-  const addPost = () => {
+  const addPost = async () => {
     if (!postForm.title||!postForm.description) { notify("Titre et description requis","error"); return; }
     if (isVehicle && !vehicleForm.marque) { notify("La marque du véhicule est requise","error"); return; }
     const isAdmin = user.role === "admin";
     const expDate = new Date();
     expDate.setMonth(expDate.getMonth() + months);
+    const postId = "post_" + Date.now();
     const newPost = {
       ...postForm,
-      id: nextId.current++,
+      id: postId,
       author: user.name,
       authorId: user.id,
       date: new Date().toISOString().slice(0,10),
@@ -1183,6 +1184,27 @@ function AppContent() {
       expiresAt: isAdmin ? null : expDate.toISOString().slice(0,10),
       months: isAdmin ? null : months,
     };
+    // Save to Supabase
+    const { error } = await supabase.from("posts").insert({
+      id: postId,
+      title: newPost.title,
+      category: newPost.category,
+      description: newPost.description,
+      price: newPost.price || "",
+      contact: newPost.contact || "",
+      phone: newPost.phone || "",
+      author: newPost.author,
+      author_id: newPost.authorId,
+      date: newPost.date,
+      photos: newPost.photos || [],
+      vehicle: newPost.vehicle || null,
+      immo: newPost.immo || null,
+      lat: newPost.lat || null,
+      lng: newPost.lng || null,
+      expires_at: newPost.expiresAt || null,
+      likes: 0,
+    });
+    if (error) { console.error("Supabase error:", error); notify("Erreur de sauvegarde","error"); return; }
     setPosts(p=>[newPost,...p]);
     setModal(null);
     setPostForm({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"" });
@@ -1190,12 +1212,27 @@ function AppContent() {
     notify(isAdmin ? "Annonce publiée !" : "Annonce publiée pour " + months + " mois · " + (months * 1500).toLocaleString() + " FCFA !");
   };
 
-  const editPost = () => {
-    setPosts(p=>p.map(post=>post.id===modal.data.id?{...post,...postForm,photos:postPhotos,vehicle:isVehicle?vehicleForm:null}:post));
+  const editPost = async () => {
+    const updatedPost = {...posts.find(p=>p.id===modal.data.id),...postForm,photos:postPhotos,vehicle:isVehicle?vehicleForm:null};
+    await supabase.from("posts").update({
+      title: updatedPost.title,
+      category: updatedPost.category,
+      description: updatedPost.description,
+      price: updatedPost.price || "",
+      contact: updatedPost.contact || "",
+      phone: updatedPost.phone || "",
+      photos: updatedPost.photos || [],
+      vehicle: updatedPost.vehicle || null,
+    }).eq("id", modal.data.id);
+    setPosts(p=>p.map(post=>post.id===modal.data.id?updatedPost:post));
     setModal(null); notify("Annonce modifiée !");
   };
 
-  const deletePost = (id) => { setPosts(p=>p.filter(post=>post.id!==id)); setModal(null); notify("Annonce supprimée."); };
+  const deletePost = async (id) => {
+    await supabase.from("posts").delete().eq("id", id);
+    setPosts(p=>p.filter(post=>post.id!==id));
+    setModal(null); notify("Annonce supprimée.");
+  };
 
   const likePost = (id) => {
     if (likedPosts.includes(id)) return;
