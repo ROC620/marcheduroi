@@ -856,6 +856,9 @@ function AppContent() {
     });
   };
   const [authForm, setAuthForm] = useState({ email:"",password:"",name:"" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [isResetMode, setIsResetMode] = useState(false);
   const [profileForm, setProfileForm] = useState({ name:"", phone:"", bio:"", ville:"", photo:"" });
   const [editingProfile, setEditingProfile] = useState(false);
   const [modifHistory, setModifHistory] = useState(() => {
@@ -877,14 +880,17 @@ function AppContent() {
     return isSimple ? MODIF_PRICES.simple : MODIF_PRICES.pro;
   };
 
-  const canModifyThisMonth = (postId) => {
+  const getModifCount = (postId) => {
     const currentMonth = new Date().toISOString().slice(0,7);
-    return !modifHistory[postId] || modifHistory[postId] !== currentMonth;
+    const history = modifHistory[postId] || {};
+    return history.month === currentMonth ? (history.count || 0) : 0;
   };
 
   const recordModification = (postId) => {
     const currentMonth = new Date().toISOString().slice(0,7);
-    const updated = { ...modifHistory, [postId]: currentMonth };
+    const current = modifHistory[postId] || {};
+    const count = current.month === currentMonth ? (current.count || 0) + 1 : 1;
+    const updated = { ...modifHistory, [postId]: { month: currentMonth, count } };
     setModifHistory(updated);
     localStorage.setItem("mf_modifs", JSON.stringify(updated));
   };
@@ -1056,10 +1062,21 @@ function AppContent() {
 
   const logout = async () => { await supabase.auth.signOut(); setUser(null); setView("home"); notify("À bientôt !"); };
 
+  const updatePassword = async () => {
+    if (!newPassword || newPassword.length < 6) { notify("Mot de passe trop court (min. 6 caractères)","error"); return; }
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) { notify("Erreur : "+error.message,"error"); return; }
+    notify("Mot de passe mis à jour avec succès ! ✅");
+    setNewPassword("");
+    setIsResetMode(false);
+    window.location.hash = "";
+    setView("login");
+  };
+
   const resetPassword = async (email) => {
     if (!email) { notify("Entrez votre email","error"); return; }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://marketflow-delta.vercel.app/reset-password",
+      redirectTo: window.location.origin + "/reset-password",
     });
     if (error) { notify("Erreur : "+error.message,"error"); return; }
     notify("Email de réinitialisation envoyé ! Vérifiez votre boîte mail 📧");
@@ -1129,14 +1146,10 @@ function AppContent() {
 
   const openEdit = (post) => {
     const isFree = canModifyFree(post);
-    const canModif = canModifyThisMonth(post.id);
-    if (!isFree && !canModif) {
-      notify("Vous avez deja modifie cette annonce ce mois-ci","error");
-      return;
-    }
     if (!isFree) {
       const price = getModifPrice(post);
-      setModal({ type:"confirmEdit", data:post, price });
+      const count = getModifCount(post.id);
+      setModal({ type:"confirmEdit", data:post, price, count });
       return;
     }
     setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"" });
@@ -1950,6 +1963,7 @@ function AppContent() {
                   { icon:"❤️", val:post.likes, label:"likes", color:"#FF6584" },
                   { icon:"⭐", val:getAvgRating(post.id)?`${getAvgRating(post.id)}/5`:"–", label:"note", color:"#FFD700" },
                   { icon:"🚩", val:reports.filter(r=>r.postId===post.id).length, label:"signalements", color:"#FF4757" },
+                  { icon:"✏️", val:getModifCount(post.id), label:"modifs ce mois", color:"#6C63FF" },
                 ].map(s=>(
                   <div key={s.label} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:8,padding:"5px 10px",display:"flex",alignItems:"center",gap:4 }}>
                     <span style={{ fontSize:12 }}>{s.icon}</span>
@@ -2063,7 +2077,14 @@ function AppContent() {
             {[{label:"Email",key:"email",type:"email"},{label:"Mot de passe",key:"password",type:"password"}].map(f=>(
               <div key={f.key} style={{ marginBottom:16 }}>
                 <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
-                <input type={f.type} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} style={inputStyle}/>
+                {f.key==="password" ? (
+                  <div style={{ position:"relative" }}>
+                    <input type={showPassword?"text":"password"} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="••••••••" style={{ ...inputStyle,paddingRight:44 }}/>
+                    <button type="button" onClick={()=>setShowPassword(s=>!s)} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:18 }}>{showPassword?"🙈":"👁️"}</button>
+                  </div>
+                ) : (
+                  <input type={f.type} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} style={inputStyle}/>
+                )}
               </div>
             ))}
             <button onClick={login} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s" }}>Se connecter</button>
@@ -2084,7 +2105,14 @@ function AppContent() {
             {[{label:"Nom complet",key:"name",type:"text"},{label:"Email",key:"email",type:"email"},{label:"Mot de passe",key:"password",type:"password"}].map(f=>(
               <div key={f.key} style={{ marginBottom:16 }}>
                 <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
-                <input type={f.type} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} style={inputStyle}/>
+                {f.key==="password" ? (
+                  <div style={{ position:"relative" }}>
+                    <input type={showPassword?"text":"password"} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} placeholder="Min. 6 caractères" style={{ ...inputStyle,paddingRight:44 }}/>
+                    <button type="button" onClick={()=>setShowPassword(s=>!s)} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:18 }}>{showPassword?"🙈":"👁️"}</button>
+                  </div>
+                ) : (
+                  <input type={f.type} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} style={inputStyle}/>
+                )}
               </div>
             ))}
             <button onClick={register} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s" }}>Créer mon compte</button>
@@ -2095,10 +2123,8 @@ function AppContent() {
 
       {/* À PROPOS */}
       {view==="about"&&(
-        <div style={{ width:"100%",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
-
-          {/* Hero */}
-          <div style={{ textAlign:"center",marginBottom:64 }}>
+        <div style={{ width:"100%",animation:"fadeIn 0.4s ease" }}>
+          <div style={{ textAlign:"center",padding:"80px 40px 48px",background:`linear-gradient(180deg,${theme.card},transparent)` }}>
             <img src="/logo.svg" alt="MarketFlow" style={{ width:120,height:120,borderRadius:20,boxShadow:"0 8px 32px rgba(108,99,255,0.4)",margin:"0 auto 20px",display:"block" }}/>
             <h1 style={{ fontSize:48,fontWeight:800,marginBottom:16,color:theme.text }}>À propos de <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span></h1>
             <p style={{ color:theme.sub,fontSize:18,maxWidth:700,margin:"0 auto",lineHeight:1.7 }}>La plateforme de petites annonces qui connecte commerçants, entreprises et particuliers au Bénin et au-delà des frontières.</p>
@@ -2527,6 +2553,59 @@ function AppContent() {
         </div>
       )}
 
+      {/* PAGE RÉINITIALISATION MOT DE PASSE */}
+      {view==="reset-password"&&(
+        <div style={{ maxWidth:420,margin:"80px auto",padding:"0 24px",animation:"fadeIn 0.4s ease" }}>
+          <div style={{ ...cardStyle,borderRadius:20,padding:36 }}>
+            <div style={{ textAlign:"center",marginBottom:28 }}>
+              <p style={{ fontSize:48,marginBottom:12 }}>🔑</p>
+              <h2 style={{ fontWeight:800,fontSize:24,color:theme.text,marginBottom:8 }}>Nouveau mot de passe</h2>
+              <p style={{ color:theme.sub,fontSize:13 }}>Choisissez un nouveau mot de passe sécurisé</p>
+            </div>
+            <div style={{ marginBottom:20 }}>
+              <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Nouveau mot de passe</label>
+              <div style={{ position:"relative" }}>
+                <input
+                  type={showPassword?"text":"password"}
+                  value={newPassword}
+                  onChange={e=>setNewPassword(e.target.value)}
+                  onKeyDown={e=>e.key==="Enter"&&updatePassword()}
+                  placeholder="Min. 6 caractères"
+                  style={{ ...inputStyle,paddingRight:44 }}
+                />
+                <button type="button" onClick={()=>setShowPassword(s=>!s)} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:18 }}>
+                  {showPassword?"🙈":"👁️"}
+                </button>
+              </div>
+            </div>
+            {/* Force indicator */}
+            {newPassword.length > 0 && (
+              <div style={{ marginBottom:16 }}>
+                <div style={{ display:"flex",gap:4,marginBottom:4 }}>
+                  {[1,2,3,4].map(i=>(
+                    <div key={i} style={{ flex:1,height:4,borderRadius:4,background:
+                      newPassword.length < 6 && i<=1 ? "#FF4757" :
+                      newPassword.length >= 6 && newPassword.length < 8 && i<=2 ? "#FF8C00" :
+                      newPassword.length >= 8 && newPassword.length < 10 && i<=3 ? "#FFD700" :
+                      newPassword.length >= 10 && i<=4 ? "#43C6AC" : theme.border
+                    }}/>
+                  ))}
+                </div>
+                <p style={{ fontSize:11,color:theme.sub }}>
+                  {newPassword.length < 6 ? "❌ Trop court" : newPassword.length < 8 ? "⚠️ Faible" : newPassword.length < 10 ? "👍 Moyen" : "✅ Fort"}
+                </p>
+              </div>
+            )}
+            <button onClick={updatePassword} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s",cursor:"pointer" }}>
+              ✅ Confirmer le nouveau mot de passe
+            </button>
+            <button onClick={()=>{ setView("login"); setNewPassword(""); }} style={{ width:"100%",padding:"10px",background:"transparent",border:"none",color:theme.sub,fontSize:13,marginTop:10,cursor:"pointer" }}>
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* CONDITIONS GÉNÉRALES D'UTILISATION */}
       {view==="terms"&&(
         <div style={{ width:"100%",maxWidth:900,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
@@ -2566,7 +2645,7 @@ function AppContent() {
               num:"3",
               title:"Publication d'annonces et tarification",
               icon:"💰",
-              content:`TARIFS DE PUBLICATION - Annonce simple : 1 500 FCFA/mois. Boutique : 3 000 FCFA/mois. Atelier : 3 000 FCFA/mois. Restaurant et Bar : 3 000 FCFA/mois. Salon Beaute et Coiffure : 3 000 FCFA/mois. SPONSORING - 1 semaine : 500 FCFA. 1 mois : 1 500 FCFA. MODIFICATION - Gratuite dans les 24 heures suivant la publication. Apres 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 1 modification payante par mois par annonce. L'utilisateur choisit librement la duree de publication. Passe le delai paye, l'annonce est automatiquement retiree. Les paiements s'effectuent via Mobile Money (MTN Money, Moov Money) via FedaPay. Tout paiement est non remboursable sauf defaillance technique prouvee.`
+              content:`TARIFS DE PUBLICATION - Annonce simple : 1 500 FCFA/mois. Boutique : 3 000 FCFA/mois. Atelier : 3 000 FCFA/mois. Restaurant et Bar : 3 000 FCFA/mois. Salon Beaute et Coiffure : 3 000 FCFA/mois. SPONSORING - 1 semaine : 500 FCFA. 1 mois : 1 500 FCFA. MODIFICATION - Gratuite dans les 24 heures suivant la publication. Apres 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Modifications payantes illimitées : chaque modification après les 24h gratuites est facturée séparément. L'utilisateur choisit librement la duree de publication. Passe le delai paye, l'annonce est automatiquement retiree. Les paiements s'effectuent via Mobile Money (MTN Money, Moov Money) via FedaPay. Tout paiement est non remboursable sauf defaillance technique prouvee.`
             },
             {
               num:"4",
@@ -3403,7 +3482,8 @@ function AppContent() {
                 <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:12,padding:20,marginBottom:20,textAlign:"center" }}>
                   <p style={{ color:theme.sub,fontSize:14,marginBottom:8 }}>Le délai de 24h gratuit est écoulé.</p>
                   <p style={{ fontWeight:800,fontSize:28,color:"#6C63FF" }}>{modal.price} FCFA</p>
-                  <p style={{ color:theme.sub,fontSize:13,marginTop:4 }}>≈ ${(modal.price/600).toFixed(2)} USD · 1 modification ce mois</p>
+                  <p style={{ color:theme.sub,fontSize:13,marginTop:4 }}>≈ ${(modal.price/600).toFixed(2)} USD par modification</p>
+                  {modal.count > 0 && <p style={{ color:"#FFD700",fontSize:12,marginTop:6,fontWeight:600 }}>📋 {modal.count} modification(s) ce mois · Vous pouvez modifier autant de fois que vous voulez en payant</p>}
                   <p style={{ fontSize:11,color:theme.sub,marginTop:8 }}>⚠️ Paiement FedaPay bientôt disponible</p>
                 </div>
                 <div style={{ display:"flex",gap:12 }}>
@@ -3679,6 +3759,7 @@ export default function App() {
         <Route path="/atelier/:id" element={<AnnonceDetail/>}/>
         <Route path="/resto/:id" element={<AnnonceDetail/>}/>
         <Route path="/beaute/:id" element={<AnnonceDetail/>}/>
+        <Route path="/reset-password" element={<AppContent/>}/>
       </Routes>
     </BrowserRouter>
   );
