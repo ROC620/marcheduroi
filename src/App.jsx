@@ -580,23 +580,22 @@ function ImmoCard({ immo, theme }) {
 
 // Composant formulaire de notation
 // Badge Certifié MarketFlow — Logo officiel complet
-function CertifiedBadge({ size=48 }) {
+function CertifiedBadge({ size=40 }) {
   return (
-    <div title="Certifié MarketFlow — Vérifié sur le terrain par l'équipe MarketFlow"
-      style={{ display:"inline-flex",flexDirection:"column",alignItems:"center",flexShrink:0,cursor:"help",filter:"drop-shadow(0 2px 6px rgba(108,99,255,0.5))" }}>
-      <svg width={size} height={size*1.5} viewBox="0 0 80 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div title="Certifié MarketFlow — Verifie sur le terrain par l'equipe MarketFlow"
+      style={{ display:"inline-flex",alignItems:"center",flexShrink:0,cursor:"help",filter:"drop-shadow(0 2px 4px rgba(108,99,255,0.4))" }}>
+      <svg width={size} height={size} viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Hexagone bleu/violet */}
-        <path d="M40 4 L72 22 L72 58 L40 76 L8 58 L8 22 Z"
-          fill="white" stroke="#6C63FF" strokeWidth="4" strokeLinejoin="round"/>
+        <path d="M40 3 L70 20 L70 54 L40 71 L10 54 L10 20 Z"
+          fill="white" stroke="#6C63FF" strokeWidth="3.5" strokeLinejoin="round"/>
         {/* Grand M rouge */}
-        <text x="40" y="62" textAnchor="middle" fontSize="44" fontWeight="900"
+        <text x="40" y="52" textAnchor="middle" fontSize="36" fontWeight="900"
           fill="#FF4757" fontFamily="Georgia, serif">M</text>
-        {/* Flèche courbe bleue */}
-        <path d="M14 82 Q40 72 66 82"
-          stroke="#6C63FF" strokeWidth="3" fill="none" strokeLinecap="round"/>
-        <polygon points="64,77 70,82 64,87" fill="#6C63FF"/>
+        {/* Flèche droite bleue */}
+        <line x1="12" y1="62" x2="62" y2="62" stroke="#6C63FF" strokeWidth="2.5" strokeLinecap="round"/>
+        <polygon points="60,58 68,62 60,66" fill="#6C63FF"/>
         {/* Texte MarketFlow en cursive */}
-        <text x="40" y="108" textAnchor="middle" fontSize="13" fontWeight="600"
+        <text x="36" y="76" textAnchor="middle" fontSize="10" fontWeight="600"
           fill="#FF4757" fontFamily="Georgia, serif" fontStyle="italic">MarketFlow</text>
       </svg>
     </div>
@@ -645,7 +644,7 @@ function RatingForm({ itemId, onRate, theme }) {
 
 function AppContent() {
   const navigate = useNavigate();
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState(INITIAL_POSTS);
   const [postsLoaded, setPostsLoaded] = useState(false);
   const [boutiques, setBoutiques] = useState(INITIAL_BOUTIQUES);
   const [ateliers, setAteliers] = useState(INITIAL_ATELIERS);
@@ -751,10 +750,10 @@ function AppContent() {
         photos: p.photos || [],
         likes: p.likes || 0,
       }));
-      setPosts(mapped);
-    } else {
-      // If Supabase is empty, show initial example posts
-      setPosts(INITIAL_POSTS);
+      // Merge Supabase posts with initial posts (avoid duplicates)
+      const supabaseIds = mapped.map(p => p.id);
+      const initialOnly = INITIAL_POSTS.filter(p => !supabaseIds.includes(String(p.id)));
+      setPosts([...mapped, ...initialOnly]);
     }
     setPostsLoaded(true);
   };
@@ -1947,10 +1946,18 @@ function AppContent() {
 
                   <p style={{ color:theme.sub,fontSize:13,lineHeight:1.5,marginBottom:14 }}>{post.description.length>90?post.description.slice(0,90)+"...":post.description}</p>
                   <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8 }}>
-                    <div style={{ display:"flex",alignItems:"center",gap:6 }}>
-                      <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff" }}>{post.author[0]}</div>
-                      <div><p style={{ fontSize:12,fontWeight:600,color:theme.text }}>{post.author}</p><p style={{ fontSize:11,color:theme.sub }}>{post.date}</p></div>
+                    <div style={{ display:"flex",alignItems:"center",gap:6,flex:1 }}>
+                      <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0 }}>{post.author[0]}</div>
+                      <div>
+                        <p style={{ fontSize:12,fontWeight:600,color:theme.text }}>{post.author}</p>
+                        <p style={{ fontSize:11,color:theme.sub }}>{post.date}</p>
+                      </div>
                     </div>
+                    {isCertified(post.authorId||post.author_id) && (
+                      <div style={{ flexShrink:0,marginLeft:"auto" }}>
+                        <CertifiedBadge size={52}/>
+                      </div>
+                    )}
                     <div style={{ display:"flex",gap:4,alignItems:"center",flexWrap:"wrap" }}>
                       <button onClick={()=>likePost(post.id)} style={{ background:likedPosts.includes(post.id)?"rgba(255,101,132,0.2)":"transparent",border:"none",color:likedPosts.includes(post.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{post.likes}</button>
                       <button onClick={()=>toggleFavorite(post.id)} title={favorites.includes(post.id)?"Retirer des favoris":"Ajouter aux favoris"} style={{ background:favorites.includes(post.id)?"rgba(255,215,0,0.2)":"transparent",border:"none",color:favorites.includes(post.id)?"#FFD700":theme.sub,padding:"6px 8px",borderRadius:8,fontSize:16,cursor:"pointer" }}>{favorites.includes(post.id)?"★":"☆"}</button>
@@ -2218,6 +2225,78 @@ function AppContent() {
               </div>
             </div>
           ))}
+          {/* Boutiques */}
+          <h3 style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text }}>🛍️ Boutiques ({boutiques.length})</h3>
+          {boutiques.filter(b=>!adminSearch||(b.name+b.author+(b.type||"")).toLowerCase().includes(adminSearch.toLowerCase())).map(b=>(
+            <div key={b.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
+              <div style={{ display:"flex",gap:12,alignItems:"center" }}>
+                {b.photos&&b.photos.length>0&&<img src={b.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
+                <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.type}</p></div>
+              </div>
+              <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12,display:"flex",alignItems:"center",gap:4 }}>
+                  <CertifiedBadge size={14}/>{isCertified(b.authorId)?"Certifié ✓":"Certifier"}
+                </button>
+                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12 }}>{featuredPosts.includes(b.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12 }}>Supprimer</button>
+              </div>
+            </div>
+          ))}
+
+          {/* Ateliers */}
+          <h3 style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text }}>🔧 Ateliers ({ateliers.length})</h3>
+          {ateliers.filter(a=>!adminSearch||(a.name+a.author+(a.type||"")).toLowerCase().includes(adminSearch.toLowerCase())).map(a=>(
+            <div key={a.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
+              <div style={{ display:"flex",gap:12,alignItems:"center" }}>
+                {a.photos&&a.photos.length>0&&<img src={a.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
+                <div><p style={{ fontWeight:700,color:theme.text }}>{a.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {a.author} · {a.type}</p></div>
+              </div>
+              <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+                <button onClick={()=>toggleCertified(a.authorId, a.author)} style={{ background:isCertified(a.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12,display:"flex",alignItems:"center",gap:4 }}>
+                  <CertifiedBadge size={14}/>{isCertified(a.authorId)?"Certifié ✓":"Certifier"}
+                </button>
+                <button onClick={()=>toggleFeatured(a.id)} style={{ background:featuredPosts.includes(a.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12 }}>{featuredPosts.includes(a.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12 }}>Supprimer</button>
+              </div>
+            </div>
+          ))}
+
+          {/* Restos */}
+          <h3 style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text }}>🍽️ Restaurants & Bars ({restos.length})</h3>
+          {restos.filter(r=>!adminSearch||(r.name+r.author+(r.type||"")).toLowerCase().includes(adminSearch.toLowerCase())).map(r=>(
+            <div key={r.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
+              <div style={{ display:"flex",gap:12,alignItems:"center" }}>
+                {r.photos&&r.photos.length>0&&<img src={r.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
+                <div><p style={{ fontWeight:700,color:theme.text }}>{r.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {r.author} · {r.type}</p></div>
+              </div>
+              <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+                <button onClick={()=>toggleCertified(r.authorId, r.author)} style={{ background:isCertified(r.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12,display:"flex",alignItems:"center",gap:4 }}>
+                  <CertifiedBadge size={14}/>{isCertified(r.authorId)?"Certifié ✓":"Certifier"}
+                </button>
+                <button onClick={()=>toggleFeatured(r.id)} style={{ background:featuredPosts.includes(r.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12 }}>{featuredPosts.includes(r.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12 }}>Supprimer</button>
+              </div>
+            </div>
+          ))}
+
+          {/* Beauté */}
+          <h3 style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text }}>💇 Beauté & Coiffure ({beaute.length})</h3>
+          {beaute.filter(b=>!adminSearch||(b.name+b.author+(b.type||"")).toLowerCase().includes(adminSearch.toLowerCase())).map(b=>(
+            <div key={b.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
+              <div style={{ display:"flex",gap:12,alignItems:"center" }}>
+                {b.photos&&b.photos.length>0&&<img src={b.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
+                <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.type}</p></div>
+              </div>
+              <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12,display:"flex",alignItems:"center",gap:4 }}>
+                  <CertifiedBadge size={14}/>{isCertified(b.authorId)?"Certifié ✓":"Certifier"}
+                </button>
+                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12 }}>{featuredPosts.includes(b.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:12 }}>Supprimer</button>
+              </div>
+            </div>
+          ))}
+
         </div>
       )}
 
@@ -2386,8 +2465,15 @@ function AppContent() {
             .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
             .map(b=>(
               <div key={b.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
-                {b.video && <video src={b.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
-                {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
+                <div style={{ position:"relative" }}>
+                  {b.video && <video src={b.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
+                  {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
+                  {isCertified(b.authorId) && (
+                    <div style={{ position:"absolute",bottom:8,right:8 }}>
+                      <CertifiedBadge size={52}/>
+                    </div>
+                  )}
+                </div>
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
                     <span className="tag" style={{ background:"rgba(255,101,132,0.15)",color:"#FF6584" }}>🛍️ {b.type}</span>
@@ -2459,8 +2545,15 @@ function AppContent() {
             .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
             .map(a=>(
               <div key={a.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
-                {a.video && <video src={a.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
-                {!a.video && a.photos&&a.photos.length>0 && <PhotoCarousel photos={a.photos}/>}
+                <div style={{ position:"relative" }}>
+                  {a.video && <video src={a.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
+                  {!a.video && a.photos&&a.photos.length>0 && <PhotoCarousel photos={a.photos}/>}
+                  {isCertified(a.authorId) && (
+                    <div style={{ position:"absolute",bottom:8,right:8 }}>
+                      <CertifiedBadge size={52}/>
+                    </div>
+                  )}
+                </div>
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
                     <span className="tag" style={{ background:"rgba(67,198,172,0.15)",color:"#43C6AC" }}>🔧 {a.type}</span>
@@ -2539,8 +2632,15 @@ function AppContent() {
             .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
             .map(r=>(
               <div key={r.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
-                {r.video && <video src={r.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
-                {!r.video && r.photos&&r.photos.length>0 && <PhotoCarousel photos={r.photos}/>}
+                <div style={{ position:"relative" }}>
+                  {r.video && <video src={r.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
+                  {!r.video && r.photos&&r.photos.length>0 && <PhotoCarousel photos={r.photos}/>}
+                  {isCertified(r.authorId) && (
+                    <div style={{ position:"absolute",bottom:8,right:8 }}>
+                      <CertifiedBadge size={52}/>
+                    </div>
+                  )}
+                </div>
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
                     <span className="tag" style={{ background:"rgba(255,140,0,0.15)",color:"#FF8C00" }}>🍽️ {r.type}</span>
@@ -2623,8 +2723,15 @@ function AppContent() {
             .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
             .map(b=>(
               <div key={b.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
-                {b.video && <video src={b.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
-                {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
+                <div style={{ position:"relative" }}>
+                  {b.video && <video src={b.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
+                  {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
+                  {isCertified(b.authorId) && (
+                    <div style={{ position:"absolute",bottom:8,right:8 }}>
+                      <CertifiedBadge size={52}/>
+                    </div>
+                  )}
+                </div>
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8 }}>
                     <span className="tag" style={{ background:"rgba(255,105,180,0.15)",color:"#FF69B4" }}>💇 {b.type}</span>
