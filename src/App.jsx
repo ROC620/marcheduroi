@@ -580,12 +580,26 @@ function ImmoCard({ immo, theme }) {
 
 // Composant formulaire de notation
 // Badge Certifié MarketFlow — Logo officiel
-function CertifiedBadge({ size=28 }) {
+function CertifiedBadge({ size=32 }) {
+  const s = size;
   return (
-    <div title="Certifié MarketFlow — Vérifié sur le terrain par l'équipe MarketFlow" style={{ display:"inline-flex",alignItems:"center",justifyContent:"center",width:size,height:size,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",boxShadow:"0 2px 8px rgba(108,99,255,0.5)",flexShrink:0,cursor:"help" }}>
-      <svg width={size*0.6} height={size*0.6} viewBox="0 0 40 40" fill="none">
-        <path d="M20 4L8 10V20C8 27.2 13.2 33.9 20 36C26.8 33.9 32 27.2 32 20V10L20 4Z" fill="white" opacity="0.2"/>
-        <text x="20" y="26" textAnchor="middle" fontSize="18" fontWeight="bold" fill="white" fontFamily="Arial">M</text>
+    <div title="Certifié MarketFlow — Vérifié sur le terrain par l'équipe MarketFlow" style={{ display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"help",filter:"drop-shadow(0 2px 4px rgba(108,99,255,0.4))" }}>
+      <svg width={s} height={s*1.1} viewBox="0 0 60 66" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Hexagone */}
+        <path d="M30 2 L54 16 L54 44 L30 58 L6 44 L6 16 Z"
+          fill="white"
+          stroke="#6C63FF"
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
+        {/* Lettre M rouge */}
+        <text x="30" y="42" textAnchor="middle" fontSize="28" fontWeight="900"
+          fill="#FF4757" fontFamily="Georgia, serif" letterSpacing="-1">M</text>
+        {/* Flèche courbe en dessous */}
+        <path d="M12 52 Q30 46 48 52"
+          stroke="#6C63FF" strokeWidth="2.5" fill="none"
+          strokeLinecap="round"/>
+        <polygon points="48,49 52,52 48,55" fill="#6C63FF"/>
       </svg>
     </div>
   );
