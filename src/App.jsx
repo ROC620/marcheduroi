@@ -579,6 +579,18 @@ function ImmoCard({ immo, theme }) {
 }
 
 // Composant formulaire de notation
+// Badge Certifié MarketFlow — Logo officiel
+function CertifiedBadge({ size=28 }) {
+  return (
+    <div title="Certifié MarketFlow — Vérifié sur le terrain par l'équipe MarketFlow" style={{ display:"inline-flex",alignItems:"center",justifyContent:"center",width:size,height:size,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",boxShadow:"0 2px 8px rgba(108,99,255,0.5)",flexShrink:0,cursor:"help" }}>
+      <svg width={size*0.6} height={size*0.6} viewBox="0 0 40 40" fill="none">
+        <path d="M20 4L8 10V20C8 27.2 13.2 33.9 20 36C26.8 33.9 32 27.2 32 20V10L20 4Z" fill="white" opacity="0.2"/>
+        <text x="20" y="26" textAnchor="middle" fontSize="18" fontWeight="bold" fill="white" fontFamily="Arial">M</text>
+      </svg>
+    </div>
+  );
+}
+
 function RatingForm({ itemId, onRate, theme }) {
   const [stars, setStars] = useState(0);
   const [hover, setHover] = useState(0);
@@ -621,7 +633,8 @@ function RatingForm({ itemId, onRate, theme }) {
 
 function AppContent() {
   const navigate = useNavigate();
-  const [posts, setPosts] = useState(INITIAL_POSTS);
+  const [posts, setPosts] = useState([]);
+  const [postsLoaded, setPostsLoaded] = useState(false);
   const [boutiques, setBoutiques] = useState(INITIAL_BOUTIQUES);
   const [ateliers, setAteliers] = useState(INITIAL_ATELIERS);
   const [restos, setRestos] = useState(INITIAL_RESTOS);
@@ -712,7 +725,7 @@ function AppContent() {
 
   // Load posts from Supabase
   const loadPosts = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("posts")
       .select("*")
       .order("created_at", { ascending: false });
@@ -726,13 +739,12 @@ function AppContent() {
         photos: p.photos || [],
         likes: p.likes || 0,
       }));
-      setPosts(prev => {
-        // Merge: keep initial posts + add supabase posts
-        const supabaseIds = mapped.map(p => p.id);
-        const initialOnly = prev.filter(p => !supabaseIds.includes(p.id));
-        return [...mapped, ...initialOnly];
-      });
+      setPosts(mapped);
+    } else {
+      // If Supabase is empty, show initial example posts
+      setPosts(INITIAL_POSTS);
     }
+    setPostsLoaded(true);
   };
 
   useEffect(() => { loadPosts(); }, []);
@@ -892,6 +904,25 @@ function AppContent() {
     try { return JSON.parse(localStorage.getItem("mf_modifs") || "{}"); }
     catch { return {}; }
   });
+  const [certifiedUsers, setCertifiedUsers] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("mf_certified") || "[]"); }
+    catch { return []; }
+  });
+
+  const toggleCertified = (authorId, authorName) => {
+    setCertifiedUsers(prev => {
+      const updated = prev.includes(authorId)
+        ? prev.filter(id => id !== authorId)
+        : [...prev, authorId];
+      localStorage.setItem("mf_certified", JSON.stringify(updated));
+      notify(prev.includes(authorId)
+        ? `Certification retirée à ${authorName}`
+        : `${authorName} est maintenant Certifié MarketFlow 🏅 !`);
+      return updated;
+    });
+  };
+
+  const isCertified = (authorId) => certifiedUsers.includes(authorId);
 
   const MODIF_PRICES = { simple: 200, pro: 300 };
 
@@ -1853,7 +1884,12 @@ function AppContent() {
                       <p style={{ fontSize:12,color:"#FFA500",fontWeight:600 }}>⏳ Expire le {post.expiresAt}</p>
                     </div>
                   ) : null; })()}
-                  <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
+                  <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6,alignItems:"center" }}>
+                    {isCertified(post.authorId||post.author_id) && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:6,background:"linear-gradient(135deg,rgba(108,99,255,0.15),rgba(255,101,132,0.15))",border:"1px solid rgba(108,99,255,0.4)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:800,color:"#6C63FF" }}>
+                        <CertifiedBadge size={18}/> Certifié MarketFlow
+                      </div>
+                    )}
                     {post.sponsored && (
                       <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,color:"#000" }}>
                         🌟 Sponsorisé
@@ -2164,9 +2200,12 @@ function AppContent() {
                 {post.photos&&post.photos.length>0&&<img src={post.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
                 <div><p style={{ fontWeight:700,color:theme.text }}>{post.title}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {post.author} · {post.category}</p></div>
               </div>
-              <div style={{ display:"flex",gap:8 }}>
+              <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
                 {!post.sponsored && <button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
                 <button onClick={()=>toggleFeatured(post.id)} style={{ background:featuredPosts.includes(post.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(post.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                <button onClick={()=>toggleCertified(post.authorId||post.author_id, post.author)} style={{ background:isCertified(post.authorId||post.author_id)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
+                  <CertifiedBadge size={16}/>{isCertified(post.authorId||post.author_id)?"Certifié ✓":"Certifier"}
+                </button>
                 <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>Supprimer</button>
               </div>
             </div>
