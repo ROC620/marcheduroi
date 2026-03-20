@@ -1415,38 +1415,46 @@ function AppContent() {
   const MAX_MODIFS = 3;
 
   const openEditShop = (item, shopType, editFn) => {
-    const isFree = canModifyFree(item);
-    if (!isFree) {
-      const count = getModifCount(item.id);
-      if (count >= MAX_MODIFS) {
-        notify(`Limite de ${MAX_MODIFS} modifications payantes atteinte ce mois-ci`, "error");
-        return;
-      }
-      setModal({
-        type: "confirmEditShop",
-        data: item,
-        shopType,
-        editFn,
-        price: MODIF_PRICES.pro,
-        count
+    // Admin can always modify for free
+    const isAdmin = user?.role === "admin";
+    const isFree = isAdmin || canModifyFree(item);
+
+    const doOpenModal = () => {
+      setShopMode(shopType==="boutique"?"boutique":shopType==="atelier"?"atelier":shopType);
+      setShopForm({
+        name:item.name||"", type:item.type||"", description:item.description||"",
+        services:item.services||"", keywords:item.keywords||"",
+        ville:item.ville||"", quartier:item.quartier||"", von:item.von||"",
+        horaires:item.horaires||"", contact:item.contact||"", phone:item.phone||"",
+        specialite:item.specialite||"", tarifs:item.tarifs||"",
+        rendezvous:item.rendezvous||"", produits:item.produits||"",
+        lat:item.lat||"", lng:item.lng||""
       });
+      setShopPhotos(item.photos||[]);
+      setShopVideo(item.video||null);
+      const modalType = shopType==="resto"?"addresto":shopType==="beaute"?"addbeaute":"addshop";
+      setModal({type:modalType, data:{...item, editing:true}});
+    };
+
+    if (isFree) {
+      doOpenModal();
       return;
     }
-    // Free modification - open modal directly
-    setShopMode(shopType==="boutique"?"boutique":shopType==="atelier"?"atelier":shopType);
-    setShopForm({
-      name:item.name, type:item.type||"", description:item.description,
-      services:item.services||"", keywords:item.keywords||"",
-      ville:item.ville||"", quartier:item.quartier||"", von:item.von||"",
-      horaires:item.horaires||"", contact:item.contact||"", phone:item.phone||"",
-      specialite:item.specialite||"", tarifs:item.tarifs||"",
-      rendezvous:item.rendezvous||"", produits:item.produits||"",
-      lat:item.lat||"", lng:item.lng||""
+    // Paid modification
+    const count = getModifCount(item.id);
+    if (count >= MAX_MODIFS) {
+      notify(`Limite de ${MAX_MODIFS} modifications payantes atteinte ce mois-ci`, "error");
+      return;
+    }
+    setModal({
+      type: "confirmEditShop",
+      data: item,
+      shopType,
+      editFn,
+      price: MODIF_PRICES.pro,
+      count,
+      doOpenModal
     });
-    setShopPhotos(item.photos||[]);
-    setShopVideo(item.video||null);
-    const modalType = shopType==="resto"?"addresto":shopType==="beaute"?"addbeaute":"addshop";
-    setModal({type:modalType, data:{...item, editing:true}});
   };
 
   const openEdit = (post) => {
@@ -4081,8 +4089,7 @@ function AppContent() {
                     });
                     setShopPhotos(modal.data.photos||[]);
                     setShopVideo(modal.data.video||null);
-                    const modalType = modal.shopType==="resto"?"addresto":modal.shopType==="beaute"?"addbeaute":"addshop";
-                    setModal({type:modalType, data:{...modal.data, editing:true}});
+                    if(modal.doOpenModal) modal.doOpenModal();
                   }} className="btn-glow" style={{ flex:1,padding:"12px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:10,fontWeight:700,fontSize:14,transition:"box-shadow 0.2s" }}>
                     Confirmer · {modal.price} FCFA
                   </button>
