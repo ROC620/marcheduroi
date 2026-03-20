@@ -763,26 +763,29 @@ function AppContent() {
 
   useEffect(() => {
     loadPosts();
-    // Restore sponsored state
+    // Restore sponsored state for boutiques/ateliers/restos/beaute
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     if (Object.keys(sponsored).length > 0) {
       const today = new Date();
+      const validSponsored = {};
       Object.keys(sponsored).forEach(id => {
         const exp = new Date(sponsored[id].sponsoredUntil);
-        if (exp < today) delete sponsored[id]; // expired
+        if (exp >= today) validSponsored[id] = sponsored[id];
       });
-      setBoutiques(b => b.map(x => sponsored[x.id] ? {...x, ...sponsored[x.id]} : x));
-      setAteliers(a => a.map(x => sponsored[x.id] ? {...x, ...sponsored[x.id]} : x));
-      setRestos(r => r.map(x => sponsored[x.id] ? {...x, ...sponsored[x.id]} : x));
-      setBeaute(b => b.map(x => sponsored[x.id] ? {...x, ...sponsored[x.id]} : x));
+      if (Object.keys(validSponsored).length > 0) {
+        setBoutiques(b => b.map(x => validSponsored[x.id] ? {...x, sponsored:true, sponsoredUntil:validSponsored[x.id].sponsoredUntil} : x));
+        setAteliers(a => a.map(x => validSponsored[x.id] ? {...x, sponsored:true, sponsoredUntil:validSponsored[x.id].sponsoredUntil} : x));
+        setRestos(r => r.map(x => validSponsored[x.id] ? {...x, sponsored:true, sponsoredUntil:validSponsored[x.id].sponsoredUntil} : x));
+        setBeaute(b => b.map(x => validSponsored[x.id] ? {...x, sponsored:true, sponsoredUntil:validSponsored[x.id].sponsoredUntil} : x));
+      }
     }
   }, []);
 
-  const toggleFeatured = (postId) => {
+  const toggleFeatured = (itemId) => {
     setFeaturedPosts(f => {
-      const updated = f.includes(postId) ? f.filter(id=>id!==postId) : [...f, postId];
+      const updated = f.includes(itemId) ? f.filter(id=>id!==itemId) : [...f, itemId];
       localStorage.setItem("mf_featured", JSON.stringify(updated));
-      notify(f.includes(postId) ? "Retiré des vedettes" : "Ajouté en vedette 🏆 !");
+      notify(f.includes(itemId) ? "Retiré des vedettes" : "Ajouté en vedette 🏆 !");
       return updated;
     });
   };
@@ -2635,8 +2638,7 @@ function AppContent() {
                   <div style={{ display:"flex",gap:8 }}>
                     <button onClick={()=>likePost(a.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(a.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{a.likes}</button>
                     <button onClick={()=>setModal({type:"contact",data:{...a,title:a.name}})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
-                                        <a href={"https://wa.me/?text="+encodeURIComponent("*"+a.name+"*"+"\n"+"Type: "+a.type+"\n"+"Voir l'atelier: https://marketflow-delta.vercel.app/atelier/"+a.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
-                    {user&&user.id!==a.authorId&&<button onClick={()=>{ setActiveConv({postId:a.id,postTitle:a.name,postPrice:"",postPhoto:a.photos?.[0],receiverId:a.authorId,receiverName:a.author,messages:messages.filter(m=>(m.post_id===a.id)&&((m.sender_id===user.id&&m.receiver_id===a.authorId)||(m.receiver_id===user.id&&m.sender_id===a.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Envoyer un message">💬</button>}
+                    <a href={"https://wa.me/?text="+encodeURIComponent("*"+a.name+"*"+"\n"+"Type: "+a.type+"\n"+"Voir l'atelier: https://marketflow-delta.vercel.app/atelier/"+a.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}>
                         <svg width="12" height="12" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                         Partager
@@ -2647,6 +2649,7 @@ function AppContent() {
                         <svg width="13" height="13" fill="#1877F2" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                       </div>
                     </a>
+                    {user&&user.id!==a.authorId&&<button onClick={()=>{ setActiveConv({postId:a.id,postTitle:a.name,postPrice:"",postPhoto:a.photos?.[0],receiverId:a.authorId,receiverName:a.author,messages:messages.filter(m=>(m.post_id===a.id)&&((m.sender_id===user.id&&m.receiver_id===a.authorId)||(m.receiver_id===user.id&&m.sender_id===a.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Envoyer un message">💬</button>}
                     {user&&(user.id===a.authorId||user.role==="admin")&&(
                       <>
                         <button onClick={()=>{ setShopMode("atelier"); setShopForm({name:a.name,type:a.type||"",description:a.description,services:a.services||"",keywords:a.keywords||"",ville:a.ville||"",quartier:a.quartier||"",von:a.von||"",horaires:a.horaires||"",contact:a.contact||"",phone:a.phone||""}); setShopPhotos(a.photos||[]); setShopVideo(a.video||null); setMonths(1); setModal({type:"addshop",data:a,editing:true}); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
