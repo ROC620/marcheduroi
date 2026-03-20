@@ -1414,6 +1414,41 @@ function AppContent() {
 
   const MAX_MODIFS = 3;
 
+  const openEditShop = (item, shopType, editFn) => {
+    const isFree = canModifyFree(item);
+    if (!isFree) {
+      const count = getModifCount(item.id);
+      if (count >= MAX_MODIFS) {
+        notify(`Limite de ${MAX_MODIFS} modifications payantes atteinte ce mois-ci`, "error");
+        return;
+      }
+      setModal({
+        type: "confirmEditShop",
+        data: item,
+        shopType,
+        editFn,
+        price: MODIF_PRICES.pro,
+        count
+      });
+      return;
+    }
+    // Free modification - open modal directly
+    setShopMode(shopType==="boutique"?"boutique":shopType==="atelier"?"atelier":shopType);
+    setShopForm({
+      name:item.name, type:item.type||"", description:item.description,
+      services:item.services||"", keywords:item.keywords||"",
+      ville:item.ville||"", quartier:item.quartier||"", von:item.von||"",
+      horaires:item.horaires||"", contact:item.contact||"", phone:item.phone||"",
+      specialite:item.specialite||"", tarifs:item.tarifs||"",
+      rendezvous:item.rendezvous||"", produits:item.produits||"",
+      lat:item.lat||"", lng:item.lng||""
+    });
+    setShopPhotos(item.photos||[]);
+    setShopVideo(item.video||null);
+    const modalType = shopType==="resto"?"addresto":shopType==="beaute"?"addbeaute":"addshop";
+    setModal({type:modalType, data:{...item, editing:true}});
+  };
+
   const openEdit = (post) => {
     const isFree = canModifyFree(post);
     if (!isFree) {
@@ -2733,7 +2768,7 @@ function AppContent() {
                     <button onClick={()=>setModal({type:"report",data:{...b,title:b.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===b.authorId||user.role==="admin")&&(
                       <>
-                        <button onClick={()=>{ setShopMode("boutique"); setShopForm({name:b.name,type:b.type||"",description:b.description,services:b.services||"",keywords:b.keywords||"",ville:b.ville||"",quartier:b.quartier||"",von:b.von||"",horaires:b.horaires||"",contact:b.contact||"",phone:b.phone||""}); setShopPhotos(b.photos||[]); setShopVideo(b.video||null); setMonths(1); setModal({type:"addshop",data:{...b,editing:true}}); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>{ setShopMode("boutique"); setShopForm({name:b.name,type:b.type||"",description:b.description,services:b.services||"",keywords:b.keywords||"",ville:b.ville||"",quartier:b.quartier||"",von:b.von||"",horaires:b.horaires||"",contact:b.contact||"",phone:b.phone||""}); setShopPhotos(b.photos||[]); setShopVideo(b.video||null); setMonths(1); openEditShop(b,"boutique",editShop); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
                     )}
@@ -2834,7 +2869,7 @@ function AppContent() {
                     <button onClick={()=>setModal({type:"report",data:{...a,title:a.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===a.authorId||user.role==="admin")&&(
                       <>
-                        <button onClick={()=>{ setShopMode("atelier"); setShopForm({name:a.name,type:a.type||"",description:a.description,services:a.services||"",keywords:a.keywords||"",ville:a.ville||"",quartier:a.quartier||"",von:a.von||"",horaires:a.horaires||"",contact:a.contact||"",phone:a.phone||""}); setShopPhotos(a.photos||[]); setShopVideo(a.video||null); setMonths(1); setModal({type:"addshop",data:{...a,editing:true}}); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>{ setShopMode("atelier"); setShopForm({name:a.name,type:a.type||"",description:a.description,services:a.services||"",keywords:a.keywords||"",ville:a.ville||"",quartier:a.quartier||"",von:a.von||"",horaires:a.horaires||"",contact:a.contact||"",phone:a.phone||""}); setShopPhotos(a.photos||[]); setShopVideo(a.video||null); setMonths(1); openEditShop(a,"atelier",editShop); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
                     )}
@@ -2939,7 +2974,7 @@ function AppContent() {
                     <button onClick={()=>setModal({type:"report",data:{...r,title:r.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===r.authorId||user.role==="admin")&&(
                       <>
-                        <button onClick={()=>{ setShopMode("resto"); setShopForm({name:r.name,type:r.type||"",description:r.description,services:r.services||"",keywords:r.keywords||"",ville:r.ville||"",quartier:r.quartier||"",von:r.von||"",horaires:r.horaires||"",contact:r.contact||"",phone:r.phone||""}); setShopPhotos(r.photos||[]); setShopVideo(r.video||null); setMonths(1); setModal({type:"addresto",data:{...r,editing:true}}); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>{ setShopMode("resto"); setShopForm({name:r.name,type:r.type||"",description:r.description,services:r.services||"",keywords:r.keywords||"",ville:r.ville||"",quartier:r.quartier||"",von:r.von||"",horaires:r.horaires||"",contact:r.contact||"",phone:r.phone||""}); setShopPhotos(r.photos||[]); setShopVideo(r.video||null); setMonths(1); openEditShop(r,"resto",editResto); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
                     )}
@@ -3038,7 +3073,7 @@ function AppContent() {
                     </a>
                     {user&&(user.id===b.authorId||user.role==="admin")&&(
                       <>
-                        <button onClick={()=>{ setShopMode("beaute"); setShopForm({name:b.name,type:b.type||"",description:b.description,services:b.services||"",keywords:b.keywords||"",ville:b.ville||"",quartier:b.quartier||"",von:b.von||"",horaires:b.horaires||"",contact:b.contact||"",phone:b.phone||""}); setShopPhotos(b.photos||[]); setShopVideo(b.video||null); setMonths(1); setModal({type:"addbeaute",data:{...b,editing:true}}); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>{ setShopMode("beaute"); setShopForm({name:b.name,type:b.type||"",description:b.description,services:b.services||"",keywords:b.keywords||"",ville:b.ville||"",quartier:b.quartier||"",von:b.von||"",horaires:b.horaires||"",contact:b.contact||"",phone:b.phone||""}); setShopPhotos(b.photos||[]); setShopVideo(b.video||null); setMonths(1); openEditShop(b,"beaute",editBeaute); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
                     )}
@@ -3613,7 +3648,9 @@ function AppContent() {
             {modal.type==="addbeaute"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>💇 Publier mon salon</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>
+                    {modal.data?.editing ? "✏️ Modifier le salon" : "💇 Publier mon salon"}
+                  </h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <VideoUploader video={shopVideo} setVideo={setShopVideo} theme={theme}/>
@@ -3671,7 +3708,7 @@ function AppContent() {
                     </div>
                   </div>
                 </div>
-                {user?.role !== "admin" && (
+                {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF69B444`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4 }}>💰 Durée de publication · 3 000 FCFA/mois</p>
                     <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:12 }}>
@@ -3695,7 +3732,9 @@ function AppContent() {
             {modal.type==="addresto"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>🍽️ Publier mon établissement</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>
+                    {modal.data?.editing ? "✏️ Modifier l'établissement" : "🍽️ Publier mon établissement"}
+                  </h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
 
@@ -3756,7 +3795,7 @@ function AppContent() {
                   </div>
                 </div>
 
-                {user?.role !== "admin" && (
+                {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF8C0044`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4 }}>💰 Durée de publication</p>
                     <p style={{ fontSize:12,color:theme.sub,marginBottom:16 }}>3 000 FCFA par mois</p>
@@ -3786,7 +3825,11 @@ function AppContent() {
             {modal.type==="addshop"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>{shopMode==="boutique"?"🛍️ Publier ma boutique":"🔧 Publier mon atelier"}</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>
+                    {modal.data?.editing
+                      ? (shopMode==="boutique"?"✏️ Modifier la boutique":"✏️ Modifier l'atelier")
+                      : (shopMode==="boutique"?"🛍️ Publier ma boutique":"🔧 Publier mon atelier")}
+                  </h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
 
@@ -3847,8 +3890,8 @@ function AppContent() {
                   </div>
                 </div>
 
-                {/* Durée et paiement */}
-                {user?.role !== "admin" && (
+                {/* Durée et paiement - seulement si pas en mode édition */}
+                {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF658444`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4 }}>💰 Durée de publication</p>
                     <p style={{ fontSize:12,color:theme.sub,marginBottom:16 }}>3 000 FCFA par mois</p>
@@ -4005,6 +4048,44 @@ function AppContent() {
             )}
 
             {/* CONFIRMATION MODIFICATION PAYANTE */}
+            {/* CONFIRMATION MODIFICATION PAYANTE BOUTIQUE/ATELIER/RESTO/BEAUTE */}
+            {modal.type==="confirmEditShop"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>✏️ Modification payante</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <div style={{ background:`rgba(108,99,255,0.08)`,borderRadius:12,padding:16,marginBottom:20 }}>
+                  <p style={{ fontWeight:700,color:theme.text,marginBottom:8 }}>📋 {modal.data.name}</p>
+                  <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>La modification gratuite de 24h est expirée.</p>
+                  <p style={{ color:"#FF8C00",fontSize:13,fontWeight:600,marginBottom:4 }}>💰 Coût : {modal.price} FCFA</p>
+                  <p style={{ color:theme.sub,fontSize:12 }}>📊 {modal.count}/{MAX_MODIFS} modifications utilisées ce mois · Il vous reste {MAX_MODIFS - modal.count} modification(s)</p>
+                </div>
+                <div style={{ display:"flex",gap:12 }}>
+                  <button onClick={()=>setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,borderRadius:10,fontWeight:600,fontSize:14 }}>Annuler</button>
+                  <button onClick={()=>{
+                    recordModification(modal.data.id);
+                    setShopMode(modal.shopType==="boutique"?"boutique":modal.shopType==="atelier"?"atelier":modal.shopType);
+                    setShopForm({
+                      name:modal.data.name, type:modal.data.type||"", description:modal.data.description,
+                      services:modal.data.services||"", keywords:modal.data.keywords||"",
+                      ville:modal.data.ville||"", quartier:modal.data.quartier||"", von:modal.data.von||"",
+                      horaires:modal.data.horaires||"", contact:modal.data.contact||"", phone:modal.data.phone||"",
+                      specialite:modal.data.specialite||"", tarifs:modal.data.tarifs||"",
+                      rendezvous:modal.data.rendezvous||"", produits:modal.data.produits||"",
+                      lat:modal.data.lat||"", lng:modal.data.lng||""
+                    });
+                    setShopPhotos(modal.data.photos||[]);
+                    setShopVideo(modal.data.video||null);
+                    const modalType = modal.shopType==="resto"?"addresto":modal.shopType==="beaute"?"addbeaute":"addshop";
+                    setModal({type:modalType, data:{...modal.data, editing:true}});
+                  }} className="btn-glow" style={{ flex:1,padding:"12px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:10,fontWeight:700,fontSize:14,transition:"box-shadow 0.2s" }}>
+                    Confirmer · {modal.price} FCFA
+                  </button>
+                </div>
+              </>
+            )}
+
             {modal.type==="confirmEdit"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
