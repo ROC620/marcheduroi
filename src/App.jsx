@@ -2524,9 +2524,16 @@ function AppContent() {
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
             {boutiques.filter(b=>!search||(b.name+b.description+(b.keywords||"")+(b.type||"")).toLowerCase().includes(search.toLowerCase()))
             .map(b=>({...b, distance: userLocation&&b.lat&&b.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(b.lat),parseFloat(b.lng)) : null}))
-            .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
+            .sort((a,b)=>{
+              if(featuredPosts.includes(a.id)&&!featuredPosts.includes(b.id)) return -1;
+              if(!featuredPosts.includes(a.id)&&featuredPosts.includes(b.id)) return 1;
+              if(a.sponsored&&!b.sponsored) return -1;
+              if(!a.sponsored&&b.sponsored) return 1;
+              if(sortByDistance){ if(a.distance===null) return 1; if(b.distance===null) return -1; return a.distance-b.distance; }
+              return 0;
+            })
             .map(b=>(
-              <div key={b.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
+              <div key={b.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":b.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(b.id)?`2px solid #FFD700`:b.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
                   {b.video && <video src={b.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
                   {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
@@ -2608,9 +2615,16 @@ function AppContent() {
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
             {ateliers.filter(a=>!search||(a.name+a.description+(a.keywords||"")+(a.type||"")+(a.services||"")).toLowerCase().includes(search.toLowerCase()))
             .map(a=>({...a, distance: userLocation&&a.lat&&a.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(a.lat),parseFloat(a.lng)) : null}))
-            .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
+            .sort((a,b)=>{
+              if(featuredPosts.includes(a.id)&&!featuredPosts.includes(b.id)) return -1;
+              if(!featuredPosts.includes(a.id)&&featuredPosts.includes(b.id)) return 1;
+              if(a.sponsored&&!b.sponsored) return -1;
+              if(!a.sponsored&&b.sponsored) return 1;
+              if(sortByDistance){ if(a.distance===null) return 1; if(b.distance===null) return -1; return a.distance-b.distance; }
+              return 0;
+            })
             .map(a=>(
-              <div key={a.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
+              <div key={a.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(a.id)?"0 4px 24px rgba(255,215,0,0.4)":a.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(a.id)?`2px solid #FFD700`:a.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
                   {a.video && <video src={a.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
                   {!a.video && a.photos&&a.photos.length>0 && <PhotoCarousel photos={a.photos}/>}
@@ -2699,9 +2713,16 @@ function AppContent() {
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
             {restos.filter(r=>!search||(r.name+r.description+(r.keywords||"")+(r.type||"")+(r.specialite||"")).toLowerCase().includes(search.toLowerCase()))
             .map(r=>({...r, distance: userLocation&&r.lat&&r.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(r.lat),parseFloat(r.lng)) : null}))
-            .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
+            .sort((a,b)=>{
+              if(featuredPosts.includes(a.id)&&!featuredPosts.includes(b.id)) return -1;
+              if(!featuredPosts.includes(a.id)&&featuredPosts.includes(b.id)) return 1;
+              if(a.sponsored&&!b.sponsored) return -1;
+              if(!a.sponsored&&b.sponsored) return 1;
+              if(sortByDistance){ if(a.distance===null) return 1; if(b.distance===null) return -1; return a.distance-b.distance; }
+              return 0;
+            })
             .map(r=>(
-              <div key={r.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
+              <div key={r.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(r.id)?"0 4px 24px rgba(255,215,0,0.4)":r.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(r.id)?`2px solid #FFD700`:r.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
                   {r.video && <video src={r.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
                   {!r.video && r.photos&&r.photos.length>0 && <PhotoCarousel photos={r.photos}/>}
@@ -2794,9 +2815,16 @@ function AppContent() {
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:20 }}>
             {beaute.filter(b=>!search||(b.name+b.description+(b.keywords||"")+(b.type||"")+(b.specialite||"")+(b.services||"")).toLowerCase().includes(search.toLowerCase()))
             .map(b=>({...b, distance: userLocation&&b.lat&&b.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(b.lat),parseFloat(b.lng)) : null}))
-            .sort((a,b)=>sortByDistance?(a.distance===null?1:b.distance===null?-1:a.distance-b.distance):0)
+            .sort((a,b)=>{
+              if(featuredPosts.includes(a.id)&&!featuredPosts.includes(b.id)) return -1;
+              if(!featuredPosts.includes(a.id)&&featuredPosts.includes(b.id)) return 1;
+              if(a.sponsored&&!b.sponsored) return -1;
+              if(!a.sponsored&&b.sponsored) return 1;
+              if(sortByDistance){ if(a.distance===null) return 1; if(b.distance===null) return -1; return a.distance-b.distance; }
+              return 0;
+            })
             .map(b=>(
-              <div key={b.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.15)" }}>
+              <div key={b.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":b.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(b.id)?`2px solid #FFD700`:b.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
                   {b.video && <video src={b.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
                   {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
