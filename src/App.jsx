@@ -2540,6 +2540,10 @@ function AppContent() {
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
                     <span className="tag" style={{ background:"rgba(255,101,132,0.15)",color:"#FF6584" }}>🛍️ {b.type}</span>
                   </div>
+                  <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
+                    {b.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>🌟 Sponsorisé</span>}
+                    {featuredPosts.includes(b.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🏆 En vedette</span>}
+                  </div>
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:6,color:theme.text }}>{b.name}</h3>
                   {b.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(b.distance)}</div>}
                   {getAvgRating(b.id) && <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:8 }}><div style={{ display:"flex" }}>{renderStars(getAvgRating(b.id))}</div><span style={{ fontSize:12,color:"#FFD700",fontWeight:700 }}>{getAvgRating(b.id)}</span><span style={{ fontSize:11,color:theme.sub }}>({getRatingCount(b.id)} avis)</span></div>}
@@ -2619,6 +2623,10 @@ function AppContent() {
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
                     <span className="tag" style={{ background:"rgba(67,198,172,0.15)",color:"#43C6AC" }}>🔧 {a.type}</span>
+                  </div>
+                  <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
+                    {a.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>🌟 Sponsorisé</span>}
+                    {featuredPosts.includes(a.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🏆 En vedette</span>}
                   </div>
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:6,color:theme.text }}>{a.name}</h3>
                   {a.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(a.distance)}</div>}
@@ -2707,6 +2715,10 @@ function AppContent() {
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
                     <span className="tag" style={{ background:"rgba(255,140,0,0.15)",color:"#FF8C00" }}>🍽️ {r.type}</span>
                     {r.prixMoyen && <span style={{ fontSize:12,color:theme.sub,fontWeight:600 }}>{r.prixMoyen}</span>}
+                  </div>
+                  <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
+                    {r.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>🌟 Sponsorisé</span>}
+                    {featuredPosts.includes(r.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🏆 En vedette</span>}
                   </div>
                   {r.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(r.distance)}</div>}
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:4,color:theme.text }}>{r.name}</h3>
@@ -2800,6 +2812,10 @@ function AppContent() {
                     {b.tarifs && <span style={{ fontSize:12,color:theme.sub,fontWeight:600 }}>{b.tarifs}</span>}
                   </div>
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:4,color:theme.text }}>{b.name}</h3>
+                  <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
+                    {b.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>🌟 Sponsorisé</span>}
+                    {featuredPosts.includes(b.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🏆 En vedette</span>}
+                  </div>
                   {b.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(b.distance)}</div>}
                   {getAvgRating(b.id) && <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:8 }}><div style={{ display:"flex" }}>{renderStars(getAvgRating(b.id))}</div><span style={{ fontSize:12,color:"#FFD700",fontWeight:700 }}>{getAvgRating(b.id)}</span><span style={{ fontSize:11,color:theme.sub }}>({getRatingCount(b.id)} avis)</span></div>}
                   {b.specialite && <p style={{ fontSize:13,color:"#FF69B4",fontWeight:600,marginBottom:6 }}>✨ {b.specialite}</p>}
