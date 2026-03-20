@@ -1086,14 +1086,40 @@ function AppContent() {
 
   useEffect(() => { setVisibleCount(12); }, [search, category, priceMin, priceMax]);
 
-  // Check sponsored expiry and downgrade to normal
+  // Check sponsored expiry and auto-expire posts
   useEffect(() => {
     const today = new Date();
+    // Expire sponsored
     setPosts(prev => prev.map(post => {
       if (!post.sponsoredUntil) return post;
-      const sponsorExp = new Date(post.sponsoredUntil);
-      if (sponsorExp < today) return { ...post, sponsored: false, sponsoredUntil: null };
+      if (new Date(post.sponsoredUntil) < today) return { ...post, sponsored: false, sponsoredUntil: null };
       return post;
+    }));
+    // Auto-expire posts past their expiresAt date
+    setPosts(prev => prev.map(post => {
+      if (!post.expiresAt) return post;
+      if (new Date(post.expiresAt) < today) return { ...post, expired: true };
+      return post;
+    }));
+    setBoutiques(prev => prev.map(b => {
+      if (!b.expiresAt) return b;
+      if (new Date(b.expiresAt) < today) return { ...b, expired: true };
+      return b;
+    }));
+    setAteliers(prev => prev.map(a => {
+      if (!a.expiresAt) return a;
+      if (new Date(a.expiresAt) < today) return { ...a, expired: true };
+      return a;
+    }));
+    setRestos(prev => prev.map(r => {
+      if (!r.expiresAt) return r;
+      if (new Date(r.expiresAt) < today) return { ...r, expired: true };
+      return r;
+    }));
+    setBeaute(prev => prev.map(b => {
+      if (!b.expiresAt) return b;
+      if (new Date(b.expiresAt) < today) return { ...b, expired: true };
+      return b;
     }));
   }, []);
 
@@ -2069,6 +2095,16 @@ function AppContent() {
                           💬
                         </button>
                       )}
+                      {post.phone && (
+                        <a href={"tel:"+post.phone} style={{ textDecoration:"none" }}>
+                          <div style={{ background:"rgba(67,198,172,0.1)",color:"#43C6AC",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">
+                            📞
+                          </div>
+                        </a>
+                      )}
+                      <button onClick={()=>{ navigator.clipboard.writeText("https://marketflow-delta.vercel.app/annonce/"+post.id); notify("Lien copié ! 📋"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">
+                        🔗
+                      </button>
                       <button onClick={()=>setModal({type:"report",data:post})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:3 }} title="Signaler cette annonce">
                         🚩
                       </button>
@@ -2716,6 +2752,8 @@ function AppContent() {
                   <div style={{ display:"flex",gap:8 }}>
                     <button onClick={()=>likePost(a.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(a.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{a.likes}</button>
                     <button onClick={()=>setModal({type:"contact",data:{...a,title:a.name}})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
+                    {a.phone && <a href={"tel:"+a.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(67,198,172,0.1)",color:"#43C6AC",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">📞</div></a>}
+                    <button onClick={()=>{ navigator.clipboard.writeText("https://marketflow-delta.vercel.app/atelier/"+a.id); notify("Lien copié ! 📋"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">🔗</button>
                     <a href={"https://wa.me/?text="+encodeURIComponent("*"+a.name+"*"+"\n"+"Type: "+a.type+"\n"+"Voir l'atelier: https://marketflow-delta.vercel.app/atelier/"+a.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}>
                         <svg width="12" height="12" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
@@ -2817,6 +2855,8 @@ function AppContent() {
                   <div style={{ display:"flex",gap:8 }}>
                     <button onClick={()=>likePost(r.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(r.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{r.likes}</button>
                     <button onClick={()=>setModal({type:"contact",data:{...r,title:r.name}})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
+                    {r.phone && <a href={"tel:"+r.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(255,140,0,0.1)",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">📞</div></a>}
+                    <button onClick={()=>{ navigator.clipboard.writeText("https://marketflow-delta.vercel.app/resto/"+r.id); notify("Lien copié ! 📋"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">🔗</button>
                     {user&&user.id!==r.authorId&&<button onClick={()=>{ setActiveConv({postId:r.id,postTitle:r.name,postPrice:"",postPhoto:r.photos?.[0],receiverId:r.authorId,receiverName:r.author,messages:messages.filter(m=>(m.post_id===r.id)&&((m.sender_id===user.id&&m.receiver_id===r.authorId)||(m.receiver_id===user.id&&m.sender_id===r.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Envoyer un message">💬</button>}
                     <a href={"https://wa.me/?text="+encodeURIComponent("*"+r.name+"*"+"\n"+"Type: "+r.type+"\n"+"Voir l'etablissement: https://marketflow-delta.vercel.app/resto/"+r.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}>
@@ -2913,6 +2953,8 @@ function AppContent() {
                   <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
                     <button onClick={()=>likePost(b.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(b.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{b.likes}</button>
                     <button onClick={()=>setModal({type:"contact",data:{...b,title:b.name}})} style={{ background:"rgba(255,105,180,0.1)",border:"none",color:"#FF69B4",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
+                    {b.phone && <a href={"tel:"+b.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(255,105,180,0.1)",color:"#FF69B4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">📞</div></a>}
+                    <button onClick={()=>{ navigator.clipboard.writeText("https://marketflow-delta.vercel.app/beaute/"+b.id); notify("Lien copié ! 📋"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">🔗</button>
                     {user&&user.id!==b.authorId&&<button onClick={()=>{ setActiveConv({postId:b.id,postTitle:b.name,postPrice:b.tarifs||"",postPhoto:b.photos?.[0],receiverId:b.authorId,receiverName:b.author,messages:messages.filter(m=>(m.post_id===b.id)&&((m.sender_id===user.id&&m.receiver_id===b.authorId)||(m.receiver_id===user.id&&m.sender_id===b.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Envoyer un message">💬</button>}
                     <a href={"https://wa.me/?text="+encodeURIComponent("*"+b.name+"*"+"\n"+"Type: "+b.type+"\n"+"Voir le salon: https://marketflow-delta.vercel.app/beaute/"+b.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}>
