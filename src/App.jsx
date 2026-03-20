@@ -717,17 +717,20 @@ function AppContent() {
   const sendMessage = async (postId, postTitle, postPrice, postPhoto, receiverId, receiverName) => {
     if (!msgInput.trim()) return;
     if (!user) { notify("Connectez-vous pour envoyer un message","error"); return; }
-    if (!receiverId) { notify("Destinataire introuvable","error"); return; }
+    // Try to get receiver from activeConv if not provided
+    const finalReceiverId = receiverId || activeConv?.receiverId || activeConv?.otherId;
+    const finalReceiverName = receiverName || activeConv?.receiverName || activeConv?.otherName || "Utilisateur";
+    if (!finalReceiverId) { notify("Destinataire introuvable","error"); return; }
     const { error } = await supabase.from("messages").insert({
       post_id: postId, post_title: postTitle||"", post_price: postPrice||"", post_photo: postPhoto||null,
       sender_id: user.id, sender_name: user.name,
-      receiver_id: receiverId, receiver_name: receiverName||"Utilisateur",
+      receiver_id: finalReceiverId, receiver_name: finalReceiverName,
       content: msgInput.trim(), read: false
     });
     if (!error) {
       setMsgInput("");
       loadMessages();
-      addNotification("Message envoyé à "+(receiverName||"")+" !", "contact", postId);
+      addNotification("Message envoyé à "+finalReceiverName+" !", "contact", postId);
     } else { console.error(error); notify("Erreur d'envoi","error"); }
   };
 
