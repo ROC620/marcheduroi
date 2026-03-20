@@ -1414,12 +1414,78 @@ function AppContent() {
 
   const MAX_MODIFS = 3;
 
+  const editShop = async () => {
+    const id = modal.data?.id;
+    if (!id) return;
+    const tableName = shopMode === "boutique" ? "boutiques" : "ateliers";
+    const { error } = await supabase.from(tableName).update({
+      name: shopForm.name, type: shopForm.type||"",
+      description: shopForm.description, services: shopForm.services||"",
+      keywords: shopForm.keywords||"", ville: shopForm.ville||"",
+      quartier: shopForm.quartier||"", von: shopForm.von||"",
+      horaires: shopForm.horaires||"", contact: shopForm.contact||"",
+      phone: shopForm.phone||"", photos: shopPhotos||[], video: shopVideo||null,
+      lat: shopForm.lat||null, lng: shopForm.lng||null,
+    }).eq("id", id);
+    if (error) { notify("Erreur de modification","error"); return; }
+    if (shopMode==="boutique") setBoutiques(b=>b.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
+    else setAteliers(a=>a.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
+    setModal(null);
+    setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
+    setShopPhotos([]); setShopVideo(null);
+    notify("✅ Modification appliquée !");
+  };
+
+  const editResto = async () => {
+    const id = modal.data?.id;
+    if (!id) return;
+    const { error } = await supabase.from("restos").update({
+      name: shopForm.name, type: shopForm.type||"",
+      description: shopForm.description, services: shopForm.services||"",
+      keywords: shopForm.keywords||"", ville: shopForm.ville||"",
+      quartier: shopForm.quartier||"", von: shopForm.von||"",
+      horaires: shopForm.horaires||"", contact: shopForm.contact||"",
+      phone: shopForm.phone||"", photos: shopPhotos||[], video: shopVideo||null,
+      lat: shopForm.lat||null, lng: shopForm.lng||null,
+      specialite: shopForm.specialite||"",
+    }).eq("id", id);
+    if (error) { notify("Erreur de modification","error"); return; }
+    setRestos(r=>r.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
+    setModal(null);
+    setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
+    setShopPhotos([]); setShopVideo(null);
+    notify("✅ Modification appliquée !");
+  };
+
+  const editBeaute = async () => {
+    const id = modal.data?.id;
+    if (!id) return;
+    const { error } = await supabase.from("beaute").update({
+      name: shopForm.name, type: shopForm.type||"",
+      description: shopForm.description, services: shopForm.services||"",
+      keywords: shopForm.keywords||"", ville: shopForm.ville||"",
+      quartier: shopForm.quartier||"", von: shopForm.von||"",
+      horaires: shopForm.horaires||"", contact: shopForm.contact||"",
+      phone: shopForm.phone||"", photos: shopPhotos||[], video: shopVideo||null,
+      lat: shopForm.lat||null, lng: shopForm.lng||null,
+      specialite: shopForm.specialite||"", tarifs: shopForm.tarifs||"",
+      rendezvous: shopForm.rendezvous||"", produits: shopForm.produits||"",
+    }).eq("id", id);
+    if (error) { notify("Erreur de modification","error"); return; }
+    setBeaute(b=>b.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
+    setModal(null);
+    setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
+    setShopPhotos([]); setShopVideo(null);
+    notify("✅ Modification appliquée !");
+  };
+
   const openEditShop = (item, shopType, editFn) => {
     // Admin can always modify for free
     const isAdmin = user?.role === "admin";
     const isFree = isAdmin || canModifyFree(item);
 
     const doOpenModal = () => {
+
       setShopMode(shopType==="boutique"?"boutique":shopType==="atelier"?"atelier":shopType);
       setShopForm({
         name:item.name||"", type:item.type||"", description:item.description||"",
