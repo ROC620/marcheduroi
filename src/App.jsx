@@ -2768,7 +2768,7 @@ function AppContent() {
                     <button onClick={()=>setModal({type:"report",data:{...b,title:b.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===b.authorId||user.role==="admin")&&(
                       <>
-                        <button onClick={()=>{ setShopMode("boutique"); setShopForm({name:b.name,type:b.type||"",description:b.description,services:b.services||"",keywords:b.keywords||"",ville:b.ville||"",quartier:b.quartier||"",von:b.von||"",horaires:b.horaires||"",contact:b.contact||"",phone:b.phone||""}); setShopPhotos(b.photos||[]); setShopVideo(b.video||null); setMonths(1); openEditShop(b,"boutique",editShop); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>openEditShop(b,"boutique",editShop)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
                     )}
@@ -2869,7 +2869,7 @@ function AppContent() {
                     <button onClick={()=>setModal({type:"report",data:{...a,title:a.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===a.authorId||user.role==="admin")&&(
                       <>
-                        <button onClick={()=>{ setShopMode("atelier"); setShopForm({name:a.name,type:a.type||"",description:a.description,services:a.services||"",keywords:a.keywords||"",ville:a.ville||"",quartier:a.quartier||"",von:a.von||"",horaires:a.horaires||"",contact:a.contact||"",phone:a.phone||""}); setShopPhotos(a.photos||[]); setShopVideo(a.video||null); setMonths(1); openEditShop(a,"atelier",editShop); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>openEditShop(a,"atelier",editShop)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
                     )}
@@ -2974,7 +2974,7 @@ function AppContent() {
                     <button onClick={()=>setModal({type:"report",data:{...r,title:r.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===r.authorId||user.role==="admin")&&(
                       <>
-                        <button onClick={()=>{ setShopMode("resto"); setShopForm({name:r.name,type:r.type||"",description:r.description,services:r.services||"",keywords:r.keywords||"",ville:r.ville||"",quartier:r.quartier||"",von:r.von||"",horaires:r.horaires||"",contact:r.contact||"",phone:r.phone||""}); setShopPhotos(r.photos||[]); setShopVideo(r.video||null); setMonths(1); openEditShop(r,"resto",editResto); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>openEditShop(r,"resto",editResto)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
                     )}
@@ -3073,7 +3073,7 @@ function AppContent() {
                     </a>
                     {user&&(user.id===b.authorId||user.role==="admin")&&(
                       <>
-                        <button onClick={()=>{ setShopMode("beaute"); setShopForm({name:b.name,type:b.type||"",description:b.description,services:b.services||"",keywords:b.keywords||"",ville:b.ville||"",quartier:b.quartier||"",von:b.von||"",horaires:b.horaires||"",contact:b.contact||"",phone:b.phone||""}); setShopPhotos(b.photos||[]); setShopVideo(b.video||null); setMonths(1); openEditShop(b,"beaute",editBeaute); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
+                        <button onClick={()=>openEditShop(b,"beaute",editBeaute)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
                     )}
@@ -4034,9 +4034,13 @@ function AppContent() {
                 </div>
                 <div style={{ display:"flex",gap:12 }}>
                   <button onClick={()=>setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,borderRadius:12,fontWeight:600 }}>Annuler</button>
-                  <button onClick={()=>{
+                  <button onClick={async ()=>{
                     const tableMap = {boutique:"boutiques", atelier:"ateliers", resto:"restos", beaute:"beaute"};
-                    if(tableMap[modal.shopType]) supabase.from(tableMap[modal.shopType]).delete().eq("id",modal.data.id);
+                    const table = tableMap[modal.shopType];
+                    if(table) {
+                      const { error } = await supabase.from(table).delete().eq("id", modal.data.id);
+                      if(error) { notify("Erreur lors de la suppression","error"); console.error(error); return; }
+                    }
                     if(modal.shopType==="boutique") setBoutiques(b=>b.filter(x=>x.id!==modal.data.id));
                     else if(modal.shopType==="atelier") setAteliers(a=>a.filter(x=>x.id!==modal.data.id));
                     else if(modal.shopType==="resto") setRestos(r=>r.filter(x=>x.id!==modal.data.id));
