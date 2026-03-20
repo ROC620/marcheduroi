@@ -778,38 +778,38 @@ function AppContent() {
   const loadShops = async () => {
     // Load boutiques
     const { data: bData } = await supabase.from("boutiques").select("*").order("created_at", { ascending: false });
-    if (bData && bData.length > 0) {
+    if (bData) {
       const mapped = bData.map(b => ({...b, authorId: b.author_id, expiresAt: b.expires_at, sponsoredUntil: b.sponsored_until, photos: b.photos || [], likes: b.likes || 0}));
-      setBoutiques(prev => {
+      if (mapped.length > 0) setBoutiques(prev => {
         const ids = mapped.map(b => b.id);
-        return [...mapped, ...prev.filter(b => !ids.includes(b.id))];
+        return [...mapped, ...INITIAL_BOUTIQUES.filter(b => !ids.includes(b.id))];
       });
     }
     // Load ateliers
     const { data: aData } = await supabase.from("ateliers").select("*").order("created_at", { ascending: false });
-    if (aData && aData.length > 0) {
+    if (aData) {
       const mapped = aData.map(a => ({...a, authorId: a.author_id, expiresAt: a.expires_at, sponsoredUntil: a.sponsored_until, photos: a.photos || [], likes: a.likes || 0}));
-      setAteliers(prev => {
+      if (mapped.length > 0) setAteliers(prev => {
         const ids = mapped.map(a => a.id);
-        return [...mapped, ...prev.filter(a => !ids.includes(a.id))];
+        return [...mapped, ...INITIAL_ATELIERS.filter(a => !ids.includes(a.id))];
       });
     }
     // Load restos
     const { data: rData } = await supabase.from("restos").select("*").order("created_at", { ascending: false });
-    if (rData && rData.length > 0) {
+    if (rData) {
       const mapped = rData.map(r => ({...r, authorId: r.author_id, expiresAt: r.expires_at, sponsoredUntil: r.sponsored_until, photos: r.photos || [], likes: r.likes || 0}));
-      setRestos(prev => {
+      if (mapped.length > 0) setRestos(prev => {
         const ids = mapped.map(r => r.id);
-        return [...mapped, ...prev.filter(r => !ids.includes(r.id))];
+        return [...mapped, ...INITIAL_RESTOS.filter(r => !ids.includes(r.id))];
       });
     }
     // Load beaute
     const { data: beData } = await supabase.from("beaute").select("*").order("created_at", { ascending: false });
-    if (beData && beData.length > 0) {
+    if (beData) {
       const mapped = beData.map(b => ({...b, authorId: b.author_id, expiresAt: b.expires_at, sponsoredUntil: b.sponsored_until, photos: b.photos || [], likes: b.likes || 0}));
-      setBeaute(prev => {
+      if (mapped.length > 0) setBeaute(prev => {
         const ids = mapped.map(b => b.id);
-        return [...mapped, ...prev.filter(b => !ids.includes(b.id))];
+        return [...mapped, ...INITIAL_BEAUTE.filter(b => !ids.includes(b.id))];
       });
     }
   };
@@ -3866,7 +3866,7 @@ function AppContent() {
                   </div>
                 )}
 
-                <button onClick={addShop} className="btn-glow" style={{ width:"100%",padding:"14px",background:shopMode==="boutique"?"linear-gradient(135deg,#FF6584,#FFB347)":"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
+                <button onClick={modal.editing ? editShop : addShop} className="btn-glow" style={{ width:"100%",padding:"14px",background:shopMode==="boutique"?"linear-gradient(135deg,#FF6584,#FFB347)":"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
                   {user?.role==="admin" ? `Publier ${shopMode==="boutique"?"la boutique":"l'atelier"}` : `Publier · ${(months*3000).toLocaleString()} FCFA`}
                 </button>
               </>
