@@ -662,7 +662,10 @@ function AppContent() {
   const [category, setCategory] = useState("Toutes");
   const [modal, setModal] = useState(null);
   const [notification, setNotification] = useState(null);
-  const [likedPosts, setLikedPosts] = useState([]);
+  const [likedPosts, setLikedPosts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("mf_liked") || "[]"); }
+    catch { return []; }
+  });
   const [ratings, setRatings] = useState({});
   const [reports, setReports] = useState([]);
   const [featuredPosts, setFeaturedPosts] = useState(() => {
@@ -714,17 +717,18 @@ function AppContent() {
   const sendMessage = async (postId, postTitle, postPrice, postPhoto, receiverId, receiverName) => {
     if (!msgInput.trim()) return;
     if (!user) { notify("Connectez-vous pour envoyer un message","error"); return; }
+    if (!receiverId) { notify("Destinataire introuvable","error"); return; }
     const { error } = await supabase.from("messages").insert({
-      post_id: postId, post_title: postTitle, post_price: postPrice, post_photo: postPhoto,
+      post_id: postId, post_title: postTitle||"", post_price: postPrice||"", post_photo: postPhoto||null,
       sender_id: user.id, sender_name: user.name,
-      receiver_id: receiverId, receiver_name: receiverName,
+      receiver_id: receiverId, receiver_name: receiverName||"Utilisateur",
       content: msgInput.trim(), read: false
     });
     if (!error) {
       setMsgInput("");
       loadMessages();
-      addNotification("Message envoyé à "+receiverName+" !", "contact", postId);
-    } else notify("Erreur d'envoi","error");
+      addNotification("Message envoyé à "+(receiverName||"")+" !", "contact", postId);
+    } else { console.error(error); notify("Erreur d'envoi","error"); }
   };
 
   const markConvRead = async (conv) => {
@@ -735,7 +739,18 @@ function AppContent() {
     }
   };
 
-  useEffect(() => { if(user) loadMessages(); }, [user]);
+  useEffect(() => {
+    if(user) {
+      loadMessages();
+      // Load favorites from Supabase
+      supabase.from("profiles").select("favorites").eq("id", user.id).single().then(({data}) => {
+        if (data?.favorites && Array.isArray(data.favorites)) {
+          setFavorites(data.favorites);
+          localStorage.setItem("mf_favorites", JSON.stringify(data.favorites));
+        }
+      });
+    }
+  }, [user]);
 
   // Load posts from Supabase
   // Load admin settings (featured, certified, sponsored) from Supabase
@@ -975,10 +990,14 @@ function AppContent() {
     catch { return []; }
   });
 
-  const toggleFavorite = (id) => {
+  const toggleFavorite = async (id) => {
     setFavorites(f => {
       const updated = f.includes(id) ? f.filter(x=>x!==id) : [...f, id];
       localStorage.setItem("mf_favorites", JSON.stringify(updated));
+      // Save to Supabase profile if logged in
+      if (user) {
+        supabase.from("profiles").update({ favorites: updated }).eq("id", user.id);
+      }
       return updated;
     });
   };
@@ -1406,10 +1425,27 @@ function AppContent() {
     setModal(null); notify("Annonce supprimée.");
   };
 
-  const likePost = (id) => {
-    if (likedPosts.includes(id)) return;
-    setLikedPosts(l=>[...l,id]);
-    setPosts(p=>p.map(post=>post.id===id?{...post,likes:post.likes+1}:post));
+  const likePost = async (id) => {
+    if (!user) { notify("Connectez-vous pour liker","error"); return; }
+    if (likedPosts.includes(id)) { notify("Vous avez déjà aimé cette publication","error"); return; }
+    const updated = [...likedPosts, id];
+    setLikedPosts(updated);
+    localStorage.setItem("mf_liked", JSON.stringify(updated));
+    // Update in all sections
+    const updateLikes = arr => arr.map(x => x.id===id ? {...x, likes:(x.likes||0)+1} : x);
+    setPosts(updateLikes);
+    setBoutiques(updateLikes);
+    setAteliers(updateLikes);
+    setRestos(updateLikes);
+    setBeaute(updateLikes);
+    // Save to Supabase - try each table
+    for (const table of ["posts","boutiques","ateliers","restos","beaute"]) {
+      const { data } = await supabase.from(table).select("likes").eq("id",id).single();
+      if (data) {
+        await supabase.from(table).update({ likes: (data.likes||0)+1 }).eq("id",id);
+        break;
+      }
+    }
   };
 
   const MAX_MODIFS = 3;
