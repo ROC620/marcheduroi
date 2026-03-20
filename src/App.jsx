@@ -1809,7 +1809,7 @@ function AppContent() {
                     <div>
                       <p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>{activeConv.postTitle}</p>
                       {activeConv.postPrice && <p style={{ color:"#43C6AC",fontWeight:700,fontSize:12 }}>{activeConv.postPrice}</p>}
-                      <p style={{ color:theme.sub,fontSize:11 }}>avec {activeConv.otherName}</p>
+                      <p style={{ color:theme.sub,fontSize:11 }}>avec {activeConv.otherName||activeConv.receiverName}</p>
                     </div>
                   </div>
                 </div>
@@ -1831,8 +1831,8 @@ function AppContent() {
 
                 {/* Input */}
                 <div style={{ padding:"12px 16px",paddingBottom:"env(safe-area-inset-bottom, 12px)",borderTop:`1px solid ${theme.border}`,display:"flex",gap:8,position:"relative",zIndex:10 }}>
-                  <input value={msgInput} onChange={e=>setMsgInput(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendMessage(activeConv.postId,activeConv.postTitle,activeConv.postPrice,activeConv.postPhoto,activeConv.otherId,activeConv.otherName); loadMessages(); }}} placeholder="Écrire un message..." style={{ ...inputStyle,flex:1,padding:"10px 14px",borderRadius:24,fontSize:14 }}/>
-                  <button onClick={()=>{ sendMessage(activeConv.postId,activeConv.postTitle,activeConv.postPrice,activeConv.postPhoto,activeConv.otherId,activeConv.otherName); setTimeout(loadMessages,500); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",width:42,height:42,borderRadius:"50%",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
+                  <input value={msgInput} onChange={e=>setMsgInput(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendMessage(activeConv.postId,activeConv.postTitle,activeConv.postPrice,activeConv.postPhoto,activeConv.otherId||activeConv.receiverId,activeConv.otherName||activeConv.receiverName); loadMessages(); }}} placeholder="Écrire un message..." style={{ ...inputStyle,flex:1,padding:"10px 14px",borderRadius:24,fontSize:14 }}/>
+                  <button onClick={()=>{ sendMessage(activeConv.postId,activeConv.postTitle,activeConv.postPrice,activeConv.postPhoto,activeConv.otherId||activeConv.receiverId,activeConv.otherName||activeConv.receiverName); setTimeout(loadMessages,500); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",width:42,height:42,borderRadius:"50%",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
                     <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                   </button>
                 </div>
