@@ -738,6 +738,43 @@ function AppContent() {
   useEffect(() => { if(user) loadMessages(); }, [user]);
 
   // Load posts from Supabase
+  // Load admin settings (featured, certified, sponsored) from Supabase
+  const loadAdminSettings = async () => {
+    const { data } = await supabase.from("admin_settings").select("*");
+    if (data && data.length > 0) {
+      data.forEach(row => {
+        if (row.key === "featured") {
+          setFeaturedPosts(row.value || []);
+          localStorage.setItem("mf_featured", JSON.stringify(row.value || []));
+        }
+        if (row.key === "certified") {
+          setCertifiedUsers(row.value || []);
+          localStorage.setItem("mf_certified", JSON.stringify(row.value || []));
+        }
+        if (row.key === "sponsored") {
+          const sponsored = row.value || {};
+          localStorage.setItem("mf_sponsored", JSON.stringify(sponsored));
+          // Apply sponsored to all sections
+          const today = new Date();
+          const valid = {};
+          Object.keys(sponsored).forEach(id => {
+            if (new Date(sponsored[id].sponsoredUntil) >= today) valid[id] = sponsored[id];
+          });
+          if (Object.keys(valid).length > 0) {
+            setBoutiques(b => b.map(x => valid[x.id] ? {...x, sponsored:true, sponsoredUntil:valid[x.id].sponsoredUntil} : x));
+            setAteliers(a => a.map(x => valid[x.id] ? {...x, sponsored:true, sponsoredUntil:valid[x.id].sponsoredUntil} : x));
+            setRestos(r => r.map(x => valid[x.id] ? {...x, sponsored:true, sponsoredUntil:valid[x.id].sponsoredUntil} : x));
+            setBeaute(b => b.map(x => valid[x.id] ? {...x, sponsored:true, sponsoredUntil:valid[x.id].sponsoredUntil} : x));
+          }
+        }
+      });
+    }
+  };
+
+  const saveAdminSetting = async (key, value) => {
+    await supabase.from("admin_settings").upsert({ key, value, updated_at: new Date().toISOString() });
+  };
+
   const loadPosts = async () => {
     const { data } = await supabase
       .from("posts")
@@ -763,6 +800,7 @@ function AppContent() {
 
   useEffect(() => {
     loadPosts();
+    loadAdminSettings();
     // Restore sponsored state for boutiques/ateliers/restos/beaute
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     if (Object.keys(sponsored).length > 0) {
@@ -785,6 +823,7 @@ function AppContent() {
     setFeaturedPosts(f => {
       const updated = f.includes(itemId) ? f.filter(id=>id!==itemId) : [...f, itemId];
       localStorage.setItem("mf_featured", JSON.stringify(updated));
+      saveAdminSetting("featured", updated);
       notify(f.includes(itemId) ? "Retiré des vedettes" : "Ajouté en vedette 🏆 !");
       return updated;
     });
@@ -951,6 +990,7 @@ function AppContent() {
         ? prev.filter(id => id !== authorId)
         : [...prev, authorId];
       localStorage.setItem("mf_certified", JSON.stringify(updated));
+      saveAdminSetting("certified", updated);
       notify(prev.includes(authorId)
         ? `Certification retirée à ${authorName}`
         : `${authorName} est maintenant Certifié MarketFlow 🏅 !`);
@@ -1063,10 +1103,11 @@ function AppContent() {
     setAteliers(a => a.map(x => x.id === postId ? { ...x, sponsored: false, sponsoredUntil: null } : x));
     setRestos(r => r.map(x => x.id === postId ? { ...x, sponsored: false, sponsoredUntil: null } : x));
     setBeaute(b => b.map(x => x.id === postId ? { ...x, sponsored: false, sponsoredUntil: null } : x));
-    // Remove from localStorage
+    // Remove from localStorage and Supabase
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     delete sponsored[postId];
     localStorage.setItem("mf_sponsored", JSON.stringify(sponsored));
+    saveAdminSetting("sponsored", sponsored);
     notify("Sponsoring retiré ✅");
   };
 
@@ -1082,10 +1123,11 @@ function AppContent() {
     setAteliers(a => a.map(x => x.id === postId ? { ...x, sponsored: true, sponsoredUntil: expStr } : x));
     setRestos(r => r.map(x => x.id === postId ? { ...x, sponsored: true, sponsoredUntil: expStr } : x));
     setBeaute(b => b.map(x => x.id === postId ? { ...x, sponsored: true, sponsoredUntil: expStr } : x));
-    // Save sponsored list to localStorage
+    // Save sponsored list to localStorage and Supabase
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     sponsored[postId] = { sponsored: true, sponsoredUntil: expStr };
     localStorage.setItem("mf_sponsored", JSON.stringify(sponsored));
+    saveAdminSetting("sponsored", sponsored);
     setModal(null);
     notify("Sponsorisé jusqu'au " + expStr + " !");
   };
