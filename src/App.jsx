@@ -1766,9 +1766,9 @@ function AppContent() {
         .tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
         .bg-opt{transition:transform 0.15s;cursor:pointer;} .bg-opt:hover{transform:scale(1.08);}
         /* RESPONSIVE MOBILE & TABLETTE */
-        @media(max-width:768px){
+        @media(max-width:600px){
           .desktop-only{display:none!important;}
-          .page-content{padding:12px!important;}
+          .page-content{padding:8px!important;}
           .grid-cards{grid-template-columns:1fr!important;width:100%!important;}
           .admin-row{flex-direction:column!important;align-items:flex-start!important;gap:8px!important;}
           .modal-inner{width:96vw!important;max-width:96vw!important;padding:16px!important;}
@@ -1785,12 +1785,11 @@ function AppContent() {
           .hero-title{font-size:20px!important;}
           .modal-inner{padding:12px!important;}
         }
-        @media(min-width:1100px){
-          .grid-cards{grid-template-columns:repeat(3,1fr)!important;}
-        }
-        @media(min-width:769px) and (max-width:1099px){
+        @media(min-width:601px) and (max-width:900px){
           .grid-cards{grid-template-columns:repeat(2,1fr)!important;}
-          .page-content{padding:20px!important;}
+        }
+        @media(min-width:901px){
+          .grid-cards{grid-template-columns:repeat(3,1fr)!important;}
         }
       `}</style>
 
@@ -2221,7 +2220,7 @@ function AppContent() {
                 <span style={{ fontSize:22 }}>🏆</span>
                 <h2 style={{ fontWeight:800,fontSize:20,color:theme.text }}>Coups de cœur <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span></h2>
               </div>
-              <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(min(340px,100%),1fr))",gap:16,width:"100%" }}>
+              <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,width:"100%" }}>
                 {posts.filter(p=>featuredPosts.includes(p.id)&&!p.expired).map(post=>(
                   <div key={post.id} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",border:"2px solid #FFD700",boxShadow:"0 4px 24px rgba(255,215,0,0.25)",position:"relative" }}>
                     <div style={{ position:"absolute",top:12,left:12,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:800,color:"#000",zIndex:2 }}>🏆 Coup de cœur</div>
@@ -2241,7 +2240,7 @@ function AppContent() {
             </div>
           )}
 
-          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(min(340px,100%),1fr))",gap:16,width:"100%" }}>
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,width:"100%" }}>
             {filtered.slice(0, visibleCount).map(post=>(
               <div key={post.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:post.sponsored?"0 4px 24px rgba(255,215,0,0.3)":"0 4px 20px rgba(0,0,0,0.15)",animation:"fadeIn 0.4s ease",border:post.sponsored?`2px solid #FFD700`:`1px solid ${theme.border}` }}>
                 {post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>}
@@ -2874,7 +2873,7 @@ function AppContent() {
               </button>
             )}
           </div>
-          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(min(340px,100%),1fr))",gap:16,width:"100%" }}>
+          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,width:"100%" }}>
             {boutiques.filter(b=>!search||(b.name+b.description+(b.keywords||"")+(b.type||"")).toLowerCase().includes(search.toLowerCase()))
             .map(b=>({...b, distance: userLocation&&b.lat&&b.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(b.lat),parseFloat(b.lng)) : null}))
             .sort((a,b)=>{
@@ -2969,7 +2968,7 @@ function AppContent() {
               </button>
             )}
           </div>
-          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(min(340px,100%),1fr))",gap:16,width:"100%" }}>
+          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,width:"100%" }}>
             {ateliers.filter(a=>!search||(a.name+a.description+(a.keywords||"")+(a.type||"")+(a.services||"")).toLowerCase().includes(search.toLowerCase()))
             .map(a=>({...a, distance: userLocation&&a.lat&&a.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(a.lat),parseFloat(a.lng)) : null}))
             .sort((a,b)=>{
@@ -3072,7 +3071,7 @@ function AppContent() {
             )}
           </div>
 
-          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(min(340px,100%),1fr))",gap:16,width:"100%" }}>
+          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,width:"100%" }}>
             {restos.filter(r=>!search||(r.name+r.description+(r.keywords||"")+(r.type||"")+(r.specialite||"")).toLowerCase().includes(search.toLowerCase()))
             .map(r=>({...r, distance: userLocation&&r.lat&&r.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(r.lat),parseFloat(r.lng)) : null}))
             .sort((a,b)=>{
@@ -3178,7 +3177,7 @@ function AppContent() {
             )}
           </div>
 
-          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(min(340px,100%),1fr))",gap:16,width:"100%" }}>
+          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,width:"100%" }}>
             {beaute.filter(b=>!search||(b.name+b.description+(b.keywords||"")+(b.type||"")+(b.specialite||"")+(b.services||"")).toLowerCase().includes(search.toLowerCase()))
             .map(b=>({...b, distance: userLocation&&b.lat&&b.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(b.lat),parseFloat(b.lng)) : null}))
             .sort((a,b)=>{
