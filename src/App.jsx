@@ -602,7 +602,7 @@ function CertifiedBadge({ size=40 }) {
   );
 }
 
-function RatingForm({ itemId, onRate, theme }) {
+function RatingForm({ itemId, authorId, onRate, theme, currentUserId }) {
   const [stars, setStars] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
@@ -646,6 +646,10 @@ function AppContent() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [postsLoaded, setPostsLoaded] = useState(false);
+  const [visibleBoutiques, setVisibleBoutiques] = useState(12);
+  const [visibleAteliers, setVisibleAteliers] = useState(12);
+  const [visibleRestos, setVisibleRestos] = useState(12);
+  const [visibleBeaute, setVisibleBeaute] = useState(12);
   const [boutiques, setBoutiques] = useState(INITIAL_BOUTIQUES);
   const [ateliers, setAteliers] = useState(INITIAL_ATELIERS);
   const [restos, setRestos] = useState(INITIAL_RESTOS);
@@ -1124,7 +1128,19 @@ function AppContent() {
   // Check sponsored expiry and auto-expire posts
   useEffect(() => {
     const today = new Date();
-    // Expire sponsored
+    // Expire sponsored - clean Supabase too
+    const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
+    let changed = false;
+    Object.keys(sponsored).forEach(id => {
+      if (new Date(sponsored[id].sponsoredUntil) < today) {
+        delete sponsored[id];
+        changed = true;
+      }
+    });
+    if (changed) {
+      localStorage.setItem("mf_sponsored", JSON.stringify(sponsored));
+      saveAdminSetting("sponsored", sponsored);
+    }
     setPosts(prev => prev.map(post => {
       if (!post.sponsoredUntil) return post;
       if (new Date(post.sponsoredUntil) < today) return { ...post, sponsored: false, sponsoredUntil: null };
@@ -1417,6 +1433,9 @@ function AppContent() {
       phone: updatedPost.phone || "",
       photos: updatedPost.photos || [],
       vehicle: updatedPost.vehicle || null,
+      lat: updatedPost.lat || null,
+      lng: updatedPost.lng || null,
+      immo: updatedPost.immo || null,
     }).eq("id", modal.data.id);
     setPosts(p=>p.map(post=>post.id===modal.data.id?updatedPost:post));
     setModal(null); notify("Annonce modifiée !");
@@ -1456,7 +1475,8 @@ function AppContent() {
   const editShop = async () => {
     const id = modal.data?.id;
     if (!id) return;
-    const tableName = shopMode === "boutique" ? "boutiques" : "ateliers";
+    const tableMap = {boutique:"boutiques", atelier:"ateliers", resto:"restos", beaute:"beaute"};
+    const tableName = tableMap[shopMode] || "boutiques";
     const { error } = await supabase.from(tableName).update({
       name: shopForm.name, type: shopForm.type||"",
       description: shopForm.description, services: shopForm.services||"",
@@ -1465,10 +1485,15 @@ function AppContent() {
       horaires: shopForm.horaires||"", contact: shopForm.contact||"",
       phone: shopForm.phone||"", photos: shopPhotos||[], video: shopVideo||null,
       lat: shopForm.lat||null, lng: shopForm.lng||null,
+      specialite: shopForm.specialite||"", tarifs: shopForm.tarifs||"",
+      rendezvous: shopForm.rendezvous||"", produits: shopForm.produits||"",
     }).eq("id", id);
     if (error) { notify("Erreur de modification","error"); return; }
-    if (shopMode==="boutique") setBoutiques(b=>b.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
-    else setAteliers(a=>a.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
+    const updated = {...modal.data,...shopForm,photos:shopPhotos,video:shopVideo};
+    if (shopMode==="boutique") setBoutiques(b=>b.map(x=>x.id===id?updated:x));
+    else if (shopMode==="atelier") setAteliers(a=>a.map(x=>x.id===id?updated:x));
+    else if (shopMode==="resto") setRestos(r=>r.map(x=>x.id===id?updated:x));
+    else if (shopMode==="beaute") setBeaute(b=>b.map(x=>x.id===id?updated:x));
     setModal(null);
     setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
     setShopPhotos([]); setShopVideo(null);
@@ -2856,7 +2881,7 @@ function AppContent() {
               if(!a.sponsored&&b.sponsored) return 1;
               if(sortByDistance){ if(a.distance===null) return 1; if(b.distance===null) return -1; return a.distance-b.distance; }
               return 0;
-            })
+            }).slice(0,visibleBeaute)
             .map(b=>(
               <div key={b.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":b.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(b.id)?`2px solid #FFD700`:b.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
@@ -2915,6 +2940,7 @@ function AppContent() {
             ))}
           </div>
           {boutiques.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>🛍️</p><p>Aucune boutique pour le moment</p></div>}
+          {boutiques.length > visibleBoutiques && <div style={{ textAlign:"center",marginTop:24 }}><button onClick={()=>setVisibleBoutiques(v=>v+12)} style={{ background:"rgba(255,101,132,0.1)",border:"1px solid rgba(255,101,132,0.3)",color:"#FF6584",padding:"10px 28px",borderRadius:20,fontWeight:700,fontSize:14,cursor:"pointer" }}>Voir plus ({boutiques.length - visibleBoutiques} restants)</button></div>}
         </div>
       )}
 
@@ -2950,7 +2976,7 @@ function AppContent() {
               if(!a.sponsored&&b.sponsored) return 1;
               if(sortByDistance){ if(a.distance===null) return 1; if(b.distance===null) return -1; return a.distance-b.distance; }
               return 0;
-            })
+            }).slice(0,visibleAteliers)
             .map(a=>(
               <div key={a.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(a.id)?"0 4px 24px rgba(255,215,0,0.4)":a.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(a.id)?`2px solid #FFD700`:a.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
@@ -3016,6 +3042,7 @@ function AppContent() {
             ))}
           </div>
           {ateliers.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>🔧</p><p>Aucun atelier pour le moment</p></div>}
+          {ateliers.length > visibleAteliers && <div style={{ textAlign:"center",marginTop:24 }}><button onClick={()=>setVisibleAteliers(v=>v+12)} style={{ background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",color:"#43C6AC",padding:"10px 28px",borderRadius:20,fontWeight:700,fontSize:14,cursor:"pointer" }}>Voir plus ({ateliers.length - visibleAteliers} restants)</button></div>}
         </div>
       )}
       {/* RESTAURANTS & BARS */}
@@ -3052,7 +3079,7 @@ function AppContent() {
               if(!a.sponsored&&b.sponsored) return 1;
               if(sortByDistance){ if(a.distance===null) return 1; if(b.distance===null) return -1; return a.distance-b.distance; }
               return 0;
-            })
+            }).slice(0,visibleRestos)
             .map(r=>(
               <div key={r.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(r.id)?"0 4px 24px rgba(255,215,0,0.4)":r.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(r.id)?`2px solid #FFD700`:r.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
@@ -3158,7 +3185,7 @@ function AppContent() {
               if(!a.sponsored&&b.sponsored) return 1;
               if(sortByDistance){ if(a.distance===null) return 1; if(b.distance===null) return -1; return a.distance-b.distance; }
               return 0;
-            })
+            }).slice(0,visibleBeaute)
             .map(b=>(
               <div key={b.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":b.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(b.id)?`2px solid #FFD700`:b.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
@@ -3220,6 +3247,7 @@ function AppContent() {
             ))}
           </div>
           {beaute.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>💇</p><p>Aucun salon pour le moment</p></div>}
+          {beaute.length > visibleBeaute && <div style={{ textAlign:"center",marginTop:24 }}><button onClick={()=>setVisibleBeaute(v=>v+12)} style={{ background:"rgba(255,105,180,0.1)",border:"1px solid rgba(255,105,180,0.3)",color:"#FF69B4",padding:"10px 28px",borderRadius:20,fontWeight:700,fontSize:14,cursor:"pointer" }}>Voir plus ({beaute.length - visibleBeaute} restants)</button></div>}
         </div>
       )}
 
