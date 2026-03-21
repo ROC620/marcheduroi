@@ -646,6 +646,13 @@ function AppContent() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [postsLoaded, setPostsLoaded] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const gridCols = windowWidth > 900 ? "repeat(3,1fr)" : windowWidth > 600 ? "repeat(2,1fr)" : "1fr";
   const [visibleBoutiques, setVisibleBoutiques] = useState(12);
   const [visibleAteliers, setVisibleAteliers] = useState(12);
   const [visibleRestos, setVisibleRestos] = useState(12);
@@ -2873,7 +2880,7 @@ function AppContent() {
               </button>
             )}
           </div>
-          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,width:"100%" }}>
+          <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%" }}>
             {boutiques.filter(b=>!search||(b.name+b.description+(b.keywords||"")+(b.type||"")).toLowerCase().includes(search.toLowerCase()))
             .map(b=>({...b, distance: userLocation&&b.lat&&b.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(b.lat),parseFloat(b.lng)) : null}))
             .sort((a,b)=>{
@@ -2968,7 +2975,7 @@ function AppContent() {
               </button>
             )}
           </div>
-          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,width:"100%" }}>
+          <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%" }}>
             {ateliers.filter(a=>!search||(a.name+a.description+(a.keywords||"")+(a.type||"")+(a.services||"")).toLowerCase().includes(search.toLowerCase()))
             .map(a=>({...a, distance: userLocation&&a.lat&&a.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(a.lat),parseFloat(a.lng)) : null}))
             .sort((a,b)=>{
@@ -3071,7 +3078,7 @@ function AppContent() {
             )}
           </div>
 
-          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,width:"100%" }}>
+          <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%" }}>
             {restos.filter(r=>!search||(r.name+r.description+(r.keywords||"")+(r.type||"")+(r.specialite||"")).toLowerCase().includes(search.toLowerCase()))
             .map(r=>({...r, distance: userLocation&&r.lat&&r.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(r.lat),parseFloat(r.lng)) : null}))
             .sort((a,b)=>{
@@ -3177,7 +3184,7 @@ function AppContent() {
             )}
           </div>
 
-          <div className="grid-cards" style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,width:"100%" }}>
+          <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%" }}>
             {beaute.filter(b=>!search||(b.name+b.description+(b.keywords||"")+(b.type||"")+(b.specialite||"")+(b.services||"")).toLowerCase().includes(search.toLowerCase()))
             .map(b=>({...b, distance: userLocation&&b.lat&&b.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(b.lat),parseFloat(b.lng)) : null}))
             .sort((a,b)=>{
