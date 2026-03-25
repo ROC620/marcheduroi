@@ -1,6 +1,6 @@
 {
-  "name": "MarketFlow",
-  "short_name": "MarketFlow",
+  "name": "MarcheduRoi",
+  "short_name": "MarcheduRoi",
   "description": "La plateforme collaborative de petites annonces au Bénin et en Afrique",
   "start_url": "/",
   "display": "standalone",
@@ -9,7 +9,7 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/marketflow-icon.svg",
+      "src": "/marcheduRoi-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

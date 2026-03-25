@@ -579,10 +579,10 @@ function ImmoCard({ immo, theme }) {
 }
 
 // Composant formulaire de notation
-// Badge Certifié MarketFlow — Logo officiel complet
+// Badge Certifié MarcheduRoi — Logo officiel complet
 function CertifiedBadge({ size=40 }) {
   return (
-    <div title="Certifié MarketFlow — Verifie sur le terrain par l'equipe MarketFlow"
+    <div title="Certifié MarcheduRoi — Verifie sur le terrain par l'equipe MarketFlow"
       style={{ display:"inline-flex",alignItems:"center",flexShrink:0,cursor:"help",filter:"drop-shadow(0 2px 4px rgba(108,99,255,0.4))" }}>
       <svg width={size} height={size} viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Hexagone bleu/violet */}
@@ -594,9 +594,9 @@ function CertifiedBadge({ size=40 }) {
         {/* Flèche droite bleue */}
         <line x1="12" y1="62" x2="62" y2="62" stroke="#6C63FF" strokeWidth="2.5" strokeLinecap="round"/>
         <polygon points="60,58 68,62 60,66" fill="#6C63FF"/>
-        {/* Texte MarketFlow en cursive */}
+        {/* Texte MarcheduRoi en cursive */}
         <text x="36" y="76" textAnchor="middle" fontSize="10" fontWeight="600"
-          fill="#FF4757" fontFamily="Georgia, serif" fontStyle="italic">MarketFlow</text>
+          fill="#FF4757" fontFamily="Georgia, serif" fontStyle="italic">MarcheduRoi</text>
       </svg>
     </div>
   );
@@ -1039,7 +1039,7 @@ function AppContent() {
       saveAdminSetting("certified", updated);
       notify(prev.includes(authorId)
         ? `Certification retirée à ${authorName}`
-        : `${authorName} est maintenant Certifié MarketFlow 🏅 !`);
+        : `${authorName} est maintenant Certifié MarcheduRoi 🏅 !`);
       return updated;
     });
   };
@@ -1324,7 +1324,7 @@ function AppContent() {
     const { data: profile } = await supabase.from("profiles").select("*").eq("id",data.user.id).single();
     if (profile) setUser({ id:data.user.id, name:profile.name, role:profile.role||"user", isPremium:profile.is_premium||false, plan:profile.plan });
     setView("home"); notify("Bienvenue !");
-    addNotification("Bienvenue sur MarketFlow ! Vos notifications apparaissent ici.", "info");
+    addNotification("Bienvenue sur MarcheduRoi ! Vos notifications apparaissent ici.", "info");
   };
 
   const register = async () => {
@@ -1757,7 +1757,7 @@ function AppContent() {
   const cardStyle = { background:theme.card, border:`1px solid ${theme.border}` };
 
   return (
-    <div style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box" }}>
+    <div onContextMenu={e=>e.preventDefault()} style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -1931,7 +1931,7 @@ function AppContent() {
       <nav style={{ background:`${theme.bg}EE`,borderBottom:`1px solid ${theme.border}`,padding:"0 32px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)",width:"100%" }}>
         <div style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer" }} onClick={()=>setView("landing")}>
           <img src="/logo.svg" alt="MarketFlow" style={{ width:40,height:40,borderRadius:8 }}/>
-          <span style={{ fontWeight:800,fontSize:18,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span>
+          <span style={{ fontWeight:800,fontSize:18,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Marche<span style={{position:"relative"}}>du<span style={{position:"relative"}}>R<span style={{position:"relative"}}>o<span style={{position:"relative",display:"inline-block"}}>i<span style={{position:"absolute",top:"-8px",left:"50%",transform:"translateX(-50%)",fontSize:"10px",lineHeight:1}}>👑</span></span></span></span></span>
         </div>
         <div style={{ display:"flex",gap:6,alignItems:"center" }}>
           <button onClick={()=>setView("home")} style={{ background:view==="home"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="home"?"#6C63FF":theme.sub,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
@@ -2043,7 +2043,7 @@ function AppContent() {
           {/* Titre */}
           <h1 style={{ fontSize:56,fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:16,color:theme.text }}>
             Bienvenue sur{" "}
-            <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span>
+            <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarcheduRoi</span>
           </h1>
 
           {/* Slogan */}
@@ -2118,14 +2118,14 @@ function AppContent() {
 
           {/* Footer landing */}
           <p style={{ color:theme.sub,fontSize:13,marginTop:40,textAlign:"center" }}>
-            © 2026 MarketFlow · Ouidah, Bénin 🇧🇯 · <button onClick={()=>setView("terms")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>CGU</button> · <button onClick={()=>setView("about")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>À propos</button>
+            © 2026 MarcheduRoi · Ouidah, Bénin 🇧🇯 · <button onClick={()=>setView("terms")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>CGU</button> · <button onClick={()=>setView("about")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>À propos</button>
           </p>
         </div>
       )}
 
       {/* HOME */}
       {view==="home"&&(
-        <div style={{ width:"100%",padding:"16px clamp(8px,2vw,24px)",animation:"fadeIn 0.4s ease" }}>
+        <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ marginBottom:12 }}>
             <h1 style={{ fontSize:40,fontWeight:800,lineHeight:1.1,marginBottom:8,color:theme.text,textAlign:"center" }}>Découvrez des <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>annonces uniques</span></h1>
 
@@ -2217,7 +2217,7 @@ function AppContent() {
             <div style={{ marginBottom:32 }}>
               <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:16 }}>
                 <span style={{ fontSize:22 }}>🏆</span>
-                <h2 style={{ fontWeight:800,fontSize:20,color:theme.text }}>Coups de cœur <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span></h2>
+                <h2 style={{ fontWeight:800,fontSize:20,color:theme.text }}>Coups de cœur <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarcheduRoi</span></h2>
               </div>
               <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%" }}>
                 {posts.filter(p=>featuredPosts.includes(p.id)&&!p.expired).map(post=>(
@@ -2522,7 +2522,7 @@ function AppContent() {
 
       {/* ADMIN */}
       {view==="admin"&&user?.role==="admin"&&(
-        <div style={{ width:"100%",padding:"16px clamp(8px,2vw,24px)",animation:"fadeIn 0.4s ease" }}>
+        <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
           <h2 style={{ fontWeight:800,fontSize:28,marginBottom:8,color:theme.text }}>Panneau Admin</h2>
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:16,marginBottom:32,maxWidth:700 }}>
             {[{label:"Annonces",val:posts.length,color:"#6C63FF"},{label:"Boutiques",val:boutiques.length,color:"#FF6584"},{label:"Ateliers",val:ateliers.length,color:"#43C6AC"},{label:"Restos & Bars",val:restos.length,color:"#FF8C00"},{label:"Beauté",val:beaute.length,color:"#FF69B4"},{label:"Signalements",val:reports.filter(r=>r.status==="En attente").length,color:"#FF4757"},{label:"Suggestions",val:suggestions.length,color:"#9A78CF"}].map(s=>(
@@ -2771,7 +2771,7 @@ function AppContent() {
         <div style={{ width:"100%",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",padding:"80px 40px 48px",background:`linear-gradient(180deg,${theme.card},transparent)` }}>
             <img src="/logo.svg" alt="MarketFlow" style={{ width:120,height:120,borderRadius:20,boxShadow:"0 8px 32px rgba(108,99,255,0.4)",margin:"0 auto 20px",display:"block" }}/>
-            <h1 style={{ fontSize:48,fontWeight:800,marginBottom:16,color:theme.text }}>À propos de <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span></h1>
+            <h1 style={{ fontSize:48,fontWeight:800,marginBottom:16,color:theme.text }}>À propos de <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarcheduRoi</span></h1>
             <p style={{ color:theme.sub,fontSize:18,maxWidth:700,margin:"0 auto",lineHeight:1.7 }}>La plateforme de petites annonces qui connecte commerçants, entreprises et particuliers au Bénin et au-delà des frontières.</p>
           </div>
 
@@ -2817,8 +2817,8 @@ function AppContent() {
             <div style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:20,padding:32,textAlign:"center" }}>
               <div style={{ width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:32,fontWeight:800,color:"#fff" }}>H</div>
               <h2 style={{ fontWeight:800,fontSize:22,marginBottom:4,color:theme.text }}>HOUNZA THÉOPHILE</h2>
-              <p style={{ color:"#6C63FF",fontWeight:600,fontSize:14,marginBottom:16 }}>Fondateur & Directeur de MarketFlow</p>
-              <p style={{ color:theme.sub,fontSize:14,lineHeight:1.7,marginBottom:20 }}>Passionné par le commerce et la technologie, HOUNZA Théophile a créé MarketFlow avec la vision de démocratiser le commerce en ligne au Bénin et en Afrique, en offrant une plateforme accessible à tous.</p>
+              <p style={{ color:"#6C63FF",fontWeight:600,fontSize:14,marginBottom:16 }}>Fondateur & Directeur de MarcheduRoi</p>
+              <p style={{ color:theme.sub,fontSize:14,lineHeight:1.7,marginBottom:20 }}>Passionné par le commerce et la technologie, HOUNZA Théophile a créé MarcheduRoi avec la vision de démocratiser le commerce en ligne au Bénin et en Afrique, en offrant une plateforme accessible à tous.</p>
               <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                 <a href="mailto:thza@live.fr" style={{ textDecoration:"none",display:"flex",alignItems:"center",gap:10,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:10,padding:"10px 16px" }}>
                   <svg width="16" height="16" fill="none" stroke="#43C6AC" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -2838,7 +2838,7 @@ function AppContent() {
 
           {/* Footer about */}
           <div style={{ textAlign:"center",padding:"32px 0",borderTop:`1px solid ${theme.border}` }}>
-            <p style={{ color:theme.sub,fontSize:14,marginBottom:16 }}>© 2026 MarketFlow · Tous droits réservés · Ouidah, Bénin</p>
+            <p style={{ color:theme.sub,fontSize:14,marginBottom:16 }}>© 2026 MarcheduRoi · Tous droits réservés · Ouidah, Bénin</p>
             <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 32px",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
               Voir les annonces →
             </button>
@@ -2947,7 +2947,7 @@ function AppContent() {
 
       {/* ATELIERS */}
       {view==="ateliers"&&(
-        <div style={{ width:"100%",padding:"16px clamp(8px,2vw,24px)",animation:"fadeIn 0.4s ease" }}>
+        <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:40 }}>
             <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>🔧 <span style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Ateliers</span></h1>
             <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Trouvez l'artisan qu'il vous faut · Cliquez sur Publier mon atelier</p>
@@ -3048,7 +3048,7 @@ function AppContent() {
       )}
       {/* RESTAURANTS & BARS */}
       {view==="restos"&&(
-        <div style={{ width:"100%",padding:"16px clamp(8px,2vw,24px)",animation:"fadeIn 0.4s ease" }}>
+        <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:40 }}>
             <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>🍽️ <span style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Restaurants & Bars</span></h1>
             <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Rendez votre établissement visible partout · Cliquez sur Publier mon établissement</p>
@@ -3154,7 +3154,7 @@ function AppContent() {
 
       {/* BEAUTÉ & COIFFURE */}
       {view==="beaute"&&(
-        <div style={{ width:"100%",padding:"16px clamp(8px,2vw,24px)",animation:"fadeIn 0.4s ease" }}>
+        <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:40 }}>
             <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>💇 <span style={{ background:"linear-gradient(135deg,#FF69B4,#FF1493)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Beauté & Coiffure</span></h1>
             <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Rendez votre salon visible partout · Cliquez sur Publier mon salon</p>
@@ -3256,7 +3256,7 @@ function AppContent() {
       {view==="stats"&&(
         <div style={{ width:"100%",maxWidth:900,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:48 }}>
-            <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>📊 MarketFlow en <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>chiffres</span></h1>
+            <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>📊 MarcheduRoi en <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>chiffres</span></h1>
             <p style={{ color:theme.sub,fontSize:16 }}>La plateforme qui grandit chaque jour au Bénin et en Afrique</p>
           </div>
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:20,marginBottom:40 }}>
@@ -3278,7 +3278,7 @@ function AppContent() {
             ))}
           </div>
           <div style={{ ...cardStyle,borderRadius:16,padding:28,textAlign:"center" }}>
-            <p style={{ fontSize:18,fontWeight:700,color:theme.text,marginBottom:8 }}>🚀 Rejoignez la communauté MarketFlow</p>
+            <p style={{ fontSize:18,fontWeight:700,color:theme.text,marginBottom:8 }}>🚀 Rejoignez la communauté MarcheduRoi</p>
             <p style={{ color:theme.sub,marginBottom:20 }}>Publiez vos annonces et rejoignez des milliers de commerçants au Bénin</p>
             <button onClick={()=>user?setModal({type:"add"}):setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"14px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
               {user?"Publier une annonce →":"Créer mon compte gratuitement →"}
@@ -3348,7 +3348,7 @@ function AppContent() {
           <div style={{ textAlign:"center",marginBottom:48 }}>
             <div style={{ fontSize:56,marginBottom:16 }}>📋</div>
             <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>Conditions Générales <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>d'Utilisation</span></h1>
-            <p style={{ color:theme.sub,fontSize:15 }}>Dernière mise à jour : Mars 2026 · MarketFlow, Ouidah, Bénin</p>
+            <p style={{ color:theme.sub,fontSize:15 }}>Dernière mise à jour : Mars 2026 · MarcheduRoi, Ouidah, Bénin</p>
           </div>
 
           {/* Avertissement */}
@@ -3357,7 +3357,7 @@ function AppContent() {
             <div>
               <p style={{ fontWeight:800,fontSize:16,color:"#FF4757",marginBottom:8 }}>Avertissement Important</p>
               <p style={{ color:theme.sub,fontSize:14,lineHeight:1.8 }}>
-                En utilisant MarketFlow, vous acceptez pleinement et sans réserve les présentes conditions. Toute violation de ces conditions vous expose à des poursuites judiciaires conformément aux lois et textes en vigueur dans votre pays de résidence, ainsi qu'aux conventions et traités internationaux applicables.
+                En utilisant MarcheduRoi, vous acceptez pleinement et sans réserve les présentes conditions. Toute violation de ces conditions vous expose à des poursuites judiciaires conformément aux lois et textes en vigueur dans votre pays de résidence, ainsi qu'aux conventions et traités internationaux applicables.
               </p>
             </div>
           </div>
@@ -3367,7 +3367,7 @@ function AppContent() {
               num:"1",
               title:"Présentation de MarketFlow",
               icon:"🏢",
-              content:`MarketFlow est une plateforme numérique de petites annonces créée et gérée par HOUNZA THÉOPHILE, basée à Ouidah, Bénin. Elle permet à toute personne physique ou morale de consulter, publier et diffuser des annonces relatives à des produits, biens et services, au Bénin et dans le monde entier. L'accès à la plateforme implique l'acceptation sans réserve des présentes conditions générales d'utilisation.`
+              content:`MarcheduRoi est une plateforme numérique de petites annonces créée et gérée par HOUNZA THÉOPHILE, basée à Ouidah, Bénin. Elle permet à toute personne physique ou morale de consulter, publier et diffuser des annonces relatives à des produits, biens et services, au Bénin et dans le monde entier. L'accès à la plateforme implique l'acceptation sans réserve des présentes conditions générales d'utilisation.`
             },
             {
               num:"2",
@@ -3385,49 +3385,49 @@ function AppContent() {
               num:"4",
               title:"Contenus interdits",
               icon:"🚫",
-              content:`Il est formellement interdit de publier sur MarketFlow : des armes, munitions ou matériels militaires ; des stupéfiants, drogues ou substances illicites ; des contenus à caractère pornographique ou sexuellement explicite ; des contenus impliquant des mineurs ; des animaux protégés ou en voie de disparition ; des médicaments sans autorisation ; des produits contrefaits ou volés ; des annonces frauduleuses ou trompeuses ; des contenus incitant à la haine, à la violence ou à la discrimination ; tout contenu portant atteinte aux droits de propriété intellectuelle. Toute annonce violant ces interdictions sera supprimée immédiatement et l'auteur signalé aux autorités compétentes.`
+              content:`Il est formellement interdit de publier sur MarcheduRoi : des armes, munitions ou matériels militaires ; des stupéfiants, drogues ou substances illicites ; des contenus à caractère pornographique ou sexuellement explicite ; des contenus impliquant des mineurs ; des animaux protégés ou en voie de disparition ; des médicaments sans autorisation ; des produits contrefaits ou volés ; des annonces frauduleuses ou trompeuses ; des contenus incitant à la haine, à la violence ou à la discrimination ; tout contenu portant atteinte aux droits de propriété intellectuelle. Toute annonce violant ces interdictions sera supprimée immédiatement et l'auteur signalé aux autorités compétentes.`
             },
             {
               num:"5",
               title:"Responsabilité des utilisateurs",
               icon:"⚖️",
-              content:`Chaque utilisateur est entièrement et personnellement responsable du contenu qu'il publie sur MarketFlow. L'utilisateur garantit que ses annonces sont conformes aux lois en vigueur dans son pays et dans le pays destinataire. MarketFlow ne vérifie pas l'exactitude des informations publiées et ne peut être tenu responsable des transactions effectuées entre utilisateurs. En cas de litige entre acheteur et vendeur, MarketFlow ne peut être partie prenante et ne saurait être tenu pour responsable.`
+              content:`Chaque utilisateur est entièrement et personnellement responsable du contenu qu'il publie sur MarcheduRoi. L'utilisateur garantit que ses annonces sont conformes aux lois en vigueur dans son pays et dans le pays destinataire. MarcheduRoi ne vérifie pas l'exactitude des informations publiées et ne peut être tenu responsable des transactions effectuées entre utilisateurs. En cas de litige entre acheteur et vendeur, MarcheduRoi ne peut être partie prenante et ne saurait être tenu pour responsable.`
             },
             {
               num:"6",
               title:"Limitation de responsabilité de MarketFlow",
               icon:"🛡️",
-              content:`MarketFlow agit en qualité d'intermédiaire technique et ne peut être tenu responsable : des contenus publiés par les utilisateurs ; des transactions commerciales entre utilisateurs ; des pertes financières résultant d'une utilisation de la plateforme ; des interruptions temporaires de service pour maintenance ; des dommages indirects ou consécutifs liés à l'utilisation du site. MarketFlow s'engage cependant à faire ses meilleurs efforts pour assurer la disponibilité et la sécurité de la plateforme.`
+              content:`MarcheduRoi agit en qualité d'intermédiaire technique et ne peut être tenu responsable : des contenus publiés par les utilisateurs ; des transactions commerciales entre utilisateurs ; des pertes financières résultant d'une utilisation de la plateforme ; des interruptions temporaires de service pour maintenance ; des dommages indirects ou consécutifs liés à l'utilisation du site. MarcheduRoi s'engage cependant à faire ses meilleurs efforts pour assurer la disponibilité et la sécurité de la plateforme.`
             },
             {
               num:"7",
               title:"Protection des données personnelles",
               icon:"🔒",
-              content:`MarketFlow collecte et traite les données personnelles des utilisateurs dans le strict respect de la vie privée. Les données collectées (nom, email, numéro de téléphone) sont utilisées uniquement pour le fonctionnement de la plateforme et ne sont jamais vendues à des tiers. L'utilisateur dispose d'un droit d'accès, de rectification et de suppression de ses données en contactant : thza@live.fr. MarketFlow s'engage à protéger vos données contre tout accès non autorisé.`
+              content:`MarcheduRoi collecte et traite les données personnelles des utilisateurs dans le strict respect de la vie privée. Les données collectées (nom, email, numéro de téléphone) sont utilisées uniquement pour le fonctionnement de la plateforme et ne sont jamais vendues à des tiers. L'utilisateur dispose d'un droit d'accès, de rectification et de suppression de ses données en contactant : thza@live.fr. MarcheduRoi s'engage à protéger vos données contre tout accès non autorisé.`
             },
             {
               num:"8",
               title:"Propriété intellectuelle",
               icon:"©️",
-              content:`La plateforme MarketFlow, son logo, son design, son code source et tous ses contenus originaux sont la propriété exclusive de HOUNZA THÉOPHILE. Toute reproduction, modification, distribution ou utilisation commerciale sans autorisation écrite préalable est strictement interdite et constitue une violation du droit de la propriété intellectuelle passible de poursuites judiciaires. Les utilisateurs conservent la propriété des contenus qu'ils publient mais accordent à MarketFlow une licence d'affichage.`
+              content:`La plateforme MarcheduRoi, son logo, son design, son code source et tous ses contenus originaux sont la propriété exclusive de HOUNZA THÉOPHILE. Toute reproduction, modification, distribution ou utilisation commerciale sans autorisation écrite préalable est strictement interdite et constitue une violation du droit de la propriété intellectuelle passible de poursuites judiciaires. Les utilisateurs conservent la propriété des contenus qu'ils publient mais accordent à MarcheduRoi une licence d'affichage.`
             },
             {
               num:"9",
               title:"Suspension et suppression de compte",
               icon:"🔴",
-              content:`MarketFlow se réserve le droit de suspendre ou supprimer tout compte sans préavis en cas de : violation des présentes conditions ; publication de contenus illicites ; comportement frauduleux ou abusif ; utilisation de fausses informations lors de l'inscription. La suppression d'un compte entraîne la perte de toutes les annonces publiées. L'utilisateur suspendu peut faire appel en contactant le support via WhatsApp ou email.`
+              content:`MarcheduRoi se réserve le droit de suspendre ou supprimer tout compte sans préavis en cas de : violation des présentes conditions ; publication de contenus illicites ; comportement frauduleux ou abusif ; utilisation de fausses informations lors de l'inscription. La suppression d'un compte entraîne la perte de toutes les annonces publiées. L'utilisateur suspendu peut faire appel en contactant le support via WhatsApp ou email.`
             },
             {
               num:"10",
               title:"Sanctions et poursuites judiciaires",
               icon:"⚖️",
-              content:`Tout utilisateur qui outrepasserait les présentes conditions d'utilisation s'expose à des sanctions graves. MarketFlow se réserve le droit d'engager toutes les procédures judiciaires nécessaires à la protection de ses intérêts et de ceux de ses utilisateurs. Les contrevenants seront poursuivis conformément aux lois et textes législatifs en vigueur dans leur pays de résidence, ainsi que selon les conventions et traités internationaux applicables en matière de commerce électronique, de cybercriminalité et de protection des données personnelles.`
+              content:`Tout utilisateur qui outrepasserait les présentes conditions d'utilisation s'expose à des sanctions graves. MarcheduRoi se réserve le droit d'engager toutes les procédures judiciaires nécessaires à la protection de ses intérêts et de ceux de ses utilisateurs. Les contrevenants seront poursuivis conformément aux lois et textes législatifs en vigueur dans leur pays de résidence, ainsi que selon les conventions et traités internationaux applicables en matière de commerce électronique, de cybercriminalité et de protection des données personnelles.`
             },
             {
               num:"11",
               title:"Modification des conditions",
               icon:"📝",
-              content:`MarketFlow se réserve le droit de modifier les présentes conditions à tout moment. Les utilisateurs seront informés de toute modification importante par notification sur la plateforme. La poursuite de l'utilisation de MarketFlow après modification constitue une acceptation tacite des nouvelles conditions.`
+              content:`MarcheduRoi se réserve le droit de modifier les présentes conditions à tout moment. Les utilisateurs seront informés de toute modification importante par notification sur la plateforme. La poursuite de l'utilisation de MarcheduRoi après modification constitue une acceptation tacite des nouvelles conditions.`
             },
             {
               num:"12",
@@ -3453,8 +3453,8 @@ function AppContent() {
 
           {/* Signature */}
           <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:16,padding:28,marginTop:32,textAlign:"center" }}>
-            <p style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:8 }}>En utilisant MarketFlow, vous confirmez avoir lu, compris et accepté l'intégralité des présentes conditions.</p>
-            <p style={{ color:theme.sub,fontSize:13,marginBottom:20 }}>© 2026 MarketFlow · HOUNZA THÉOPHILE · Ouidah, Bénin 🇧🇯</p>
+            <p style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:8 }}>En utilisant MarcheduRoi, vous confirmez avoir lu, compris et accepté l'intégralité des présentes conditions.</p>
+            <p style={{ color:theme.sub,fontSize:13,marginBottom:20 }}>© 2026 MarcheduRoi · HOUNZA THÉOPHILE · Ouidah, Bénin 🇧🇯</p>
             <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 32px",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
               Retour aux annonces →
             </button>
@@ -3468,7 +3468,7 @@ function AppContent() {
           <div style={{ textAlign:"center",marginBottom:40 }}>
             <p style={{ fontSize:48,marginBottom:12 }}>🎁</p>
             <h1 style={{ fontSize:38,fontWeight:800,marginBottom:12,color:theme.text }}>Programme de <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Parrainage</span></h1>
-            <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez <strong style={{ color:"#FFD700" }}>10 amis</strong> sur MarketFlow et gagnez <strong style={{ color:"#FFD700" }}>1 mois de publication gratuit</strong> !</p>
+            <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez <strong style={{ color:"#FFD700" }}>10 amis</strong> sur MarcheduRoi et gagnez <strong style={{ color:"#FFD700" }}>1 mois de publication gratuit</strong> !</p>
             <div style={{ background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:12,padding:"12px 20px",marginTop:12,display:"inline-block" }}>
               <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>🎁 10 parrainages = 1 annonce simple gratuite (valeur 1 500 FCFA)</p>
               <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>⚠️ Valable uniquement pour les annonces simples · Non applicable aux boutiques, ateliers, restos et salons</p>
@@ -3501,7 +3501,7 @@ function AppContent() {
                 <input readOnly value={`https://marketflow-delta.vercel.app?ref=${user.id}`} style={{ ...inputStyle,flex:1,background:theme.bg }} onClick={e=>e.target.select()}/>
                 <button onClick={()=>{ navigator.clipboard.writeText(`https://marketflow-delta.vercel.app?ref=${user.id}`); notify("Lien copié ! 📋"); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 16px",borderRadius:10,fontWeight:700,cursor:"pointer" }}>Copier</button>
               </div>
-              <a href={`https://wa.me/?text=${encodeURIComponent("Rejoins-moi sur MarketFlow, la plateforme de petites annonces au Benin ! https://marketflow-delta.vercel.app?ref="+user.id)}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"block" }}>
+              <a href={`https://wa.me/?text=${encodeURIComponent("Rejoins-moi sur MarcheduRoi, la plateforme de petites annonces au Benin ! https://marketflow-delta.vercel.app?ref="+user.id)}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"block" }}>
                 <button style={{ width:"100%",padding:"14px",background:"#25D366",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
                   <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                   Partager sur WhatsApp
@@ -4144,7 +4144,7 @@ function AppContent() {
             {modal.type==="newsletter"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>📧 Newsletter MarketFlow</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>📧 Newsletter MarcheduRoi</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <p style={{ color:theme.sub,fontSize:14,marginBottom:20,lineHeight:1.6 }}>
@@ -4401,7 +4401,7 @@ function AppContent() {
                   <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>💡 Envoyer une suggestion</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
-                <p style={{ color:theme.sub,fontSize:14,marginBottom:24,lineHeight:1.5 }}>Partagez vos idées pour améliorer MarketFlow ! Toutes les suggestions sont lues par l'équipe.</p>
+                <p style={{ color:theme.sub,fontSize:14,marginBottom:24,lineHeight:1.5 }}>Partagez vos idées pour améliorer MarcheduRoi ! Toutes les suggestions sont lues par l'équipe.</p>
                 <div style={{ marginBottom:16 }}>
                   <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre nom (optionnel)</label>
                   <input value={suggestionName} onChange={e=>setSuggestionName(e.target.value)} placeholder="Visiteur anonyme" style={inputStyle}/>
@@ -4468,7 +4468,7 @@ function AnnonceDetail() {
       <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 32px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100 }}>
         <div style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer" }} onClick={()=>navigate("/")}>
           <img src="/logo.svg" alt="MarketFlow" style={{ width:40,height:40,borderRadius:8 }}/>
-          <span style={{ fontWeight:800,fontSize:18,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarketFlow</span>
+          <span style={{ fontWeight:800,fontSize:18,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Marche<span style={{position:"relative"}}>du<span style={{position:"relative"}}>R<span style={{position:"relative"}}>o<span style={{position:"relative",display:"inline-block"}}>i<span style={{position:"absolute",top:"-8px",left:"50%",transform:"translateX(-50%)",fontSize:"10px",lineHeight:1}}>👑</span></span></span></span></span>
         </div>
         <button onClick={()=>navigate("/")} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>← Retour</button>
       </div>
@@ -4530,7 +4530,7 @@ function AnnonceDetail() {
 
         {/* Bouton retour */}
         <button onClick={()=>navigate("/")} style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
-          ← Voir toutes les annonces sur MarketFlow
+          ← Voir toutes les annonces sur MarcheduRoi
         </button>
       </div>
     </div>
