@@ -1,53 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#8B5CF6"/>
-      <stop offset="100%" style="stop-color:#EC4899"/>
-    </linearGradient>
-    <linearGradient id="mGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#7C3AED"/>
-      <stop offset="100%" style="stop-color:#EF4444"/>
-    </linearGradient>
-    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#10B981"/>
-      <stop offset="100%" style="stop-color:#3B82F6"/>
-    </linearGradient>
-    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#8B5CF6"/>
-      <stop offset="100%" style="stop-color:#EC4899"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6C63FF"/>
+      <stop offset="100%" style="stop-color:#FF6584"/>
     </linearGradient>
   </defs>
-
-  <rect width="512" height="600" fill="white"/>
-
-  <!-- Hexagone -->
-  <path d="M256 30 L420 125 L420 315 L256 410 L92 315 L92 125 Z"
-    fill="none" stroke="url(#hexGrad)" stroke-width="8"/>
-
-  <!-- M -->
-  <text x="256" y="320" text-anchor="middle" font-size="220" font-weight="900"
-    fill="url(#mGrad)" font-family="Arial Black, sans-serif">M</text>
-
+  <!-- Fond dégradé arrondi -->
+  <rect width="512" height="512" rx="80" fill="url(#bg)"/>
+  <!-- Hexagone blanc transparent -->
+  <path d="M256 55 L420 150 L420 340 L256 435 L92 340 L92 150 Z"
+    fill="white" opacity="0.15" stroke="white" stroke-width="10"/>
+  <!-- Grand M blanc -->
+  <text x="256" y="330" text-anchor="middle" font-size="240" font-weight="900"
+    fill="white" font-family="Georgia, serif">M</text>
   <!-- Flèche concave (creuse vers le bas) -->
-  <path d="M75 370 Q256 440 437 370"
-    fill="none" stroke="url(#arrowGrad)" stroke-width="6" stroke-linecap="round"/>
-  <!-- Pointe de flèche -->
-  <polygon points="425,355 445,370 425,385" fill="#3B82F6"/>
-
-  <!-- MarchéduRoı avec accent sur é -->
-  <text x="256" y="490" text-anchor="middle" font-size="54" font-weight="900"
-    fill="url(#textGrad)" font-family="Arial Black, sans-serif" font-style="italic">MarchéduRoı</text>
+  <path d="M80 390 Q256 460 432 390"
+    fill="none" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <polygon points="420,373 444,390 420,407" fill="white"/>
+  <!-- MarchéduRoı -->
+  <text x="248" y="475" text-anchor="middle" font-size="46" font-weight="700"
+    fill="white" font-family="Georgia, serif" font-style="italic">MarchéduRoı</text>
   <!-- Couronne sur le ı -->
-  <text x="418" y="443" text-anchor="middle" font-size="26">👑</text>
-
-  <!-- BÉNIN · AFRIQUE -->
-  <text x="256" y="535" text-anchor="middle" font-size="22" font-weight="400"
-    fill="#A78BFA" font-family="Arial, sans-serif" letter-spacing="6">BÉNIN · AFRIQUE</text>
-
-  <!-- Globe -->
-  <circle cx="256" cy="572" r="18" fill="none" stroke="#06B6D4" stroke-width="2"/>
-  <ellipse cx="256" cy="572" rx="9" ry="18" fill="none" stroke="#06B6D4" stroke-width="1.5"/>
-  <line x1="238" y1="572" x2="274" y2="572" stroke="#06B6D4" stroke-width="1.5"/>
-  <path d="M239 558 Q256 554 273 558" fill="none" stroke="#06B6D4" stroke-width="1.5"/>
-  <path d="M239 586 Q256 590 273 586" fill="none" stroke="#06B6D4" stroke-width="1.5"/>
+  <text x="410" y="432" text-anchor="middle" font-size="26">👑</text>
 </svg>
