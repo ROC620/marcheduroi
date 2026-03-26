@@ -1964,23 +1964,46 @@ function AppContent() {
       )}
 
       {/* Navbar */}
-      <nav style={{ background:`${theme.bg}EE`,borderBottom:`1px solid ${theme.border}`,padding:"0 32px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)",width:"100%" }}>
-        <div style={{ display:"flex",alignItems:"center",cursor:"pointer" }} onClick={()=>setView("landing")}>
-          <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,width:"auto",objectFit:"contain" }}/>
+      <nav style={{ background:`${theme.bg}EE`,borderBottom:`1px solid ${theme.border}`,padding:"0 16px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)",width:"100%" }}>
+
+        {/* LOGO — complet sur desktop, "M" seul sur mobile */}
+        <div style={{ display:"flex",alignItems:"center",cursor:"pointer",flexShrink:0 }} onClick={()=>setView("landing")}>
+          {windowWidth > 600 ? (
+            <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,width:"auto",objectFit:"contain" }}/>
+          ) : (
+            <div style={{ width:40,height:40,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 12px rgba(108,99,255,0.4)" }}>
+              <span style={{ fontSize:24,fontWeight:900,color:"#fff",fontFamily:"Georgia,serif",lineHeight:1 }}>M</span>
+            </div>
+          )}
         </div>
-        <div style={{ display:"flex",gap:6,alignItems:"center" }}>
-          <button onClick={()=>setView("home")} style={{ background:view==="home"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="home"?"#6C63FF":theme.sub,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
-            {t.annonces}
-          </button>
-          <button onClick={()=>setModal({type:"howto"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
-            {t.publierAnnonce}
-          </button>
-          {user?.role==="admin"&&<button onClick={()=>setView("admin")} style={{ background:"transparent",border:"none",color:"#FF6584",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>{t.admin}</button>}
-          <button onClick={()=>{ const newLang = lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); }} style={{ background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,padding:"6px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5 }}>
-            {lang==="fr"?<>🇫🇷 FR</>:<>🇬🇧 EN</>}
-          </button>
-          <button onClick={()=>setShowBgPicker(p=>!p)} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 10px",borderRadius:8,display:"flex",alignItems:"center",gap:4,fontWeight:600,fontSize:13 }}><Icon name="palette" size={14}/></button>
-          {/* Menu Plus ▾ */}
+
+        {/* BOUTONS DROITE */}
+        <div style={{ display:"flex",gap:4,alignItems:"center" }}>
+
+          {/* Annonces + Publier + Admin — desktop seulement */}
+          {windowWidth > 600 && <>
+            <button onClick={()=>setView("home")} style={{ background:view==="home"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="home"?"#6C63FF":theme.sub,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
+              {t.annonces}
+            </button>
+            <button onClick={()=>setModal({type:"howto"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
+              {t.publierAnnonce}
+            </button>
+            {user?.role==="admin" && <button onClick={()=>setView("admin")} style={{ background:"transparent",border:"none",color:"#FF6584",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>{t.admin}</button>}
+            <button onClick={()=>{ const newLang=lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); }} style={{ background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,padding:"6px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5 }}>
+              {lang==="fr"?<>🇫🇷 FR</>:<>🇬🇧 EN</>}
+            </button>
+            <button onClick={()=>setShowBgPicker(p=>!p)} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 10px",borderRadius:8,display:"flex",alignItems:"center",gap:4,fontWeight:600,fontSize:13 }}><Icon name="palette" size={14}/></button>
+          </>}
+
+          {/* CONNEXION / INSCRIPTION — avant Plus sur mobile, dans user block sur desktop */}
+          {!user && windowWidth <= 600 && (
+            <>
+              <button onClick={()=>setView("login")} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,padding:"7px 10px",borderRadius:8,fontWeight:600,fontSize:12,WebkitTapHighlightColor:"transparent" }}>{t.connexion}</button>
+              <button onClick={()=>setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"7px 10px",borderRadius:8,fontWeight:600,fontSize:12,WebkitTapHighlightColor:"transparent" }}>{t.inscrire}</button>
+            </>
+          )}
+
+          {/* MENU PLUS ▾ */}
           <div style={{ position:"relative" }}>
             <button
               onClick={e=>{e.stopPropagation();setShowMoreMenu(m=>!m);}}
@@ -1989,14 +2012,21 @@ function AppContent() {
             </button>
             {showMoreMenu && (
               <>
-                {/* Overlay tactile pour fermer sur mobile */}
-                <div
-                  onClick={()=>setShowMoreMenu(false)}
-                  style={{ position:"fixed",inset:0,zIndex:299 }}
-                />
-                <div
-                  onClick={e=>e.stopPropagation()}
-                  style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:14,boxShadow:"0 20px 60px rgba(0,0,0,0.4)",zIndex:300,minWidth:220,overflow:"hidden" }}>
+                <div onClick={()=>setShowMoreMenu(false)} style={{ position:"fixed",inset:0,zIndex:299 }}/>
+                <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:14,boxShadow:"0 20px 60px rgba(0,0,0,0.4)",zIndex:300,minWidth:230,overflow:"hidden" }}>
+                  {/* Sur mobile : ajouter Annonces + Publier dans le menu Plus */}
+                  {windowWidth <= 600 && [
+                    { label:"📋 "+t.annonces, action:()=>{setView("home");setShowMoreMenu(false);} },
+                    { label:"💡 "+t.publierAnnonce, action:()=>{setModal({type:"howto"});setShowMoreMenu(false);} },
+                    ...(user?.role==="admin"?[{ label:"⚙️ "+t.admin, action:()=>{setView("admin");setShowMoreMenu(false);} }]:[]),
+                    { label:lang==="fr"?"🇬🇧 English":"🇫🇷 Français", action:()=>{ const newLang=lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); setShowMoreMenu(false); } },
+                    { label:"🎨 "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
+                  ].map((item,i,arr)=>(
+                    <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"14px 18px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:`1px solid ${theme.border}`,WebkitTapHighlightColor:"transparent" }}>
+                      {item.label}
+                    </button>
+                  ))}
+                  {/* Commun desktop + mobile */}
                   {[
                     { label:"📞 Support technique", action:()=>{ window.open("https://wa.me/2290147562640?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide.", "_blank"); setShowMoreMenu(false); } },
                     { label:t.stats, action:()=>{setView("stats");setShowMoreMenu(false);} },
@@ -2006,10 +2036,7 @@ function AppContent() {
                     { label:t.apropos, action:()=>{setView("about");setShowMoreMenu(false);} },
                     { label:t.cgu, action:()=>{setView("terms");setShowMoreMenu(false);} },
                   ].map((item,i,arr)=>(
-                    <button
-                      key={item.label}
-                      onClick={item.action}
-                      style={{ width:"100%",padding:"14px 18px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:i<arr.length-1?`1px solid ${theme.border}`:"none",WebkitTapHighlightColor:"transparent" }}>
+                    <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"14px 18px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:i<arr.length-1?`1px solid ${theme.border}`:"none",WebkitTapHighlightColor:"transparent" }}>
                       {item.label}
                     </button>
                   ))}
@@ -2017,17 +2044,17 @@ function AppContent() {
               </>
             )}
           </div>
-          {user?(
-            <div style={{ display:"flex",alignItems:"center",gap:6 }}>
 
+          {/* UTILISATEUR CONNECTÉ */}
+          {user ? (
+            <div style={{ display:"flex",alignItems:"center",gap:4 }}>
               {/* Messagerie */}
               <div style={{ position:"relative" }}>
                 <button onClick={()=>{ setShowMessages(s=>!s); loadMessages(); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px",cursor:"pointer",position:"relative" }}>
-                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" title={t.messages}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                   {unreadCount > 0 && <span style={{ position:"absolute",top:4,right:4,background:"#6C63FF",color:"#fff",borderRadius:"50%",width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800 }}>{unreadCount}</span>}
                 </button>
               </div>
-
               {/* Cloche notifications */}
               <div style={{ position:"relative" }}>
                 <button onClick={()=>{setShowNotifs(s=>!s); if(!showNotifs) markAllRead();}} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px",position:"relative",cursor:"pointer" }}>
@@ -2040,7 +2067,7 @@ function AppContent() {
                 </button>
                 {/* Dropdown notifications */}
                 {showNotifs && (
-                  <div onClick={e=>e.stopPropagation()} style={{ position:"absolute",right:0,top:44,width:320,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:14,boxShadow:"0 20px 60px rgba(0,0,0,0.4)",zIndex:200,overflow:"hidden" }}>
+                  <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,width:Math.min(320,windowWidth-16),background:theme.card,border:`1px solid ${theme.border}`,borderRadius:14,boxShadow:"0 20px 60px rgba(0,0,0,0.4)",zIndex:300,overflow:"hidden" }}>
                     <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",borderBottom:`1px solid ${theme.border}` }}>
                       <p style={{ fontWeight:700,fontSize:14,color:theme.text }}>🔔 Notifications</p>
                       {notifications.length > 0 && <button onClick={clearNotifications} style={{ background:"none",border:"none",color:theme.sub,fontSize:11,cursor:"pointer",fontWeight:600 }}>Tout effacer</button>}
@@ -2069,11 +2096,14 @@ function AppContent() {
               <button onClick={()=>setView("dashboard")} style={{ ...cardStyle,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,color:theme.text }}><Icon name="user" size={14}/>{user.name.split(" ")[0]}</button>
               <button onClick={logout} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px" }}><Icon name="logout" size={16}/></button>
             </div>
-          ):(
-            <div style={{ display:"flex",gap:6 }}>
-              <button onClick={()=>setView("login")} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>Connexion</button>
-              <button onClick={()=>setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,transition:"box-shadow 0.2s" }}>S'inscrire</button>
-            </div>
+          ) : (
+            /* Connexion/Inscription — desktop seulement (sur mobile c'est avant Plus) */
+            windowWidth > 600 && (
+              <div style={{ display:"flex",gap:6 }}>
+                <button onClick={()=>setView("login")} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{t.connexion}</button>
+                <button onClick={()=>setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,transition:"box-shadow 0.2s" }}>{t.inscrire}</button>
+              </div>
+            )
           )}
         </div>
       </nav>
