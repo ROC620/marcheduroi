@@ -1965,9 +1965,8 @@ function AppContent() {
 
       {/* Navbar */}
       <nav style={{ background:`${theme.bg}EE`,borderBottom:`1px solid ${theme.border}`,padding:"0 32px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)",width:"100%" }}>
-        <div style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer" }} onClick={()=>setView("landing")}>
-          <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:40,height:40,borderRadius:8 }}/>
-          <span style={{ fontWeight:800,fontSize:17,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRo<span style={{position:"relative",display:"inline-block"}}>ı<span style={{position:"absolute",top:"-10px",left:"50%",transform:"translateX(-50%)",fontSize:"10px",lineHeight:1,WebkitTextFillColor:"initial",background:"none",WebkitBackgroundClip:"initial",filter:"none"}}>👑</span></span></span>
+        <div style={{ display:"flex",alignItems:"center",cursor:"pointer" }} onClick={()=>setView("landing")}>
+          <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,width:"auto",objectFit:"contain" }}/>
         </div>
         <div style={{ display:"flex",gap:6,alignItems:"center" }}>
           <button onClick={()=>setView("home")} style={{ background:view==="home"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="home"?"#6C63FF":theme.sub,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
@@ -2074,7 +2073,7 @@ function AppContent() {
           <div style={{ position:"absolute",bottom:-100,right:-100,width:500,height:500,borderRadius:"50%",background:"rgba(255,101,132,0.05)",pointerEvents:"none" }}/>
 
           {/* Logo */}
-          <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:160,height:160,marginBottom:24,filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.3))" }}/>
+          <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:280,height:"auto",marginBottom:24,filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.3))" }}/>
 
           {/* Titre */}
           <h1 style={{ fontSize:56,fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:16,color:theme.text }}>
@@ -4528,9 +4527,8 @@ function AnnonceDetail() {
     <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",color:"#E8E8F0" }}>
       {/* Navbar simple */}
       <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 32px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100 }}>
-        <div style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer" }} onClick={()=>navigate("/")}>
-          <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:40,height:40,borderRadius:8 }}/>
-          <span style={{ fontWeight:800,fontSize:17,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRo<span style={{position:"relative",display:"inline-block"}}>ı<span style={{position:"absolute",top:"-10px",left:"50%",transform:"translateX(-50%)",fontSize:"10px",lineHeight:1,WebkitTextFillColor:"initial",background:"none",WebkitBackgroundClip:"initial",filter:"none"}}>👑</span></span></span>
+        <div style={{ display:"flex",alignItems:"center",cursor:"pointer" }} onClick={()=>navigate("/")}>
+          <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,width:"auto",objectFit:"contain" }}/>
         </div>
         <button onClick={()=>navigate("/")} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>← Retour</button>
       </div>
