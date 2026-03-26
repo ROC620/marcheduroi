@@ -1216,7 +1216,6 @@ function AppContent() {
     notify("Sponsorisé jusqu'au " + expStr + " !");
   };
 
-  useEffect(() => { setVisibleCount(12); }, [search, category, priceMin, priceMax]);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [userLocation, setUserLocation] = useState(null);
@@ -1757,11 +1756,12 @@ function AppContent() {
   const cardStyle = { background:theme.card, border:`1px solid ${theme.border}` };
 
   return (
-    <div onContextMenu={e=>e.preventDefault()} style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box" }}>
+    <div onContextMenu={e=>e.preventDefault()} style={{ minHeight:"100vh",width:"100%",flex:1,background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-        html,body{width:100%;overflow-x:hidden;}
+        html,body{width:100%;min-height:100vh;overflow-x:hidden;}
+        #root,#app{width:100%;min-height:100vh;display:flex;flex-direction:column;}
         ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:#2A2D45;border-radius:3px;}
         input,textarea,select{outline:none;font-family:inherit;}
         button{cursor:pointer;font-family:inherit;}
@@ -1931,7 +1931,7 @@ function AppContent() {
       <nav style={{ background:`${theme.bg}EE`,borderBottom:`1px solid ${theme.border}`,padding:"0 32px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)",width:"100%" }}>
         <div style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer" }} onClick={()=>setView("landing")}>
           <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:40,height:40,borderRadius:8 }}/>
-          <span style={{ fontWeight:800,fontSize:17,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi<span style={{position:"relative",display:"inline-block"}}>ı<span style={{position:"absolute",top:"-10px",left:"50%",transform:"translateX(-50%)",fontSize:"10px",lineHeight:1,WebkitTextFillColor:"initial",background:"none",WebkitBackgroundClip:"initial",filter:"none"}}>👑</span></span></span>
+          <span style={{ fontWeight:800,fontSize:17,background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRo<span style={{position:"relative",display:"inline-block"}}>ı<span style={{position:"absolute",top:"-10px",left:"50%",transform:"translateX(-50%)",fontSize:"10px",lineHeight:1,WebkitTextFillColor:"initial",background:"none",WebkitBackgroundClip:"initial",filter:"none"}}>👑</span></span></span>
         </div>
         <div style={{ display:"flex",gap:6,alignItems:"center" }}>
           <button onClick={()=>setView("home")} style={{ background:view==="home"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="home"?"#6C63FF":theme.sub,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
@@ -2149,7 +2149,7 @@ function AppContent() {
             {/* Recherche + GPS + Tri distance - tous sur la même ligne */}
             <div style={{ display:"flex",gap:6,alignItems:"center",marginBottom:8 }}>
               {/* Barre de recherche fixe 50 caractères */}
-              <div style={{ position:"relative",width:"50ch",flexShrink:0 }}>
+              <div style={{ position:"relative",flex:1,minWidth:0 }}>
                 <div style={{ position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={15}/></div>
                 <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.rechercher} maxLength={100} style={{ ...inputStyle,padding:"11px 16px 11px 40px",borderRadius:10,fontSize:13,width:"100%" }}/>
               </div>
