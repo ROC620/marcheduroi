@@ -648,9 +648,13 @@ function AppContent() {
   const [postsLoaded, setPostsLoaded] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
+    let timer;
+    const handleResize = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => setWindowWidth(window.innerWidth), 150);
+    };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => { window.removeEventListener("resize", handleResize); clearTimeout(timer); };
   }, []);
   const gridCols = windowWidth > 800 ? "repeat(3,1fr)" : windowWidth > 500 ? "repeat(2,1fr)" : "1fr";
   const [visibleBoutiques, setVisibleBoutiques] = useState(12);
@@ -763,6 +767,26 @@ function AppContent() {
           localStorage.setItem("mf_favorites", JSON.stringify(data.favorites));
         }
       });
+
+      // ── Realtime : nouveaux messages en temps réel ──────────────────────────
+      const channel = supabase
+        .channel("messages_realtime_" + user.id)
+        .on("postgres_changes", {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `receiver_id=eq.${user.id}`,
+        }, (payload) => {
+          loadMessages();
+          addNotification(
+            `Nouveau message de ${payload.new.sender_name} : "${payload.new.content.slice(0,40)}..."`,
+            "contact",
+            payload.new.post_id
+          );
+        })
+        .subscribe();
+
+      return () => { supabase.removeChannel(channel); };
     }
   }, [user]);
 
@@ -805,44 +829,54 @@ function AppContent() {
   };
 
   const loadShops = async () => {
-    const mapItem = x => ({...x, authorId: x.author_id, expiresAt: x.expires_at, sponsoredUntil: x.sponsored_until, photos: x.photos||[], likes: x.likes||0});
-    const { data: bData } = await supabase.from("boutiques").select("*").order("created_at", { ascending: false });
-    if (bData && bData.length > 0) setBoutiques(bData.map(mapItem));
-    const { data: aData } = await supabase.from("ateliers").select("*").order("created_at", { ascending: false });
-    if (aData && aData.length > 0) setAteliers(aData.map(mapItem));
-    const { data: rData } = await supabase.from("restos").select("*").order("created_at", { ascending: false });
-    if (rData && rData.length > 0) setRestos(rData.map(mapItem));
-    const { data: beData } = await supabase.from("beaute").select("*").order("created_at", { ascending: false });
-    if (beData && beData.length > 0) setBeaute(beData.map(mapItem));
+    try {
+      const mapItem = x => ({...x, authorId: x.author_id, expiresAt: x.expires_at, sponsoredUntil: x.sponsored_until, photos: x.photos||[], likes: x.likes||0});
+      const { data: bData } = await supabase.from("boutiques").select("*").order("created_at", { ascending: false }).range(0, 99);
+      if (bData && bData.length > 0) setBoutiques(bData.map(mapItem));
+      const { data: aData } = await supabase.from("ateliers").select("*").order("created_at", { ascending: false }).range(0, 99);
+      if (aData && aData.length > 0) setAteliers(aData.map(mapItem));
+      const { data: rData } = await supabase.from("restos").select("*").order("created_at", { ascending: false }).range(0, 99);
+      if (rData && rData.length > 0) setRestos(rData.map(mapItem));
+      const { data: beData } = await supabase.from("beaute").select("*").order("created_at", { ascending: false }).range(0, 99);
+      if (beData && beData.length > 0) setBeaute(beData.map(mapItem));
+    } catch(err) {
+      console.error("Erreur chargement boutiques:", err);
+    }
   };
 
   const loadPosts = async () => {
-    const { data } = await supabase
-      .from("posts")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data && data.length > 0) {
-      const mapped = data.map(p => ({
-        ...p,
-        authorId: p.author_id,
-        expiresAt: p.expires_at,
-        sponsoredUntil: p.sponsored_until,
-        ownerVerified: p.owner_verified,
-        photos: p.photos || [],
-        likes: p.likes || 0,
-      }));
-      // Merge Supabase posts with initial posts (avoid duplicates)
-      const supabaseIds = mapped.map(p => p.id);
-      const initialOnly = INITIAL_POSTS.filter(p => !supabaseIds.includes(String(p.id)));
-      setPosts([...mapped, ...initialOnly]);
+    try {
+      const { data, error } = await supabase
+        .from("posts")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(0, 199); // max 200 annonces par chargement
+      if (error) throw error;
+      if (data) {
+        const mapped = data.map(p => ({
+          ...p,
+          authorId: p.author_id,
+          expiresAt: p.expires_at,
+          sponsoredUntil: p.sponsored_until,
+          ownerVerified: p.owner_verified,
+          photos: p.photos || [],
+          likes: p.likes || 0,
+        }));
+        setPosts(mapped); // Supabase uniquement — plus de données fictives
+      }
+    } catch(err) {
+      console.error("Erreur chargement annonces:", err);
+      notify("Erreur de chargement des annonces. Vérifiez votre connexion.", "error");
+    } finally {
+      setPostsLoaded(true);
     }
-    setPostsLoaded(true);
   };
 
   useEffect(() => {
     loadPosts();
     loadShops();
     loadAdminSettings();
+    loadRatings();
     // Restore sponsored state for boutiques/ateliers/restos/beaute
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     if (Object.keys(sponsored).length > 0) {
@@ -891,7 +925,7 @@ function AppContent() {
     }
   };
 
-  const submitReport = (postData, motif) => {
+  const submitReport = async (postData, motif) => {
     const reportId = Date.now();
     const newReport = {
       id: reportId,
@@ -904,8 +938,21 @@ function AppContent() {
       status: "En attente",
       createdAt: Date.now(),
     };
+
+    // Sauvegarder dans Supabase
+    await supabase.from("reports").insert({
+      post_id: postData.id,
+      post_title: newReport.postTitle,
+      motif,
+      reporter: newReport.reporter,
+      phone: reportOtp.phone || null,
+      date: newReport.date,
+      status: "En attente",
+    }).then(({ error }) => {
+      if (error) console.error("Erreur signalement Supabase:", error);
+    });
+
     setReports(r=>[...r, newReport]);
-    // Allow cancellation for 5 minutes
     setCancelableReports(c=>({...c, [reportId]: true}));
     setTimeout(() => {
       setCancelableReports(c=>{ const n={...c}; delete n[reportId]; return n; });
@@ -960,10 +1007,23 @@ function AppContent() {
     catch { return {}; }
   });
 
-  const addRating = (itemId, stars, comment) => {
+  const addRating = async (itemId, stars, comment) => {
     if (!user) { notify("Connectez-vous pour noter","error"); return; }
     const key = user.id + "_" + itemId;
     if (userRatings[key]) { notify("Vous avez déjà noté cet élément","error"); return; }
+
+    // Sauvegarder dans Supabase
+    const { error } = await supabase.from("ratings").insert({
+      item_id: itemId,
+      user_id: user.id,
+      user_name: user.name,
+      stars,
+      comment: comment || null,
+      date: new Date().toISOString().slice(0,10),
+    });
+    if (error) { console.error("Erreur rating:", error); }
+
+    // Mettre à jour localement
     const newUserRatings = { ...userRatings, [key]: { stars, comment, date: new Date().toISOString().slice(0,10), userName: user.name } };
     localStorage.setItem("mf_ratings", JSON.stringify(newUserRatings));
     setUserRatings(newUserRatings);
@@ -978,10 +1038,29 @@ function AppContent() {
       const post = posts.find(p=>p.id===itemId);
       if (post && stars >= 4 && newRating.count >= 5) {
         setPosts(prev => prev.map(p => p.id===itemId ? {...p, ownerVerified:true} : p));
+        supabase.from("posts").update({ owner_verified: true }).eq("id", itemId);
       }
       return { ...r, [itemId]: newRating };
     });
     notify("Merci pour votre note !");
+  };
+
+  // Charger les notes depuis Supabase au démarrage
+  const loadRatings = async () => {
+    const { data } = await supabase.from("ratings").select("*");
+    if (data && data.length > 0) {
+      const ratingsMap = {};
+      const userRatingsMap = {};
+      data.forEach(r => {
+        if (!ratingsMap[r.item_id]) ratingsMap[r.item_id] = { total: 0, count: 0, comments: [] };
+        ratingsMap[r.item_id].total += r.stars;
+        ratingsMap[r.item_id].count += 1;
+        if (r.comment) ratingsMap[r.item_id].comments.push({ stars: r.stars, comment: r.comment, userName: r.user_name, date: r.date });
+        if (user) userRatingsMap[`${user.id}_${r.item_id}`] = { stars: r.stars, comment: r.comment };
+      });
+      setRatings(ratingsMap);
+      if (user) setUserRatings(prev => ({ ...prev, ...userRatingsMap }));
+    }
   };
 
   const getAvgRating = (itemId) => {
@@ -1320,8 +1399,14 @@ function AppContent() {
   const login = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });
     if (error) { notify("Email ou mot de passe incorrect","error"); return; }
+    // Vérification email obligatoire
+    if (!data.user.email_confirmed_at) {
+      await supabase.auth.signOut();
+      notify("Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte mail 📧","error");
+      return;
+    }
     const { data: profile } = await supabase.from("profiles").select("*").eq("id",data.user.id).single();
-    if (profile) setUser({ id:data.user.id, name:profile.name, role:profile.role||"user", isPremium:profile.is_premium||false, plan:profile.plan });
+    if (profile) setUser({ id:data.user.id, name:profile.name, role:profile.role||"user", isPremium:profile.is_premium||false, plan:profile.plan, emailConfirmed:true });
     setView("home"); notify("Bienvenue !");
     addNotification("Bienvenue sur MarchéduRoi ! Vos notifications apparaissent ici.", "info");
   };
@@ -1915,6 +2000,17 @@ function AppContent() {
         </div>
       )}
 
+      {/* Bannière erreur Supabase */}
+      {isOnline && postsLoaded && posts.length === 0 && (
+        <div style={{ position:"fixed",top:64,left:0,right:0,zIndex:997,background:"rgba(255,140,0,0.95)",color:"#fff",padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"center",gap:10,fontSize:14,fontWeight:600 }}>
+          <span>⚠️</span>
+          Impossible de charger les annonces.
+          <button onClick={()=>{ loadPosts(); loadShops(); }} style={{ background:"rgba(255,255,255,0.2)",border:"1px solid rgba(255,255,255,0.4)",color:"#fff",padding:"4px 12px",borderRadius:8,fontWeight:700,cursor:"pointer",fontSize:13 }}>
+            Réessayer
+          </button>
+        </div>
+      )}
+
       {/* Bouton WhatsApp Support flottant */}
       {!showMessages && <a href="https://wa.me/2290147562640?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide%20concernant%20ma%20publication." target="_blank" rel="noopener noreferrer" title="Contacter le support technique" style={{ position:"fixed",bottom:90,right:16,zIndex:999,width:50,height:50,borderRadius:"50%",background:"#25D366",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(37,211,102,0.5)",cursor:"pointer",textDecoration:"none",transition:"transform 0.2s" }}
         onMouseEnter={e=>{ e.currentTarget.style.transform="scale(1.1)"; }}
@@ -2205,6 +2301,18 @@ function AppContent() {
       {/* HOME */}
       {view==="home"&&(
         <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
+
+          {/* État de chargement */}
+          {!postsLoaded && (
+            <div style={{ display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"60px 24px",gap:16 }}>
+              <div style={{ width:48,height:48,border:`4px solid ${theme.border}`,borderTop:`4px solid #6C63FF`,borderRadius:"50%",animation:"spin 0.8s linear infinite" }}/>
+              <p style={{ color:theme.sub,fontWeight:600,fontSize:14 }}>Chargement des annonces...</p>
+              <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+            </div>
+          )}
+
+          {/* Contenu principal — affiché seulement quand chargé */}
+          {postsLoaded && (<>
           <div style={{ marginBottom:12 }}>
             <h1 style={{ fontSize:40,fontWeight:800,lineHeight:1.1,marginBottom:8,color:theme.text,textAlign:"center" }}>Découvrez des <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>annonces uniques</span></h1>
 
@@ -2225,10 +2333,9 @@ function AppContent() {
               )}
             </div>
 
-            {/* Recherche + GPS + Tri distance - tous sur la même ligne */}
-            <div style={{ display:"flex",gap:6,alignItems:"center",marginBottom:8 }}>
-              {/* Barre de recherche fixe 50 caractères */}
-              <div style={{ position:"relative",width:"50ch",flexShrink:0 }}>
+            {/* Recherche + GPS + Tri distance */}
+            <div style={{ display:"flex",gap:6,alignItems:"center",marginBottom:8,flexWrap:"wrap" }}>
+              <div style={{ position:"relative",flex:1,minWidth:0 }}>
                 <div style={{ position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={15}/></div>
                 <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.rechercher} maxLength={100} style={{ ...inputStyle,padding:"11px 16px 11px 40px",borderRadius:10,fontSize:13,width:"100%" }}/>
               </div>
@@ -2455,7 +2562,13 @@ function AppContent() {
               </div>
             ))}
           </div>
-          {filtered.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40,marginBottom:12 }}>🔍</p><p>Aucune annonce trouvée</p></div>}
+          {filtered.length===0 && postsLoaded && (
+            <div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}>
+              <p style={{ fontSize:40,marginBottom:12 }}>🔍</p>
+              <p style={{ fontWeight:600,marginBottom:8 }}>Aucune annonce trouvée</p>
+              <p style={{ fontSize:13 }}>Essayez une autre catégorie ou modifiez votre recherche</p>
+            </div>
+          )}
 
           {/* Voir plus */}
           {filtered.length > visibleCount && (
@@ -2475,7 +2588,7 @@ function AppContent() {
               </button>
             </div>
           )}
-
+          </>)} {/* fin postsLoaded */}
         </div>
       )}
 
