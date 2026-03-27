@@ -2108,8 +2108,9 @@ function AppContent() {
             </button>
             {showMoreMenu && (
               <>
+                {/* Overlay — clic n'importe où ferme le menu */}
                 <div onClick={()=>setShowMoreMenu(false)} style={{ position:"fixed",inset:0,zIndex:299 }}/>
-                <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:14,boxShadow:"0 20px 60px rgba(0,0,0,0.4)",zIndex:300,minWidth:230,overflow:"hidden" }}>
+                <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:200,overflow:"hidden" }}>
                   {/* Sur mobile : ajouter Annonces + Publier dans le menu Plus */}
                   {windowWidth <= 600 && [
                     { label:"📋 "+t.annonces, action:()=>{setView("home");setShowMoreMenu(false);} },
@@ -2117,14 +2118,14 @@ function AppContent() {
                     ...(user?.role==="admin"?[{ label:"⚙️ "+t.admin, action:()=>{setView("admin");setShowMoreMenu(false);} }]:[]),
                     { label:lang==="fr"?"🇬🇧 English":"🇫🇷 Français", action:()=>{ const newLang=lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); setShowMoreMenu(false); } },
                     { label:"🎨 "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
-                  ].map((item,i,arr)=>(
-                    <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"14px 18px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:`1px solid ${theme.border}`,WebkitTapHighlightColor:"transparent" }}>
+                  ].map((item)=>(
+                    <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"11px 14px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:13,cursor:"pointer",textAlign:"left",borderBottom:`1px solid ${theme.border}`,WebkitTapHighlightColor:"transparent" }}>
                       {item.label}
                     </button>
                   ))}
                   {/* Commun desktop + mobile */}
                   {[
-                    { label:"📞 Support technique", action:()=>{ window.open("https://wa.me/2290147562640?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide.", "_blank"); setShowMoreMenu(false); } },
+                    { label:"📞 Support", action:()=>{ window.open("https://wa.me/2290147562640?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide.", "_blank"); setShowMoreMenu(false); } },
                     { label:t.stats, action:()=>{setView("stats");setShowMoreMenu(false);} },
                     { label:t.parrainage, action:()=>{setView("parrainage");setShowMoreMenu(false);} },
                     { label:t.newsletter, action:()=>{setModal({type:"newsletter"});setShowMoreMenu(false);} },
@@ -2132,7 +2133,7 @@ function AppContent() {
                     { label:t.apropos, action:()=>{setView("about");setShowMoreMenu(false);} },
                     { label:t.cgu, action:()=>{setView("terms");setShowMoreMenu(false);} },
                   ].map((item,i,arr)=>(
-                    <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"14px 18px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:i<arr.length-1?`1px solid ${theme.border}`:"none",WebkitTapHighlightColor:"transparent" }}>
+                    <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"11px 14px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:13,cursor:"pointer",textAlign:"left",borderBottom:i<arr.length-1?`1px solid ${theme.border}`:"none",WebkitTapHighlightColor:"transparent" }}>
                       {item.label}
                     </button>
                   ))}
