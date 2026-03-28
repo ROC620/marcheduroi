@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exemples de publications — MarchéduRoi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0D0F1A;
+      --card: #1A1D30;
+      --border: #2A2D45;
+      --text: #E8E8F0;
+      --sub: #9A9AB0;
+      --violet: #6C63FF;
+      --rose: #FF6584;
+      --vert: #43C6AC;
+      --orange: #FF8C00;
+      --pink: #FF69B4;
+      --gold: #FFD700;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      text-align: center;
+      padding: 60px 24px 48px;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(108,99,255,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 30%, rgba(255,101,132,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.4);
+      color: var(--violet);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 6vw, 52px);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--violet), var(--rose));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      color: var(--sub);
+      font-size: 15px;
+      max-width: 560px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+    }
+
+    /* ── BOUTON RETOUR ── */
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--violet), #8B84FF);
+      border: none;
+      color: #fff;
+      padding: 13px 28px;
+      border-radius: 14px;
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(108,99,255,0.35);
+    }
+    .btn-back:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(108,99,255,0.5);
+    }
+
+    /* ── NAV CATÉGORIES ── */
+    .cats-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 0 24px 40px;
+    }
+    .cat-pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--sub);
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .cat-pill:hover, .cat-pill.active {
+      border-color: var(--violet);
+      color: var(--violet);
+      background: rgba(108,99,255,0.1);
+    }
+
+    /* ── SECTION ── */
+    .section {
+      padding: 0 20px 56px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-icon {
+      font-size: 28px;
+    }
+    .section-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .section-count {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-left: auto;
+    }
+
+    /* ── GRILLE ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    .card-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+    .card-img-placeholder {
+      width: 100%;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+    .card-body {
+      padding: 16px;
+    }
+    .card-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--sub);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .card-price {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--vert);
+      margin-bottom: 8px;
+    }
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--sub);
+    }
+    .card-location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .card-cta {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: opacity 0.2s;
+    }
+    .card-cta:hover { opacity: 0.85; }
+
+    .sponsored-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: linear-gradient(135deg, var(--gold), #FFA500);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 20px;
+      z-index: 2;
+    }
+
+    /* ── CARD PRO (boutique/resto/atelier/beauté) ── */
+    .card-pro {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .card-pro:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    .card-pro-header {
+      padding: 20px 16px 16px;
+    }
+    .card-pro-name {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .card-pro-type {
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .card-pro-desc {
+      font-size: 12px;
+      color: var(--sub);
+      line-height: 1.6;
+    }
+    .card-pro-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 8px 0 48px;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--sub);
+      font-size: 13px;
+    }
+    .footer a {
+      color: var(--violet);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero { padding: 40px 16px 32px; }
+      .section { padding: 0 12px 40px; }
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .section { animation: fadeUp 0.5s ease both; }
+    .section:nth-child(2) { animation-delay: 0.05s; }
+    .section:nth-child(3) { animation-delay: 0.10s; }
+    .section:nth-child(4) { animation-delay: 0.15s; }
+    .section:nth-child(5) { animation-delay: 0.20s; }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">📖 Guide de publication</div>
+  <h1>Exemples de publications<br/><span>MarchéduRoi</span></h1>
+  <p>Découvrez comment publier votre annonce dans chaque catégorie. Chaque exemple illustre ce qu'une bonne publication doit contenir.</p>
+  <a href="https://marcheduroi.com" target="_blank" class="btn-back">
+    ← Retourner sur MarchéduRoi
+  </a>
+</div>
+
+<!-- NAV CATÉGORIES -->
+<div class="cats-nav">
+  <a href="#immobilier"  class="cat-pill">🏠 Immobilier</a>
+  <a href="#vehicules"   class="cat-pill">🚗 Véhicules</a>
+  <a href="#electronique"class="cat-pill">📱 Électronique</a>
+  <a href="#services"    class="cat-pill">🔧 Services</a>
+  <a href="#sport"       class="cat-pill">⚽ Sport</a>
+  <a href="#mode"        class="cat-pill">👗 Mode</a>
+  <a href="#autre"       class="cat-pill">🍳 Autre</a>
+  <a href="#boutiques"   class="cat-pill">🛍️ Boutiques</a>
+  <a href="#ateliers"    class="cat-pill">🔩 Ateliers</a>
+  <a href="#restos"      class="cat-pill">🍽️ Restos & Bars</a>
+  <a href="#beaute"      class="cat-pill">💇 Beauté</a>
+</div>
+
+<!-- ══════════════ IMMOBILIER ══════════════ -->
+<div class="section" id="immobilier">
+  <div class="section-header">
+    <span class="section-icon">🏠</span>
+    <span class="section-title">Immobilier</span>
+    <span class="section-count" style="background:rgba(108,99,255,0.15);color:#6C63FF;">Vente & Location</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="sponsored-badge">🌟 Sponsorisé</div>
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://picsum.photos/seed/villa/600/360" alt="villa"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(108,99,255,0.15);color:#6C63FF;">🏠 Villa · Location</span>
+        <div class="card-title">Belle villa avec piscine — 4 chambres</div>
+        <div class="card-desc">Magnifique villa moderne avec piscine, jardin paysagé, garage 2 voitures et groupe électrogène. Quartier résidentiel sécurisé à Fidjrossè.</div>
+        <div class="card-price">450 000 FCFA / mois</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">📐 350 m² · 8 pièces · Titre foncier ✅</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou, Fidjrossè</span>
+          <span>Sophie M.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#6C63FF,#8B84FF);color:#fff;">Contacter le propriétaire</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="appart"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(108,99,255,0.15);color:#6C63FF;">🏢 Appartement · Location</span>
+        <div class="card-title">Appartement meublé 3 pièces — Akpakpa</div>
+        <div class="card-desc">Appartement entièrement meublé et climatisé, eau et électricité inclus. Proche du marché Akpakpa. Disponible immédiatement.</div>
+        <div class="card-price">120 000 FCFA / mois</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">📐 85 m² · 3 pièces · Meublé ✅</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou, Akpakpa</span>
+          <span>Adjovi R.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#6C63FF,#8B84FF);color:#fff;">Contacter le propriétaire</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="parcelle"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(255,101,132,0.15);color:#FF6584;">🏗️ Parcelle · Vente</span>
+        <div class="card-title">Grande parcelle 600 m² — Calavi</div>
+        <div class="card-desc">Parcelle dans un quartier résidentiel en développement. Proche de toutes commodités et de l'université. Idéale pour construction.</div>
+        <div class="card-price">12 000 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">📐 600 m² · Titre en cours · Électricité ✅</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Abomey-Calavi, Godomey</span>
+          <span>Germain K.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF6584,#FFB347);color:#fff;">Contacter le vendeur</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- ══════════════ VÉHICULES ══════════════ -->
+<div class="section" id="vehicules">
+  <div class="section-header">
+    <span class="section-icon">🚗</span>
+    <span class="section-title">Véhicules</span>
+    <span class="section-count" style="background:rgba(255,101,132,0.15);color:#FF6584;">Voitures & Motos</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="toyota"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(255,101,132,0.15);color:#FF6584;">🚗 Voiture · Vente</span>
+        <div class="card-title">Toyota Corolla 2020 — Première main</div>
+        <div class="card-desc">Excellent état, entretien régulier chez concessionnaire. Jamais accidentée. Automatique, climatisation, 45 000 km seulement.</div>
+        <div class="card-price">8 500 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">🔑 Auto · Essence · 5 places · Carte grise ✅</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou</span>
+          <span>Marc D.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF6584,#FFB347);color:#fff;">Voir les détails</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/120049/pexels-photo-120049.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="mercedes"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(255,101,132,0.15);color:#FF6584;">🚗 Voiture · Vente</span>
+        <div class="card-title">Mercedes Classe C 200 — 2019</div>
+        <div class="card-desc">Intérieur cuir beige, toit ouvrant, caméra de recul, GPS intégré. Voiture de direction très bien entretenue. Prix négociable.</div>
+        <div class="card-price">18 000 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">🔑 Auto · Essence · Cuir · GPS ✅</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Porto-Novo</span>
+          <span>Brice A.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF6584,#FFB347);color:#fff;">Voir les détails</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- ══════════════ ÉLECTRONIQUE ══════════════ -->
+<div class="section" id="electronique">
+  <div class="section-header">
+    <span class="section-icon">📱</span>
+    <span class="section-title">Électronique</span>
+    <span class="section-count" style="background:rgba(67,198,172,0.15);color:#43C6AC;">Téléphones & Tech</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/788946/pexels-photo-788946.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="iphone"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(67,198,172,0.15);color:#43C6AC;">📱 Téléphone</span>
+        <div class="card-title">iPhone 15 Pro Max 256 Go — Neuf</div>
+        <div class="card-desc">Couleur titane naturel. Acheté il y a 2 mois, jamais tombé. Vendu avec boîte originale, chargeur MagSafe et coque de protection.</div>
+        <div class="card-price">580 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">✅ Boîte originale · Garantie · Chargeur inclus</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou</span>
+          <span>Karim B.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#43C6AC,#6C63FF);color:#fff;">Contacter le vendeur</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="tv"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(67,198,172,0.15);color:#43C6AC;">📺 Télévision</span>
+        <div class="card-title">Samsung 65" QLED 4K Smart TV</div>
+        <div class="card-desc">Smart TV avec Netflix, YouTube intégrés. Acheté en janvier 2026, très peu utilisé. Livré avec télécommande et support mural.</div>
+        <div class="card-price">320 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">✅ Quasi neuf · Support mural · Télécommande</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou</span>
+          <span>Franck T.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#43C6AC,#6C63FF);color:#fff;">Contacter le vendeur</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- ══════════════ SERVICES ══════════════ -->
+<div class="section" id="services">
+  <div class="section-header">
+    <span class="section-icon">🔧</span>
+    <span class="section-title">Services</span>
+    <span class="section-count" style="background:rgba(255,215,0,0.15);color:#FFD700;">Cours & Artisanat</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/4144923/pexels-photo-4144923.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="cours"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(255,215,0,0.15);color:#FFD700;">📚 Cours particuliers</span>
+        <div class="card-title">Cours de Maths & Physique — À domicile</div>
+        <div class="card-desc">Professeur diplômé, 8 ans d'expérience. Collégiens, lycéens et étudiants. Résultats garantis. Disponible soirs et week-ends.</div>
+        <div class="card-price">5 000 FCFA / heure</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">⭐ 4.9/5 · 42 avis · Déplacement inclus</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou & environs</span>
+          <span>Dr. Koffi M.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;">Prendre contact</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/8005397/pexels-photo-8005397.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="plombier"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(255,215,0,0.15);color:#FFD700;">🔧 Plomberie</span>
+        <div class="card-title">Plombier professionnel — Intervention rapide</div>
+        <div class="card-desc">12 ans d'expérience. Installation, réparation, dépannage urgent. Robinetterie, chauffe-eau, WC, douche. Intervention sous 2h sur Cotonou.</div>
+        <div class="card-price">Sur devis</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">⚡ Disponible 7j/7 · Devis gratuit · Garantie</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou & Calavi</span>
+          <span>Yves P.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;">Demander un devis</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- ══════════════ SPORT ══════════════ -->
+<div class="section" id="sport">
+  <div class="section-header">
+    <span class="section-icon">⚽</span>
+    <span class="section-title">Sport</span>
+    <span class="section-count" style="background:rgba(255,101,132,0.15);color:#FF6584;">Équipements & Matériel</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/100582/pexels-photo-100582.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="velo"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(255,101,132,0.15);color:#FF6584;">🚲 Vélo électrique</span>
+        <div class="card-title">VTT Électrique 27,5 pouces — Très bon état</div>
+        <div class="card-desc">Batterie longue durée 80 km, moteur 250W, 21 vitesses. Parfait pour trajets quotidiens et randonnées. Chargeur inclus.</div>
+        <div class="card-price">280 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">✅ Très peu utilisé · Chargeur inclus · 80 km/charge</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou</span>
+          <span>Léa K.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF6584,#FFB347);color:#fff;">Contacter le vendeur</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/1552252/pexels-photo-1552252.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="musculation"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(255,101,132,0.15);color:#FF6584;">💪 Musculation</span>
+        <div class="card-title">Équipement complet de musculation</div>
+        <div class="card-desc">Banc multifonction avec barre, haltères et disques de poids (50 kg au total). Parfait état, déménagement oblige la vente.</div>
+        <div class="card-price">95 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">✅ Parfait état · 50 kg de poids · À récupérer</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou, Fidjrossè</span>
+          <span>Arnold S.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF6584,#FFB347);color:#fff;">Contacter le vendeur</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- ══════════════ MODE ══════════════ -->
+<div class="section" id="mode">
+  <div class="section-header">
+    <span class="section-icon">👗</span>
+    <span class="section-title">Mode</span>
+    <span class="section-count" style="background:rgba(155,89,182,0.15);color:#9B59B6;">Vêtements & Accessoires</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/985635/pexels-photo-985635.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="robe"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(155,89,182,0.15);color:#9B59B6;">👗 Vêtement · Femme</span>
+        <div class="card-title">Robe de soirée élégante — Taille M</div>
+        <div class="card-desc">Longue, couleur bordeaux avec ornements dorés. Portée une seule fois pour un mariage. Taille M (38-40). Parfaite pour cérémonies et galas.</div>
+        <div class="card-price">35 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">✅ Portée 1 fois · Taille M · Bordeaux & Or</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou</span>
+          <span>Nadège F.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#9B59B6,#E91E8C);color:#fff;">Contacter la vendeuse</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="costume"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(155,89,182,0.15);color:#9B59B6;">👔 Vêtement · Homme</span>
+        <div class="card-title">Costume 3 pièces — Taille L</div>
+        <div class="card-desc">Veste + pantalon + gilet, couleur gris anthracite. Tissu de qualité, coupe italienne. Porté 2 fois. Idéal pour entretiens et mariages.</div>
+        <div class="card-price">28 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">✅ Porté 2 fois · Taille L · Coupe italienne</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou</span>
+          <span>Romuald A.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#9B59B6,#E91E8C);color:#fff;">Contacter le vendeur</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- ══════════════ AUTRE ══════════════ -->
+<div class="section" id="autre">
+  <div class="section-header">
+    <span class="section-icon">🍳</span>
+    <span class="section-title">Autre</span>
+    <span class="section-count" style="background:rgba(67,198,172,0.15);color:#43C6AC;">Cuisine & Divers</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="casseroles"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(67,198,172,0.15);color:#43C6AC;">🍳 Cuisine</span>
+        <div class="card-title">Set de casseroles inox 7 pièces — Neuves</div>
+        <div class="card-desc">Casseroles et poêles en inox 18/10, fond épais anti-adhésif. Compatibles toutes plaques dont induction. Neuves dans leur emballage.</div>
+        <div class="card-price">45 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">✅ Neuves · Induction · 7 pièces</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou</span>
+          <span>Ines C.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#43C6AC,#6C63FF);color:#fff;">Contacter la vendeuse</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="robot"/>
+      <div class="card-body">
+        <span class="card-badge" style="background:rgba(67,198,172,0.15);color:#43C6AC;">🤖 Électroménager</span>
+        <div class="card-title">Robot de cuisine multifonction 1200W</div>
+        <div class="card-desc">6 programmes automatiques, bol inox 4L. Hache, mixe, pétrit, cuit à la vapeur. Utilisé 3 mois. Avec tous les accessoires d'origine.</div>
+        <div class="card-price">75 000 FCFA</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px;">✅ Quasi neuf · Tous accessoires · Garantie</div>
+        <div class="card-meta">
+          <span class="card-location">📍 Cotonou</span>
+          <span>Céleste M.</span>
+        </div>
+        <button class="card-cta" style="background:linear-gradient(135deg,#43C6AC,#6C63FF);color:#fff;">Contacter la vendeuse</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- ══════════════ BOUTIQUES ══════════════ -->
+<div class="section" id="boutiques">
+  <div class="section-header">
+    <span class="section-icon">🛍️</span>
+    <span class="section-title">Boutiques</span>
+    <span class="section-count" style="background:rgba(255,101,132,0.15);color:#FF6584;">Commerces physiques</span>
+  </div>
+  <div class="grid">
+
+    <div class="card-pro" style="background:var(--card);border:1px solid var(--border);">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/3373736/pexels-photo-3373736.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="beaute"/>
+      <div class="card-pro-header">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span class="card-badge" style="background:rgba(255,101,132,0.15);color:#FF6584;margin:0;">🛍️ Boutique</span>
+          <span style="font-size:11px;color:var(--sub);">Cosmétiques & Beauté</span>
+        </div>
+        <div class="card-pro-name" style="color:var(--text);">Beauté Dorée Cosmétiques</div>
+        <div class="card-pro-desc">Boutique spécialisée en produits cosmétiques naturels, soins de la peau, parfums et accessoires beauté. Produits importés et locaux de qualité.</div>
+      </div>
+      <div class="card-pro-footer">
+        <span style="color:var(--sub);">📍 Cotonou, Akpakpa</span>
+        <span style="color:#FF6584;font-weight:700;">🕐 Lun-Sam 8h-20h</span>
+      </div>
+      <div style="padding:0 16px 16px;">
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF6584,#FFB347);color:#fff;margin-top:0;">Voir la boutique</button>
+      </div>
+    </div>
+
+    <div class="card-pro" style="background:var(--card);border:1px solid var(--border);">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="tech"/>
+      <div class="card-pro-header">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span class="card-badge" style="background:rgba(255,101,132,0.15);color:#FF6584;margin:0;">🛍️ Boutique</span>
+          <span style="font-size:11px;color:var(--sub);">Électronique & Informatique</span>
+        </div>
+        <div class="card-pro-name" style="color:var(--text);">Tech Store Bénin</div>
+        <div class="card-pro-desc">Vente et réparation de téléphones, ordinateurs et accessoires informatiques. Garantie sur tous les produits. Service après-vente disponible.</div>
+      </div>
+      <div class="card-pro-footer">
+        <span style="color:var(--sub);">📍 Porto-Novo, Ouando</span>
+        <span style="color:#FF6584;font-weight:700;">🕐 Lun-Sam 8h-19h</span>
+      </div>
+      <div style="padding:0 16px 16px;">
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF6584,#FFB347);color:#fff;margin-top:0;">Voir la boutique</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- ══════════════ ATELIERS ══════════════ -->
+<div class="section" id="ateliers">
+  <div class="section-header">
+    <span class="section-icon">🔩</span>
+    <span class="section-title">Ateliers</span>
+    <span class="section-count" style="background:rgba(67,198,172,0.15);color:#43C6AC;">Artisans & Prestataires</span>
+  </div>
+  <div class="grid">
+
+    <div class="card-pro" style="background:var(--card);border:1px solid var(--border);">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/3622622/pexels-photo-3622622.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="couture"/>
+      <div class="card-pro-header">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span class="card-badge" style="background:rgba(67,198,172,0.15);color:#43C6AC;margin:0;">🔩 Atelier</span>
+          <span style="font-size:11px;color:var(--sub);">Couture / Mode</span>
+        </div>
+        <div class="card-pro-name" style="color:var(--text);">Atelier Couture Élégance</div>
+        <div class="card-pro-desc">Confection de tenues sur mesure pour hommes, femmes et enfants. Spécialiste tenues traditionnelles et modernes. Retouches et broderie acceptées.</div>
+      </div>
+      <div class="card-pro-footer">
+        <span style="color:var(--sub);">📍 Cotonou, Gbègamey</span>
+        <span style="color:#43C6AC;font-weight:700;">🕐 Lun-Sam 8h-18h</span>
+      </div>
+      <div style="padding:0 16px 16px;">
+        <button class="card-cta" style="background:linear-gradient(135deg,#43C6AC,#6C63FF);color:#fff;margin-top:0;">Voir l'atelier</button>
+      </div>
+    </div>
+
+    <div class="card-pro" style="background:var(--card);border:1px solid var(--border);">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/3807386/pexels-photo-3807386.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="garage"/>
+      <div class="card-pro-header">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span class="card-badge" style="background:rgba(67,198,172,0.15);color:#43C6AC;margin:0;">🔩 Atelier</span>
+          <span style="font-size:11px;color:var(--sub);">Mécanique Auto</span>
+        </div>
+        <div class="card-pro-name" style="color:var(--text);">Garage Auto Pro</div>
+        <div class="card-pro-desc">Réparation et entretien de tous types de véhicules. Diagnostic électronique, vidange, freins, climatisation. Pièces détachées disponibles.</div>
+      </div>
+      <div class="card-pro-footer">
+        <span style="color:var(--sub);">📍 Calavi, Godomey</span>
+        <span style="color:#43C6AC;font-weight:700;">🕐 Lun-Sam 7h30-18h30</span>
+      </div>
+      <div style="padding:0 16px 16px;">
+        <button class="card-cta" style="background:linear-gradient(135deg,#43C6AC,#6C63FF);color:#fff;margin-top:0;">Voir l'atelier</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- ══════════════ RESTOS ══════════════ -->
+<div class="section" id="restos">
+  <div class="section-header">
+    <span class="section-icon">🍽️</span>
+    <span class="section-title">Restaurants & Bars</span>
+    <span class="section-count" style="background:rgba(255,140,0,0.15);color:#FF8C00;">Maquis · Fast-food · Bar</span>
+  </div>
+  <div class="grid">
+
+    <div class="card-pro" style="background:var(--card);border:1px solid var(--border);">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="maquis"/>
+      <div class="card-pro-header">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span class="card-badge" style="background:rgba(255,140,0,0.15);color:#FF8C00;margin:0;">🍽️ Maquis</span>
+          <span style="font-size:11px;color:#FF8C00;font-weight:600;">✨ Spécialité : Cuisine béninoise</span>
+        </div>
+        <div class="card-pro-name" style="color:var(--text);">Maquis Chez Maman Africa</div>
+        <div class="card-pro-desc">Les meilleurs plats traditionnels béninois dans une ambiance chaleureuse. Sauce arachide, igname pilée, poisson braisé, akassa... Idéal en famille.</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:8px;">💰 Prix moyen : 1 500 - 5 000 FCFA · 40 couverts</div>
+      </div>
+      <div class="card-pro-footer">
+        <span style="color:var(--sub);">📍 Cotonou, Cadjehoun</span>
+        <span style="color:#FF8C00;font-weight:700;">🕐 7h-22h tous les jours</span>
+      </div>
+      <div style="padding:0 16px 16px;">
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF8C00,#FF6584);color:#fff;margin-top:0;">Voir l'établissement</button>
+      </div>
+    </div>
+
+    <div class="card-pro" style="background:var(--card);border:1px solid var(--border);">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="fastfood"/>
+      <div class="card-pro-header">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span class="card-badge" style="background:rgba(255,140,0,0.15);color:#FF8C00;margin:0;">🍔 Fast-food</span>
+          <span style="font-size:11px;color:#FF8C00;font-weight:600;">🚀 Livraison disponible</span>
+        </div>
+        <div class="card-pro-name" style="color:var(--text);">Fast Food Le Goût</div>
+        <div class="card-pro-desc">Burgers maison, grillades et sandwichs. Livraison rapide dans tout Cotonou. Salle climatisée. À emporter ou sur place.</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:8px;">💰 Prix moyen : 1 000 - 4 000 FCFA · 25 couverts</div>
+      </div>
+      <div class="card-pro-footer">
+        <span style="color:var(--sub);">📍 Cotonou, Akpakpa</span>
+        <span style="color:#FF8C00;font-weight:700;">🕐 10h-23h tous les jours</span>
+      </div>
+      <div style="padding:0 16px 16px;">
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF8C00,#FF6584);color:#fff;margin-top:0;">Voir l'établissement</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- ══════════════ BEAUTÉ ══════════════ -->
+<div class="section" id="beaute">
+  <div class="section-header">
+    <span class="section-icon">💇</span>
+    <span class="section-title">Beauté & Coiffure</span>
+    <span class="section-count" style="background:rgba(255,105,180,0.15);color:#FF69B4;">Salons & Instituts</span>
+  </div>
+  <div class="grid">
+
+    <div class="card-pro" style="background:var(--card);border:1px solid var(--border);">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="salon"/>
+      <div class="card-pro-header">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span class="card-badge" style="background:rgba(255,105,180,0.15);color:#FF69B4;margin:0;">💇 Salon de coiffure</span>
+        </div>
+        <div class="card-pro-name" style="color:var(--text);">Salon Beauté Divine</div>
+        <div class="card-pro-desc">Tresses africaines et coiffures modernes. Accueil chaleureux dans un cadre propre. Tresses, locks, tissages, lissage, coloration, soins capillaires.</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:8px;">💰 Tarifs : 2 000 - 25 000 FCFA · Sur RDV & sans RDV</div>
+      </div>
+      <div class="card-pro-footer">
+        <span style="color:var(--sub);">📍 Cotonou, Cadjehoun</span>
+        <span style="color:#FF69B4;font-weight:700;">🕐 Lun-Dim 8h-20h</span>
+      </div>
+      <div style="padding:0 16px 16px;">
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF69B4,#FF1493);color:#fff;margin-top:0;">Voir le salon</button>
+      </div>
+    </div>
+
+    <div class="card-pro" style="background:var(--card);border:1px solid var(--border);">
+      <img class="card-img" onerror="this.src='https://placehold.co/600x360/1A1D30/6C63FF?text=Image'" src="https://images.pexels.com/photos/3997989/pexels-photo-3997989.jpeg?auto=compress&cs=tinysrgb&w=600&h=360&fit=crop" alt="institut"/>
+      <div class="card-pro-header">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span class="card-badge" style="background:rgba(255,105,180,0.15);color:#FF69B4;margin:0;">💅 Institut de beauté</span>
+        </div>
+        <div class="card-pro-name" style="color:var(--text);">Institut Glam & Style</div>
+        <div class="card-pro-desc">Maquillage, manucure, pédicure, soins du visage et épilation. Produits haut de gamme. Cadre luxueux et personnel professionnel certifié.</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:8px;">💰 Tarifs : 3 000 - 40 000 FCFA · Sur rendez-vous</div>
+      </div>
+      <div class="card-pro-footer">
+        <span style="color:var(--sub);">📍 Cotonou, Ganhi</span>
+        <span style="color:#FF69B4;font-weight:700;">🕐 Lun-Sam 9h-19h</span>
+      </div>
+      <div style="padding:0 16px 16px;">
+        <button class="card-cta" style="background:linear-gradient(135deg,#FF69B4,#FF1493);color:#fff;margin-top:0;">Voir le salon</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p style="margin-bottom:16px;">Ces exemples vous donnent une idée de la qualité attendue pour chaque publication.</p>
+  <a href="https://marcheduroi.com" target="_blank" class="btn-back" style="display:inline-flex;">
+    ← Retourner sur MarchéduRoi et publier
+  </a>
+  <p style="margin-top:24px;">© 2026 MarchéduRoi · Bénin & Afrique 🇧🇯</p>
+</div>
+
+<script>
+  // Smooth scroll pour les liens de navigation
+  document.querySelectorAll('.cat-pill').forEach(pill => {
+    pill.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Highlight catégorie active au scroll
+  const sections = document.querySelectorAll('.section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        document.querySelectorAll('.cat-pill').forEach(p => {
+          p.classList.toggle('active', p.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
