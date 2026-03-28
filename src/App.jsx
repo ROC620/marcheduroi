@@ -2224,37 +2224,41 @@ function AppContent() {
           </h1>
 
           {/* Slogan */}
-          <p style={{ fontSize:20,color:theme.sub,textAlign:"center",maxWidth:600,lineHeight:1.7,marginBottom:20 }}>
+          <p style={{ fontSize:20,color:theme.sub,textAlign:"center",maxWidth:600,lineHeight:1.7,marginBottom:16 }}>
             La plateforme qui connecte commerçants, entreprises et particuliers au <strong style={{ color:theme.text }}>Bénin</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
           </p>
 
           {/* Drapeaux des pays couverts */}
-          <div style={{ display:"flex",flexWrap:"wrap",justifyContent:"center",gap:8,marginBottom:40,maxWidth:700,padding:"12px 20px",background:`${theme.card}88`,borderRadius:16,border:`1px solid ${theme.border}` }}>
+          <div style={{ display:"flex",flexWrap:"wrap",justifyContent:"center",gap:6,marginBottom:40,maxWidth:600 }}>
             {[
-              { flag:"🇧🇯", pays:"Bénin" },
-              { flag:"🇹🇬", pays:"Togo" },
-              { flag:"🇧🇫", pays:"Burkina Faso" },
-              { flag:"🇲🇱", pays:"Mali" },
-              { flag:"🇸🇳", pays:"Sénégal" },
-              { flag:"🇨🇮", pays:"Côte d'Ivoire" },
-              { flag:"🇨🇲", pays:"Cameroun" },
-              { flag:"🇬🇳", pays:"Guinée" },
-              { flag:"🇳🇪", pays:"Niger" },
-              { flag:"🇨🇬", pays:"Congo" },
-              { flag:"🇨🇩", pays:"RDC" },
-              { flag:"🇬🇦", pays:"Gabon" },
-              { flag:"🇲🇬", pays:"Madagascar" },
-              { flag:"🇷🇼", pays:"Rwanda" },
-              { flag:"🇧🇮", pays:"Burundi" },
-              { flag:"🇹🇩", pays:"Tchad" },
-              { flag:"🇲🇷", pays:"Mauritanie" },
-              { flag:"🇰🇲", pays:"Comores" },
+              { code:"bj", pays:"Bénin" },
+              { code:"tg", pays:"Togo" },
+              { code:"bf", pays:"Burkina Faso" },
+              { code:"ml", pays:"Mali" },
+              { code:"sn", pays:"Sénégal" },
+              { code:"ci", pays:"Côte d'Ivoire" },
+              { code:"ng", pays:"Nigeria" },
+              { code:"cm", pays:"Cameroun" },
+              { code:"gn", pays:"Guinée" },
+              { code:"ne", pays:"Niger" },
+              { code:"cg", pays:"Congo" },
+              { code:"cd", pays:"RDC" },
+              { code:"ga", pays:"Gabon" },
+              { code:"mg", pays:"Madagascar" },
+              { code:"rw", pays:"Rwanda" },
+              { code:"bi", pays:"Burundi" },
+              { code:"td", pays:"Tchad" },
+              { code:"mr", pays:"Mauritanie" },
             ].map(p=>(
-              <span key={p.pays} title={p.pays} style={{ fontSize:24,cursor:"default",transition:"transform 0.15s" }}
-                onMouseEnter={e=>e.target.style.transform="scale(1.3)"}
-                onMouseLeave={e=>e.target.style.transform="scale(1)"}>
-                {p.flag}
-              </span>
+              <img
+                key={p.code}
+                src={`https://flagcdn.com/32x24/${p.code}.png`}
+                alt={p.pays}
+                title={p.pays}
+                style={{ width:32,height:24,borderRadius:3,objectFit:"cover",boxShadow:"0 1px 4px rgba(0,0,0,0.2)",cursor:"default",transition:"transform 0.15s" }}
+                onMouseEnter={e=>e.target.style.transform="scale(1.25)"}
+                onMouseLeave={e=>e.target.style.transform="scale(1)"}
+              />
             ))}
           </div>
 
