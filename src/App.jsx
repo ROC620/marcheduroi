@@ -2228,8 +2228,8 @@ function AppContent() {
             La plateforme qui connecte commerçants, entreprises et particuliers au <strong style={{ color:theme.text }}>Bénin</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
           </p>
 
-          {/* Drapeaux des pays couverts */}
-          <div style={{ display:"flex",flexWrap:"wrap",justifyContent:"center",gap:6,marginBottom:40,maxWidth:600 }}>
+          {/* Drapeaux des pays couverts — une seule ligne */}
+          <div style={{ display:"flex",flexWrap:"nowrap",justifyContent:"center",gap:5,marginBottom:40,overflowX:"auto",padding:"4px 0" }}>
             {[
               { code:"bj", pays:"Bénin" },
               { code:"tg", pays:"Togo" },
@@ -2252,30 +2252,13 @@ function AppContent() {
             ].map(p=>(
               <img
                 key={p.code}
-                src={`https://flagcdn.com/32x24/${p.code}.png`}
+                src={`https://flagcdn.com/28x21/${p.code}.png`}
                 alt={p.pays}
                 title={p.pays}
-                style={{ width:32,height:24,borderRadius:3,objectFit:"cover",boxShadow:"0 1px 4px rgba(0,0,0,0.2)",cursor:"default",transition:"transform 0.15s" }}
-                onMouseEnter={e=>e.target.style.transform="scale(1.25)"}
+                style={{ width:28,height:21,borderRadius:3,objectFit:"cover",boxShadow:"0 1px 4px rgba(0,0,0,0.2)",flexShrink:0,transition:"transform 0.15s" }}
+                onMouseEnter={e=>e.target.style.transform="scale(1.3)"}
                 onMouseLeave={e=>e.target.style.transform="scale(1)"}
               />
-            ))}
-          </div>
-
-          {/* Statistiques */}
-          <div style={{ display:"flex",gap:20,marginBottom:48,flexWrap:"wrap",justifyContent:"center" }}>
-            {[
-              { val:posts.length, label:"Annonces", color:"#6C63FF", icon:"📋" },
-              { val:boutiques.length, label:"Boutiques", color:"#FF6584", icon:"🛍️" },
-              { val:ateliers.length, label:"Ateliers", color:"#43C6AC", icon:"🔧" },
-              { val:restos.length, label:"Restos & Bars", color:"#FF8C00", icon:"🍽️" },
-              { val:CATEGORIES.length-1, label:"Catégories", color:"#FFD700", icon:"🗂️" },
-            ].map(s=>(
-              <div key={s.label} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:16,padding:"20px 28px",textAlign:"center",minWidth:120 }}>
-                <p style={{ fontSize:24,marginBottom:4 }}>{s.icon}</p>
-                <p style={{ fontSize:32,fontWeight:800,color:s.color }}>{s.val}</p>
-                <p style={{ fontSize:13,color:theme.sub,fontWeight:600 }}>{s.label}</p>
-              </div>
             ))}
           </div>
 
