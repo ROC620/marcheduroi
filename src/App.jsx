@@ -291,7 +291,7 @@ function FlagCylinder({ theme }) {
   useEffect(() => {
     if (dragging) return;
     const tick = () => {
-      setAngle(a => a - 0.3);
+      setAngle(a => a + 0.3);
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
