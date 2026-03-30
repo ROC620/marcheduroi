@@ -265,7 +265,7 @@ const IMMO_TITRES = ["Oui - Titre foncier disponible","Non - Sans titre","En cou
 // Fiche détaillée Immobilier
 // Composant formulaire de notation
 // Badge Certifié MarchéduRoi — Logo officiel complet
-// ─── ORBITE DRAPEAUX AUTOUR DU LOGO ──────────────────────────────────────────
+// ─── DOUBLE CYLINDRE 3D : Logo au centre + Drapeaux en orbite ────────────────
 const FLAGS = [
   {code:"bj",pays:"Bénin"},{code:"tg",pays:"Togo"},{code:"bf",pays:"Burkina Faso"},
   {code:"ml",pays:"Mali"},{code:"sn",pays:"Sénégal"},{code:"ci",pays:"Côte d'Ivoire"},
@@ -277,88 +277,120 @@ const FLAGS = [
 
 function FlagCylinder({ theme }) {
   const [angle, setAngle] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [startAngle, setStartAngle] = useState(0);
+  const [velocity, setVelocity] = useState(0);
+  const [lastX, setLastX] = useState(0);
   const rafRef = useRef(null);
   const n = FLAGS.length;
   const angleStep = 360 / n;
-  // Rayon adaptatif selon la taille d'écran
-  const radius = typeof window !== "undefined" && window.innerWidth < 500 ? 110 : 145;
+  const radius = 200; // rayon du cylindre des drapeaux
 
+  // Auto-rotation
   useEffect(() => {
-    if (paused) return;
+    if (dragging) return;
     const tick = () => {
       setAngle(a => a + 0.25);
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [paused]);
+  }, [dragging]);
 
-  const size = radius * 2 + 60;
+  // Inertie
+  useEffect(() => {
+    if (dragging || Math.abs(velocity) < 0.1) return;
+    const tick = () => {
+      setVelocity(v => {
+        const next = v * 0.95;
+        setAngle(a => a + next);
+        if (Math.abs(next) < 0.1) return 0;
+        rafRef.current = requestAnimationFrame(tick);
+        return next;
+      });
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [dragging, velocity]);
+
+  const onStart = (x) => { cancelAnimationFrame(rafRef.current); setDragging(true); setStartX(x); setStartAngle(angle); setLastX(x); setVelocity(0); };
+  const onMove  = (x) => { if (!dragging) return; setAngle(startAngle + (x - startX) * 0.4); setVelocity((x - lastX) * 0.4); setLastX(x); };
+  const onEnd   = () => setDragging(false);
 
   return (
-    <div style={{ position:"relative", width:size, height:size, margin:"0 auto", flexShrink:0 }}
-      onMouseEnter={()=>setPaused(true)}
-      onMouseLeave={()=>setPaused(false)}>
+    <div
+      style={{ width:"100%",height:320,position:"relative",cursor:dragging?"grabbing":"grab",userSelect:"none",marginBottom:8,touchAction:"none" }}
+      onMouseDown={e=>onStart(e.clientX)}
+      onMouseMove={e=>onMove(e.clientX)}
+      onMouseUp={onEnd}
+      onMouseLeave={onEnd}
+      onTouchStart={e=>onStart(e.touches[0].clientX)}
+      onTouchMove={e=>{ e.preventDefault(); onMove(e.touches[0].clientX); }}
+      onTouchEnd={onEnd}>
 
-      {/* Logo au centre */}
-      <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", zIndex:10 }}>
-        <img
-          src="/marcheduRoi-icon.svg"
-          alt="MarchéduRoi"
-          style={{ width:radius*0.85, height:"auto", filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.35))", display:"block" }}
-        />
-      </div>
+      {/* Scène 3D */}
+      <div style={{ position:"absolute",left:"50%",top:"50%",width:0,height:0,perspective:"700px" }}>
 
-      {/* Anneau décoratif */}
-      <div style={{
-        position:"absolute", top:"50%", left:"50%",
-        width:radius*2+10, height:radius*2+10,
-        transform:"translate(-50%,-50%)",
-        borderRadius:"50%",
-        border:"1px dashed rgba(108,99,255,0.2)",
-        pointerEvents:"none",
-      }}/>
+        {/* ── Cylindre extérieur : drapeaux qui tournent ── */}
+        <div style={{
+          position:"absolute",
+          width:0,height:0,
+          transformStyle:"preserve-3d",
+          transform:`translateX(-50%) translateY(-50%) rotateX(15deg) rotateY(${angle}deg)`,
+        }}>
+          {FLAGS.map((f, i) => {
+            const rot = i * angleStep;
+            // Calcul de la visibilité selon l'angle pour effet avant/arrière
+            const radAngle = (rot + angle) * Math.PI / 180;
+            const cosVal = Math.cos(radAngle * Math.PI / 180);
+            const opacity = Math.max(0.2, 0.5 + 0.5 * Math.cos((rot) * Math.PI / 180));
+            return (
+              <div key={f.code} title={f.pays} style={{
+                position:"absolute",
+                transform:`rotateY(${rot}deg) translateZ(${radius}px)`,
+                transformOrigin:"center center",
+              }}>
+                <img
+                  src={`https://flagcdn.com/40x30/${f.code}.png`}
+                  alt={f.pays}
+                  draggable={false}
+                  style={{
+                    width:38, height:28,
+                    borderRadius:4,
+                    objectFit:"cover",
+                    boxShadow:"0 3px 10px rgba(0,0,0,0.4)",
+                    display:"block",
+                    pointerEvents:"none",
+                    transform:"rotateY(0deg)", // contre-rotation pour garder les drapeaux droits
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
 
-      {/* Drapeaux en orbite */}
-      {FLAGS.map((f, i) => {
-        const deg = (i * angleStep + angle) * (Math.PI / 180);
-        const x = Math.cos(deg) * radius;
-        const y = Math.sin(deg) * radius;
-        // Profondeur simulée : drapeaux "derrière" = plus petits et transparents
-        const depth = Math.sin(deg); // -1 à +1
-        const scale = 0.7 + 0.3 * ((depth + 1) / 2);
-        const opacity = 0.35 + 0.65 * ((depth + 1) / 2);
-        const zIndex = Math.round((depth + 1) * 5);
-        return (
-          <div
-            key={f.code}
-            title={f.pays}
+        {/* ── Cylindre intérieur : Logo fixe ── */}
+        <div style={{
+          position:"absolute",
+          transform:"translateX(-50%) translateY(-50%)",
+          zIndex:10,
+          pointerEvents:"none",
+        }}>
+          <img
+            src="/marcheduRoi-icon.svg"
+            alt="MarchéduRoi"
+            draggable={false}
             style={{
-              position:"absolute",
-              left:"50%",
-              top:"50%",
-              transform:`translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`,
-              opacity,
-              zIndex,
-              transition:"none",
-              pointerEvents:"none",
-            }}>
-            <img
-              src={`https://flagcdn.com/32x24/${f.code}.png`}
-              alt={f.pays}
-              draggable={false}
-              style={{
-                width:32, height:24,
-                borderRadius:3,
-                objectFit:"cover",
-                boxShadow:`0 2px 6px rgba(0,0,0,${0.15 + 0.2 * ((depth+1)/2)})`,
-                display:"block",
-              }}
-            />
-          </div>
-        );
-      })}
+              width:180,
+              height:"auto",
+              filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.4))",
+              display:"block",
+            }}
+          />
+        </div>
+
+      </div>
     </div>
   );
 }
