@@ -378,6 +378,8 @@ function AppContent() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [postsLoaded, setPostsLoaded] = useState(false);
+  const [ads, setAds] = useState([]);
+  const [adIndex, setAdIndex] = useState(0);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   useEffect(() => {
     let timer;
@@ -609,6 +611,19 @@ function AppContent() {
     loadShops();
     loadAdminSettings();
     loadRatings();
+
+    // Charger les pubs depuis Supabase
+    const loadAds = async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data } = await supabase
+        .from("ads")
+        .select("*")
+        .eq("actif", true)
+        .or(`fin.is.null,fin.gte.${today}`)
+        .order("created_at", { ascending: false });
+      if (data && data.length > 0) setAds(data);
+    };
+    loadAds();
     // Restore sponsored state for boutiques/ateliers/restos/beaute
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     if (Object.keys(sponsored).length > 0) {
@@ -1308,6 +1323,15 @@ function AppContent() {
 
   // Pays détecté automatiquement via IP
   const [detectedCountry, setDetectedCountry] = useState("BJ");
+
+  // Rotation automatique des pubs toutes les 5 secondes
+  useEffect(() => {
+    if (ads.length <= 1) return;
+    const timer = setInterval(() => {
+      setAdIndex(i => (i + 1) % ads.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [ads]);
 
   useEffect(() => {
     fetch("https://ipapi.co/json/")
@@ -2279,23 +2303,63 @@ function AppContent() {
             </button>
           </div>
 
-          {/* Bannière publicitaire entreprises */}
-          <div style={{ width:"100%",maxWidth:700,margin:"32px auto 0",borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:theme.card }}>
-            <div style={{ padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
-              <div style={{ display:"flex",alignItems:"center",gap:12 }}>
-                <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>📢</div>
-                <div>
-                  <p style={{ fontWeight:800,fontSize:14,color:theme.text,marginBottom:2 }}>Votre entreprise ici</p>
-                  <p style={{ color:theme.sub,fontSize:12 }}>Bannière publicitaire · 50 000 FCFA/mois · Visibilité maximale</p>
+          {/* Bannière publicitaire — dynamique */}
+          {(() => {
+            const ad = ads[adIndex];
+            if (!ad) return (
+              // Bannière par défaut si aucune pub dans Supabase
+              <div style={{ width:"100%",maxWidth:700,margin:"32px auto 0",borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:theme.card }}>
+                <div style={{ padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
+                  <div style={{ display:"flex",alignItems:"center",gap:12 }}>
+                    <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>📢</div>
+                    <div>
+                      <p style={{ fontWeight:800,fontSize:14,color:theme.text,marginBottom:2 }}>Votre entreprise ici</p>
+                      <p style={{ color:theme.sub,fontSize:12 }}>Bannière publicitaire · 50 000 FCFA/mois · Visibilité maximale</p>
+                    </div>
+                  </div>
+                  <a href="mailto:contact@marcheduroi.com?subject=Bannière publicitaire MarchéduRoi" style={{ textDecoration:"none" }}>
+                    <button style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                      Nous contacter
+                    </button>
+                  </a>
                 </div>
               </div>
-              <a href="mailto:contact@marcheduroi.com?subject=Bannière publicitaire MarchéduRoi" style={{ textDecoration:"none" }}>
-                <button style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",flexShrink:0 }}>
-                  Nous contacter
-                </button>
+            );
+            return (
+              <a href={ad.lien||"#"} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"block",width:"100%",maxWidth:700,margin:"32px auto 0" }}>
+                <div style={{ borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:`linear-gradient(135deg,${ad.couleur1||"#6C63FF"}22,${ad.couleur2||"#8B84FF"}22)`,transition:"transform 0.3s",cursor:"pointer" }}
+                  onMouseEnter={e=>e.currentTarget.style.transform="scale(1.01)"}
+                  onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
+                  <div style={{ padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
+                    <div style={{ display:"flex",alignItems:"center",gap:14 }}>
+                      {ad.logo_url
+                        ? <img src={ad.logo_url} alt={ad.entreprise} style={{ width:48,height:48,borderRadius:10,objectFit:"cover",flexShrink:0 }}/>
+                        : <div style={{ width:48,height:48,borderRadius:10,background:`linear-gradient(135deg,${ad.couleur1},${ad.couleur2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0 }}>🏢</div>
+                      }
+                      <div>
+                        <p style={{ fontWeight:800,fontSize:15,color:theme.text,marginBottom:3 }}>{ad.entreprise}</p>
+                        {ad.slogan && <p style={{ color:theme.sub,fontSize:13 }}>{ad.slogan}</p>}
+                      </div>
+                    </div>
+                    <div style={{ display:"flex",alignItems:"center",gap:10,flexShrink:0 }}>
+                      {ads.length > 1 && (
+                        <div style={{ display:"flex",gap:4 }}>
+                          {ads.map((_,i) => (
+                            <div key={i} onClick={e=>{ e.preventDefault(); setAdIndex(i); }}
+                              style={{ width:6,height:6,borderRadius:"50%",background:i===adIndex?(ad.couleur1||"#6C63FF"):"rgba(154,154,176,0.4)",cursor:"pointer",transition:"background 0.3s" }}/>
+                          ))}
+                        </div>
+                      )}
+                      <div style={{ background:`linear-gradient(135deg,${ad.couleur1||"#6C63FF"},${ad.couleur2||"#8B84FF"})`,color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13 }}>
+                        Voir →
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ height:3,background:`linear-gradient(90deg,${ad.couleur1||"#6C63FF"},${ad.couleur2||"#8B84FF"})`,opacity:0.6 }}/>
+                </div>
               </a>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Footer landing */}
           <p style={{ color:theme.sub,fontSize:13,marginTop:24,textAlign:"center" }}>
@@ -2929,6 +2993,136 @@ function AppContent() {
               </div>
             </div>
           ))}
+
+          {/* ── GESTION BANNIÈRES PUBLICITAIRES ── */}
+          <div style={{ marginTop:40 }}>
+            <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text,display:"flex",alignItems:"center",gap:8 }}>
+              📢 Bannières publicitaires
+              <span style={{ background:"rgba(108,99,255,0.15)",color:"#6C63FF",borderRadius:20,padding:"2px 10px",fontSize:12,fontWeight:600 }}>{ads.length} active{ads.length>1?"s":""}</span>
+            </h3>
+
+            {/* Formulaire nouvelle pub */}
+            {(()=>{
+              const [adForm, setAdForm] = useState({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
+              const [adSaving, setAdSaving] = useState(false);
+
+              const saveAd = async () => {
+                if (!adForm.entreprise) { notify("Le nom de l'entreprise est requis","error"); return; }
+                setAdSaving(true);
+                const { data, error } = await supabase.from("ads").insert({
+                  entreprise: adForm.entreprise,
+                  slogan: adForm.slogan || null,
+                  logo_url: adForm.logo_url || null,
+                  lien: adForm.lien || null,
+                  couleur1: adForm.couleur1 || "#6C63FF",
+                  couleur2: adForm.couleur2 || "#8B84FF",
+                  actif: true,
+                  fin: adForm.fin || null,
+                }).select().single();
+                setAdSaving(false);
+                if (error) { notify("Erreur : "+error.message,"error"); return; }
+                setAds(prev => [data, ...prev]);
+                setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
+                notify("✅ Bannière publiée avec succès !");
+              };
+
+              return (
+                <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24 }}>
+                  <p style={{ fontWeight:700,fontSize:15,color:theme.text,marginBottom:16 }}>➕ Ajouter une bannière</p>
+                  <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12 }}>
+                    <div>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Nom entreprise *</label>
+                      <input value={adForm.entreprise} onChange={e=>setAdForm(f=>({...f,entreprise:e.target.value}))} placeholder="Ex: Boulangerie Dorée" style={{ ...inputStyle,fontSize:13 }}/>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Slogan</label>
+                      <input value={adForm.slogan} onChange={e=>setAdForm(f=>({...f,slogan:e.target.value}))} placeholder="Ex: Les meilleurs pains de Cotonou" style={{ ...inputStyle,fontSize:13 }}/>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>URL Logo (optionnel)</label>
+                      <input value={adForm.logo_url} onChange={e=>setAdForm(f=>({...f,logo_url:e.target.value}))} placeholder="https://..." style={{ ...inputStyle,fontSize:13 }}/>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Lien (clic sur bannière)</label>
+                      <input value={adForm.lien} onChange={e=>setAdForm(f=>({...f,lien:e.target.value}))} placeholder="https://..." style={{ ...inputStyle,fontSize:13 }}/>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Couleur 1</label>
+                      <div style={{ display:"flex",gap:8,alignItems:"center" }}>
+                        <input type="color" value={adForm.couleur1} onChange={e=>setAdForm(f=>({...f,couleur1:e.target.value}))} style={{ width:40,height:36,border:"none",borderRadius:8,cursor:"pointer",background:"transparent" }}/>
+                        <input value={adForm.couleur1} onChange={e=>setAdForm(f=>({...f,couleur1:e.target.value}))} style={{ ...inputStyle,fontSize:13,flex:1 }}/>
+                      </div>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Couleur 2</label>
+                      <div style={{ display:"flex",gap:8,alignItems:"center" }}>
+                        <input type="color" value={adForm.couleur2} onChange={e=>setAdForm(f=>({...f,couleur2:e.target.value}))} style={{ width:40,height:36,border:"none",borderRadius:8,cursor:"pointer",background:"transparent" }}/>
+                        <input value={adForm.couleur2} onChange={e=>setAdForm(f=>({...f,couleur2:e.target.value}))} style={{ ...inputStyle,fontSize:13,flex:1 }}/>
+                      </div>
+                    </div>
+                    <div style={{ gridColumn:"1/-1" }}>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Date de fin de campagne (optionnel)</label>
+                      <input type="date" value={adForm.fin} onChange={e=>setAdForm(f=>({...f,fin:e.target.value}))} style={{ ...inputStyle,fontSize:13 }}/>
+                    </div>
+                  </div>
+                  {/* Aperçu */}
+                  {adForm.entreprise && (
+                    <div style={{ borderRadius:12,overflow:"hidden",border:`1px solid ${theme.border}`,background:`linear-gradient(135deg,${adForm.couleur1}22,${adForm.couleur2}22)`,marginBottom:16 }}>
+                      <div style={{ padding:"12px 16px",display:"flex",alignItems:"center",gap:12 }}>
+                        {adForm.logo_url
+                          ? <img src={adForm.logo_url} alt="" style={{ width:40,height:40,borderRadius:8,objectFit:"cover" }}/>
+                          : <div style={{ width:40,height:40,borderRadius:8,background:`linear-gradient(135deg,${adForm.couleur1},${adForm.couleur2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18 }}>🏢</div>
+                        }
+                        <div>
+                          <p style={{ fontWeight:800,fontSize:14,color:theme.text }}>{adForm.entreprise}</p>
+                          {adForm.slogan && <p style={{ color:theme.sub,fontSize:12 }}>{adForm.slogan}</p>}
+                        </div>
+                        <div style={{ marginLeft:"auto",background:`linear-gradient(135deg,${adForm.couleur1},${adForm.couleur2})`,color:"#fff",padding:"6px 14px",borderRadius:8,fontWeight:700,fontSize:12 }}>Aperçu</div>
+                      </div>
+                      <div style={{ height:3,background:`linear-gradient(90deg,${adForm.couleur1},${adForm.couleur2})`,opacity:0.6 }}/>
+                    </div>
+                  )}
+                  <button onClick={saveAd} disabled={adSaving} style={{ width:"100%",padding:"13px",background:adSaving?"rgba(108,99,255,0.3)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:adSaving?"not-allowed":"pointer",transition:"opacity 0.2s" }}>
+                    {adSaving ? "⏳ Publication en cours..." : "✅ Valider et publier la bannière"}
+                  </button>
+                </div>
+              );
+            })()}
+
+            {/* Liste des pubs actives */}
+            {ads.length === 0 && <p style={{ color:theme.sub,fontSize:13,marginBottom:24 }}>Aucune bannière active pour le moment.</p>}
+            {ads.map(ad=>(
+              <div key={ad.id} style={{ ...cardStyle,borderRadius:14,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap" }}>
+                <div style={{ display:"flex",alignItems:"center",gap:12 }}>
+                  {ad.logo_url
+                    ? <img src={ad.logo_url} alt="" style={{ width:40,height:40,borderRadius:8,objectFit:"cover",flexShrink:0 }}/>
+                    : <div style={{ width:40,height:40,borderRadius:8,background:`linear-gradient(135deg,${ad.couleur1||"#6C63FF"},${ad.couleur2||"#8B84FF"})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0 }}>🏢</div>
+                  }
+                  <div>
+                    <p style={{ fontWeight:700,color:theme.text,fontSize:14 }}>{ad.entreprise}</p>
+                    {ad.slogan && <p style={{ color:theme.sub,fontSize:12 }}>{ad.slogan}</p>}
+                    {ad.fin && <p style={{ color:"#FF8C00",fontSize:11,marginTop:2 }}>⏳ Expire le {ad.fin}</p>}
+                  </div>
+                </div>
+                <div style={{ display:"flex",gap:8,flexShrink:0 }}>
+                  <button onClick={async()=>{
+                    await supabase.from("ads").update({actif:!ad.actif}).eq("id",ad.id);
+                    setAds(prev=>prev.map(a=>a.id===ad.id?{...a,actif:!a.actif}:a));
+                    notify(ad.actif?"Bannière désactivée":"Bannière réactivée ✅");
+                  }} style={{ background:ad.actif?"rgba(67,198,172,0.15)":"rgba(255,71,87,0.1)",border:"none",color:ad.actif?"#43C6AC":"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
+                    {ad.actif?"✅ Active":"⏸ Inactive"}
+                  </button>
+                  <button onClick={async()=>{
+                    await supabase.from("ads").delete().eq("id",ad.id);
+                    setAds(prev=>prev.filter(a=>a.id!==ad.id));
+                    notify("Bannière supprimée.");
+                  }} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
 
         </div>
       )}
