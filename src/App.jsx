@@ -265,7 +265,7 @@ const IMMO_TITRES = ["Oui - Titre foncier disponible","Non - Sans titre","En cou
 // Fiche détaillée Immobilier
 // Composant formulaire de notation
 // Badge Certifié MarchéduRoi — Logo officiel complet
-// ─── CYLINDRE 3D DRAPEAUX ────────────────────────────────────────────────────
+// ─── ORBITE DRAPEAUX AUTOUR DU LOGO ──────────────────────────────────────────
 const FLAGS = [
   {code:"bj",pays:"Bénin"},{code:"tg",pays:"Togo"},{code:"bf",pays:"Burkina Faso"},
   {code:"ml",pays:"Mali"},{code:"sn",pays:"Sénégal"},{code:"ci",pays:"Côte d'Ivoire"},
@@ -277,98 +277,88 @@ const FLAGS = [
 
 function FlagCylinder({ theme }) {
   const [angle, setAngle] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [startAngle, setStartAngle] = useState(0);
-  const [velocity, setVelocity] = useState(0);
-  const [lastX, setLastX] = useState(0);
+  const [paused, setPaused] = useState(false);
   const rafRef = useRef(null);
   const n = FLAGS.length;
-  const radius = 220;
   const angleStep = 360 / n;
+  // Rayon adaptatif selon la taille d'écran
+  const radius = typeof window !== "undefined" && window.innerWidth < 500 ? 110 : 145;
 
-  // Auto-rotation
   useEffect(() => {
-    if (dragging) return;
+    if (paused) return;
     const tick = () => {
-      setAngle(a => a + 0.3);
+      setAngle(a => a + 0.25);
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [dragging]);
+  }, [paused]);
 
-  // Inertie après drag
-  useEffect(() => {
-    if (dragging || Math.abs(velocity) < 0.1) return;
-    const tick = () => {
-      setVelocity(v => {
-        const next = v * 0.95;
-        setAngle(a => a + next);
-        if (Math.abs(next) < 0.1) return 0;
-        rafRef.current = requestAnimationFrame(tick);
-        return next;
-      });
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [dragging, velocity]);
-
-  const onStart = (x) => {
-    cancelAnimationFrame(rafRef.current);
-    setDragging(true);
-    setStartX(x);
-    setStartAngle(angle);
-    setLastX(x);
-    setVelocity(0);
-  };
-  const onMove = (x) => {
-    if (!dragging) return;
-    const delta = x - startX;
-    setAngle(startAngle + delta * 0.3);
-    setVelocity((x - lastX) * 0.3);
-    setLastX(x);
-  };
-  const onEnd = () => setDragging(false);
+  const size = radius * 2 + 60;
 
   return (
-    <div style={{ width:"100%",height:80,marginBottom:32,position:"relative",overflow:"hidden",cursor:"grab",userSelect:"none" }}
-      onMouseDown={e=>onStart(e.clientX)}
-      onMouseMove={e=>onMove(e.clientX)}
-      onMouseUp={onEnd}
-      onMouseLeave={onEnd}
-      onTouchStart={e=>onStart(e.touches[0].clientX)}
-      onTouchMove={e=>{ e.preventDefault(); onMove(e.touches[0].clientX); }}
-      onTouchEnd={onEnd}
-      style={{ width:"100%",height:80,marginBottom:32,position:"relative",overflow:"hidden",cursor:dragging?"grabbing":"grab",userSelect:"none",touchAction:"none" }}>
-      <div style={{ position:"absolute",left:"50%",top:"50%",transform:"translateX(-50%) translateY(-50%)",width:0,height:0,perspective:"600px" }}>
-        <div style={{ position:"relative",width:0,height:0,transformStyle:"preserve-3d",transform:`rotateY(${angle}deg)`,transition:dragging?"none":"none" }}>
-          {FLAGS.map((f, i) => {
-            const rot = i * angleStep;
-            const opacity = (() => {
-              let diff = ((rot + angle) % 360 + 360) % 360;
-              if (diff > 180) diff = 360 - diff;
-              return Math.max(0.15, 1 - diff / 130);
-            })();
-            return (
-              <div key={f.code} title={f.pays} style={{
-                position:"absolute",
-                transform:`rotateY(${rot}deg) translateZ(${radius}px)`,
-                transformOrigin:"center center",
-                opacity,
-                transition:"opacity 0.1s",
-              }}>
-                <img
-                  src={`https://flagcdn.com/40x30/${f.code}.png`}
-                  alt={f.pays}
-                  draggable={false}
-                  style={{ width:40,height:30,borderRadius:4,objectFit:"cover",boxShadow:"0 2px 8px rgba(0,0,0,0.3)",display:"block",pointerEvents:"none" }}
-                />
-              </div>
-            );
-          })}
-        </div>
+    <div style={{ position:"relative", width:size, height:size, margin:"0 auto", flexShrink:0 }}
+      onMouseEnter={()=>setPaused(true)}
+      onMouseLeave={()=>setPaused(false)}>
+
+      {/* Logo au centre */}
+      <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", zIndex:10 }}>
+        <img
+          src="/marcheduRoi-icon.svg"
+          alt="MarchéduRoi"
+          style={{ width:radius*0.85, height:"auto", filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.35))", display:"block" }}
+        />
       </div>
+
+      {/* Anneau décoratif */}
+      <div style={{
+        position:"absolute", top:"50%", left:"50%",
+        width:radius*2+10, height:radius*2+10,
+        transform:"translate(-50%,-50%)",
+        borderRadius:"50%",
+        border:"1px dashed rgba(108,99,255,0.2)",
+        pointerEvents:"none",
+      }}/>
+
+      {/* Drapeaux en orbite */}
+      {FLAGS.map((f, i) => {
+        const deg = (i * angleStep + angle) * (Math.PI / 180);
+        const x = Math.cos(deg) * radius;
+        const y = Math.sin(deg) * radius;
+        // Profondeur simulée : drapeaux "derrière" = plus petits et transparents
+        const depth = Math.sin(deg); // -1 à +1
+        const scale = 0.7 + 0.3 * ((depth + 1) / 2);
+        const opacity = 0.35 + 0.65 * ((depth + 1) / 2);
+        const zIndex = Math.round((depth + 1) * 5);
+        return (
+          <div
+            key={f.code}
+            title={f.pays}
+            style={{
+              position:"absolute",
+              left:"50%",
+              top:"50%",
+              transform:`translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`,
+              opacity,
+              zIndex,
+              transition:"none",
+              pointerEvents:"none",
+            }}>
+            <img
+              src={`https://flagcdn.com/32x24/${f.code}.png`}
+              alt={f.pays}
+              draggable={false}
+              style={{
+                width:32, height:24,
+                borderRadius:3,
+                objectFit:"cover",
+                boxShadow:`0 2px 6px rgba(0,0,0,${0.15 + 0.2 * ((depth+1)/2)})`,
+                display:"block",
+              }}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -2237,149 +2227,76 @@ function AppContent() {
           <div style={{ position:"absolute",top:-100,left:-100,width:400,height:400,borderRadius:"50%",background:"rgba(108,99,255,0.06)",pointerEvents:"none" }}/>
           <div style={{ position:"absolute",bottom:-100,right:-100,width:500,height:500,borderRadius:"50%",background:"rgba(255,101,132,0.05)",pointerEvents:"none" }}/>
 
-          {windowWidth > 768 ? (
-            /* ── DESKTOP : 2 colonnes ── */
-            <div style={{ display:"flex",alignItems:"center",gap:48,width:"100%",maxWidth:1100,marginBottom:24 }}>
+          {/* Logo + drapeaux en orbite */}
+          <FlagCylinder theme={theme}/>
 
-              {/* Colonne gauche — Logo + Drapeaux */}
-              <div style={{ display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0,width:280 }}>
-                <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:260,height:"auto",marginBottom:8,filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.3))" }}/>
-                <FlagCylinder theme={theme}/>
-              </div>
+          {/* Titre */}
+          <h1 style={{ fontSize:"clamp(26px,7vw,52px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:12,color:theme.text,padding:"0 8px",width:"100%",marginTop:8 }}>
+            Bienvenue sur{" "}
+            <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span>
+          </h1>
 
-              {/* Colonne droite — Texte + Boutons + Catégories */}
-              <div style={{ flex:1,display:"flex",flexDirection:"column",alignItems:"flex-start" }}>
-                <h1 style={{ fontSize:"clamp(28px,3.5vw,48px)",fontWeight:800,lineHeight:1.1,marginBottom:12,color:theme.text }}>
-                  Bienvenue sur{" "}
-                  <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span>
-                </h1>
-                <p style={{ fontSize:"clamp(13px,1.5vw,16px)",color:theme.sub,lineHeight:1.6,marginBottom:20,maxWidth:520 }}>
-                  La plateforme qui connecte commerçants, entreprises et particuliers au <strong style={{ color:theme.text }}>Bénin</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
-                </p>
+          {/* Slogan */}
+          <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:560,lineHeight:1.6,marginBottom:16,padding:"0 16px" }}>
+            La plateforme qui connecte commerçants, entreprises et particuliers au <strong style={{ color:theme.text }}>Bénin</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
+          </p>
 
-                {/* Boutons CTA */}
-                <div style={{ display:"flex",gap:12,marginBottom:20,flexWrap:"wrap" }}>
-                  <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
-                    Voir les annonces →
-                  </button>
-                  {!user && (
-                    <button onClick={()=>setView("register")} style={{ background:"transparent",border:`2px solid ${theme.border}`,color:theme.text,padding:"13px 28px",borderRadius:14,fontWeight:700,fontSize:16,cursor:"pointer" }}>
-                      Créer un compte
-                    </button>
-                  )}
-                  <button onClick={()=>window.open("https://marcheduroi.com/exemples.html","_blank")} style={{ background:"rgba(67,198,172,0.1)",border:`1px solid rgba(67,198,172,0.4)`,color:"#43C6AC",padding:"13px 24px",borderRadius:14,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
-                    📖 Exemples
-                  </button>
-                </div>
+          {/* Boutons CTA */}
+          <div style={{ display:"flex",gap:12,flexWrap:"wrap",justifyContent:"center",marginBottom:16 }}>
+            <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
+              Voir les annonces →
+            </button>
+            {!user && (
+              <button onClick={()=>setView("register")} style={{ background:"transparent",border:`2px solid ${theme.border}`,color:theme.text,padding:"13px 28px",borderRadius:14,fontWeight:700,fontSize:16,cursor:"pointer" }}>
+                Créer un compte
+              </button>
+            )}
+            <button onClick={()=>window.open("https://marcheduroi.com/exemples.html","_blank")} style={{ background:"rgba(67,198,172,0.1)",border:`1px solid rgba(67,198,172,0.4)`,color:"#43C6AC",padding:"13px 20px",borderRadius:14,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
+              📖 Exemples
+            </button>
+          </div>
 
-                {/* Catégories — scroll horizontal */}
-                <div style={{ width:"100%",position:"relative",marginBottom:12 }}>
-                  <div style={{ position:"absolute",right:0,top:0,bottom:0,width:20,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
-                  <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-                    {[
-                      { label:"Immobilier",   icon:"🏠", color:"#6C63FF" },
-                      { label:"Véhicules",    icon:"🚗", color:"#FF6584" },
-                      { label:"Électronique", icon:"📱", color:"#43C6AC" },
-                      { label:"Services",     icon:"🔧", color:"#FFD700" },
-                      { label:"Sport",        icon:"⚽", color:"#FF6584" },
-                      { label:"Mode",         icon:"👗", color:"#9A78CF" },
-                      { label:"Autre",        icon:"🍳", color:"#43C6AC" },
-                    ].map(c=>(
-                      <button key={c.label} onClick={()=>{ setCategory(c.label); setView("home"); }}
-                        style={{ background:`${c.color}15`,border:`1px solid ${c.color}44`,color:c.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap",transition:"all 0.2s" }}>
-                        {c.icon} {c.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Sections — scroll horizontal */}
-                <div style={{ width:"100%",position:"relative" }}>
-                  <div style={{ position:"absolute",right:0,top:0,bottom:0,width:20,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
-                  <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-                    {[
-                      { label:"🛍️ Boutiques",        color:"#FF6584", bg:"rgba(255,101,132,0.1)", border:"rgba(255,101,132,0.3)", count:boutiques.length, action:()=>setView("boutiques") },
-                      { label:"🔧 Ateliers",          color:"#43C6AC", bg:"rgba(67,198,172,0.1)",  border:"rgba(67,198,172,0.3)",  count:ateliers.length,  action:()=>setView("ateliers") },
-                      { label:"🍽️ Restos & Bars",     color:"#FF8C00", bg:"rgba(255,140,0,0.1)",   border:"rgba(255,140,0,0.3)",   count:restos.length,    action:()=>setView("restos") },
-                      { label:"💇 Beauté & Coiffure", color:"#FF69B4", bg:"rgba(255,105,180,0.1)", border:"rgba(255,105,180,0.3)", count:beaute.length,    action:()=>setView("beaute") },
-                    ].map(s=>(
-                      <button key={s.label} onClick={s.action}
-                        style={{ background:s.bg,border:`1px solid ${s.border}`,color:s.color,padding:"7px 16px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
-                        {s.label} <span style={{ background:s.border,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          ) : (
-            /* ── MOBILE : empilement (inchangé pour l'instant) ── */
-            <>
-              <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:200,height:"auto",marginBottom:4,filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.3))" }}/>
-              <h1 style={{ fontSize:"clamp(26px,7vw,48px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:12,color:theme.text,padding:"0 8px",width:"100%" }}>
-                Bienvenue sur{" "}
-                <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span>
-              </h1>
-              <p style={{ fontSize:"clamp(13px,4vw,16px)",color:theme.sub,textAlign:"center",maxWidth:500,lineHeight:1.6,marginBottom:12,padding:"0 16px" }}>
-                La plateforme qui connecte commerçants, entreprises et particuliers au <strong style={{ color:theme.text }}>Bénin</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
-              </p>
-              <FlagCylinder theme={theme}/>
-
-              {/* Catégories */}
-              <div style={{ width:"100%",position:"relative",marginBottom:12 }}>
-                <div style={{ position:"absolute",left:0,top:0,bottom:0,width:20,background:`linear-gradient(to right,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
-                <div style={{ position:"absolute",right:0,top:0,bottom:0,width:20,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
-                <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 20px",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-                  {[
-                    { label:"Immobilier",   icon:"🏠", color:"#6C63FF" },
-                    { label:"Véhicules",    icon:"🚗", color:"#FF6584" },
-                    { label:"Électronique", icon:"📱", color:"#43C6AC" },
-                    { label:"Services",     icon:"🔧", color:"#FFD700" },
-                    { label:"Sport",        icon:"⚽", color:"#FF6584" },
-                    { label:"Mode",         icon:"👗", color:"#9A78CF" },
-                    { label:"Autre",        icon:"🍳", color:"#43C6AC" },
-                  ].map(c=>(
-                    <button key={c.label} onClick={()=>{ setCategory(c.label); setView("home"); }}
-                      style={{ background:`${c.color}15`,border:`1px solid ${c.color}44`,color:c.color,padding:"8px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
-                      {c.icon} {c.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Boutons CTA */}
-              <div style={{ display:"flex",gap:12,flexWrap:"wrap",justifyContent:"center",marginBottom:12 }}>
-                <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
-                  Voir les annonces →
+          {/* Catégories — défilement horizontal */}
+          <div style={{ width:"100%",maxWidth:700,position:"relative",marginBottom:10 }}>
+            <div style={{ position:"absolute",left:0,top:0,bottom:0,width:20,background:`linear-gradient(to right,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
+            <div style={{ position:"absolute",right:0,top:0,bottom:0,width:20,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
+            <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 20px",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
+              {[
+                {label:"Immobilier",icon:"🏠",color:"#6C63FF"},
+                {label:"Véhicules",icon:"🚗",color:"#FF6584"},
+                {label:"Électronique",icon:"📱",color:"#43C6AC"},
+                {label:"Services",icon:"🔧",color:"#FFD700"},
+                {label:"Sport",icon:"⚽",color:"#FF6584"},
+                {label:"Mode",icon:"👗",color:"#9A78CF"},
+                {label:"Autre",icon:"🍳",color:"#43C6AC"},
+              ].map(c=>(
+                <button key={c.label} onClick={()=>{ setCategory(c.label); setView("home"); }}
+                  style={{ background:`${c.color}15`,border:`1px solid ${c.color}44`,color:c.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
+                  {c.icon} {c.label}
                 </button>
-                {!user && (
-                  <button onClick={()=>setView("register")} style={{ background:"transparent",border:`2px solid ${theme.border}`,color:theme.text,padding:"13px 28px",borderRadius:14,fontWeight:700,fontSize:16,cursor:"pointer" }}>
-                    Créer un compte
-                  </button>
-                )}
-              </div>
+              ))}
+            </div>
+          </div>
 
-              {/* Sections */}
-              <div style={{ width:"100%",position:"relative",marginBottom:12 }}>
-                <div style={{ position:"absolute",left:0,top:0,bottom:0,width:20,background:`linear-gradient(to right,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
-                <div style={{ position:"absolute",right:0,top:0,bottom:0,width:20,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
-                <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 20px",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-                  {[
-                    { label:"🛍️ Boutiques",        color:"#FF6584", bg:"rgba(255,101,132,0.1)", border:"rgba(255,101,132,0.3)", count:boutiques.length, action:()=>setView("boutiques") },
-                    { label:"🔧 Ateliers",          color:"#43C6AC", bg:"rgba(67,198,172,0.1)",  border:"rgba(67,198,172,0.3)",  count:ateliers.length,  action:()=>setView("ateliers") },
-                    { label:"🍽️ Restos & Bars",     color:"#FF8C00", bg:"rgba(255,140,0,0.1)",   border:"rgba(255,140,0,0.3)",   count:restos.length,    action:()=>setView("restos") },
-                    { label:"💇 Beauté & Coiffure", color:"#FF69B4", bg:"rgba(255,105,180,0.1)", border:"rgba(255,105,180,0.3)", count:beaute.length,    action:()=>setView("beaute") },
-                  ].map(s=>(
-                    <button key={s.label} onClick={s.action}
-                      style={{ background:s.bg,border:`1px solid ${s.border}`,color:s.color,padding:"8px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
-                      {s.label} <span style={{ background:s.border,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
+          {/* Sections — défilement horizontal */}
+          <div style={{ width:"100%",maxWidth:700,position:"relative",marginBottom:16 }}>
+            <div style={{ position:"absolute",left:0,top:0,bottom:0,width:20,background:`linear-gradient(to right,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
+            <div style={{ position:"absolute",right:0,top:0,bottom:0,width:20,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
+            <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 20px",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
+              {[
+                {label:"🛍️ Boutiques",color:"#FF6584",bg:"rgba(255,101,132,0.1)",border:"rgba(255,101,132,0.3)",count:boutiques.length,action:()=>setView("boutiques")},
+                {label:"🔧 Ateliers",color:"#43C6AC",bg:"rgba(67,198,172,0.1)",border:"rgba(67,198,172,0.3)",count:ateliers.length,action:()=>setView("ateliers")},
+                {label:"🍽️ Restos & Bars",color:"#FF8C00",bg:"rgba(255,140,0,0.1)",border:"rgba(255,140,0,0.3)",count:restos.length,action:()=>setView("restos")},
+                {label:"💇 Beauté & Coiffure",color:"#FF69B4",bg:"rgba(255,105,180,0.1)",border:"rgba(255,105,180,0.3)",count:beaute.length,action:()=>setView("beaute")},
+                {label:"👗 Mode",color:"#9B59B6",bg:"rgba(155,89,182,0.1)",border:"rgba(155,89,182,0.3)",count:posts.filter(p=>p.category==="Mode").length,action:()=>{setView("home");setCategory("Mode");}},
+              ].map(s=>(
+                <button key={s.label} onClick={s.action}
+                  style={{ background:s.bg,border:`1px solid ${s.border}`,color:s.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
+                  {s.label} <span style={{ background:s.border,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Bannière publicitaire — dynamique */}
           {(() => {
