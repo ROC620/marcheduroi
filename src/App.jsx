@@ -265,7 +265,7 @@ const IMMO_TITRES = ["Oui - Titre foncier disponible","Non - Sans titre","En cou
 // Fiche détaillée Immobilier
 // Composant formulaire de notation
 // Badge Certifié MarchéduRoi — Logo officiel complet
-// ─── LOGO + CEINTURE DE DRAPEAUX ─────────────────────────────────────────────
+// ─── CYLINDRE 3D DE DRAPEAUX ────────────────────────────────────────────────
 const FLAGS = [
   {code:"bj",pays:"Bénin"},{code:"tg",pays:"Togo"},{code:"bf",pays:"Burkina Faso"},
   {code:"ml",pays:"Mali"},{code:"sn",pays:"Sénégal"},{code:"ci",pays:"Côte d'Ivoire"},
@@ -276,125 +276,113 @@ const FLAGS = [
 ];
 
 function FlagCylinder({ theme }) {
-  const [offset, setOffset] = useState(0);
+  const [angle, setAngle] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [startOffset, setStartOffset] = useState(0);
+  const [startAngle, setStartAngle] = useState(0);
   const [velocity, setVelocity] = useState(0);
   const [lastX, setLastX] = useState(0);
   const rafRef = useRef(null);
 
-  // Chaque drapeau fait 48px + 8px gap = 56px
-  const itemW = 56;
-  const totalW = FLAGS.length * itemW;
+  const n = FLAGS.length;
+  const angleStep = 360 / n;
+  const itemW = 50; // largeur drapeau + gap
+  // rayon du cylindre : r = (n * itemW) / (2π)
+  const radius = Math.round((n * itemW) / (2 * Math.PI));
 
-  // Auto-scroll de gauche à droite
+  // Auto-rotation
   useEffect(() => {
     if (dragging) return;
-    const tick = () => {
-      setOffset(o => (o + 0.6) % totalW);
-      rafRef.current = requestAnimationFrame(tick);
-    };
+    const tick = () => { setAngle(a => a + 0.3); rafRef.current = requestAnimationFrame(tick); };
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [dragging, totalW]);
+  }, [dragging]);
 
-  // Inertie après drag
+  // Inertie
   useEffect(() => {
-    if (dragging || Math.abs(velocity) < 0.2) return;
+    if (dragging || Math.abs(velocity) < 0.1) return;
     const tick = () => {
       setVelocity(v => {
         const next = v * 0.95;
-        setOffset(o => ((o - next) % totalW + totalW) % totalW);
-        if (Math.abs(next) < 0.2) return 0;
+        setAngle(a => a + next);
+        if (Math.abs(next) < 0.1) return 0;
         rafRef.current = requestAnimationFrame(tick);
         return next;
       });
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [dragging, velocity, totalW]);
+  }, [dragging, velocity]);
 
-  const onStart = (x) => {
-    cancelAnimationFrame(rafRef.current);
-    setDragging(true); setStartX(x); setStartOffset(offset); setLastX(x); setVelocity(0);
-  };
-  const onMove = (x) => {
-    if (!dragging) return;
-    const delta = startX - x;
-    setOffset(((startOffset + delta) % totalW + totalW) % totalW);
-    setVelocity(lastX - x);
-    setLastX(x);
-  };
-  const onEnd = () => setDragging(false);
-
-  // Drapeaux dupliqués pour boucle infinie
-  const allFlags = [...FLAGS, ...FLAGS, ...FLAGS];
+  const onStart = (x) => { cancelAnimationFrame(rafRef.current); setDragging(true); setStartX(x); setStartAngle(angle); setLastX(x); setVelocity(0); };
+  const onMove  = (x) => { if (!dragging) return; setAngle(startAngle + (x - startX) * 0.4); setVelocity((x - lastX) * 0.4); setLastX(x); };
+  const onEnd   = () => setDragging(false);
 
   return (
-    <div style={{ position:"relative", width:"100%", marginBottom:8 }}>
+    <div style={{ position:"relative", width:"100%", marginBottom:8, userSelect:"none" }}>
 
-      {/* Logo */}
-      <div style={{ display:"flex", justifyContent:"center", position:"relative" }}>
+      {/* Logo — affiché normalement en dessous du cylindre */}
+      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none" }}>
         <img
           src="/marcheduRoi-icon.svg"
           alt="MarchéduRoi"
           draggable={false}
-          style={{ width:260, height:"auto", filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.35))", display:"block", pointerEvents:"none" }}
+          style={{ width:260, height:"auto", filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.35))", display:"block" }}
         />
+      </div>
 
-        {/* Ceinture de drapeaux — positionnée sur le M (~38% du haut du SVG) */}
-        <div
-          style={{
-            position:"absolute",
-            top:"36%",
-            left:0, right:0,
-            height:38,
-            overflow:"hidden",
-            cursor: dragging ? "grabbing" : "grab",
-            userSelect:"none",
-            touchAction:"none",
-          }}
-          onMouseDown={e=>onStart(e.clientX)}
-          onMouseMove={e=>onMove(e.clientX)}
-          onMouseUp={onEnd}
-          onMouseLeave={onEnd}
-          onTouchStart={e=>onStart(e.touches[0].clientX)}
-          onTouchMove={e=>{ e.preventDefault(); onMove(e.touches[0].clientX); }}
-          onTouchEnd={onEnd}>
+      {/* Cylindre 3D — positionné sur le M (top:34%) */}
+      <div
+        style={{
+          position:"absolute",
+          top:"34%",
+          left:0, right:0,
+          height:46,
+          overflow:"hidden",
+          cursor:dragging?"grabbing":"grab",
+          touchAction:"none",
+        }}
+        onMouseDown={e=>onStart(e.clientX)}
+        onMouseMove={e=>onMove(e.clientX)}
+        onMouseUp={onEnd}
+        onMouseLeave={onEnd}
+        onTouchStart={e=>onStart(e.touches[0].clientX)}
+        onTouchMove={e=>{ e.preventDefault(); onMove(e.touches[0].clientX); }}
+        onTouchEnd={onEnd}
+      >
+        {/* Fondu gauche/droite */}
+        <div style={{ position:"absolute",left:0,top:0,bottom:0,width:48,background:`linear-gradient(to right,${theme.bg},transparent)`,zIndex:10,pointerEvents:"none" }}/>
+        <div style={{ position:"absolute",right:0,top:0,bottom:0,width:48,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:10,pointerEvents:"none" }}/>
 
-          {/* Fondu gauche */}
-          <div style={{ position:"absolute",left:0,top:0,bottom:0,width:32,background:`linear-gradient(to right,${theme.bg}CC,transparent)`,zIndex:2,pointerEvents:"none" }}/>
-          {/* Fondu droite */}
-          <div style={{ position:"absolute",right:0,top:0,bottom:0,width:32,background:`linear-gradient(to left,${theme.bg}CC,transparent)`,zIndex:2,pointerEvents:"none" }}/>
-
-          {/* Bande de drapeaux */}
+        {/* Conteneur perspective */}
+        <div style={{ position:"absolute", left:"50%", top:"50%", width:0, height:0, perspective:`${radius * 2.5}px` }}>
+          {/* Cylindre rotatif */}
           <div style={{
-            display:"flex",
-            alignItems:"center",
-            gap:8,
             position:"absolute",
-            top:"50%",
-            transform:`translateX(${-offset}px) translateY(-50%)`,
-            willChange:"transform",
+            width:0, height:0,
+            transformStyle:"preserve-3d",
+            transform:`translateX(-50%) translateY(-50%) rotateY(${angle}deg)`,
           }}>
-            {allFlags.map((f, i) => (
-              <img
-                key={i}
-                src={`https://flagcdn.com/40x30/${f.code}.png`}
-                alt={f.pays}
-                title={f.pays}
-                draggable={false}
-                style={{
-                  width:40, height:30,
-                  borderRadius:4,
-                  objectFit:"cover",
-                  boxShadow:"0 2px 8px rgba(0,0,0,0.3)",
-                  flexShrink:0,
-                  pointerEvents:"none",
-                }}
-              />
-            ))}
+            {FLAGS.map((f, i) => {
+              const rot = i * angleStep;
+              const rad = ((rot + angle) % 360) * Math.PI / 180;
+              const opacity = Math.max(0.12, (Math.cos(rad) + 1) / 2);
+              return (
+                <div key={f.code} title={f.pays} style={{
+                  position:"absolute",
+                  transform:`rotateY(${rot}deg) translateZ(${radius}px) translateX(-50%) translateY(-50%)`,
+                  opacity,
+                  transformOrigin:"center center",
+                }}>
+                  <img
+                    src={`https://flagcdn.com/40x30/${f.code}.png`}
+                    alt={f.pays}
+                    draggable={false}
+                    style={{ width:40, height:30, borderRadius:4, objectFit:"cover", boxShadow:"0 2px 8px rgba(0,0,0,0.35)", display:"block", pointerEvents:"none" }}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -402,6 +390,7 @@ function FlagCylinder({ theme }) {
   );
 }
 // ─────────────────────────────────────────────────────────────────────────────
+
 
 function AppContent() {
   const navigate = useNavigate();
