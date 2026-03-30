@@ -1027,6 +1027,8 @@ function AppContent() {
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [pwaPrompt, setPwaPrompt] = useState(null);
+  const [showPwaBanner, setShowPwaBanner] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [notifications, setNotifications] = useState(() => {
     try { return JSON.parse(localStorage.getItem("mf_notifs") || "[]"); }
@@ -1071,11 +1073,20 @@ function AppContent() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     }
+    // PWA install prompt
+    const handleInstallPrompt = (e) => {
+      e.preventDefault();
+      setPwaPrompt(e);
+      const dismissed = localStorage.getItem("mdr_pwa_dismissed");
+      if (!dismissed) setShowPwaBanner(true);
+    };
+    window.addEventListener("beforeinstallprompt", handleInstallPrompt);
     return () => {
       document.removeEventListener("click", handleClickOutside);
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
     };
   }, []);
 
@@ -1834,6 +1845,7 @@ function AppContent() {
         button{cursor:pointer;font-family:inherit;}
         @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes notifIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.85;transform:scale(1.05)}}
         .card-hover{transition:transform 0.25s ease,box-shadow 0.25s ease;}
         .card-hover:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(108,99,255,0.18)!important;}
         .btn-glow:hover{box-shadow:0 0 24px rgba(108,99,255,0.5);}
@@ -1920,7 +1932,14 @@ function AppContent() {
                       <div style={{ maxWidth:"75%",background:msg.sender_id===user.id?"linear-gradient(135deg,#6C63FF,#8B84FF)":theme.bg,border:msg.sender_id===user.id?"none":`1px solid ${theme.border}`,borderRadius:msg.sender_id===user.id?"18px 18px 4px 18px":"18px 18px 18px 4px",padding:"10px 14px" }}>
                         <p style={{ color:msg.sender_id===user.id?"#fff":theme.text,fontSize:14,lineHeight:1.4 }}>{msg.content}</p>
                       </div>
-                      <p style={{ color:theme.sub,fontSize:10,marginTop:3 }}>{new Date(msg.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})}</p>
+                      <div style={{ display:"flex",alignItems:"center",gap:4,marginTop:3 }}>
+                        <p style={{ color:theme.sub,fontSize:10 }}>{new Date(msg.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})}</p>
+                        {msg.sender_id===user.id && (
+                          <span style={{ fontSize:11,color:msg.read?"#43C6AC":theme.sub }} title={msg.read?"Lu":"Envoyé"}>
+                            {msg.read ? "✓✓" : "✓"}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1943,6 +1962,29 @@ function AppContent() {
         <div style={{ position:"fixed",top:64,left:0,right:0,zIndex:998,background:"linear-gradient(135deg,#FF4757,#FF6584)",color:"#fff",padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"center",gap:10,fontSize:14,fontWeight:600,boxShadow:"0 4px 20px rgba(255,71,87,0.4)" }}>
           <span style={{ fontSize:18 }}>📵</span>
           Vous êtes hors ligne — Les dernières annonces chargées restent disponibles
+        </div>
+      )}
+
+      {/* Bannière PWA — installer l'application */}
+      {showPwaBanner && (
+        <div style={{ position:"fixed",bottom:80,left:12,right:12,zIndex:997,background:"linear-gradient(135deg,#1A1D30,#2A2D45)",border:"1px solid #6C63FF",borderRadius:16,padding:"14px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 8px 32px rgba(108,99,255,0.4)",maxWidth:480,margin:"0 auto" }}>
+          <img src="/marcheduRoi-icon.svg" alt="" style={{ width:44,height:44,borderRadius:10,flexShrink:0 }}/>
+          <div style={{ flex:1,minWidth:0 }}>
+            <p style={{ fontWeight:800,fontSize:14,color:"#E8E8F0",marginBottom:2 }}>Installer MarchéduRoi</p>
+            <p style={{ fontSize:12,color:"#9A9AB0" }}>Accès rapide · Fonctionne hors ligne</p>
+          </div>
+          <button onClick={async()=>{
+            if (pwaPrompt) {
+              pwaPrompt.prompt();
+              const result = await pwaPrompt.userChoice;
+              if (result.outcome === "accepted") notify("✅ Application installée !");
+            }
+            setShowPwaBanner(false);
+            localStorage.setItem("mdr_pwa_dismissed","1");
+          }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",flexShrink:0 }}>
+            Installer
+          </button>
+          <button onClick={()=>{ setShowPwaBanner(false); localStorage.setItem("mdr_pwa_dismissed","1"); }} style={{ background:"transparent",border:"none",color:"#9A9AB0",fontSize:18,cursor:"pointer",flexShrink:0,lineHeight:1 }}>✕</button>
         </div>
       )}
 
@@ -2137,7 +2179,16 @@ function AppContent() {
                   </div>
                 )}
               </div>
-              <button onClick={()=>setView("dashboard")} style={{ ...cardStyle,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,color:theme.text }}><Icon name="user" size={14}/>{user.name.split(" ")[0]}</button>
+              <button onClick={()=>setView("dashboard")} style={{ ...cardStyle,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,color:theme.text }}>
+                <Icon name="user" size={14}/>
+                {user.name.split(" ")[0]}
+                {user.isPremium && <span style={{ fontSize:10,background:"rgba(255,215,0,0.2)",color:"#FFD700",padding:"1px 6px",borderRadius:10,fontWeight:800 }}>PRO</span>}
+              </button>
+              {!user.isPremium && windowWidth > 768 && (
+                <button onClick={()=>setModal({type:"pro"})} style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",padding:"7px 12px",borderRadius:8,fontWeight:800,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:4 }}>
+                  👑 PRO
+                </button>
+              )}
               <button onClick={logout} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px" }}><Icon name="logout" size={16}/></button>
             </div>
           ) : (
@@ -2228,8 +2279,26 @@ function AppContent() {
             </button>
           </div>
 
+          {/* Bannière publicitaire entreprises */}
+          <div style={{ width:"100%",maxWidth:700,margin:"32px auto 0",borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:theme.card }}>
+            <div style={{ padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
+              <div style={{ display:"flex",alignItems:"center",gap:12 }}>
+                <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>📢</div>
+                <div>
+                  <p style={{ fontWeight:800,fontSize:14,color:theme.text,marginBottom:2 }}>Votre entreprise ici</p>
+                  <p style={{ color:theme.sub,fontSize:12 }}>Bannière publicitaire · 50 000 FCFA/mois · Visibilité maximale</p>
+                </div>
+              </div>
+              <a href="mailto:contact@marcheduroi.com?subject=Bannière publicitaire MarchéduRoi" style={{ textDecoration:"none" }}>
+                <button style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",flexShrink:0 }}>
+                  Nous contacter
+                </button>
+              </a>
+            </div>
+          </div>
+
           {/* Footer landing */}
-          <p style={{ color:theme.sub,fontSize:13,marginTop:40,textAlign:"center" }}>
+          <p style={{ color:theme.sub,fontSize:13,marginTop:24,textAlign:"center" }}>
             © 2026 MarchéduRoi · Ouidah, Bénin 🇧🇯 · <button onClick={()=>setView("terms")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>CGU</button> · <button onClick={()=>setView("about")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>À propos</button>
           </p>
         </div>
@@ -2400,6 +2469,16 @@ function AppContent() {
                         🌟 Sponsorisé
                       </div>
                     )}
+                    {post.urgent && new Date(post.urgentUntil) > new Date() && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#FF4757,#FF6584)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,color:"#fff",animation:"pulse 1.5s infinite" }}>
+                        🔥 URGENT
+                      </div>
+                    )}
+                    {post.flash && new Date(post.flashUntil) > new Date() && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#6C63FF,#8B84FF)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,color:"#fff" }}>
+                        ⚡ FLASH
+                      </div>
+                    )}
                     {post.ownerVerified && (
                       <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.15)",border:"1px solid rgba(67,198,172,0.4)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,color:"#43C6AC" }}>
                         ✅ Vendeur vérifié
@@ -2471,6 +2550,17 @@ function AppContent() {
                           <svg width="13" height="13" fill="#1877F2" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                         </div>
                       </a>
+                      {/* TikTok share */}
+                      <a href={"https://www.tiktok.com/share?url="+encodeURIComponent("https://marcheduroi.com/annonce/"+post.id)+"&text="+encodeURIComponent(post.title+" — MarchéduRoi")} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                        <div style={{ background:"rgba(0,0,0,0.08)",color:"#000",padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:3,cursor:"pointer",border:"1px solid rgba(0,0,0,0.12)" }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.23a8.16 8.16 0 0 0 4.77 1.52V7.32a4.85 4.85 0 0 1-1.01-.63z"/></svg>
+                          TikTok
+                        </div>
+                      </a>
+                      {/* Copier le lien */}
+                      <button onClick={()=>{ navigator.clipboard.writeText("https://marcheduroi.com/annonce/"+post.id); notify("🔗 Lien copié !"); }} style={{ background:"rgba(154,154,176,0.1)",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:3 }}>
+                        🔗
+                      </button>
                       {user && user.id !== (post.authorId||post.author_id) && (post.authorId||post.author_id) && (
                         <button onClick={()=>{ const ownerId=post.authorId||post.author_id; setActiveConv({postId:post.id,postTitle:post.title,postPrice:post.price,postPhoto:post.photos?.[0],receiverId:ownerId,receiverName:post.author,messages:messages.filter(m=>(m.post_id===post.id)&&((m.sender_id===user.id&&m.receiver_id===ownerId)||(m.receiver_id===user.id&&m.sender_id===ownerId)))}); setShowMessages(true); markConvRead({messages:messages.filter(m=>m.post_id===post.id&&m.receiver_id===user.id)}); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:3 }} title="Envoyer un message">
                           💬
@@ -2623,6 +2713,7 @@ function AppContent() {
                 <div style={{ display:"flex",gap:8,flexShrink:0,flexWrap:"wrap" }}>
                   {post.expiresAt&&<button onClick={()=>setModal({type:"prolong",data:post})} style={{ background:"rgba(67,198,172,0.15)",border:"none",color:"#43C6AC",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>⏳ Prolonger</button>}
                   {!post.sponsored&&<button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.15)",border:"none",color:"#FFD700",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🌟 Sponsoriser</button>}
+                  {!(post.urgent&&new Date(post.urgentUntil)>new Date())&&<button onClick={()=>setModal({type:"urgent",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🔥 Urgent</button>}
                   <button onClick={()=>openEdit(post)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>✏️ Modifier</button>
                   <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🗑️</button>
                 </div>
@@ -2634,7 +2725,7 @@ function AppContent() {
                   { icon:"💬", val:contactClicks[post.id]||0, label:"contacts", color:"#6C63FF" },
                   { icon:"❤️", val:post.likes, label:"likes", color:"#FF6584" },
                   { icon:"⭐", val:getAvgRating(post.id)?`${getAvgRating(post.id)}/5`:"–", label:"note", color:"#FFD700" },
-                  { icon:"🚩", val:reports.filter(r=>r.postId===post.id).length, label:"signalements", color:"#FF4757" },
+                  { icon:"📊", val: postViews[post.id]>0 ? Math.round((contactClicks[post.id]||0)/postViews[post.id]*100)+"%" : "–", label:"conversion", color:"#43C6AC" },
                   { icon:"✏️", val:`${getModifCount(post.id)}/${MAX_MODIFS}`, label:"modifs ce mois", color: getModifCount(post.id)>=MAX_MODIFS?"#FF4757":"#6C63FF" },
                 ].map(s=>(
                   <div key={s.label} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:8,padding:"5px 10px",display:"flex",alignItems:"center",gap:4 }}>
@@ -3401,7 +3492,7 @@ function AppContent() {
               { val:beaute.length, label:"Salons Beauté", icon:"💇", color:"#FF69B4" },
               { val:posts.reduce((a,p)=>a+p.likes,0), label:"Likes totaux", icon:"❤️", color:"#FF6584" },
               { val:CATEGORIES.length-1, label:"Catégories", icon:"🗂️", color:"#FFD700" },
-              { val:"Bénin 🇧🇯", label:"Pays principal", icon:"🌍", color:"#43C6AC" },
+              { val:"18 pays 🌍", label:"Couverture Afrique", icon:"🌐", color:"#43C6AC" },
             ].map(s=>(
               <div key={s.label} className="card-hover" style={{ ...cardStyle,borderRadius:16,padding:28,textAlign:"center" }}>
                 <p style={{ fontSize:36,marginBottom:8 }}>{s.icon}</p>
@@ -3410,6 +3501,46 @@ function AppContent() {
               </div>
             ))}
           </div>
+
+          {/* Carte Google Maps des annonces */}
+          <div style={{ ...cardStyle,borderRadius:16,marginBottom:24,overflow:"hidden" }}>
+            <div style={{ padding:"16px 20px",borderBottom:`1px solid ${theme.border}`,display:"flex",alignItems:"center",gap:8 }}>
+              <span style={{ fontSize:20 }}>🗺️</span>
+              <p style={{ fontWeight:700,fontSize:16,color:theme.text }}>Carte des annonces</p>
+              <span style={{ color:theme.sub,fontSize:13 }}>— Bénin & Afrique</span>
+            </div>
+            <div style={{ height:320,position:"relative" }}>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1014574!2d2.3158!3d6.3654!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sfr!2sbj!4v1"
+                width="100%" height="320" style={{ border:0 }} allowFullScreen loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade" title="Carte MarchéduRoi"/>
+              <div style={{ position:"absolute",bottom:0,left:0,right:0,background:`linear-gradient(to top,${theme.bg}CC,transparent)`,padding:"16px 20px" }}>
+                <p style={{ color:theme.text,fontSize:13,fontWeight:600 }}>
+                  📍 {posts.filter(p=>p.lat&&p.lng).length} annonce{posts.filter(p=>p.lat&&p.lng).length>1?"s":""} géolocalisée{posts.filter(p=>p.lat&&p.lng).length>1?"s":""}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Activer les notifications push */}
+          {user && "Notification" in window && Notification.permission !== "granted" && (
+            <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24,display:"flex",gap:16,alignItems:"center",flexWrap:"wrap" }}>
+              <span style={{ fontSize:36 }}>🔔</span>
+              <div style={{ flex:1 }}>
+                <p style={{ fontWeight:700,fontSize:16,color:theme.text,marginBottom:4 }}>Activer les notifications</p>
+                <p style={{ color:theme.sub,fontSize:13 }}>Soyez alerté en temps réel — nouveaux messages, likes, expiration d'annonces.</p>
+              </div>
+              <button onClick={()=>{
+                Notification.requestPermission().then(perm=>{
+                  if (perm==="granted") notify("🔔 Notifications activées ! Vous serez alerté en temps réel.");
+                  else notify("Notifications refusées — vous pouvez les activer dans les paramètres du navigateur.","error");
+                });
+              }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 24px",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer",flexShrink:0 }}>
+                🔔 Activer
+              </button>
+            </div>
+          )}
+
           <div style={{ ...cardStyle,borderRadius:16,padding:28,textAlign:"center" }}>
             <p style={{ fontSize:18,fontWeight:700,color:theme.text,marginBottom:8 }}>🚀 Rejoignez la communauté MarchéduRoi</p>
             <p style={{ color:theme.sub,marginBottom:20 }}>Publiez vos annonces et rejoignez des milliers de commerçants au Bénin</p>
@@ -3513,7 +3644,7 @@ function AppContent() {
               num:"3",
               title:"Publication d'annonces et tarification",
               icon:"💰",
-              content:`TARIFS DE PUBLICATION : Annonce simple (toutes catégories) : 1 500 FCFA/mois. Boutique : 3 000 FCFA/mois. Atelier : 3 000 FCFA/mois. Restaurant et Bar : 3 000 FCFA/mois. Salon Beauté et Coiffure : 3 000 FCFA/mois. SPONSORING : 1 semaine : 500 FCFA. 1 mois : 1 500 FCFA. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Après 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. L'utilisateur choisit librement la durée de publication. Passé le délai payé, l'annonce est automatiquement retirée. Les paiements s'effectuent via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, l'utilisateur doit contacter support@marcheduroi.com dans un délai de 7 jours ouvrables suivant le paiement contesté, en fournissant les justificatifs nécessaires.`
+              content:`TARIFS DE PUBLICATION : Annonce simple (toutes catégories) : 1 500 FCFA/mois. Boutique : 3 000 FCFA/mois. Atelier : 3 000 FCFA/mois. Restaurant et Bar : 3 000 FCFA/mois. Salon Beauté et Coiffure : 3 000 FCFA/mois. SPONSORING : 1 semaine : 500 FCFA. 1 mois : 1 500 FCFA. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Après 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. L'utilisateur choisit librement la durée de publication. Passé le délai payé, l'annonce est automatiquement retirée. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA (Bénin, Togo, Côte d'Ivoire, Sénégal, Mali, Burkina Faso, Niger, Guinée), et via Flutterwave (Mobile Money, carte bancaire, virement) pour les autres pays africains couverts par la plateforme. Le système détecte automatiquement le pays de l'utilisateur et propose le moyen de paiement adapté. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, l'utilisateur doit contacter support@marcheduroi.com dans un délai de 7 jours ouvrables suivant le paiement contesté, en fournissant les justificatifs nécessaires.`
             },
             {
               num:"4",
@@ -3543,7 +3674,7 @@ function AppContent() {
               num:"8",
               title:"Protection des données personnelles",
               icon:"🔒",
-              content:`MarchéduRoi collecte et traite les données personnelles des utilisateurs dans le strict respect de la vie privée et conformément aux lois applicables. DONNÉES COLLECTÉES : nom, adresse email, numéro de téléphone (optionnel), localisation (optionnelle), photos et contenus publiés. FINALITÉ : ces données sont utilisées exclusivement pour le fonctionnement de la plateforme, la gestion des comptes, le traitement des paiements et la lutte contre la fraude. Elles ne sont jamais vendues ni cédées à des tiers à des fins commerciales. SOUS-TRAITANTS : MarchéduRoi utilise Supabase (hébergement et base de données) et FedaPay (paiements) comme sous-traitants techniques opérant dans le respect des règles de protection des données. DURÉE DE CONSERVATION : les données sont conservées pendant toute la durée d'activité du compte, puis 3 ans après sa suppression pour des obligations légales. DROITS : tout utilisateur dispose d'un droit d'accès, de rectification, de suppression et de portabilité de ses données en contactant : contact@marcheduroi.com. Nous nous engageons à répondre dans un délai de 30 jours.`
+              content:`MarchéduRoi collecte et traite les données personnelles des utilisateurs dans le strict respect de la vie privée et conformément aux lois applicables. DONNÉES COLLECTÉES : nom, adresse email, numéro de téléphone (optionnel), localisation (optionnelle), photos et contenus publiés. FINALITÉ : ces données sont utilisées exclusivement pour le fonctionnement de la plateforme, la gestion des comptes, le traitement des paiements et la lutte contre la fraude. Elles ne sont jamais vendues ni cédées à des tiers à des fins commerciales. SOUS-TRAITANTS : MarchéduRoi utilise Supabase (hébergement et base de données), FedaPay (paiements zone UEMOA) et Flutterwave (paiements panafricains) comme sous-traitants techniques opérant dans le respect des règles de protection des données. DURÉE DE CONSERVATION : les données sont conservées pendant toute la durée d'activité du compte, puis 3 ans après sa suppression pour des obligations légales. DROITS : tout utilisateur dispose d'un droit d'accès, de rectification, de suppression et de portabilité de ses données en contactant : contact@marcheduroi.com. Nous nous engageons à répondre dans un délai de 30 jours.`
             },
             {
               num:"9",
@@ -3953,10 +4084,26 @@ function AppContent() {
                   </div>
                 )}
 
-                {/* Annonces similaires */}
+                {/* Annonces similaires améliorées */}
                 {(() => {
-                  const similaires = posts.filter(p=>p.id!==modal.data.id && p.category===modal.data.category && !p.expired).slice(0,3);
-                  if (similaires.length===0) return null;
+                  const prixPost = parseInt((modal.data.price||"").replace(/[^0-9]/g,"")) || 0;
+                  const villePost = modal.data.immo?.ville || modal.data.vehicle?.position || "";
+                  const similaires = posts
+                    .filter(p => p.id !== modal.data.id && p.category === modal.data.category && !p.expired)
+                    .map(p => {
+                      let score = 0;
+                      const prixP = parseInt((p.price||"").replace(/[^0-9]/g,"")) || 0;
+                      // Même ville = +3 points
+                      if (villePost && (p.immo?.ville||p.vehicle?.position||"").toLowerCase().includes(villePost.toLowerCase())) score += 3;
+                      // Prix dans 50% de fourchette = +2 points
+                      if (prixPost > 0 && prixP > 0 && Math.abs(prixP - prixPost) / prixPost < 0.5) score += 2;
+                      // Sponsorisé = +1 point
+                      if (p.sponsored) score += 1;
+                      return { ...p, _score: score };
+                    })
+                    .sort((a,b) => b._score - a._score)
+                    .slice(0, 3);
+                  if (similaires.length === 0) return null;
                   return (
                     <div style={{ marginTop:24,borderTop:`1px solid ${theme.border}`,paddingTop:20 }}>
                       <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:14 }}>📋 Annonces similaires</p>
@@ -3966,7 +4113,10 @@ function AppContent() {
                             {p.photos&&p.photos.length>0 && <img src={p.photos[0]} alt="" style={{ width:52,height:52,borderRadius:8,objectFit:"cover",flexShrink:0 }}/>}
                             <div style={{ flex:1,minWidth:0 }}>
                               <p style={{ fontWeight:700,fontSize:13,color:theme.text,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{p.title}</p>
-                              <p style={{ color:"#43C6AC",fontWeight:700,fontSize:13 }}>{p.price||""}</p>
+                              <div style={{ display:"flex",alignItems:"center",gap:6 }}>
+                                <p style={{ color:"#43C6AC",fontWeight:700,fontSize:13 }}>{p.price||""}</p>
+                                {p.sponsored && <span style={{ fontSize:10,color:"#FFD700" }}>🌟</span>}
+                              </div>
                             </div>
                             <button onClick={()=>setModal({type:"contact",data:p})} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,flexShrink:0,cursor:"pointer" }}>
                               Voir →
@@ -4557,6 +4707,79 @@ function AppContent() {
                   </div>
                 </div>
                 <p style={{ fontSize:11,color:theme.sub,textAlign:"center" }}>⚠️ Paiement FedaPay bientôt disponible · Après expiration, l'annonce reste visible normalement</p>
+              </>
+            )}
+
+            {/* URGENT */}
+            {modal.type==="urgent"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>🔥 Badge Urgent</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
+                  <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>{modal.data.title}</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Un badge 🔥 URGENT rouge animé s'affiche sur votre annonce — visible par tous.</p>
+                </div>
+                <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
+                  {[{dur:"3 jours",price:200,days:3},{dur:"7 jours",price:300,days:7}].map(opt=>(
+                    <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Badge Urgent ${opt.dur} sur MarchéduRoi`,async()=>{
+                      const until = new Date(); until.setDate(until.getDate()+opt.days);
+                      const urgentUntil = until.toISOString().slice(0,10);
+                      await supabase.from("posts").update({urgent:true,urgentUntil}).eq("id",modal.data.id);
+                      setPosts(p=>p.map(x=>x.id===modal.data.id?{...x,urgent:true,urgentUntil}:x));
+                      setModal(null); notify("🔥 Badge Urgent activé jusqu'au "+urgentUntil);
+                    })} style={{ background:theme.card,border:"2px solid #FF4757",borderRadius:14,padding:20,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                      <div>
+                        <p style={{ fontWeight:800,fontSize:15,color:"#FF4757",marginBottom:4 }}>🔥 Urgent {opt.dur}</p>
+                        <p style={{ color:theme.sub,fontSize:13 }}>Badge animé rouge pendant {opt.dur}</p>
+                      </div>
+                      <span style={{ fontWeight:800,fontSize:20,color:"#FF4757" }}>{opt.price} FCFA</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* ABONNEMENT PRO */}
+            {modal.type==="pro"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>👑 Abonnement PRO</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <div style={{ background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:12,padding:16,marginBottom:20,textAlign:"center" }}>
+                  <p style={{ fontSize:32,marginBottom:8 }}>👑</p>
+                  <p style={{ fontWeight:800,fontSize:22,color:"#FFD700",marginBottom:4 }}>MarchéduRoi PRO</p>
+                  <p style={{ color:theme.sub,fontSize:14 }}>Publications illimitées + Badge PRO + Stats avancées</p>
+                </div>
+                <div style={{ marginBottom:20 }}>
+                  {[
+                    "✅ Publications annonces illimitées",
+                    "✅ Badge PRO 👑 visible sur vos annonces",
+                    "✅ Statistiques détaillées (vues, contacts, conversions)",
+                    "✅ Priorité dans les résultats de recherche",
+                    "✅ 1 badge Urgent OFFERT par mois",
+                    "✅ Support prioritaire 24h",
+                  ].map((f,i)=>(
+                    <div key={i} style={{ display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<5?`1px solid ${theme.border}`:"none" }}>
+                      <p style={{ color:theme.text,fontSize:14 }}>{f}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer",textAlign:"center" }}
+                  onClick={()=>handlePayment(10000,"Abonnement PRO MarchéduRoi 1 mois",async()=>{
+                    const expires = new Date(); expires.setMonth(expires.getMonth()+1);
+                    await supabase.from("profiles").update({is_premium:true,plan:"pro",premiumUntil:expires.toISOString().slice(0,10)}).eq("id",user.id);
+                    setUser(u=>({...u,isPremium:true,plan:"pro"}));
+                    setModal(null); notify("👑 Bienvenue dans le club PRO MarchéduRoi !");
+                  })}>
+                  <p style={{ fontWeight:800,fontSize:24,color:"#FFD700",marginBottom:4 }}>10 000 FCFA / mois</p>
+                  <p style={{ color:"#FFA500",fontSize:14 }}>≈ 17 USD · Résiliable à tout moment</p>
+                  <div style={{ marginTop:12,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:10,padding:"12px",color:"#000",fontWeight:800,fontSize:15 }}>
+                    💳 S'abonner maintenant
+                  </div>
+                </div>
               </>
             )}
 
