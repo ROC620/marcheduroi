@@ -419,7 +419,19 @@ function AppContent() {
   const [beaute, setBeaute] = useState(INITIAL_BEAUTE);
   const [suggestions, setSuggestions] = useState([{ id:1,text:"Ajouter un système de messagerie interne",author:"Visiteur anonyme",date:"2026-03-10",status:"en attente" }]);
   const [user, setUser] = useState(null);
-  const [view, setView] = useState("landing");
+  const [view, setViewState] = useState(() => {
+    // Restaurer la vue depuis l'historique si disponible
+    return history.state?.view || "landing";
+  });
+  const [showCategories, setShowCategories] = useState(false);
+
+  // Navigation avec historique — remplace setView partout
+  const setView = (newView) => {
+    if (newView === view) return;
+    history.pushState({ view: newView }, "", window.location.pathname);
+    setViewState(newView);
+    window.scrollTo(0, 0);
+  };
   const [shopForm, setShopForm] = useState({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"",lat:"",lng:"" });
   const [immoForm, setImmoForm] = useState({ sousType:"Maison", transaction:"Vente", superficie:"", pieces:"", titre:"", ville:"", quartier:"", von:"", eau:"Oui", electricite:"Oui", etat:"Bon état", recasee:"", autres:"" });
   const [shopPhotos, setShopPhotos] = useState([]);
@@ -1116,12 +1128,28 @@ function AppContent() {
       if (!dismissed) setShowPwaBanner(true);
     };
     window.addEventListener("beforeinstallprompt", handleInstallPrompt);
+
+    // Bouton Retour mobile — restaurer la vue précédente
+    const handlePopState = (e) => {
+      const previousView = e.state?.view || "landing";
+      setViewState(previousView);
+      setModal(null);
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener("popstate", handlePopState);
+
+    // Initialiser l'historique avec la vue de départ
+    if (!history.state?.view) {
+      history.replaceState({ view: "landing" }, "", window.location.pathname);
+    }
+
     return () => {
       document.removeEventListener("click", handleClickOutside);
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
+      window.removeEventListener("popstate", handlePopState);
     };
   }, []);
 
@@ -2271,8 +2299,8 @@ function AppContent() {
 
           {/* Boutons CTA */}
           <div style={{ display:"flex",gap:12,flexWrap:"wrap",justifyContent:"center",marginBottom:16 }}>
-            <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
-              Voir les annonces →
+            <button onClick={()=>setShowCategories(s=>!s)} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
+              {showCategories ? "Masquer ▲" : "Voir les annonces ▾"}
             </button>
             {!user && (
               <button onClick={()=>setView("register")} style={{ background:"transparent",border:`2px solid ${theme.border}`,color:theme.text,padding:"13px 28px",borderRadius:14,fontWeight:700,fontSize:16,cursor:"pointer" }}>
@@ -2284,45 +2312,61 @@ function AppContent() {
             </button>
           </div>
 
-          {/* Catégories — défilement horizontal */}
-          <div style={{ width:"100%",maxWidth:700,position:"relative",marginBottom:10 }}>
-            <div style={{ position:"absolute",left:0,top:0,bottom:0,width:20,background:`linear-gradient(to right,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
-            <div style={{ position:"absolute",right:0,top:0,bottom:0,width:20,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
-            <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 20px",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-              {[
-                {label:"Immobilier",icon:"🏠",color:"#6C63FF"},
-                {label:"Véhicules",icon:"🚗",color:"#FF6584"},
-                {label:"Électronique",icon:"📱",color:"#43C6AC"},
-                {label:"Services",icon:"🔧",color:"#FFD700"},
-                {label:"Sport",icon:"⚽",color:"#FF6584"},
-                {label:"Mode",icon:"👗",color:"#9A78CF"},
-                {label:"Autre",icon:"🍳",color:"#43C6AC"},
-              ].map(c=>(
-                <button key={c.label} onClick={()=>{ setCategory(c.label); setView("home"); }}
-                  style={{ background:`${c.color}15`,border:`1px solid ${c.color}44`,color:c.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
-                  {c.icon} {c.label}
-                </button>
-              ))}
+          {/* Catégories + Sections — apparaissent au clic sur "Voir les annonces" */}
+          <div style={{
+            width:"100%",maxWidth:700,
+            overflow:"hidden",
+            maxHeight: showCategories ? 200 : 0,
+            opacity: showCategories ? 1 : 0,
+            transition:"max-height 0.4s ease, opacity 0.3s ease",
+          }}>
+            {/* Catégories — défilement horizontal */}
+            <div style={{ position:"relative",marginBottom:10 }}>
+              <div style={{ position:"absolute",left:0,top:0,bottom:0,width:20,background:`linear-gradient(to right,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
+              <div style={{ position:"absolute",right:0,top:0,bottom:0,width:20,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
+              <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 20px",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
+                {[
+                  {label:"Immobilier",icon:"🏠",color:"#6C63FF"},
+                  {label:"Véhicules",icon:"🚗",color:"#FF6584"},
+                  {label:"Électronique",icon:"📱",color:"#43C6AC"},
+                  {label:"Services",icon:"🔧",color:"#FFD700"},
+                  {label:"Sport",icon:"⚽",color:"#FF6584"},
+                  {label:"Mode",icon:"👗",color:"#9A78CF"},
+                  {label:"Autre",icon:"🍳",color:"#43C6AC"},
+                ].map(c=>(
+                  <button key={c.label} onClick={()=>{ setCategory(c.label); setView("home"); }}
+                    style={{ background:`${c.color}15`,border:`1px solid ${c.color}44`,color:c.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
+                    {c.icon} {c.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Sections — défilement horizontal */}
-          <div style={{ width:"100%",maxWidth:700,position:"relative",marginBottom:16 }}>
-            <div style={{ position:"absolute",left:0,top:0,bottom:0,width:20,background:`linear-gradient(to right,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
-            <div style={{ position:"absolute",right:0,top:0,bottom:0,width:20,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
-            <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 20px",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-              {[
-                {label:"🛍️ Boutiques",color:"#FF6584",bg:"rgba(255,101,132,0.1)",border:"rgba(255,101,132,0.3)",count:boutiques.length,action:()=>setView("boutiques")},
-                {label:"🔧 Ateliers",color:"#43C6AC",bg:"rgba(67,198,172,0.1)",border:"rgba(67,198,172,0.3)",count:ateliers.length,action:()=>setView("ateliers")},
-                {label:"🍽️ Restos & Bars",color:"#FF8C00",bg:"rgba(255,140,0,0.1)",border:"rgba(255,140,0,0.3)",count:restos.length,action:()=>setView("restos")},
-                {label:"💇 Beauté & Coiffure",color:"#FF69B4",bg:"rgba(255,105,180,0.1)",border:"rgba(255,105,180,0.3)",count:beaute.length,action:()=>setView("beaute")},
-                {label:"👗 Mode",color:"#9B59B6",bg:"rgba(155,89,182,0.1)",border:"rgba(155,89,182,0.3)",count:posts.filter(p=>p.category==="Mode").length,action:()=>{setView("home");setCategory("Mode");}},
-              ].map(s=>(
-                <button key={s.label} onClick={s.action}
-                  style={{ background:s.bg,border:`1px solid ${s.border}`,color:s.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
-                  {s.label} <span style={{ background:s.border,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>
-                </button>
-              ))}
+            {/* Sections — défilement horizontal */}
+            <div style={{ position:"relative",marginBottom:16 }}>
+              <div style={{ position:"absolute",left:0,top:0,bottom:0,width:20,background:`linear-gradient(to right,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
+              <div style={{ position:"absolute",right:0,top:0,bottom:0,width:20,background:`linear-gradient(to left,${theme.bg},transparent)`,zIndex:2,pointerEvents:"none" }}/>
+              <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 20px",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
+                {[
+                  {label:"🛍️ Boutiques",color:"#FF6584",bg:"rgba(255,101,132,0.1)",border:"rgba(255,101,132,0.3)",count:boutiques.length,action:()=>setView("boutiques")},
+                  {label:"🔧 Ateliers",color:"#43C6AC",bg:"rgba(67,198,172,0.1)",border:"rgba(67,198,172,0.3)",count:ateliers.length,action:()=>setView("ateliers")},
+                  {label:"🍽️ Restos & Bars",color:"#FF8C00",bg:"rgba(255,140,0,0.1)",border:"rgba(255,140,0,0.3)",count:restos.length,action:()=>setView("restos")},
+                  {label:"💇 Beauté & Coiffure",color:"#FF69B4",bg:"rgba(255,105,180,0.1)",border:"rgba(255,105,180,0.3)",count:beaute.length,action:()=>setView("beaute")},
+                  {label:"👗 Mode",color:"#9B59B6",bg:"rgba(155,89,182,0.1)",border:"rgba(155,89,182,0.3)",count:posts.filter(p=>p.category==="Mode").length,action:()=>{setView("home");setCategory("Mode");}},
+                ].map(s=>(
+                  <button key={s.label} onClick={s.action}
+                    style={{ background:s.bg,border:`1px solid ${s.border}`,color:s.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
+                    {s.label} <span style={{ background:s.border,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Bouton direct vers toutes les annonces */}
+            <div style={{ textAlign:"center",paddingBottom:8 }}>
+              <button onClick={()=>setView("home")} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 20px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                📋 Toutes les annonces →
+              </button>
             </div>
           </div>
 
