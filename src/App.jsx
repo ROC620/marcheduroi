@@ -1044,6 +1044,8 @@ function AppContent() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pwaPrompt, setPwaPrompt] = useState(null);
   const [showPwaBanner, setShowPwaBanner] = useState(false);
+  const [adForm, setAdForm] = useState({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
+  const [adSaving, setAdSaving] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [notifications, setNotifications] = useState(() => {
     try { return JSON.parse(localStorage.getItem("mf_notifs") || "[]"); }
@@ -3002,32 +3004,7 @@ function AppContent() {
             </h3>
 
             {/* Formulaire nouvelle pub */}
-            {(()=>{
-              const [adForm, setAdForm] = useState({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
-              const [adSaving, setAdSaving] = useState(false);
-
-              const saveAd = async () => {
-                if (!adForm.entreprise) { notify("Le nom de l'entreprise est requis","error"); return; }
-                setAdSaving(true);
-                const { data, error } = await supabase.from("ads").insert({
-                  entreprise: adForm.entreprise,
-                  slogan: adForm.slogan || null,
-                  logo_url: adForm.logo_url || null,
-                  lien: adForm.lien || null,
-                  couleur1: adForm.couleur1 || "#6C63FF",
-                  couleur2: adForm.couleur2 || "#8B84FF",
-                  actif: true,
-                  fin: adForm.fin || null,
-                }).select().single();
-                setAdSaving(false);
-                if (error) { notify("Erreur : "+error.message,"error"); return; }
-                setAds(prev => [data, ...prev]);
-                setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
-                notify("✅ Bannière publiée avec succès !");
-              };
-
-              return (
-                <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24 }}>
+            <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24 }}>
                   <p style={{ fontWeight:700,fontSize:15,color:theme.text,marginBottom:16 }}>➕ Ajouter une bannière</p>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12 }}>
                     <div>
@@ -3082,12 +3059,28 @@ function AppContent() {
                       <div style={{ height:3,background:`linear-gradient(90deg,${adForm.couleur1},${adForm.couleur2})`,opacity:0.6 }}/>
                     </div>
                   )}
-                  <button onClick={saveAd} disabled={adSaving} style={{ width:"100%",padding:"13px",background:adSaving?"rgba(108,99,255,0.3)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:adSaving?"not-allowed":"pointer",transition:"opacity 0.2s" }}>
+                  <button onClick={async()=>{
+                    if (!adForm.entreprise) { notify("Le nom de l'entreprise est requis","error"); return; }
+                    setAdSaving(true);
+                    const { data, error } = await supabase.from("ads").insert({
+                      entreprise: adForm.entreprise,
+                      slogan: adForm.slogan || null,
+                      logo_url: adForm.logo_url || null,
+                      lien: adForm.lien || null,
+                      couleur1: adForm.couleur1 || "#6C63FF",
+                      couleur2: adForm.couleur2 || "#8B84FF",
+                      actif: true,
+                      fin: adForm.fin || null,
+                    }).select().single();
+                    setAdSaving(false);
+                    if (error) { notify("Erreur : "+error.message,"error"); return; }
+                    setAds(prev => [data, ...prev]);
+                    setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
+                    notify("✅ Bannière publiée avec succès !");
+                  }} disabled={adSaving} style={{ width:"100%",padding:"13px",background:adSaving?"rgba(108,99,255,0.3)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:adSaving?"not-allowed":"pointer" }}>
                     {adSaving ? "⏳ Publication en cours..." : "✅ Valider et publier la bannière"}
                   </button>
-                </div>
-              );
-            })()}
+            </div>
 
             {/* Liste des pubs actives */}
             {ads.length === 0 && <p style={{ color:theme.sub,fontSize:13,marginBottom:24 }}>Aucune bannière active pour le moment.</p>}
