@@ -5133,12 +5133,21 @@ function AppContent() {
                   </div>
                 ))}
                 <div style={{ background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:12,padding:16,marginTop:8 }}>
-                  <p style={{ fontWeight:700,color:"#43C6AC",fontSize:14,marginBottom:6 }}>📋 Tarifs annonces classiques</p>
-                  <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:6 }}>
-                    {[["4 jours","Gratuit"],["30 jours","1 000 F"],["90 jours","2 500 F"],["360 jours","8 000 F"]].map(([d,p])=>(
+                  <p style={{ fontWeight:700,color:"#43C6AC",fontSize:14,marginBottom:8 }}>📋 Tarifs annonces classiques</p>
+                  <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:16 }}>
+                    {[["4 jours","Gratuit"],["30 jours","1 000 F"],["90 jours","2 500 F"],["180 jours","4 500 F"],["360 jours","8 000 F"]].map(([d,p])=>(
                       <div key={d} style={{ background:theme.card,borderRadius:8,padding:"6px 10px",display:"flex",justifyContent:"space-between",fontSize:12 }}>
                         <span style={{ color:theme.sub }}>{d}</span>
                         <span style={{ fontWeight:700,color:p==="Gratuit"?"#43C6AC":"#6C63FF" }}>{p}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontWeight:700,color:"#FF6584",fontSize:14,marginBottom:8 }}>🛍️ Boutiques · Ateliers · Restos · Beauté</p>
+                  <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:6 }}>
+                    {[["4 jours","Gratuit"],["30 jours","2 500 F"],["90 jours","6 000 F"],["180 jours","10 000 F"],["360 jours","18 000 F"]].map(([d,p])=>(
+                      <div key={d} style={{ background:theme.card,borderRadius:8,padding:"6px 10px",display:"flex",justifyContent:"space-between",fontSize:12 }}>
+                        <span style={{ color:theme.sub }}>{d}</span>
+                        <span style={{ fontWeight:700,color:p==="Gratuit"?"#43C6AC":"#FF6584" }}>{p}</span>
                       </div>
                     ))}
                   </div>
