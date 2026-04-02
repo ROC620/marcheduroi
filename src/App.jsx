@@ -2343,6 +2343,53 @@ function AppContent() {
             La plateforme qui connecte commerçants, entreprises et particuliers au <strong style={{ color:theme.text }}>Bénin</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
           </p>
 
+          {/* Verset du jour — change chaque jour */}
+          {(()=>{
+            const VERSETS_LANDING = [
+              {ref:"Jean 3:16",texte:"Car Dieu a tant aimé le monde qu'il a donné son Fils unique."},
+              {ref:"Phil 4:13",texte:"Je puis tout par celui qui me fortifie."},
+              {ref:"Jér 29:11",texte:"Des projets de paix et non de malheur, pour vous donner un avenir."},
+              {ref:"Ps 23:1",texte:"L'Éternel est mon berger : je ne manquerai de rien."},
+              {ref:"Rom 8:28",texte:"Toutes choses concourent au bien de ceux qui aiment Dieu."},
+              {ref:"Matt 6:33",texte:"Cherchez premièrement le royaume et la justice de Dieu."},
+              {ref:"Prov 3:5",texte:"Confie-toi en l'Éternel de tout ton cœur."},
+              {ref:"És 40:31",texte:"Ceux qui se confient en l'Éternel renouvellent leur force."},
+              {ref:"Luc 1:37",texte:"Rien n'est impossible à Dieu."},
+              {ref:"Ps 46:1",texte:"Dieu est pour nous un refuge et un appui."},
+              {ref:"Gal 6:9",texte:"Ne nous lassons pas de faire le bien."},
+              {ref:"2 Tim 1:7",texte:"Un esprit de force, d'amour et de sagesse."},
+              {ref:"Prov 16:3",texte:"Recommande à l'Éternel tes œuvres, et tes projets réussiront."},
+              {ref:"Matt 11:28",texte:"Venez à moi, vous tous qui êtes fatigués et chargés."},
+              {ref:"És 41:10",texte:"Ne crains rien, car je suis avec toi."},
+              {ref:"Jean 14:6",texte:"Je suis le chemin, la vérité, et la vie."},
+              {ref:"Ps 37:4",texte:"Fais de l'Éternel tes délices, et il te donnera ce que ton cœur désire."},
+              {ref:"Héb 11:1",texte:"La foi est une ferme assurance des choses qu'on espère."},
+              {ref:"Col 3:23",texte:"Quoi que vous fassiez, faites-le de bon cœur, comme pour le Seigneur."},
+              {ref:"Deut 31:6",texte:"Fortifiez-vous ! L'Éternel, ton Dieu, marchera avec toi."},
+              {ref:"Apo 3:20",texte:"Voici, je me tiens à la porte et je frappe."},
+              {ref:"Ps 118:24",texte:"C'est ici la journée que l'Éternel a faite : qu'elle soit un sujet d'allégresse !"},
+              {ref:"1 Cor 10:13",texte:"Dieu est fidèle, et il ne permettra pas que vous soyez tentés au-delà de vos forces."},
+              {ref:"Ps 121:2",texte:"Mon secours vient de l'Éternel, qui a fait les cieux et la terre."},
+              {ref:"1 Jean 4:4",texte:"Celui qui est en vous est plus grand que celui qui est dans le monde."},
+              {ref:"Nomb 6:24",texte:"Que l'Éternel te bénisse et te garde !"},
+              {ref:"Prov 18:10",texte:"Le nom de l'Éternel est une tour forte ; le juste s'y réfugie."},
+              {ref:"Apo 21:4",texte:"Il essuiera toute larme de leurs yeux, et la mort ne sera plus."},
+              {ref:"Rom 5:8",texte:"Lorsque nous étions encore des pécheurs, Christ est mort pour nous."},
+              {ref:"Ps 27:1",texte:"L'Éternel est ma lumière et mon salut : de qui aurais-je crainte ?"},
+            ];
+            const dayIndex = Math.floor(Date.now() / (1000*60*60*24)) % VERSETS_LANDING.length;
+            const v = VERSETS_LANDING[dayIndex];
+            return (
+              <div style={{ display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:"rgba(108,99,255,0.07)",borderLeft:"3px solid #6C63FF",borderRadius:10,marginBottom:12,maxWidth:480 }}>
+                <span style={{ fontSize:16,flexShrink:0 }}>✨</span>
+                <div>
+                  <span style={{ fontSize:12,fontStyle:"italic",color:theme.text }}>{v.texte} </span>
+                  <span style={{ fontSize:12,fontWeight:700,color:"#FF6584" }}>— {v.ref}</span>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Boutons CTA */}
           <div style={{ display:"flex",gap:12,flexWrap:"wrap",justifyContent:"center",marginBottom:8 }}>
             <button onClick={()=>setShowCategories(s=>!s)} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
@@ -2498,79 +2545,27 @@ function AppContent() {
           {/* Contenu principal — affiché seulement quand chargé */}
           {postsLoaded && (<>
 
-          {/* Ligne supérieure : Verset du jour (gauche) + Titre (centre) */}
-          <div style={{ display:"flex",alignItems:"flex-start",gap:12,marginBottom:8,flexWrap:"wrap" }}>
-            {/* Verset du jour */}
-            {(()=>{
-              const VERSETS = [
-                { ref:"Jean 3:16", texte:"Car Dieu a tant aimé le monde qu'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais ait la vie éternelle." },
-                { ref:"Philippiens 4:13", texte:"Je puis tout par celui qui me fortifie." },
-                { ref:"Jérémie 29:11", texte:"Car je connais les projets que j'ai formés sur vous, dit l'Éternel, projets de paix et non de malheur, afin de vous donner un avenir et de l'espérance." },
-                { ref:"Psaumes 23:1", texte:"L'Éternel est mon berger : je ne manquerai de rien." },
-                { ref:"Romains 8:28", texte:"Nous savons, du reste, que toutes choses concourent au bien de ceux qui aiment Dieu." },
-                { ref:"Matthieu 6:33", texte:"Cherchez premièrement le royaume et la justice de Dieu; et toutes ces choses vous seront données par-dessus." },
-                { ref:"Proverbes 3:5-6", texte:"Confie-toi en l'Éternel de tout ton cœur, et ne t'appuie pas sur ta sagesse. Reconnais-le dans toutes tes voies, et il aplanira tes sentiers." },
-                { ref:"Ésaïe 40:31", texte:"Mais ceux qui se confient en l'Éternel renouvellent leur force. Ils prennent le vol comme les aigles." },
-                { ref:"Psaumes 46:1", texte:"Dieu est pour nous un refuge et un appui, un secours qui ne manque jamais dans la détresse." },
-                { ref:"Luc 1:37", texte:"Car rien n'est impossible à Dieu." },
-                { ref:"Galates 6:9", texte:"Ne nous lassons pas de faire le bien ; car nous moissonnerons au temps convenable, si nous ne nous relâchons pas." },
-                { ref:"2 Timothée 1:7", texte:"Car ce n'est pas un esprit de timidité que Dieu nous a donné, mais un esprit de force, d'amour et de sagesse." },
-                { ref:"1 Corinthiens 10:13", texte:"Dieu est fidèle, et il ne permettra pas que vous soyez tentés au-delà de vos forces." },
-                { ref:"Proverbes 16:3", texte:"Recommande à l'Éternel tes œuvres, et tes projets réussiront." },
-                { ref:"Psaumes 118:24", texte:"C'est ici la journée que l'Éternel a faite : qu'elle soit pour nous un sujet d'allégresse et de joie!" },
-                { ref:"Matthieu 11:28", texte:"Venez à moi, vous tous qui êtes fatigués et chargés, et je vous donnerai du repos." },
-                { ref:"Ésaïe 41:10", texte:"Ne crains rien, car je suis avec toi ; ne promène pas des regards inquiets, car je suis ton Dieu." },
-                { ref:"Apocalypse 21:4", texte:"Il essuiera toute larme de leurs yeux, et la mort ne sera plus." },
-                { ref:"Jean 14:6", texte:"Je suis le chemin, la vérité, et la vie. Nul ne vient au Père que par moi." },
-                { ref:"Romains 5:8", texte:"Mais Dieu prouve son amour envers nous, en ce que, lorsque nous étions encore des pécheurs, Christ est mort pour nous." },
-                { ref:"Psaumes 37:4", texte:"Fais de l'Éternel tes délices, et il te donnera ce que ton cœur désire." },
-                { ref:"Proverbes 18:10", texte:"Le nom de l'Éternel est une tour forte ; le juste s'y réfugie et se trouve en sûreté." },
-                { ref:"Hébreux 11:1", texte:"Or la foi est une ferme assurance des choses qu'on espère, une démonstration de celles qu'on ne voit pas." },
-                { ref:"Jacques 1:5", texte:"Si quelqu'un d'entre vous manque de sagesse, qu'il la demande à Dieu, qui donne à tous simplement et sans reproche." },
-                { ref:"Psaumes 121:2", texte:"Mon secours vient de l'Éternel, qui a fait les cieux et la terre." },
-                { ref:"1 Jean 4:4", texte:"Vous êtes de Dieu, et vous les avez vaincus, parce que celui qui est en vous est plus grand que celui qui est dans le monde." },
-                { ref:"Nombres 6:24-25", texte:"Que l'Éternel te bénisse et te garde ! Que l'Éternel fasse luire sa face sur toi, et qu'il t'accorde sa grâce !" },
-                { ref:"Colossiens 3:23", texte:"Quoi que vous fassiez, faites-le de bon cœur, comme pour le Seigneur et non pour des hommes." },
-                { ref:"Deutéronome 31:6", texte:"Fortifiez-vous et ayez du courage ! Ne craignez point et ne soyez point effrayés devant eux ; car l'Éternel, ton Dieu, marchera avec toi." },
-                { ref:"Apocalypse 3:20", texte:"Voici, je me tiens à la porte, et je frappe. Si quelqu'un entend ma voix et ouvre la porte, j'entrerai chez lui." },
-              ];
-              // Même verset toute la journée, change chaque jour
-              const dayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % VERSETS.length;
-              const v = VERSETS[dayIndex];
-              return (
-                <div style={{ flex:"0 0 auto",maxWidth:280,display:windowWidth<=700?"none":"block",background:`linear-gradient(135deg,rgba(108,99,255,0.08),rgba(255,101,132,0.05))`,border:`1px solid rgba(108,99,255,0.2)`,borderLeft:"3px solid #6C63FF",borderRadius:12,padding:"10px 14px" }}>
-                  <p style={{ fontWeight:800,fontSize:11,color:"#6C63FF",letterSpacing:1,textTransform:"uppercase",marginBottom:5 }}>✨ Verset du jour</p>
-                  <p style={{ fontSize:12,color:theme.text,lineHeight:1.6,marginBottom:6,fontStyle:"italic" }}>"{v.texte}"</p>
-                  <p style={{ fontSize:11,fontWeight:700,color:"#FF6584",textAlign:"right" }}>— {v.ref}</p>
-                </div>
-              );
-            })()}
-
-            {/* Titre + compteur */}
-            <div style={{ flex:1,minWidth:0 }}>
-              {windowWidth > 600 && <h1 style={{ fontSize:"clamp(22px,4vw,36px)",fontWeight:800,lineHeight:1.1,marginBottom:6,color:theme.text }}>Découvrez des <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>annonces uniques</span></h1>}
-              <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8 }}>
-                <div style={{ display:"flex",alignItems:"center",gap:8,flexWrap:"wrap" }}>
-                  <p style={{ color:theme.sub,fontSize:12 }}>{t.gratuitement}</p>
-                  <span style={{ background:theme.card,border:`1px solid ${theme.border}`,color:theme.sub,padding:"2px 10px",borderRadius:20,fontSize:12,fontWeight:600 }}>{filtered.length} annonce{filtered.length!==1?"s":""}</span>
-                </div>
-                {canEdit?(
-                  <button onClick={()=>{setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:""});setPostPhotos([]);setVehicleForm({});setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" }); setMonths(1); setModal({type:"add"});}} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"9px 18px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6,transition:"box-shadow 0.2s",flexShrink:0 }}>
-                    <Icon name="plus" size={14}/>Publier
-                  </button>
-                ):(
-                  windowWidth > 600 ? (
-                    <button onClick={()=>setView("register")} style={{ ...cardStyle,border:`1px dashed #6C63FF`,color:"#6C63FF",padding:"9px 14px",borderRadius:10,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,flexShrink:0 }}>
-                      <Icon name="lock" size={13}/>Créer un compte
-                    </button>
-                  ) : null
-                )}
-              </div>
+          {/* Titre + compteur + bouton publier */}
+          <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:8 }}>
+            <div style={{ display:"flex",alignItems:"center",gap:8,flexWrap:"wrap" }}>
+              {windowWidth > 600 && <h1 style={{ fontSize:"clamp(18px,3vw,28px)",fontWeight:800,color:theme.text,margin:0 }}>Découvrez des <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>annonces</span></h1>}
+              <span style={{ background:theme.card,border:`1px solid ${theme.border}`,color:theme.sub,padding:"2px 10px",borderRadius:20,fontSize:12,fontWeight:600 }}>{filtered.length} annonce{filtered.length!==1?"s":""}</span>
             </div>
+            {canEdit ? (
+              <button onClick={()=>{setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:""});setPostPhotos([]);setVehicleForm({});setImmoForm({sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:""}); setMonths(1); setModal({type:"add"});}} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"9px 18px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6,transition:"box-shadow 0.2s",flexShrink:0 }}>
+                <Icon name="plus" size={14}/>Publier
+              </button>
+            ) : (
+              windowWidth > 600 ? (
+                <button onClick={()=>setView("register")} style={{ ...cardStyle,border:`1px dashed #6C63FF`,color:"#6C63FF",padding:"9px 14px",borderRadius:10,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,flexShrink:0 }}>
+                  <Icon name="lock" size={13}/>Créer un compte
+                </button>
+              ) : null
+            )}
           </div>
 
             {/* Recherche + GPS — même ligne sur desktop, empilé sur mobile */}
-            <div style={{ marginBottom:8 }}>
+            <div style={{ marginBottom:8,maxWidth:windowWidth>700?Math.round(windowWidth*0.5):"100%" }}>
               <div style={{ display:"flex",gap:6,alignItems:"center",marginBottom:windowWidth>700?0:6 }}>
                 <div style={{ position:"relative",flex:1 }}>
                   <div style={{ position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={15}/></div>
@@ -2591,32 +2586,6 @@ function AppContent() {
                 </div>
               )}
             </div>
-
-            {/* Verset du jour — mobile uniquement, remplace Créer un compte */}
-            {windowWidth <= 600 && (()=>{
-              const VERSETS_MINI = [
-                {ref:"Phil 4:13",texte:"Je puis tout par celui qui me fortifie."},
-                {ref:"Jean 3:16",texte:"Dieu a tant aimé le monde qu'il a donné son Fils unique."},
-                {ref:"Jér 29:11",texte:"Je connais les projets que j'ai formés sur vous : projets de paix."},
-                {ref:"Ps 23:1",texte:"L'Éternel est mon berger : je ne manquerai de rien."},
-                {ref:"Rom 8:28",texte:"Toutes choses concourent au bien de ceux qui aiment Dieu."},
-                {ref:"Matt 6:33",texte:"Cherchez premièrement le royaume de Dieu."},
-                {ref:"Prov 3:5",texte:"Confie-toi en l'Éternel de tout ton cœur."},
-                {ref:"És 40:31",texte:"Ceux qui se confient en l'Éternel renouvellent leur force."},
-                {ref:"Luc 1:37",texte:"Rien n'est impossible à Dieu."},
-                {ref:"Ps 46:1",texte:"Dieu est pour nous un refuge et un appui."},
-              ];
-              const v = VERSETS_MINI[Math.floor(Date.now()/(1000*60*60*24)) % VERSETS_MINI.length];
-              return (
-                <div style={{ display:"flex",alignItems:"center",gap:8,padding:"8px 12px",background:`rgba(108,99,255,0.06)`,borderLeft:"3px solid #6C63FF",borderRadius:8,marginBottom:8 }}>
-                  <span style={{ fontSize:14,flexShrink:0 }}>✨</span>
-                  <div style={{ flex:1,minWidth:0 }}>
-                    <span style={{ fontSize:11,fontStyle:"italic",color:theme.text }}>{v.texte} </span>
-                    <span style={{ fontSize:11,fontWeight:700,color:"#FF6584" }}>— {v.ref}</span>
-                  </div>
-                </div>
-              );
-            })()}
 
             {/* Boutiques Ateliers Restos — défilement horizontal */}
             <div style={{ position:"relative",marginBottom:8 }}>
@@ -2793,20 +2762,21 @@ function AppContent() {
                   <p style={{ color:theme.sub,fontSize:12,lineHeight:1.4,marginBottom:10 }}>{post.description.length>80?post.description.slice(0,80)+"...":post.description}</p>
 
                   {/* Bouton Contacter — toujours visible, déplie tout */}
-                  <button onClick={()=>{
+                  <button onClick={(e)=>{
+                    e.stopPropagation();
                     if (!expandedContacts[post.id]) {
                       trackView(post.id);
                       trackContact(post.id);
                     }
-                    setExpandedContacts(e=>({...e,[post.id]:!e[post.id]}));
+                    setExpandedContacts(prev=>({...prev,[post.id]:!prev[post.id]}));
                   }} style={{ width:"100%",background:expandedContacts[post.id]?"rgba(67,198,172,0.15)":"rgba(67,198,172,0.08)",border:`1px solid rgba(67,198,172,${expandedContacts[post.id]?0.5:0.25})`,color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.2s" }}>
                     <Icon name="mail" size={14}/>
                     {expandedContacts[post.id] ? "Masquer ▲" : "Contacter ▾"}
                   </button>
 
-                  {/* Panneau déplié — auteur, likes, partage, contact */}
+                  {/* Panneau déplié — stoppe la propagation pour ne pas se refermer au clic intérieur */}
                   {expandedContacts[post.id] && (
-                    <div style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
+                    <div onClick={e=>e.stopPropagation()} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
 
                       {/* Auteur + badge vérifié */}
                       <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,paddingBottom:10,borderBottom:`1px solid ${theme.border}` }}>
