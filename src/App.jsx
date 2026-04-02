@@ -5185,25 +5185,43 @@ function AppContent() {
                   <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce apparaîtra en premier avec un badge 🌟</p>
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
-                  <div onClick={()=>handlePayment(500,"Sponsoring 1 semaine sur MarchéduRoi",()=>sponsorPost(modal.data.id,"week"))} style={{ background:theme.card,border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer" }}>
-                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-                      <div>
-                        <p style={{ fontWeight:800,fontSize:16,color:"#FFD700",marginBottom:4 }}>🌟 Sponsoring 1 semaine</p>
-                        <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en tête pendant 7 jours</p>
+                  {user?.role==="admin" ? (
+                    // Version admin — juste choisir la durée, pas de prix
+                    <>
+                      <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>Choisissez la durée du sponsoring :</p>
+                      <div style={{ display:"flex",gap:12 }}>
+                        <button onClick={()=>{ sponsorPost(modal.data.id,"week"); setModal(null); }} style={{ flex:1,padding:"14px",background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",borderRadius:12,fontWeight:800,fontSize:15,cursor:"pointer" }}>
+                          🌟 1 semaine
+                        </button>
+                        <button onClick={()=>{ sponsorPost(modal.data.id,"month"); setModal(null); }} style={{ flex:1,padding:"14px",background:"linear-gradient(135deg,#FFA500,#FF8C00)",border:"none",color:"#000",borderRadius:12,fontWeight:800,fontSize:15,cursor:"pointer" }}>
+                          🌟 1 mois
+                        </button>
                       </div>
-                      <span style={{ fontWeight:800,fontSize:20,color:"#FFD700" }}>500 FCFA</span>
-                    </div>
-                  </div>
-                  <div onClick={()=>handlePayment(1500,"Sponsoring 1 mois sur MarchéduRoi",()=>sponsorPost(modal.data.id,"month"))} style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFA500",borderRadius:14,padding:20,cursor:"pointer",position:"relative" }}>
-                    <div style={{ position:"absolute",top:-12,right:16,background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:800 }}>POPULAIRE</div>
-                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-                      <div>
-                        <p style={{ fontWeight:800,fontSize:16,color:"#FFA500",marginBottom:4 }}>🌟 Sponsoring 1 mois</p>
-                        <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en tête pendant 30 jours</p>
+                    </>
+                  ) : (
+                    // Version utilisateur — avec paiement
+                    <>
+                      <div onClick={()=>handlePayment(500,"Sponsoring 1 semaine sur MarchéduRoi",()=>sponsorPost(modal.data.id,"week"))} style={{ background:theme.card,border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer" }}>
+                        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                          <div>
+                            <p style={{ fontWeight:800,fontSize:16,color:"#FFD700",marginBottom:4 }}>🌟 Sponsoring 1 semaine</p>
+                            <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en tête pendant 7 jours</p>
+                          </div>
+                          <span style={{ fontWeight:800,fontSize:20,color:"#FFD700" }}>500 FCFA</span>
+                        </div>
                       </div>
-                      <span style={{ fontWeight:800,fontSize:20,color:"#FFA500" }}>1 500 FCFA</span>
-                    </div>
-                  </div>
+                      <div onClick={()=>handlePayment(1500,"Sponsoring 1 mois sur MarchéduRoi",()=>sponsorPost(modal.data.id,"month"))} style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFA500",borderRadius:14,padding:20,cursor:"pointer",position:"relative" }}>
+                        <div style={{ position:"absolute",top:-12,right:16,background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:800 }}>POPULAIRE</div>
+                        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                          <div>
+                            <p style={{ fontWeight:800,fontSize:16,color:"#FFA500",marginBottom:4 }}>🌟 Sponsoring 1 mois</p>
+                            <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en tête pendant 30 jours</p>
+                          </div>
+                          <span style={{ fontWeight:800,fontSize:20,color:"#FFA500" }}>1 500 FCFA</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
                 <p style={{ fontSize:11,color:theme.sub,textAlign:"center" }}>💳 Paiement sécurisé MTN/Moov Money · Après expiration, l'annonce reste visible normalement</p>
               </>
