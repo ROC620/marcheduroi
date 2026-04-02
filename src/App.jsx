@@ -5185,7 +5185,7 @@ function AppContent() {
                   <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce apparaîtra en premier avec un badge 🌟</p>
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
-                  <div onClick={()=>sponsorPost(modal.data.id,"week")} style={{ background:theme.card,border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer" }}>
+                  <div onClick={()=>handlePayment(500,"Sponsoring 1 semaine sur MarchéduRoi",()=>sponsorPost(modal.data.id,"week"))} style={{ background:theme.card,border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer" }}>
                     <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                       <div>
                         <p style={{ fontWeight:800,fontSize:16,color:"#FFD700",marginBottom:4 }}>🌟 Sponsoring 1 semaine</p>
@@ -5194,7 +5194,7 @@ function AppContent() {
                       <span style={{ fontWeight:800,fontSize:20,color:"#FFD700" }}>500 FCFA</span>
                     </div>
                   </div>
-                  <div onClick={()=>sponsorPost(modal.data.id,"month")} style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFA500",borderRadius:14,padding:20,cursor:"pointer",position:"relative" }}>
+                  <div onClick={()=>handlePayment(1500,"Sponsoring 1 mois sur MarchéduRoi",()=>sponsorPost(modal.data.id,"month"))} style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFA500",borderRadius:14,padding:20,cursor:"pointer",position:"relative" }}>
                     <div style={{ position:"absolute",top:-12,right:16,background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:800 }}>POPULAIRE</div>
                     <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                       <div>
@@ -5205,7 +5205,7 @@ function AppContent() {
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize:11,color:theme.sub,textAlign:"center" }}>⚠️ Paiement FedaPay bientôt disponible · Après expiration, l'annonce reste visible normalement</p>
+                <p style={{ fontSize:11,color:theme.sub,textAlign:"center" }}>💳 Paiement sécurisé MTN/Moov Money · Après expiration, l'annonce reste visible normalement</p>
               </>
             )}
 
