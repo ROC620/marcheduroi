@@ -331,11 +331,11 @@ function FlagCylinder({ theme }) {
         />
       </div>
 
-      {/* Cylindre 3D — positionné sur le M (top:34%) */}
+      {/* Cylindre 3D — positionné sur le M */}
       <div
         style={{
           position:"absolute",
-          top:"30%",
+          top:window.innerWidth<=600?"18%":"30%",
           left:0, right:0,
           height:38,
           overflow:"hidden",
@@ -1043,13 +1043,7 @@ function AppContent() {
   }, []);
 
   const unsponsorPost = async (postId) => {
-    // Écrire dans Supabase
-    await supabase.from("posts").update({ sponsored: false, sponsored_until: null }).eq("id", postId).catch(()=>{});
-    await supabase.from("boutiques").update({ sponsored: false, sponsored_until: null }).eq("id", postId).catch(()=>{});
-    await supabase.from("ateliers").update({ sponsored: false, sponsored_until: null }).eq("id", postId).catch(()=>{});
-    await supabase.from("restos").update({ sponsored: false, sponsored_until: null }).eq("id", postId).catch(()=>{});
-    await supabase.from("beaute").update({ sponsored: false, sponsored_until: null }).eq("id", postId).catch(()=>{});
-    // Mettre à jour l'état local
+    // Mettre à jour l'état local immédiatement
     setPosts(p => p.map(post => post.id === postId ? { ...post, sponsored: false, sponsoredUntil: null } : post));
     setBoutiques(b => b.map(x => x.id === postId ? { ...x, sponsored: false, sponsoredUntil: null } : x));
     setAteliers(a => a.map(x => x.id === postId ? { ...x, sponsored: false, sponsoredUntil: null } : x));
@@ -1059,7 +1053,15 @@ function AppContent() {
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     delete sponsored[postId];
     localStorage.setItem("mf_sponsored", JSON.stringify(sponsored));
-    saveAdminSetting("sponsored", sponsored);
+    // Supabase en arrière-plan
+    Promise.all([
+      supabase.from("posts").update({ sponsored: false, sponsored_until: null }).eq("id", postId),
+      supabase.from("boutiques").update({ sponsored: false, sponsored_until: null }).eq("id", postId),
+      supabase.from("ateliers").update({ sponsored: false, sponsored_until: null }).eq("id", postId),
+      supabase.from("restos").update({ sponsored: false, sponsored_until: null }).eq("id", postId),
+      supabase.from("beaute").update({ sponsored: false, sponsored_until: null }).eq("id", postId),
+      saveAdminSetting("sponsored", sponsored),
+    ]).catch(()=>{});
     notify("Sponsoring retiré ✅");
   };
 
@@ -1069,14 +1071,7 @@ function AppContent() {
     else expDate.setMonth(expDate.getMonth() + 1);
     const expStr = expDate.toISOString().slice(0,10);
 
-    // Mettre à jour Supabase — persiste après rechargement
-    await supabase.from("posts").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId).catch(()=>{});
-    await supabase.from("boutiques").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId).catch(()=>{});
-    await supabase.from("ateliers").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId).catch(()=>{});
-    await supabase.from("restos").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId).catch(()=>{});
-    await supabase.from("beaute").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId).catch(()=>{});
-
-    // Mettre à jour l'état local
+    // Mettre à jour l'état local immédiatement (pas d'attente réseau)
     setPosts(p => p.map(post => post.id === postId ? { ...post, sponsored: true, sponsoredUntil: expStr } : post));
     setBoutiques(b => b.map(x => x.id === postId ? { ...x, sponsored: true, sponsoredUntil: expStr } : x));
     setAteliers(a => a.map(x => x.id === postId ? { ...x, sponsored: true, sponsoredUntil: expStr } : x));
@@ -1087,9 +1082,18 @@ function AppContent() {
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     sponsored[postId] = { sponsored: true, sponsoredUntil: expStr };
     localStorage.setItem("mf_sponsored", JSON.stringify(sponsored));
-    saveAdminSetting("sponsored", sponsored);
-    setModal(null);
-    notify("Sponsorisé jusqu'au " + expStr + " !");
+
+    // Sauvegarder dans Supabase en arrière-plan (sans bloquer l'UI)
+    Promise.all([
+      supabase.from("posts").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId),
+      supabase.from("boutiques").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId),
+      supabase.from("ateliers").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId),
+      supabase.from("restos").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId),
+      supabase.from("beaute").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId),
+      saveAdminSetting("sponsored", sponsored),
+    ]).catch(()=>{});
+
+    notify("🌟 Sponsorisé jusqu'au " + expStr + " !");
   };
 
   const removeUrgent = async (postId) => {
@@ -1105,6 +1109,7 @@ function AppContent() {
   const [adForm, setAdForm] = useState({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
   const [adSaving, setAdSaving] = useState(false);
   const [expandedContacts, setExpandedContacts] = useState({}); // postId -> boolean
+  const contactTimerRef = useRef(null);
   const [userLocation, setUserLocation] = useState(null);
   const [notifications, setNotifications] = useState(() => {
     try { return JSON.parse(localStorage.getItem("mf_notifs") || "[]"); }
@@ -1416,15 +1421,25 @@ function AppContent() {
   ];
 
   // 4 jours gratuits par mois — vérifie si l'utilisateur a déjà utilisé son crédit ce mois
-  const canPublishFree = () => {
+  const canPublishFree = async () => {
     if (!user) return false;
-    const key = `mdr_free_${user.id}_${new Date().toISOString().slice(0,7)}`; // ex: 2026-04
-    return !localStorage.getItem(key);
+    const month = new Date().toISOString().slice(0,7);
+    const { data } = await supabase.from("free_days").select("used").eq("user_id", user.id).eq("month", month).single();
+    return !data || data.used < 4;
   };
-  const useFreeDay = () => {
-    const key = `mdr_free_${user.id}_${new Date().toISOString().slice(0,7)}`;
-    localStorage.setItem(key, "1");
+  const useFreeDay = async () => {
+    const month = new Date().toISOString().slice(0,7);
+    const { data } = await supabase.from("free_days").select("used").eq("user_id", user.id).eq("month", month).single();
+    if (data) {
+      await supabase.from("free_days").update({ used: data.used + 1 }).eq("user_id", user.id).eq("month", month);
+    } else {
+      await supabase.from("free_days").insert({ user_id: user.id, month, used: 1 });
+    }
   };
+  const [canFree, setCanFree] = useState(false);
+  useEffect(() => {
+    if (user) canPublishFree().then(setCanFree);
+  }, [user]);
   // ─────────────────────────────────────────────────────────────────────────────
 
   // ─── FEDAPAY : Paiement avant publication ───────────────────────────────────
@@ -2247,15 +2262,15 @@ function AppContent() {
           {/* MENU PLUS ▾ */}
           <div style={{ position:"relative" }}>
             <button
-              onClick={e=>{e.stopPropagation();setShowMoreMenu(m=>!m);}}
+              onClick={()=>setShowMoreMenu(m=>!m)}
               style={{ background:showMoreMenu?`rgba(108,99,255,0.15)`:theme.card,border:`1px solid ${showMoreMenu?"#6C63FF":theme.border}`,color:showMoreMenu?"#6C63FF":theme.text,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer",WebkitTapHighlightColor:"transparent" }}>
               Plus {showMoreMenu?"▲":"▾"}
             </button>
             {showMoreMenu && (
               <>
-                {/* Overlay — clic n'importe où ferme le menu */}
+                {/* Overlay transparent — ferme au clic/touch en dehors */}
                 <div onClick={()=>setShowMoreMenu(false)} style={{ position:"fixed",inset:0,zIndex:299 }}/>
-                <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:200,overflow:"hidden" }}>
+                <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:Math.min(220, window.innerWidth-16),overflow:"hidden" }}>
                   {/* Sur mobile : ajouter Annonces + Publier dans le menu Plus */}
                   {windowWidth <= 600 && [
                     { label:"📋 "+t.annonces, action:()=>{setView("home");setShowMoreMenu(false);} },
@@ -2362,7 +2377,7 @@ function AppContent() {
 
       {/* LANDING PAGE */}
       {view==="landing"&&(
-        <div style={{ width:"100%",minHeight:"calc(100vh - 64px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"0 24px 8px",animation:"fadeIn 0.6s ease",position:"relative",overflow:"hidden" }}>
+        <div style={{ width:"100%",minHeight:"calc(100vh - 64px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:windowWidth<=600?"flex-start":"center",padding:windowWidth<=600?"0 16px 8px":"0 24px 8px",animation:"fadeIn 0.6s ease",position:"relative",overflow:"hidden" }}>
 
           {/* Background decoration */}
           <div style={{ position:"absolute",top:-100,left:-100,width:400,height:400,borderRadius:"50%",background:"rgba(108,99,255,0.06)",pointerEvents:"none" }}/>
@@ -2372,15 +2387,38 @@ function AppContent() {
           <FlagCylinder theme={theme}/>
 
           {/* Titre */}
-          <h1 style={{ fontSize:"clamp(26px,7vw,52px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:8,color:theme.text,padding:"0 8px",width:"100%",marginTop:0 }}>
+          <h1 style={{ fontSize:windowWidth<=600?"clamp(22px,8vw,32px)":"clamp(26px,7vw,52px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:windowWidth<=600?4:8,color:theme.text,padding:"0 8px",width:"100%",marginTop:0 }}>
             Bienvenue sur{" "}
             <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span>
           </h1>
 
           {/* Slogan */}
-          <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:560,lineHeight:1.5,marginBottom:12,padding:"0 16px" }}>
-            La plateforme qui connecte commerçants, entreprises et particuliers au <strong style={{ color:theme.text }}>Bénin</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
-          </p>
+          {(()=>{
+              const PAYS_NOMS = {
+                BJ:"Bénin", TG:"Togo", CI:"Côte d'Ivoire", SN:"Sénégal", ML:"Mali",
+                BF:"Burkina Faso", NE:"Niger", GN:"Guinée", NG:"Nigeria", CM:"Cameroun",
+                CG:"Congo", CD:"RD Congo", GA:"Gabon", MG:"Madagascar", RW:"Rwanda",
+                BI:"Burundi", TD:"Tchad", MR:"Mauritanie", FR:"France", BE:"Belgique",
+                CH:"Suisse", CA:"Canada",
+              };
+              const PREP = {
+                BJ:"au", TG:"au", ML:"au", SN:"au", NE:"au", CM:"au", CG:"au",
+                GA:"au", RW:"au", BI:"au", TD:"au", CA:"au", CD:"en", CI:"en",
+                BF:"au", GN:"en", NG:"au", MG:"à", FR:"en", BE:"en", CH:"en", MR:"en",
+              };
+              const code = getUserCountry() || "BJ";
+              const pays = PAYS_NOMS[code] || "Bénin";
+              const prep = PREP[code] || "au";
+              return windowWidth <= 600 ? (
+                <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:340,lineHeight:1.5,marginBottom:6,padding:"0 16px" }}>
+                  La plateforme qui connecte commerçants, entreprises et particuliers <strong style={{ color:theme.text }}>{prep} {pays}</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
+                </p>
+              ) : (
+                <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:560,lineHeight:1.5,marginBottom:6,padding:"0 16px" }}>
+                  La plateforme qui connecte commerçants,<br/>entreprises et particuliers <strong style={{ color:theme.text }}>{prep} {pays}</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
+                </p>
+              );
+            })()}
 
           {/* Verset du jour — change chaque jour */}
           {(()=>{
@@ -2439,9 +2477,11 @@ function AppContent() {
                 Créer un compte
               </button>
             )}
-            <button onClick={()=>window.open("https://marcheduroi.com/exemples.html","_blank")} style={{ background:"rgba(67,198,172,0.1)",border:`1px solid rgba(67,198,172,0.4)`,color:"#43C6AC",padding:"13px 20px",borderRadius:14,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
-              📖 Exemples
-            </button>
+            {windowWidth > 600 && (
+              <button onClick={()=>window.open("https://marcheduroi.com/exemples.html","_blank")} style={{ background:"rgba(67,198,172,0.1)",border:`1px solid rgba(67,198,172,0.4)`,color:"#43C6AC",padding:"13px 20px",borderRadius:14,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
+                📖 Exemples
+              </button>
+            )}
           </div>
 
           {/* Catégories + Sections — apparaissent au clic sur "Voir les annonces" */}
@@ -2508,7 +2548,7 @@ function AppContent() {
             const ad = ads[adIndex];
             if (!ad) return (
               // Bannière par défaut si aucune pub dans Supabase
-              <div style={{ width:"100%",maxWidth:700,margin:"32px auto 0",borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:theme.card }}>
+              <div style={{ width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0`,borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:theme.card }}>
                 <div style={{ padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
                   <div style={{ display:"flex",alignItems:"center",gap:12 }}>
                     <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>📢</div>
@@ -2526,7 +2566,7 @@ function AppContent() {
               </div>
             );
             return (
-              <a href={ad.lien||"#"} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"block",width:"100%",maxWidth:700,margin:"32px auto 0" }}>
+              <a href={ad.lien||"#"} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"block",width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0` }}>
                 <div style={{ borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:`linear-gradient(135deg,${ad.couleur1||"#6C63FF"}22,${ad.couleur2||"#8B84FF"}22)`,transition:"transform 0.3s",cursor:"pointer" }}
                   onMouseEnter={e=>e.currentTarget.style.transform="scale(1.01)"}
                   onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
@@ -2603,27 +2643,25 @@ function AppContent() {
             )}
           </div>
 
-            {/* Recherche + GPS — même ligne sur desktop, empilé sur mobile */}
-            <div style={{ marginBottom:8,maxWidth:windowWidth>700?Math.round(windowWidth*0.5):"100%" }}>
-              <div style={{ display:"flex",gap:6,alignItems:"center",marginBottom:windowWidth>700?0:6 }}>
-                <div style={{ position:"relative",flex:1 }}>
+            {/* Recherche + GPS — même ligne sur desktop */}
+            <div style={{ marginBottom:8, width:"100%" }}>
+              <div style={{ display:"flex",gap:6,alignItems:"center",flexWrap:windowWidth>700?"nowrap":"wrap" }}>
+                <div style={{ position:"relative",flex:1,minWidth:0 }}>
                   <div style={{ position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={15}/></div>
                   <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.rechercher} maxLength={100} style={{ ...inputStyle,padding:"11px 16px 11px 40px",borderRadius:10,fontSize:13,width:"100%",boxSizing:"border-box" }}/>
                 </div>
                 <button onClick={getUserLocation} style={{ background:userLocation?"rgba(67,198,172,0.15)":"rgba(108,99,255,0.1)",border:`1px solid ${userLocation?"rgba(67,198,172,0.5)":"rgba(108,99,255,0.3)"}`,color:userLocation?"#43C6AC":"#6C63FF",padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap",flexShrink:0 }}>
                   {locationLoading?"⏳":userLocation?"📍 Actif":t.pressDeMoi}
                 </button>
+                {userLocation && (<>
+                  <button onClick={()=>setSortByDistance(s=>!s)} style={{ background:sortByDistance?"rgba(67,198,172,0.15)":"transparent",border:`1px solid ${theme.border}`,color:sortByDistance?"#43C6AC":theme.sub,padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
+                    {sortByDistance?"✅ Distance":"Distance"}
+                  </button>
+                  <button onClick={()=>{ setUserLocation(null); setSortByDistance(false); }} style={{ background:"rgba(255,71,87,0.08)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
+                    ✕
+                  </button>
+                </>)}
               </div>
-              {userLocation && (
-                <div style={{ display:"flex",gap:6,marginTop:6,flexWrap:"wrap" }}>
-                  <button onClick={()=>setSortByDistance(s=>!s)} style={{ background:sortByDistance?"rgba(67,198,172,0.15)":"transparent",border:`1px solid ${theme.border}`,color:sortByDistance?"#43C6AC":theme.sub,padding:"7px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",whiteSpace:"nowrap" }}>
-                    {sortByDistance?"✅ Par distance":"Par distance"}
-                  </button>
-                  <button onClick={()=>{ setUserLocation(null); setSortByDistance(false); }} style={{ background:"rgba(255,71,87,0.08)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"7px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",whiteSpace:"nowrap" }}>
-                    ✕ Effacer
-                  </button>
-                </div>
-              )}
             </div>
 
             {/* Boutiques Ateliers Restos — défilement horizontal */}
@@ -2804,19 +2842,26 @@ function AppContent() {
                   {/* Bouton Contacter — toujours visible, déplie tout */}
                   <button onClick={(e)=>{
                     e.stopPropagation();
-                    if (!expandedContacts[post.id]) {
+                    const isOpen = expandedContacts[post.id];
+                    if (!isOpen) {
                       trackView(post.id);
                       trackContact(post.id);
                     }
-                    setExpandedContacts(prev=>({...prev,[post.id]:!prev[post.id]}));
+                    // Fermer tous les autres, toggler celui-ci
+                    setExpandedContacts(isOpen ? {} : { [post.id]: true });
+                    // Timer auto-repli 5 secondes
+                    if (contactTimerRef.current) clearTimeout(contactTimerRef.current);
+                    if (!isOpen) {
+                      contactTimerRef.current = setTimeout(() => setExpandedContacts({}), 5000);
+                    }
                   }} style={{ width:"100%",background:expandedContacts[post.id]?"rgba(67,198,172,0.15)":"rgba(67,198,172,0.08)",border:`1px solid rgba(67,198,172,${expandedContacts[post.id]?0.5:0.25})`,color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.2s" }}>
                     <Icon name="mail" size={14}/>
                     {expandedContacts[post.id] ? "Masquer ▲" : "Contacter ▾"}
                   </button>
 
-                  {/* Panneau déplié — stoppe la propagation pour ne pas se refermer au clic intérieur */}
+                  {/* Panneau déplié — annule le timer au clic intérieur */}
                   {expandedContacts[post.id] && (
-                    <div onClick={e=>e.stopPropagation()} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
+                    <div onClick={e=>{ e.stopPropagation(); if(contactTimerRef.current) clearTimeout(contactTimerRef.current); }} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
 
                       {/* Auteur + badge vérifié */}
                       <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,paddingBottom:10,borderBottom:`1px solid ${theme.border}` }}>
@@ -3228,13 +3273,13 @@ function AppContent() {
                 <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11,display:"flex",alignItems:"center",gap:3 }}>
+                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
                   <CertifiedBadge size={12}/>{isCertified(b.authorId)?"Certifié ✓":"Certifier"}
                 </button>
-                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>{featuredPosts.includes(b.id)?"🏆 ✓":"🏆 Vedette"}</button>
-                {!b.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>🌟 Sponsoriser</button>}
-                {b.sponsored && <><span style={{ color:"#FFD700",fontSize:11 }}>🌟 {b.sponsoredUntil}</span><button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontWeight:600,fontSize:11,cursor:"pointer" }}>✕</button></>}
-                <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>🗑️</button>
+                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(b.id)?"🏆 ✓":"🏆 Vedette"}</button>
+                {!b.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
+                {b.sponsored && <><span style={{ color:"#FFD700",fontSize:13,fontWeight:700 }}>🌟 {b.sponsoredUntil}</span><button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✕</button></>}
+                <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🗑️</button>
               </div>
             </div>
           ))}
@@ -3248,13 +3293,13 @@ function AppContent() {
                 <div><p style={{ fontWeight:700,color:theme.text }}>{a.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {a.author} · {a.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(a.authorId, a.author)} style={{ background:isCertified(a.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11,display:"flex",alignItems:"center",gap:3 }}>
+                <button onClick={()=>toggleCertified(a.authorId, a.author)} style={{ background:isCertified(a.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
                   <CertifiedBadge size={12}/>{isCertified(a.authorId)?"Certifié ✓":"Certifier"}
                 </button>
-                <button onClick={()=>toggleFeatured(a.id)} style={{ background:featuredPosts.includes(a.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>{featuredPosts.includes(a.id)?"🏆 ✓":"🏆 Vedette"}</button>
-                {!a.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...a,title:a.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>🌟 Sponsoriser</button>}
-                {a.sponsored && <><span style={{ color:"#FFD700",fontSize:11 }}>🌟 {a.sponsoredUntil}</span><button onClick={()=>unsponsorPost(a.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontWeight:600,fontSize:11,cursor:"pointer" }}>✕</button></>}
-                <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>🗑️</button>
+                <button onClick={()=>toggleFeatured(a.id)} style={{ background:featuredPosts.includes(a.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(a.id)?"🏆 ✓":"🏆 Vedette"}</button>
+                {!a.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...a,title:a.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
+                {a.sponsored && <><span style={{ color:"#FFD700",fontSize:13,fontWeight:700 }}>🌟 {a.sponsoredUntil}</span><button onClick={()=>unsponsorPost(a.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✕</button></>}
+                <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🗑️</button>
               </div>
             </div>
           ))}
@@ -3268,13 +3313,13 @@ function AppContent() {
                 <div><p style={{ fontWeight:700,color:theme.text }}>{r.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {r.author} · {r.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(r.authorId, r.author)} style={{ background:isCertified(r.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11,display:"flex",alignItems:"center",gap:3 }}>
+                <button onClick={()=>toggleCertified(r.authorId, r.author)} style={{ background:isCertified(r.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
                   <CertifiedBadge size={12}/>{isCertified(r.authorId)?"Certifié ✓":"Certifier"}
                 </button>
-                <button onClick={()=>toggleFeatured(r.id)} style={{ background:featuredPosts.includes(r.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>{featuredPosts.includes(r.id)?"🏆 ✓":"🏆 Vedette"}</button>
-                {!r.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...r,title:r.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>🌟 Sponsoriser</button>}
-                {r.sponsored && <><span style={{ color:"#FFD700",fontSize:11 }}>🌟 {r.sponsoredUntil}</span><button onClick={()=>unsponsorPost(r.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontWeight:600,fontSize:11,cursor:"pointer" }}>✕</button></>}
-                <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>🗑️</button>
+                <button onClick={()=>toggleFeatured(r.id)} style={{ background:featuredPosts.includes(r.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(r.id)?"🏆 ✓":"🏆 Vedette"}</button>
+                {!r.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...r,title:r.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
+                {r.sponsored && <><span style={{ color:"#FFD700",fontSize:13,fontWeight:700 }}>🌟 {r.sponsoredUntil}</span><button onClick={()=>unsponsorPost(r.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✕</button></>}
+                <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🗑️</button>
               </div>
             </div>
           ))}
@@ -3288,13 +3333,13 @@ function AppContent() {
                 <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11,display:"flex",alignItems:"center",gap:3 }}>
+                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
                   <CertifiedBadge size={12}/>{isCertified(b.authorId)?"Certifié ✓":"Certifier"}
                 </button>
-                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>{featuredPosts.includes(b.id)?"🏆 ✓":"🏆 Vedette"}</button>
-                {!b.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>🌟 Sponsoriser</button>}
-                {b.sponsored && <><span style={{ color:"#FFD700",fontSize:11 }}>🌟 {b.sponsoredUntil}</span><button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontWeight:600,fontSize:11,cursor:"pointer" }}>✕</button></>}
-                <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:11 }}>🗑️</button>
+                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(b.id)?"🏆 ✓":"🏆 Vedette"}</button>
+                {!b.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
+                {b.sponsored && <><span style={{ color:"#FFD700",fontSize:13,fontWeight:700 }}>🌟 {b.sponsoredUntil}</span><button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✕</button></>}
+                <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🗑️</button>
               </div>
             </div>
           ))}
@@ -4504,7 +4549,7 @@ function AppContent() {
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4 }}>💰 Durée de publication</p>
 
                     {/* Option gratuite */}
-                    {canPublishFree() && (
+                    {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)}
                         style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"12px 16px",marginBottom:8,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div>
@@ -4658,22 +4703,66 @@ function AppContent() {
                     .map(p => {
                       let score = 0;
                       const prixP = parseInt((p.price||"").replace(/[^0-9]/g,"")) || 0;
-                      // Même ville = +3 points
                       if (villePost && (p.immo?.ville||p.vehicle?.position||"").toLowerCase().includes(villePost.toLowerCase())) score += 3;
-                      // Prix dans 50% de fourchette = +2 points
                       if (prixPost > 0 && prixP > 0 && Math.abs(prixP - prixPost) / prixPost < 0.5) score += 2;
-                      // Sponsorisé = +1 point
                       if (p.sponsored) score += 1;
                       return { ...p, _score: score };
                     })
                     .sort((a,b) => b._score - a._score)
-                    .slice(0, 3);
+                    .slice(0, 8);
                   if (similaires.length === 0) return null;
+
+                  // Carrousel auto-scroll infini sur mobile
+                  if (windowWidth <= 600) {
+                    return (
+                      <div style={{ marginTop:24,borderTop:`1px solid ${theme.border}`,paddingTop:16 }}>
+                        <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:12 }}>📋 Annonces similaires</p>
+                        <div style={{ position:"relative",overflow:"hidden" }}>
+                          <style>{`
+                            @keyframes scrollX {
+                              0%   { transform: translateX(0); }
+                              100% { transform: translateX(-50%); }
+                            }
+                            .carousel-track {
+                              display: flex;
+                              gap: 10px;
+                              width: max-content;
+                              animation: scrollX ${similaires.length * 3}s linear infinite;
+                            }
+                            .carousel-track:active,
+                            .carousel-track:hover {
+                              animation-play-state: paused;
+                            }
+                          `}</style>
+                          <div className="carousel-track"
+                            onTouchStart={e=>e.currentTarget.style.animationPlayState="paused"}
+                            onTouchEnd={e=>e.currentTarget.style.animationPlayState="running"}
+                          >
+                            {/* Double les cartes pour effet infini */}
+                            {[...similaires, ...similaires].map((p, i)=>(
+                              <div key={p.id+"-"+i} onClick={()=>setModal({type:"contact",data:p})}
+                                style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:10,width:150,flexShrink:0,cursor:"pointer" }}>
+                                {p.photos&&p.photos.length>0
+                                  ? <img src={p.photos[0]} alt="" style={{ width:"100%",height:90,borderRadius:8,objectFit:"cover",marginBottom:6 }}/>
+                                  : <div style={{ width:"100%",height:90,borderRadius:8,background:"rgba(108,99,255,0.1)",marginBottom:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24 }}>📦</div>
+                                }
+                                <p style={{ fontWeight:700,fontSize:12,color:theme.text,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{p.title}</p>
+                                <p style={{ color:"#43C6AC",fontWeight:700,fontSize:12 }}>{p.price||"—"}</p>
+                                {p.sponsored && <span style={{ fontSize:10,color:"#FFD700" }}>🌟</span>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Desktop — liste verticale classique
                   return (
                     <div style={{ marginTop:24,borderTop:`1px solid ${theme.border}`,paddingTop:20 }}>
                       <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:14 }}>📋 Annonces similaires</p>
                       <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
-                        {similaires.map(p=>(
+                        {similaires.slice(0,3).map(p=>(
                           <div key={p.id} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:12,padding:12,display:"flex",gap:12,alignItems:"center" }}>
                             {p.photos&&p.photos.length>0 && <img src={p.photos[0]} alt="" style={{ width:52,height:52,borderRadius:8,objectFit:"cover",flexShrink:0 }}/>}
                             <div style={{ flex:1,minWidth:0 }}>
@@ -4766,7 +4855,7 @@ function AppContent() {
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF69B444`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
-                    {canPublishFree() && (
+                    {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
@@ -4783,10 +4872,7 @@ function AppContent() {
                 <button
                   onClick={modal.data?.editing
                     ? editBeaute
-                    : ()=>{
-                        if (selectedTarif===-1) { useFreeDay(); addBeaute(); }
-                        else { const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication salon beauté ${t.label} sur MarchéduRoi`,addBeaute); }
-                      }
+                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication salon beauté ${t.label} sur MarchéduRoi`,addBeaute); }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FF69B4,#FF1493)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
@@ -4870,7 +4956,7 @@ function AppContent() {
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF8C0044`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
-                    {canPublishFree() && (
+                    {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
@@ -4887,7 +4973,7 @@ function AppContent() {
                 <button
                   onClick={modal.data?.editing
                     ? editResto
-                    : ()=>{ if(selectedTarif===-1){useFreeDay();addResto();}else{const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0];handlePayment(t.price,`Publication restaurant/bar ${t.label} sur MarchéduRoi`,addResto);} }
+                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication restaurant/bar ${t.label} sur MarchéduRoi`,addResto); }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
@@ -4973,7 +5059,7 @@ function AppContent() {
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF658444`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
-                    {canPublishFree() && (
+                    {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
@@ -4990,7 +5076,7 @@ function AppContent() {
                 <button
                   onClick={modal.data?.editing
                     ? editShop
-                    : ()=>{ if(selectedTarif===-1){useFreeDay();addShop();}else{const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0];handlePayment(t.price,`Publication ${shopMode==="boutique"?"boutique":"atelier"} ${t.label} sur MarchéduRoi`,addShop);} }
+                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication ${shopMode==="boutique"?"boutique":"atelier"} ${t.label} sur MarchéduRoi`,addShop); }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:shopMode==="boutique"?"linear-gradient(135deg,#FF6584,#FFB347)":"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
@@ -5268,22 +5354,29 @@ function AppContent() {
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
                   {user?.role==="admin" ? (
-                    // Version admin — juste choisir la durée, pas de prix
                     <>
                       <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>Choisissez la durée du sponsoring :</p>
                       <div style={{ display:"flex",gap:12 }}>
-                        <button onClick={()=>sponsorPost(modal.data.id,"week")} style={{ flex:1,padding:"14px",background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",borderRadius:12,fontWeight:800,fontSize:15,cursor:"pointer" }}>
+                        <button onClick={async()=>{
+                          await sponsorPost(modal.data.id,"week");
+                          setModal({type:"sponsor_success", data:modal.data, duration:"1 semaine"});
+                        }} style={{ flex:1,padding:"14px",background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",borderRadius:12,fontWeight:800,fontSize:15,cursor:"pointer" }}>
                           🌟 1 semaine
                         </button>
-                        <button onClick={()=>sponsorPost(modal.data.id,"month")} style={{ flex:1,padding:"14px",background:"linear-gradient(135deg,#FFA500,#FF8C00)",border:"none",color:"#000",borderRadius:12,fontWeight:800,fontSize:15,cursor:"pointer" }}>
+                        <button onClick={async()=>{
+                          await sponsorPost(modal.data.id,"month");
+                          setModal({type:"sponsor_success", data:modal.data, duration:"1 mois"});
+                        }} style={{ flex:1,padding:"14px",background:"linear-gradient(135deg,#FFA500,#FF8C00)",border:"none",color:"#000",borderRadius:12,fontWeight:800,fontSize:15,cursor:"pointer" }}>
                           🌟 1 mois
                         </button>
                       </div>
                     </>
                   ) : (
-                    // Version utilisateur — avec paiement
                     <>
-                      <div onClick={()=>handlePayment(500,"Sponsoring 1 semaine sur MarchéduRoi",()=>sponsorPost(modal.data.id,"week"))} style={{ background:theme.card,border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer" }}>
+                      <div onClick={()=>handlePayment(500,"Sponsoring 1 semaine sur MarchéduRoi",async()=>{
+                        await sponsorPost(modal.data.id,"week");
+                        setModal({type:"sponsor_success", data:modal.data, duration:"1 semaine"});
+                      })} style={{ background:theme.card,border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer" }}>
                         <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                           <div>
                             <p style={{ fontWeight:800,fontSize:16,color:"#FFD700",marginBottom:4 }}>🌟 Sponsoring 1 semaine</p>
@@ -5292,7 +5385,10 @@ function AppContent() {
                           <span style={{ fontWeight:800,fontSize:20,color:"#FFD700" }}>500 FCFA</span>
                         </div>
                       </div>
-                      <div onClick={()=>handlePayment(1500,"Sponsoring 1 mois sur MarchéduRoi",()=>sponsorPost(modal.data.id,"month"))} style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFA500",borderRadius:14,padding:20,cursor:"pointer",position:"relative" }}>
+                      <div onClick={()=>handlePayment(1500,"Sponsoring 1 mois sur MarchéduRoi",async()=>{
+                        await sponsorPost(modal.data.id,"month");
+                        setModal({type:"sponsor_success", data:modal.data, duration:"1 mois"});
+                      })} style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFA500",borderRadius:14,padding:20,cursor:"pointer",position:"relative" }}>
                         <div style={{ position:"absolute",top:-12,right:16,background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:800 }}>POPULAIRE</div>
                         <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                           <div>
@@ -5307,6 +5403,22 @@ function AppContent() {
                 </div>
                 <p style={{ fontSize:11,color:theme.sub,textAlign:"center" }}>💳 Paiement sécurisé MTN/Moov Money · Après expiration, l'annonce reste visible normalement</p>
               </>
+            )}
+
+            {/* CONFIRMATION SPONSORING */}
+            {modal.type==="sponsor_success"&&(
+              <div style={{ textAlign:"center",padding:"16px 0" }}>
+                <div style={{ fontSize:64,marginBottom:16,animation:"pulse 1s ease" }}>🌟</div>
+                <h3 style={{ fontWeight:800,fontSize:22,color:"#FFD700",marginBottom:8 }}>Sponsoring activé !</h3>
+                <div style={{ background:"rgba(255,215,0,0.1)",border:"2px solid #FFD700",borderRadius:14,padding:20,marginBottom:20 }}>
+                  <p style={{ fontWeight:700,color:theme.text,fontSize:16,marginBottom:6 }}>{modal.data.title}</p>
+                  <p style={{ color:"#FFD700",fontWeight:700,fontSize:18 }}>✅ Sponsorisé pour {modal.duration}</p>
+                  <p style={{ color:theme.sub,fontSize:13,marginTop:6 }}>L'annonce apparaît maintenant en tête des résultats avec le badge 🌟</p>
+                </div>
+                <button onClick={()=>setModal(null)} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",borderRadius:12,fontWeight:800,fontSize:15,cursor:"pointer" }}>
+                  Parfait ! ✓
+                </button>
+              </div>
             )}
 
             {/* URGENT */}
