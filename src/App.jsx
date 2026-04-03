@@ -1374,6 +1374,8 @@ function AppContent() {
   const cleanText      = (v, n=200) => maxLen(v.replace(/[<>{}[\]\\]/g, ""), n);
   const cleanLongText  = (v, n=1000) => maxLen(v.replace(/[<>{}[\]\\]/g, ""), n);
   const noSpaces       = v => v.replace(/\s/g, "");
+  // Normalisation pour la recherche : supprime les accents et met en minuscules
+  const normalizeText  = v => (v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   // Séparateur de milliers automatique : "15000" → "15 000"
   const formatThousands = v => {
     const digits = v.replace(/[^0-9]/g, "");
@@ -1680,17 +1682,19 @@ function AppContent() {
   };
 
   const deletePost = async (id) => {
-    // Supprimer les photos du Storage
     const post = posts.find(p => p.id === id);
+    // Supprimer les photos du Storage
     if (post?.photos?.length > 0) {
       const paths = post.photos
         .filter(url => url.includes("/storage/v1/object/public/photos/"))
         .map(url => url.split("/storage/v1/object/public/photos/")[1]);
-      if (paths.length > 0) await supabase.storage.from("photos").remove(paths);
+      if (paths.length > 0) await supabase.storage.from("photos").remove(paths).catch(()=>{});
     }
-    await supabase.from("posts").delete().eq("id", id);
+    const { error } = await supabase.from("posts").delete().eq("id", id);
+    if (error) { console.error("Delete error:", error); notify("Erreur suppression : " + error.message, "error"); return; }
     setPosts(p=>p.filter(post=>post.id!==id));
-    setModal(null); notify("Annonce supprimée.");
+    setModal(null);
+    notify("✅ Annonce supprimée.");
   };
 
   const likePost = async (id) => {
@@ -1964,7 +1968,7 @@ function AppContent() {
   const filtered = posts.filter(p=>{
     if (p.expired) return false;
     if (category!=="Toutes" && p.category!==category) return false;
-    if (search && !p.title.toLowerCase().includes(search.toLowerCase()) && !p.description.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && !normalizeText(p.title).includes(normalizeText(search)) && !normalizeText(p.description).includes(normalizeText(search))) return false;
     if (priceMin || priceMax) {
       const rawPrice = (p.price||"").replace(/[^0-9]/g,"");
       const numPrice = parseInt(rawPrice);
@@ -1990,10 +1994,10 @@ function AppContent() {
 
   // Recherche globale — toutes les sections (boutiques, ateliers, restos, beauté)
   const globalSearch = search.trim().length > 1 ? [
-    ...boutiques.filter(b=> [b.name,b.description,b.type,b.services,b.ville].filter(Boolean).join(" ").toLowerCase().includes(search.toLowerCase())).map(b=>({...b,_type:"boutique",_label:"🛍️ Boutique"})),
-    ...ateliers.filter(a=> [a.name,a.description,a.type,a.services,a.ville].filter(Boolean).join(" ").toLowerCase().includes(search.toLowerCase())).map(a=>({...a,_type:"atelier",_label:"🔧 Atelier"})),
-    ...restos.filter(r=> [r.name,r.description,r.type,r.plats,r.ville].filter(Boolean).join(" ").toLowerCase().includes(search.toLowerCase())).map(r=>({...r,_type:"resto",_label:"🍽️ Resto & Bar"})),
-    ...beaute.filter(b=> [b.name,b.description,b.type,b.services,b.ville].filter(Boolean).join(" ").toLowerCase().includes(search.toLowerCase())).map(b=>({...b,_type:"beaute",_label:"💇 Beauté"})),
+    ...boutiques.filter(b=> normalizeText([b.name,b.description,b.type,b.services,b.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(b=>({...b,_type:"boutique",_label:"🛍️ Boutique"})),
+    ...ateliers.filter(a=> normalizeText([a.name,a.description,a.type,a.services,a.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(a=>({...a,_type:"atelier",_label:"🔧 Atelier"})),
+    ...restos.filter(r=> normalizeText([r.name,r.description,r.type,r.plats,r.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(r=>({...r,_type:"resto",_label:"🍽️ Resto & Bar"})),
+    ...beaute.filter(b=> normalizeText([b.name,b.description,b.type,b.services,b.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(b=>({...b,_type:"beaute",_label:"💇 Beauté"})),
   ] : [];
 
   const myPosts = user?posts.filter(p=>p.authorId===user.id):[];
@@ -3650,7 +3654,7 @@ function AppContent() {
             )}
           </div>
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
-            {boutiques.filter(b=>!search||(b.name+b.description+(b.keywords||"")+(b.type||"")).toLowerCase().includes(search.toLowerCase()))
+            {boutiques.filter(b=>!search||normalizeText(b.name+b.description+(b.keywords||"")+(b.type||"")).includes(normalizeText(search)))
             .map(b=>({...b, distance: userLocation&&b.lat&&b.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(b.lat),parseFloat(b.lng)) : null}))
             .sort((a,b)=>{
               if(featuredPosts.includes(a.id)&&!featuredPosts.includes(b.id)) return -1;
@@ -3745,7 +3749,7 @@ function AppContent() {
             )}
           </div>
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
-            {ateliers.filter(a=>!search||(a.name+a.description+(a.keywords||"")+(a.type||"")+(a.services||"")).toLowerCase().includes(search.toLowerCase()))
+            {ateliers.filter(a=>!search||normalizeText(a.name+a.description+(a.keywords||"")+(a.type||"")+(a.services||"")).includes(normalizeText(search)))
             .map(a=>({...a, distance: userLocation&&a.lat&&a.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(a.lat),parseFloat(a.lng)) : null}))
             .sort((a,b)=>{
               if(featuredPosts.includes(a.id)&&!featuredPosts.includes(b.id)) return -1;
@@ -3848,7 +3852,7 @@ function AppContent() {
           </div>
 
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
-            {restos.filter(r=>!search||(r.name+r.description+(r.keywords||"")+(r.type||"")+(r.specialite||"")).toLowerCase().includes(search.toLowerCase()))
+            {restos.filter(r=>!search||normalizeText(r.name+r.description+(r.keywords||"")+(r.type||"")+(r.specialite||"")).includes(normalizeText(search)))
             .map(r=>({...r, distance: userLocation&&r.lat&&r.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(r.lat),parseFloat(r.lng)) : null}))
             .sort((a,b)=>{
               if(featuredPosts.includes(a.id)&&!featuredPosts.includes(b.id)) return -1;
@@ -3954,7 +3958,7 @@ function AppContent() {
           </div>
 
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
-            {beaute.filter(b=>!search||(b.name+b.description+(b.keywords||"")+(b.type||"")+(b.specialite||"")+(b.services||"")).toLowerCase().includes(search.toLowerCase()))
+            {beaute.filter(b=>!search||normalizeText(b.name+b.description+(b.keywords||"")+(b.type||"")+(b.specialite||"")+(b.services||"")).includes(normalizeText(search)))
             .map(b=>({...b, distance: userLocation&&b.lat&&b.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(b.lat),parseFloat(b.lng)) : null}))
             .sort((a,b)=>{
               if(featuredPosts.includes(a.id)&&!featuredPosts.includes(b.id)) return -1;
@@ -4697,17 +4701,28 @@ function AppContent() {
                 {/* Annonces similaires améliorées */}
                 {(() => {
                   const prixPost = parseInt((modal.data.price||"").replace(/[^0-9]/g,"")) || 0;
-                  const villePost = modal.data.immo?.ville || modal.data.vehicle?.position || "";
-                  const similaires = posts
-                    .filter(p => p.id !== modal.data.id && p.category === modal.data.category && !p.expired)
+                  const villePost = modal.data.immo?.ville || modal.data.vehicle?.position || modal.data.ville || "";
+                  // Cherche dans toutes les sections
+                  const allItems = [
+                    ...posts.filter(p=>p.id!==modal.data.id&&p.category===modal.data.category&&!p.expired).map(p=>({...p,_section:"post"})),
+                    ...boutiques.map(b=>({...b,title:b.name,_section:"boutique"})),
+                    ...ateliers.map(a=>({...a,title:a.name,_section:"atelier"})),
+                    ...restos.map(r=>({...r,title:r.name,_section:"resto"})),
+                    ...beaute.map(b=>({...b,title:b.name,_section:"beaute"})),
+                  ].filter(p=>p.id!==modal.data.id);
+                  const similaires = allItems
                     .map(p => {
                       let score = 0;
                       const prixP = parseInt((p.price||"").replace(/[^0-9]/g,"")) || 0;
-                      if (villePost && (p.immo?.ville||p.vehicle?.position||"").toLowerCase().includes(villePost.toLowerCase())) score += 3;
+                      const villeP = p.immo?.ville||p.vehicle?.position||p.ville||"";
+                      if (villePost && normalizeText(villeP).includes(normalizeText(villePost))) score += 3;
                       if (prixPost > 0 && prixP > 0 && Math.abs(prixP - prixPost) / prixPost < 0.5) score += 2;
                       if (p.sponsored) score += 1;
+                      // Même type/catégorie
+                      if (p.category===modal.data.category || p.type===modal.data.type) score += 1;
                       return { ...p, _score: score };
                     })
+                    .filter(p=>p._score > 0)
                     .sort((a,b) => b._score - a._score)
                     .slice(0, 8);
                   if (similaires.length === 0) return null;
