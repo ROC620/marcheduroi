@@ -322,7 +322,7 @@ function FlagCylinder({ theme }) {
     <div style={{ position:"relative", width:"100%", marginBottom:0, userSelect:"none" }}>
 
       {/* Logo — affiché normalement, globe caché par overflow hidden */}
-      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:200 }}>
+      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:window.innerWidth<=600?148:200 }}>
         <img
           src="/marcheduRoi-icon.svg"
           alt="MarchéduRoi"
@@ -2262,20 +2262,15 @@ function AppContent() {
           {/* MENU PLUS ▾ */}
           <div style={{ position:"relative" }}>
             <button
-              onMouseDown={e=>{ e.stopPropagation(); setShowMoreMenu(m=>!m); }}
-              onTouchEnd={e=>{ e.preventDefault(); e.stopPropagation(); setShowMoreMenu(m=>!m); }}
+              onClick={()=>setShowMoreMenu(m=>!m)}
               style={{ background:showMoreMenu?`rgba(108,99,255,0.15)`:theme.card,border:`1px solid ${showMoreMenu?"#6C63FF":theme.border}`,color:showMoreMenu?"#6C63FF":theme.text,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer",WebkitTapHighlightColor:"transparent" }}>
               Plus {showMoreMenu?"▲":"▾"}
             </button>
             {showMoreMenu && (
               <>
-                {/* Overlay — ferme le menu au clic/touch en dehors */}
-                <div
-                  onMouseDown={()=>setShowMoreMenu(false)}
-                  onTouchStart={()=>setShowMoreMenu(false)}
-                  style={{ position:"fixed",inset:0,zIndex:299,WebkitTapHighlightColor:"transparent" }}
-                />
-                <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:Math.min(220, window.innerWidth-16),overflow:"hidden",transformOrigin:"top right" }}>
+                {/* Overlay transparent — ferme au clic/touch en dehors */}
+                <div onClick={()=>setShowMoreMenu(false)} style={{ position:"fixed",inset:0,zIndex:299 }}/>
+                <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:Math.min(220, window.innerWidth-16),overflow:"hidden" }}>
                   {/* Sur mobile : ajouter Annonces + Publier dans le menu Plus */}
                   {windowWidth <= 600 && [
                     { label:"📋 "+t.annonces, action:()=>{setView("home");setShowMoreMenu(false);} },
@@ -2382,7 +2377,7 @@ function AppContent() {
 
       {/* LANDING PAGE */}
       {view==="landing"&&(
-        <div style={{ width:"100%",minHeight:"calc(100vh - 64px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:windowWidth<=600?"flex-start":"center",paddingTop:windowWidth<=600?16:0,padding:windowWidth<=600?"16px 16px 8px":"0 24px 8px",animation:"fadeIn 0.6s ease",position:"relative",overflow:"hidden" }}>
+        <div style={{ width:"100%",minHeight:"calc(100vh - 64px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:windowWidth<=600?"flex-start":"center",padding:windowWidth<=600?"0 16px 8px":"0 24px 8px",animation:"fadeIn 0.6s ease",position:"relative",overflow:"hidden" }}>
 
           {/* Background decoration */}
           <div style={{ position:"absolute",top:-100,left:-100,width:400,height:400,borderRadius:"50%",background:"rgba(108,99,255,0.06)",pointerEvents:"none" }}/>
