@@ -322,7 +322,7 @@ function FlagCylinder({ theme }) {
     <div style={{ position:"relative", width:"100%", marginBottom:0, userSelect:"none" }}>
 
       {/* Logo — affiché normalement, globe caché par overflow hidden */}
-      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:window.innerWidth<=600?148:200 }}>
+      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:200 }}>
         <img
           src="/marcheduRoi-icon.svg"
           alt="MarchéduRoi"
@@ -331,11 +331,11 @@ function FlagCylinder({ theme }) {
         />
       </div>
 
-      {/* Cylindre 3D — positionné sur le M (top:34%) */}
+      {/* Cylindre 3D — positionné sur le M */}
       <div
         style={{
           position:"absolute",
-          top:"30%",
+          top:window.innerWidth<=600?"18%":"30%",
           left:0, right:0,
           height:38,
           overflow:"hidden",
@@ -2393,8 +2393,7 @@ function AppContent() {
           </h1>
 
           {/* Slogan */}
-          <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:560,lineHeight:1.5,marginBottom:windowWidth<=600?6:12,padding:"0 16px" }}>
-            {(()=>{
+          {(()=>{
               const PAYS_NOMS = {
                 BJ:"Bénin", TG:"Togo", CI:"Côte d'Ivoire", SN:"Sénégal", ML:"Mali",
                 BF:"Burkina Faso", NE:"Niger", GN:"Guinée", NG:"Nigeria", CM:"Cameroun",
@@ -2410,13 +2409,16 @@ function AppContent() {
               const code = getUserCountry() || "BJ";
               const pays = PAYS_NOMS[code] || "Bénin";
               const prep = PREP[code] || "au";
-              return (
-                <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:320,lineHeight:1.5,marginBottom:12,padding:"0 16px" }}>
+              return windowWidth <= 600 ? (
+                <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:340,lineHeight:1.5,marginBottom:6,padding:"0 16px" }}>
                   La plateforme qui connecte commerçants, entreprises et particuliers <strong style={{ color:theme.text }}>{prep} {pays}</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
+                </p>
+              ) : (
+                <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:560,lineHeight:1.5,marginBottom:6,padding:"0 16px" }}>
+                  La plateforme qui connecte commerçants,<br/>entreprises et particuliers <strong style={{ color:theme.text }}>{prep} {pays}</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
                 </p>
               );
             })()}
-          </p>
 
           {/* Verset du jour — change chaque jour */}
           {(()=>{
