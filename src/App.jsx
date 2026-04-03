@@ -322,7 +322,7 @@ function FlagCylinder({ theme }) {
     <div style={{ position:"relative", width:"100%", marginBottom:0, userSelect:"none" }}>
 
       {/* Logo — affiché normalement, globe caché par overflow hidden */}
-      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:200 }}>
+      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:window.innerWidth<=600?155:200 }}>
         <img
           src="/marcheduRoi-icon.svg"
           alt="MarchéduRoi"
@@ -1420,15 +1420,25 @@ function AppContent() {
   ];
 
   // 4 jours gratuits par mois — vérifie si l'utilisateur a déjà utilisé son crédit ce mois
-  const canPublishFree = () => {
+  const canPublishFree = async () => {
     if (!user) return false;
-    const key = `mdr_free_${user.id}_${new Date().toISOString().slice(0,7)}`; // ex: 2026-04
-    return !localStorage.getItem(key);
+    const month = new Date().toISOString().slice(0,7);
+    const { data } = await supabase.from("free_days").select("used").eq("user_id", user.id).eq("month", month).single();
+    return !data || data.used < 4;
   };
-  const useFreeDay = () => {
-    const key = `mdr_free_${user.id}_${new Date().toISOString().slice(0,7)}`;
-    localStorage.setItem(key, "1");
+  const useFreeDay = async () => {
+    const month = new Date().toISOString().slice(0,7);
+    const { data } = await supabase.from("free_days").select("used").eq("user_id", user.id).eq("month", month).single();
+    if (data) {
+      await supabase.from("free_days").update({ used: data.used + 1 }).eq("user_id", user.id).eq("month", month);
+    } else {
+      await supabase.from("free_days").insert({ user_id: user.id, month, used: 1 });
+    }
   };
+  const [canFree, setCanFree] = useState(false);
+  useEffect(() => {
+    if (user) canPublishFree().then(setCanFree);
+  }, [user]);
   // ─────────────────────────────────────────────────────────────────────────────
 
   // ─── FEDAPAY : Paiement avant publication ───────────────────────────────────
@@ -2259,7 +2269,7 @@ function AppContent() {
               <>
                 {/* Overlay — clic n'importe où ferme le menu */}
                 <div onClick={()=>setShowMoreMenu(false)} style={{ position:"fixed",inset:0,zIndex:299 }}/>
-                <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:200,overflow:"hidden" }}>
+                <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:Math.min(220, window.innerWidth-16),overflow:"hidden",transformOrigin:"top right" }}>
                   {/* Sur mobile : ajouter Annonces + Publier dans le menu Plus */}
                   {windowWidth <= 600 && [
                     { label:"📋 "+t.annonces, action:()=>{setView("home");setShowMoreMenu(false);} },
@@ -2366,7 +2376,7 @@ function AppContent() {
 
       {/* LANDING PAGE */}
       {view==="landing"&&(
-        <div style={{ width:"100%",minHeight:"calc(100vh - 64px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"0 24px 8px",animation:"fadeIn 0.6s ease",position:"relative",overflow:"hidden" }}>
+        <div style={{ width:"100%",minHeight:"calc(100vh - 64px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:windowWidth<=600?"flex-start":"center",paddingTop:windowWidth<=600?16:0,padding:windowWidth<=600?"16px 16px 8px":"0 24px 8px",animation:"fadeIn 0.6s ease",position:"relative",overflow:"hidden" }}>
 
           {/* Background decoration */}
           <div style={{ position:"absolute",top:-100,left:-100,width:400,height:400,borderRadius:"50%",background:"rgba(108,99,255,0.06)",pointerEvents:"none" }}/>
@@ -2376,13 +2386,13 @@ function AppContent() {
           <FlagCylinder theme={theme}/>
 
           {/* Titre */}
-          <h1 style={{ fontSize:"clamp(26px,7vw,52px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:8,color:theme.text,padding:"0 8px",width:"100%",marginTop:0 }}>
+          <h1 style={{ fontSize:windowWidth<=600?"clamp(22px,8vw,32px)":"clamp(26px,7vw,52px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:windowWidth<=600?4:8,color:theme.text,padding:"0 8px",width:"100%",marginTop:0 }}>
             Bienvenue sur{" "}
             <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span>
           </h1>
 
           {/* Slogan */}
-          <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:560,lineHeight:1.5,marginBottom:12,padding:"0 16px" }}>
+          <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:560,lineHeight:1.5,marginBottom:windowWidth<=600?6:12,padding:"0 16px" }}>
             La plateforme qui connecte commerçants, entreprises et particuliers au <strong style={{ color:theme.text }}>Bénin</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
           </p>
 
@@ -2512,7 +2522,7 @@ function AppContent() {
             const ad = ads[adIndex];
             if (!ad) return (
               // Bannière par défaut si aucune pub dans Supabase
-              <div style={{ width:"100%",maxWidth:700,margin:"32px auto 0",borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:theme.card }}>
+              <div style={{ width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0`,borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:theme.card }}>
                 <div style={{ padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
                   <div style={{ display:"flex",alignItems:"center",gap:12 }}>
                     <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>📢</div>
@@ -2530,7 +2540,7 @@ function AppContent() {
               </div>
             );
             return (
-              <a href={ad.lien||"#"} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"block",width:"100%",maxWidth:700,margin:"32px auto 0" }}>
+              <a href={ad.lien||"#"} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"block",width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0` }}>
                 <div style={{ borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:`linear-gradient(135deg,${ad.couleur1||"#6C63FF"}22,${ad.couleur2||"#8B84FF"}22)`,transition:"transform 0.3s",cursor:"pointer" }}
                   onMouseEnter={e=>e.currentTarget.style.transform="scale(1.01)"}
                   onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
@@ -2607,27 +2617,25 @@ function AppContent() {
             )}
           </div>
 
-            {/* Recherche + GPS — même ligne sur desktop, empilé sur mobile */}
-            <div style={{ marginBottom:8,maxWidth:windowWidth>700?Math.round(windowWidth*0.5):"100%" }}>
-              <div style={{ display:"flex",gap:6,alignItems:"center",marginBottom:windowWidth>700?0:6 }}>
-                <div style={{ position:"relative",flex:1 }}>
+            {/* Recherche + GPS — même ligne sur desktop */}
+            <div style={{ marginBottom:8, width:"100%" }}>
+              <div style={{ display:"flex",gap:6,alignItems:"center",flexWrap:windowWidth>700?"nowrap":"wrap" }}>
+                <div style={{ position:"relative",flex:1,minWidth:0 }}>
                   <div style={{ position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={15}/></div>
                   <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.rechercher} maxLength={100} style={{ ...inputStyle,padding:"11px 16px 11px 40px",borderRadius:10,fontSize:13,width:"100%",boxSizing:"border-box" }}/>
                 </div>
                 <button onClick={getUserLocation} style={{ background:userLocation?"rgba(67,198,172,0.15)":"rgba(108,99,255,0.1)",border:`1px solid ${userLocation?"rgba(67,198,172,0.5)":"rgba(108,99,255,0.3)"}`,color:userLocation?"#43C6AC":"#6C63FF",padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap",flexShrink:0 }}>
                   {locationLoading?"⏳":userLocation?"📍 Actif":t.pressDeMoi}
                 </button>
+                {userLocation && (<>
+                  <button onClick={()=>setSortByDistance(s=>!s)} style={{ background:sortByDistance?"rgba(67,198,172,0.15)":"transparent",border:`1px solid ${theme.border}`,color:sortByDistance?"#43C6AC":theme.sub,padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
+                    {sortByDistance?"✅ Distance":"Distance"}
+                  </button>
+                  <button onClick={()=>{ setUserLocation(null); setSortByDistance(false); }} style={{ background:"rgba(255,71,87,0.08)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
+                    ✕
+                  </button>
+                </>)}
               </div>
-              {userLocation && (
-                <div style={{ display:"flex",gap:6,marginTop:6,flexWrap:"wrap" }}>
-                  <button onClick={()=>setSortByDistance(s=>!s)} style={{ background:sortByDistance?"rgba(67,198,172,0.15)":"transparent",border:`1px solid ${theme.border}`,color:sortByDistance?"#43C6AC":theme.sub,padding:"7px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",whiteSpace:"nowrap" }}>
-                    {sortByDistance?"✅ Par distance":"Par distance"}
-                  </button>
-                  <button onClick={()=>{ setUserLocation(null); setSortByDistance(false); }} style={{ background:"rgba(255,71,87,0.08)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"7px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",whiteSpace:"nowrap" }}>
-                    ✕ Effacer
-                  </button>
-                </div>
-              )}
             </div>
 
             {/* Boutiques Ateliers Restos — défilement horizontal */}
@@ -4508,7 +4516,7 @@ function AppContent() {
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4 }}>💰 Durée de publication</p>
 
                     {/* Option gratuite */}
-                    {canPublishFree() && (
+                    {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)}
                         style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"12px 16px",marginBottom:8,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div>
@@ -4770,7 +4778,7 @@ function AppContent() {
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF69B444`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
-                    {canPublishFree() && (
+                    {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
@@ -4787,10 +4795,7 @@ function AppContent() {
                 <button
                   onClick={modal.data?.editing
                     ? editBeaute
-                    : ()=>{
-                        if (selectedTarif===-1) { useFreeDay(); addBeaute(); }
-                        else { const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication salon beauté ${t.label} sur MarchéduRoi`,addBeaute); }
-                      }
+                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication salon beauté ${t.label} sur MarchéduRoi`,addBeaute); }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FF69B4,#FF1493)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
@@ -4874,7 +4879,7 @@ function AppContent() {
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF8C0044`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
-                    {canPublishFree() && (
+                    {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
@@ -4891,7 +4896,7 @@ function AppContent() {
                 <button
                   onClick={modal.data?.editing
                     ? editResto
-                    : ()=>{ if(selectedTarif===-1){useFreeDay();addResto();}else{const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0];handlePayment(t.price,`Publication restaurant/bar ${t.label} sur MarchéduRoi`,addResto);} }
+                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication restaurant/bar ${t.label} sur MarchéduRoi`,addResto); }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
@@ -4977,7 +4982,7 @@ function AppContent() {
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF658444`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
-                    {canPublishFree() && (
+                    {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
@@ -4994,7 +4999,7 @@ function AppContent() {
                 <button
                   onClick={modal.data?.editing
                     ? editShop
-                    : ()=>{ if(selectedTarif===-1){useFreeDay();addShop();}else{const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0];handlePayment(t.price,`Publication ${shopMode==="boutique"?"boutique":"atelier"} ${t.label} sur MarchéduRoi`,addShop);} }
+                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication ${shopMode==="boutique"?"boutique":"atelier"} ${t.label} sur MarchéduRoi`,addShop); }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:shopMode==="boutique"?"linear-gradient(135deg,#FF6584,#FFB347)":"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
