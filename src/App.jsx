@@ -322,12 +322,12 @@ function FlagCylinder({ theme }) {
     <div style={{ position:"relative", width:"100%", marginBottom:0, userSelect:"none" }}>
 
       {/* Logo — affiché normalement, globe caché par overflow hidden */}
-      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:200 }}>
+      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:window.innerWidth<=600?118:200 }}>
         <img
           src="/marcheduRoi-icon.svg"
           alt="MarchéduRoi"
           draggable={false}
-          style={{ width:260, height:"auto", filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.35))", display:"block", marginTop: window.innerWidth<=600?-30:0 }}
+          style={{ width:260, height:"auto", filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.35))", display:"block" }}
         />
       </div>
 
@@ -2254,14 +2254,14 @@ function AppContent() {
           {/* MENU PLUS ▾ */}
           <div style={{ position:"relative" }}>
             <button
-              onClick={()=>setShowMoreMenu(m=>!m)}
+              onClick={e=>{e.stopPropagation();setShowMoreMenu(m=>!m);}}
               style={{ background:showMoreMenu?`rgba(108,99,255,0.15)`:theme.card,border:`1px solid ${showMoreMenu?"#6C63FF":theme.border}`,color:showMoreMenu?"#6C63FF":theme.text,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer",WebkitTapHighlightColor:"transparent" }}>
               Plus {showMoreMenu?"▲":"▾"}
             </button>
             {showMoreMenu && (
               <>
                 {/* Overlay — clic n'importe où ferme le menu */}
-                <div onClick={()=>setShowMoreMenu(false)} onTouchStart={()=>setShowMoreMenu(false)} style={{ position:"fixed",inset:0,zIndex:299,WebkitTapHighlightColor:"transparent" }}/>
+                <div onClick={()=>setShowMoreMenu(false)} style={{ position:"fixed",inset:0,zIndex:299 }}/>
                 <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:Math.min(220, window.innerWidth-16),overflow:"hidden",transformOrigin:"top right" }}>
                   {/* Sur mobile : ajouter Annonces + Publier dans le menu Plus */}
                   {windowWidth <= 600 && [
@@ -2387,7 +2387,7 @@ function AppContent() {
           <FlagCylinder theme={theme}/>
 
           {/* Titre */}
-          <h1 style={{ fontSize:windowWidth<=600?"clamp(22px,8vw,32px)":"clamp(26px,7vw,52px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:windowWidth<=600?4:8,color:theme.text,padding:"0 8px",width:"100%",marginTop:windowWidth<=600?-12:0 }}>
+          <h1 style={{ fontSize:windowWidth<=600?"clamp(22px,8vw,32px)":"clamp(26px,7vw,52px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:windowWidth<=600?4:8,color:theme.text,padding:"0 8px",width:"100%",marginTop:0 }}>
             Bienvenue sur{" "}
             <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span>
           </h1>
