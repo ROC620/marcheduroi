@@ -2071,6 +2071,76 @@ function AppContent() {
       `}</style>
 
       {/* PANNEAU MESSAGERIE */}
+      {/* PANNEAU PLUS */}
+      {showMoreMenu && (
+        <div onClick={()=>setShowMoreMenu(false)} style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:500 }}>
+          <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:0,top:0,bottom:0,width:Math.min(280,window.innerWidth),background:theme.card,boxShadow:"-20px 0 60px rgba(0,0,0,0.3)",display:"flex",flexDirection:"column",zIndex:501,overflowY:"auto" }}>
+            <div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${theme.border}`,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+              <h3 style={{ fontWeight:800,fontSize:18,color:theme.text }}>Menu</h3>
+              <button onClick={()=>setShowMoreMenu(false)} style={{ background:"transparent",border:"none",color:theme.sub,cursor:"pointer" }}><Icon name="x" size={20}/></button>
+            </div>
+            {windowWidth <= 600 && [
+              { label:"📋 "+t.annonces, action:()=>{setView("home");setShowMoreMenu(false);} },
+              { label:"💡 "+t.publierAnnonce, action:()=>{setModal({type:"howto"});setShowMoreMenu(false);} },
+              ...(user?.role==="admin"?[{ label:"⚙️ "+t.admin, action:()=>{setView("admin");setShowMoreMenu(false);} }]:[]),
+              { label:lang==="fr"?"🇬🇧 English":"🇫🇷 Français", action:()=>{ const newLang=lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); setShowMoreMenu(false); } },
+              { label:"🎨 "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
+            ].map(item=>(
+              <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"14px 20px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:`1px solid ${theme.border}`,WebkitTapHighlightColor:"transparent" }}>
+                {item.label}
+              </button>
+            ))}
+            {[
+              { label:"📖 Exemples de publications", action:()=>{ window.open("https://marcheduroi.com/exemples.html","_blank"); setShowMoreMenu(false); } },
+              { label:"📞 Support WhatsApp", action:()=>{ window.open("https://wa.me/2290147562640","_blank"); setShowMoreMenu(false); } },
+              { label:t.stats, action:()=>{setView("stats");setShowMoreMenu(false);} },
+              { label:t.parrainage, action:()=>{setView("parrainage");setShowMoreMenu(false);} },
+              { label:t.newsletter, action:()=>{setModal({type:"newsletter"});setShowMoreMenu(false);} },
+              { label:t.suggestion, action:()=>{setModal({type:"suggestion"});setShowMoreMenu(false);} },
+              { label:t.apropos, action:()=>{setView("about");setShowMoreMenu(false);} },
+              { label:t.cgu, action:()=>{setView("terms");setShowMoreMenu(false);} },
+            ].map((item,i,arr)=>(
+              <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"14px 20px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:i<arr.length-1?`1px solid ${theme.border}`:"none",WebkitTapHighlightColor:"transparent" }}>
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* PANNEAU NOTIFICATIONS */}
+      {showNotifs && user && (
+        <div onClick={()=>setShowNotifs(false)} style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:500 }}>
+          <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:0,top:0,bottom:0,width:Math.min(340,window.innerWidth),background:theme.card,boxShadow:"-20px 0 60px rgba(0,0,0,0.3)",display:"flex",flexDirection:"column",zIndex:501 }}>
+            <div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${theme.border}`,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+              <h3 style={{ fontWeight:800,fontSize:18,color:theme.text }}>🔔 Notifications</h3>
+              <div style={{ display:"flex",gap:8,alignItems:"center" }}>
+                {notifications.length > 0 && <button onClick={clearNotifications} style={{ background:"none",border:"none",color:theme.sub,fontSize:12,cursor:"pointer",fontWeight:600 }}>Tout effacer</button>}
+                <button onClick={()=>setShowNotifs(false)} style={{ background:"transparent",border:"none",color:theme.sub,cursor:"pointer" }}><Icon name="x" size={20}/></button>
+              </div>
+            </div>
+            <div style={{ flex:1,overflowY:"auto" }}>
+              {notifications.length === 0 ? (
+                <div style={{ textAlign:"center",padding:"48px 16px",color:theme.sub }}>
+                  <p style={{ fontSize:32,marginBottom:8 }}>🔔</p>
+                  <p style={{ fontSize:14 }}>Aucune notification</p>
+                </div>
+              ) : notifications.map(n=>(
+                <div key={n.id} style={{ padding:"14px 20px",borderBottom:`1px solid ${theme.border}`,background:n.read?theme.card:theme.bg,cursor:"pointer" }} onClick={()=>setShowNotifs(false)}>
+                  <div style={{ display:"flex",gap:10,alignItems:"flex-start" }}>
+                    <span style={{ fontSize:20,flexShrink:0 }}>{n.type==="contact"?"💬":n.type==="view"?"👁️":"🔔"}</span>
+                    <div>
+                      <p style={{ fontSize:14,color:theme.text,lineHeight:1.4,marginBottom:2 }}>{n.msg}</p>
+                      <p style={{ fontSize:12,color:theme.sub }}>{n.date}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {showMessages && user && (
         <div onClick={()=>setShowMessages(false)} style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:500 }}>
           <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:0,top:0,bottom:0,width:Math.min(420,window.innerWidth),background:theme.card,boxShadow:"-20px 0 60px rgba(0,0,0,0.3)",display:"flex",flexDirection:"column",zIndex:501 }}>
@@ -2291,37 +2361,6 @@ function AppContent() {
               style={{ background:showMoreMenu?`rgba(108,99,255,0.15)`:theme.card,border:`1px solid ${showMoreMenu?"#6C63FF":theme.border}`,color:showMoreMenu?"#6C63FF":theme.text,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>
               Plus {showMoreMenu?"▲":"▾"}
             </button>
-            {showMoreMenu && (
-              <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:Math.min(220, window.innerWidth-16),overflow:"hidden" }}>
-                  {/* Sur mobile : ajouter Annonces + Publier dans le menu Plus */}
-                  {windowWidth <= 600 && [
-                    { label:"📋 "+t.annonces, action:()=>{setView("home");setShowMoreMenu(false);} },
-                    { label:"💡 "+t.publierAnnonce, action:()=>{setModal({type:"howto"});setShowMoreMenu(false);} },
-                    ...(user?.role==="admin"?[{ label:"⚙️ "+t.admin, action:()=>{setView("admin");setShowMoreMenu(false);} }]:[]),
-                    { label:lang==="fr"?"🇬🇧 English":"🇫🇷 Français", action:()=>{ const newLang=lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); setShowMoreMenu(false); } },
-                    { label:"🎨 "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
-                  ].map((item)=>(
-                    <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"11px 14px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:13,cursor:"pointer",textAlign:"left",borderBottom:`1px solid ${theme.border}`,WebkitTapHighlightColor:"transparent" }}>
-                      {item.label}
-                    </button>
-                  ))}
-                  {/* Commun desktop + mobile */}
-                  {[
-                    { label:"📖 Exemples de publications", action:()=>{ window.open("https://marcheduroi.com/exemples.html","_blank"); setShowMoreMenu(false); } },
-                    { label:"📞 Support", action:()=>{ window.open("https://wa.me/2290147562640?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide.", "_blank"); setShowMoreMenu(false); } },
-                    { label:t.stats, action:()=>{setView("stats");setShowMoreMenu(false);} },
-                    { label:t.parrainage, action:()=>{setView("parrainage");setShowMoreMenu(false);} },
-                    { label:t.newsletter, action:()=>{setModal({type:"newsletter"});setShowMoreMenu(false);} },
-                    { label:t.suggestion, action:()=>{setModal({type:"suggestion"});setShowMoreMenu(false);} },
-                    { label:t.apropos, action:()=>{setView("about");setShowMoreMenu(false);} },
-                    { label:t.cgu, action:()=>{setView("terms");setShowMoreMenu(false);} },
-                  ].map((item,i,arr)=>(
-                    <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"11px 14px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:13,cursor:"pointer",textAlign:"left",borderBottom:i<arr.length-1?`1px solid ${theme.border}`:"none",WebkitTapHighlightColor:"transparent" }}>
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-            )}
           </div>
 
           {/* UTILISATEUR CONNECTÉ */}
@@ -2344,32 +2383,6 @@ function AppContent() {
                     </span>
                   )}
                 </button>
-                {showNotifs && (
-                  <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,width:Math.min(320,windowWidth-16),background:theme.card,border:`1px solid ${theme.border}`,borderRadius:14,boxShadow:"0 20px 60px rgba(0,0,0,0.4)",zIndex:300,overflow:"hidden" }}>
-                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",borderBottom:`1px solid ${theme.border}` }}>
-                      <p style={{ fontWeight:700,fontSize:14,color:theme.text }}>🔔 Notifications</p>
-                      {notifications.length > 0 && <button onClick={clearNotifications} style={{ background:"none",border:"none",color:theme.sub,fontSize:11,cursor:"pointer",fontWeight:600 }}>Tout effacer</button>}
-                    </div>
-                    <div style={{ maxHeight:320,overflowY:"auto" }}>
-                      {notifications.length === 0 ? (
-                        <div style={{ textAlign:"center",padding:"32px 16px",color:theme.sub }}>
-                          <p style={{ fontSize:28,marginBottom:8 }}>🔔</p>
-                          <p style={{ fontSize:13 }}>Aucune notification</p>
-                        </div>
-                      ) : notifications.map(n=>(
-                        <div key={n.id} style={{ padding:"12px 16px",borderBottom:`1px solid ${theme.border}`,background:n.read?theme.card:`${theme.bg}`,cursor:"pointer" }} onClick={()=>{setShowNotifs(false);}}>
-                          <div style={{ display:"flex",gap:10,alignItems:"flex-start" }}>
-                            <span style={{ fontSize:18,flexShrink:0 }}>{n.type==="contact"?"💬":n.type==="view"?"👁️":"🔔"}</span>
-                            <div>
-                              <p style={{ fontSize:13,color:theme.text,lineHeight:1.4,marginBottom:2 }}>{n.msg}</p>
-                              <p style={{ fontSize:11,color:theme.sub }}>{n.date}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
               <button onClick={()=>setView("dashboard")} style={{ ...cardStyle,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,color:theme.text }}>
                 <Icon name="user" size={14}/>
