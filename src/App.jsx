@@ -2086,7 +2086,7 @@ function AppContent() {
               { label:lang==="fr"?"🇬🇧 English":"🇫🇷 Français", action:()=>{ const newLang=lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); setShowMoreMenu(false); } },
               { label:"🎨 "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
             ].map(item=>(
-              <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"14px 20px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:`1px solid ${theme.border}`,WebkitTapHighlightColor:"transparent" }}>
+              <button key={item.label} onClick={e=>{ e.stopPropagation(); item.action(); }} style={{ width:"100%",padding:"14px 20px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:`1px solid ${theme.border}`,WebkitTapHighlightColor:"transparent" }}>
                 {item.label}
               </button>
             ))}
@@ -2100,7 +2100,7 @@ function AppContent() {
               { label:t.apropos, action:()=>{setView("about");setShowMoreMenu(false);} },
               { label:t.cgu, action:()=>{setView("terms");setShowMoreMenu(false);} },
             ].map((item,i,arr)=>(
-              <button key={item.label} onClick={item.action} style={{ width:"100%",padding:"14px 20px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:i<arr.length-1?`1px solid ${theme.border}`:"none",WebkitTapHighlightColor:"transparent" }}>
+              <button key={item.label} onClick={e=>{ e.stopPropagation(); item.action(); }} style={{ width:"100%",padding:"14px 20px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:i<arr.length-1?`1px solid ${theme.border}`:"none",WebkitTapHighlightColor:"transparent" }}>
                 {item.label}
               </button>
             ))}
