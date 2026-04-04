@@ -4339,7 +4339,7 @@ function AppContent() {
             <h1 style={{ fontSize:38,fontWeight:800,marginBottom:12,color:theme.text }}>Programme de <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Parrainage</span></h1>
             <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez <strong style={{ color:"#FFD700" }}>10 amis</strong> sur MarchéduRoi et gagnez <strong style={{ color:"#FFD700" }}>1 mois de publication gratuit</strong> !</p>
             <div style={{ background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:12,padding:"12px 20px",marginTop:12,display:"inline-block" }}>
-              <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>🎁 10 parrainages = 1 annonce simple gratuite (valeur 1 500 FCFA)</p>
+              <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>🎁 10 parrainages = 1 annonce simple gratuite (valeur 1 000 FCFA)</p>
               <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>⚠️ Valable uniquement pour les annonces simples · Non applicable aux boutiques, ateliers, restos et salons</p>
             </div>
           </div>
@@ -4349,8 +4349,8 @@ function AppContent() {
             {[
               { num:"1", text:"Partagez votre lien unique à vos amis et contacts" },
               { num:"2", text:"Chaque ami qui s'inscrit via votre lien compte comme 1 parrainage" },
-              { num:"3", text:"Après 10 parrainages confirmés, vous gagnez 1 mois gratuit" },
-              { num:"4", text:"Valable uniquement pour 1 annonce simple (valeur 1 500 FCFA)" },
+              { num:"3", text:"Après 10 parrainages confirmés, vous gagnez 1 annonce simple gratuite (30 jours)" },
+              { num:"4", text:"Valable uniquement pour 1 annonce simple (valeur 1 000 FCFA)" },
               { num:"5", text:"Non applicable aux boutiques, ateliers, restos et salons de beauté" },
               { num:"6", text:"Les crédits ne sont pas transférables ni remboursables en argent" },
             ].map(r=>(
@@ -4360,7 +4360,7 @@ function AppContent() {
               </div>
             ))}
             <div style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:10,padding:"12px 16px",marginTop:8,textAlign:"center" }}>
-              <p style={{ color:"#FFD700",fontWeight:800,fontSize:16 }}>🎯 10 parrainages = 1 mois gratuit (1 500 FCFA)</p>
+              <p style={{ color:"#FFD700",fontWeight:800,fontSize:16 }}>🎯 10 parrainages = 1 annonce gratuite (valeur 1 000 FCFA)</p>
             </div>
           </div>
           {user ? (
@@ -5368,18 +5368,18 @@ function AppContent() {
                   <p style={{ fontWeight:700,color:"#43C6AC",fontSize:14,marginBottom:8 }}>📋 Tarifs annonces classiques</p>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:16 }}>
                     {[["4 jours","Gratuit"],["30 jours","1 000 F"],["90 jours","2 500 F"],["180 jours","4 500 F"],["360 jours","8 000 F"]].map(([d,p])=>(
-                      <div key={d} style={{ background:theme.card,borderRadius:8,padding:"6px 10px",display:"flex",justifyContent:"space-between",fontSize:12 }}>
-                        <span style={{ color:theme.sub }}>{d}</span>
-                        <span style={{ fontWeight:700,color:p==="Gratuit"?"#43C6AC":"#6C63FF" }}>{p}</span>
+                      <div key={d} style={{ background:theme.card,borderRadius:8,padding:"8px 10px",display:"flex",flexDirection:"column",gap:2 }}>
+                        <span style={{ color:theme.sub,fontSize:12 }}>{d}</span>
+                        <span style={{ fontWeight:800,color:p==="Gratuit"?"#43C6AC":"#6C63FF",fontSize:13 }}>{p}</span>
                       </div>
                     ))}
                   </div>
                   <p style={{ fontWeight:700,color:"#FF6584",fontSize:14,marginBottom:8 }}>🛍️ Boutiques · Ateliers · Restos · Beauté</p>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:6 }}>
-                    {[["4 jours","Gratuit"],["30 jours","2 500 F"],["90 jours","6 000 F"],["180 jours","10 000 F"],["360 jours","18 000 F"]].map(([d,p])=>(
-                      <div key={d} style={{ background:theme.card,borderRadius:8,padding:"6px 10px",display:"flex",justifyContent:"space-between",fontSize:12 }}>
-                        <span style={{ color:theme.sub }}>{d}</span>
-                        <span style={{ fontWeight:700,color:p==="Gratuit"?"#43C6AC":"#FF6584" }}>{p}</span>
+                    {[["30 jours","2 500 F"],["90 jours","6 000 F"],["180 jours","10 000 F"],["360 jours","18 000 F"]].map(([d,p])=>(
+                      <div key={d} style={{ background:theme.card,borderRadius:8,padding:"8px 10px",display:"flex",flexDirection:"column",gap:2 }}>
+                        <span style={{ color:theme.sub,fontSize:12 }}>{d}</span>
+                        <span style={{ fontWeight:800,color:"#FF6584",fontSize:13 }}>{p}</span>
                       </div>
                     ))}
                   </div>
