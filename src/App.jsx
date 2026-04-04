@@ -943,6 +943,17 @@ function AppContent() {
   const [suggestionName, setSuggestionName] = useState("");
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+
+  // Fermer le menu Plus en cliquant/touchant ailleurs — délai 50ms pour éviter fermeture immédiate
+  useEffect(() => {
+    if (!showMoreMenu) return;
+    const close = () => setShowMoreMenu(false);
+    const t = setTimeout(() => {
+      document.addEventListener('click', close, { once: true });
+      document.addEventListener('touchend', close, { once: true });
+    }, 50);
+    return () => { clearTimeout(t); document.removeEventListener('click', close); document.removeEventListener('touchend', close); };
+  }, [showMoreMenu]);
   const [adminSearch, setAdminSearch] = useState("");
   const [lang, setLang] = useState(() => localStorage.getItem("mf_lang") || "fr");
   const t = {
@@ -1117,6 +1128,17 @@ function AppContent() {
     catch { return []; }
   });
   const [showNotifs, setShowNotifs] = useState(false);
+
+  // Fermer les notifs en cliquant/touchant ailleurs
+  useEffect(() => {
+    if (!showNotifs) return;
+    const close = () => setShowNotifs(false);
+    const t = setTimeout(() => {
+      document.addEventListener('click', close, { once: true });
+      document.addEventListener('touchend', close, { once: true });
+    }, 50);
+    return () => { clearTimeout(t); document.removeEventListener('click', close); document.removeEventListener('touchend', close); };
+  }, [showNotifs]);
 
   const addNotification = (msg, type="info", postId=null) => {
     const newNotif = { id:Date.now(), msg, type, postId, date:new Date().toISOString().slice(0,10), read:false };
@@ -2265,14 +2287,12 @@ function AppContent() {
           {/* MENU PLUS ▾ */}
           <div style={{ position:"relative" }}>
             <button
-              onPointerDown={e=>{ e.stopPropagation(); setShowMoreMenu(m=>!m); }}
+              onClick={()=>setShowMoreMenu(m=>!m)}
               style={{ background:showMoreMenu?`rgba(108,99,255,0.15)`:theme.card,border:`1px solid ${showMoreMenu?"#6C63FF":theme.border}`,color:showMoreMenu?"#6C63FF":theme.text,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>
               Plus {showMoreMenu?"▲":"▾"}
             </button>
             {showMoreMenu && (
-              <>
-                <div onPointerDown={()=>setShowMoreMenu(false)} style={{ position:"fixed",inset:0,zIndex:299 }}/>
-                <div onPointerDown={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:Math.min(220, window.innerWidth-16),overflow:"hidden" }}>
+              <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,boxShadow:"0 8px 32px rgba(0,0,0,0.25)",zIndex:300,width:Math.min(220, window.innerWidth-16),overflow:"hidden" }}>
                   {/* Sur mobile : ajouter Annonces + Publier dans le menu Plus */}
                   {windowWidth <= 600 && [
                     { label:"📋 "+t.annonces, action:()=>{setView("home");setShowMoreMenu(false);} },
@@ -2301,7 +2321,6 @@ function AppContent() {
                     </button>
                   ))}
                 </div>
-              </>
             )}
           </div>
 
@@ -2317,7 +2336,7 @@ function AppContent() {
               </div>
               {/* Cloche notifications */}
               <div style={{ position:"relative" }}>
-                <button onPointerDown={e=>{ e.stopPropagation(); setShowNotifs(s=>!s); if(!showNotifs) markAllRead(); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px",position:"relative",cursor:"pointer",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>
+                <button onClick={()=>{ setShowNotifs(s=>!s); if(!showNotifs) markAllRead(); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px",position:"relative",cursor:"pointer",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>
                   <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                   {notifications.filter(n=>!n.read).length > 0 && (
                     <span style={{ position:"absolute",top:4,right:4,background:"#FF4757",color:"#fff",borderRadius:"50%",width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800 }}>
@@ -2326,9 +2345,7 @@ function AppContent() {
                   )}
                 </button>
                 {showNotifs && (
-                  <>
-                    <div onPointerDown={()=>setShowNotifs(false)} style={{ position:"fixed",inset:0,zIndex:299 }}/>
-                    <div onPointerDown={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,width:Math.min(320,windowWidth-16),background:theme.card,border:`1px solid ${theme.border}`,borderRadius:14,boxShadow:"0 20px 60px rgba(0,0,0,0.4)",zIndex:300,overflow:"hidden" }}>
+                  <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:8,top:68,width:Math.min(320,windowWidth-16),background:theme.card,border:`1px solid ${theme.border}`,borderRadius:14,boxShadow:"0 20px 60px rgba(0,0,0,0.4)",zIndex:300,overflow:"hidden" }}>
                     <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",borderBottom:`1px solid ${theme.border}` }}>
                       <p style={{ fontWeight:700,fontSize:14,color:theme.text }}>🔔 Notifications</p>
                       {notifications.length > 0 && <button onClick={clearNotifications} style={{ background:"none",border:"none",color:theme.sub,fontSize:11,cursor:"pointer",fontWeight:600 }}>Tout effacer</button>}
@@ -2352,7 +2369,6 @@ function AppContent() {
                       ))}
                     </div>
                   </div>
-                  </>
                 )}
               </div>
               <button onClick={()=>setView("dashboard")} style={{ ...cardStyle,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,color:theme.text }}>
