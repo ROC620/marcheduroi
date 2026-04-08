@@ -1122,17 +1122,6 @@ function AppContent() {
   const [adSaving, setAdSaving] = useState(false);
   const [expandedContacts, setExpandedContacts] = useState({}); // postId -> boolean
   const contactTimerRef = useRef(null);
-
-  // Fermer le panneau contact au clic en dehors
-  useEffect(() => {
-    if (Object.keys(expandedContacts).length === 0) return;
-    const close = () => setExpandedContacts({});
-    const t = setTimeout(() => {
-      document.addEventListener('click', close, { once: true });
-      document.addEventListener('touchend', close, { once: true });
-    }, 50);
-    return () => { clearTimeout(t); document.removeEventListener('click', close); document.removeEventListener('touchend', close); };
-  }, [expandedContacts]);
   const [userLocation, setUserLocation] = useState(null);
   const [notifications, setNotifications] = useState(() => {
     try { return JSON.parse(localStorage.getItem("mf_notifs") || "[]"); }
