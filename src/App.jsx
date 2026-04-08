@@ -1122,6 +1122,17 @@ function AppContent() {
   const [adSaving, setAdSaving] = useState(false);
   const [expandedContacts, setExpandedContacts] = useState({}); // postId -> boolean
   const contactTimerRef = useRef(null);
+
+  // Fermer le panneau contact au clic en dehors
+  useEffect(() => {
+    if (Object.keys(expandedContacts).length === 0) return;
+    const close = () => setExpandedContacts({});
+    const t = setTimeout(() => {
+      document.addEventListener('click', close, { once: true });
+      document.addEventListener('touchend', close, { once: true });
+    }, 50);
+    return () => { clearTimeout(t); document.removeEventListener('click', close); document.removeEventListener('touchend', close); };
+  }, [expandedContacts]);
   const [userLocation, setUserLocation] = useState(null);
   const [notifications, setNotifications] = useState(() => {
     try { return JSON.parse(localStorage.getItem("mf_notifs") || "[]"); }
@@ -1253,7 +1264,7 @@ function AppContent() {
       if (session) {
         supabase.from("profiles").select("*").eq("id", session.user.id).single()
           .then(({ data }) => {
-            if (data) setUser({ id:session.user.id, name:data.name, role:data.role||"user", isPremium:data.is_premium&&(!data.premium_until||new Date(data.premium_until)>new Date())||false, plan:data.plan, premiumUntil:data.premium_until });
+            if (data) setUser({ id:session.user.id, name:data.name, role:data.role||"user",  });
           });
       }
     });
@@ -1269,7 +1280,7 @@ function AppContent() {
       return;
     }
     const { data: profile } = await supabase.from("profiles").select("*").eq("id",data.user.id).single();
-    if (profile) setUser({ id:data.user.id, name:profile.name, role:profile.role||"user", isPremium:profile.is_premium&&(!profile.premium_until||new Date(profile.premium_until)>new Date())||false, plan:profile.plan, premiumUntil:profile.premium_until, emailConfirmed:true });
+    if (profile) setUser({ id:data.user.id, name:profile.name, role:profile.role||"user",  emailConfirmed:true });
 
     // Traiter le parrainage en attente (si l'utilisateur vient de confirmer son email)
     const pendingRef = localStorage.getItem("mdr_ref");
@@ -1290,8 +1301,8 @@ function AppContent() {
 
     const { data, error } = await supabase.auth.signUp({ email:authForm.email, password:authForm.password });
     if (error) { notify("Erreur : "+error.message,"error"); return; }
-    await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", is_premium:false, country:authForm.country||"BJ" });
-    setUser({ id:data.user.id, name:authForm.name, role:"user", isPremium:false });
+    await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ" });
+    setUser({ id:data.user.id, name:authForm.name, role:"user" });
     setView("home"); notify("Compte créé ! Vérifiez votre email pour confirmer votre compte 📧");
   };
 
@@ -2391,13 +2402,8 @@ function AppContent() {
               <button onClick={()=>setView("dashboard")} style={{ ...cardStyle,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,color:theme.text }}>
                 <Icon name="user" size={14}/>
                 {user.name.split(" ")[0]}
-                {user.isPremium && <span style={{ fontSize:10,background:"rgba(255,215,0,0.2)",color:"#FFD700",padding:"1px 6px",borderRadius:10,fontWeight:800 }}>PRO</span>}
               </button>
-              {!user.isPremium && windowWidth > 768 && (
-                <button onClick={()=>setModal({type:"pro"})} style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",padding:"7px 12px",borderRadius:8,fontWeight:800,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:4 }}>
-                  👑 PRO
-                </button>
-              )}
+
               <button onClick={logout} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px" }}><Icon name="logout" size={16}/></button>
             </div>
           ) : (
@@ -2538,6 +2544,7 @@ function AppContent() {
                 {[
                   {label:"Immobilier",icon:"🏠",color:"#6C63FF"},
                   {label:"Véhicules",icon:"🚗",color:"#FF6584"},
+                  {label:"Motos & Tricycles",icon:"🏍️",color:"#FF8C42"},
                   {label:"Électronique",icon:"📱",color:"#43C6AC"},
                   {label:"Services",icon:"🔧",color:"#FFD700"},
                   {label:"Sport",icon:"⚽",color:"#FF6584"},
@@ -2890,19 +2897,14 @@ function AppContent() {
                     }
                     // Fermer tous les autres, toggler celui-ci
                     setExpandedContacts(isOpen ? {} : { [post.id]: true });
-                    // Timer auto-repli 5 secondes
-                    if (contactTimerRef.current) clearTimeout(contactTimerRef.current);
-                    if (!isOpen) {
-                      contactTimerRef.current = setTimeout(() => setExpandedContacts({}), 5000);
-                    }
                   }} style={{ width:"100%",background:expandedContacts[post.id]?"rgba(67,198,172,0.15)":"rgba(67,198,172,0.08)",border:`1px solid rgba(67,198,172,${expandedContacts[post.id]?0.5:0.25})`,color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.2s" }}>
                     <Icon name="mail" size={14}/>
                     {expandedContacts[post.id] ? "Masquer ▲" : "Contacter ▾"}
                   </button>
 
-                  {/* Panneau déplié — annule le timer au clic intérieur */}
+                  {/* Panneau déplié — clic intérieur ne ferme pas */}
                   {expandedContacts[post.id] && (
-                    <div onClick={e=>{ e.stopPropagation(); if(contactTimerRef.current) clearTimeout(contactTimerRef.current); }} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
+                    <div onClick={e=>e.stopPropagation()} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
 
                       {/* Auteur + badge vérifié */}
                       <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,paddingBottom:10,borderBottom:`1px solid ${theme.border}` }}>
@@ -3017,7 +3019,7 @@ function AppContent() {
               <div>
                 <h2 style={{ fontWeight:800,fontSize:22,color:theme.text }}>{user.name}</h2>
                 <div style={{ display:"flex",gap:8,marginTop:4 }}>
-                  {user.isPremium?<span className="tag" style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700" }}><Icon name="crown" size={10}/>PRO</span>:<span className="tag" style={{ background:"rgba(154,154,176,0.15)",color:theme.sub }}>Visiteur</span>}
+                  <span className="tag" style={{ background:"rgba(154,154,176,0.15)",color:theme.sub }}>Membre</span>
                 </div>
               </div>
             </div>
@@ -4794,41 +4796,66 @@ function AppContent() {
                     .slice(0, 8);
                   if (similaires.length === 0) return null;
 
-                  // Carrousel auto-scroll infini sur mobile
+                  // Carrousel auto-scroll infini sur mobile avec swipe
                   if (windowWidth <= 600) {
+                    const CARD_W = 160; // largeur carte + gap
+                    const GAP = 10;
+                    const totalW = similaires.length * (CARD_W + GAP);
                     return (
                       <div style={{ marginTop:24,borderTop:`1px solid ${theme.border}`,paddingTop:16 }}>
                         <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:12 }}>📋 Annonces similaires</p>
                         <div style={{ position:"relative",overflow:"hidden" }}>
                           <style>{`
-                            @keyframes scrollX {
+                            @keyframes scrollCarousel {
                               0%   { transform: translateX(0); }
-                              100% { transform: translateX(-50%); }
+                              100% { transform: translateX(-${totalW}px); }
                             }
-                            .carousel-track {
+                            .sim-track {
                               display: flex;
-                              gap: 10px;
+                              gap: ${GAP}px;
                               width: max-content;
-                              animation: scrollX ${similaires.length * 3}s linear infinite;
+                              animation: scrollCarousel ${similaires.length * 3.5}s linear infinite;
+                              cursor: grab;
+                              user-select: none;
                             }
-                            .carousel-track:active,
-                            .carousel-track:hover {
-                              animation-play-state: paused;
-                            }
+                            .sim-track.paused { animation-play-state: paused; }
                           `}</style>
-                          <div className="carousel-track"
-                            onTouchStart={e=>e.currentTarget.style.animationPlayState="paused"}
-                            onTouchEnd={e=>e.currentTarget.style.animationPlayState="running"}
+                          <div className="sim-track"
+                            ref={el => {
+                              if (!el) return;
+                              let startX = 0, startScroll = 0, isDragging = false, resumeTimer = null;
+                              const pause = () => {
+                                el.classList.add('paused');
+                                clearTimeout(resumeTimer);
+                              };
+                              const resume = () => {
+                                resumeTimer = setTimeout(() => el.classList.remove('paused'), 3000);
+                              };
+                              el.ontouchstart = e => {
+                                startX = e.touches[0].clientX;
+                                isDragging = true;
+                                pause();
+                              };
+                              el.ontouchmove = e => {
+                                if (!isDragging) return;
+                                const dx = e.touches[0].clientX - startX;
+                                // Déplacer visuellement via margin
+                                el.style.marginLeft = (parseInt(el.style.marginLeft||0) + dx * 0.3) + 'px';
+                                startX = e.touches[0].clientX;
+                              };
+                              el.ontouchend = () => { isDragging = false; resume(); };
+                              el.ontouchcancel = () => { isDragging = false; resume(); };
+                            }}
                           >
-                            {/* Double les cartes pour effet infini */}
                             {[...similaires, ...similaires].map((p, i)=>(
-                              <div key={p.id+"-"+i} onClick={()=>setModal({type:"contact",data:p})}
-                                style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:10,width:150,flexShrink:0,cursor:"pointer" }}>
+                              <div key={p.id+"-"+i}
+                                onTouchEnd={e=>{ e.stopPropagation(); setModal({type:"contact",data:p}); }}
+                                style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:10,width:CARD_W,flexShrink:0,cursor:"pointer" }}>
                                 {p.photos&&p.photos.length>0
                                   ? <img src={p.photos[0]} alt="" style={{ width:"100%",height:90,borderRadius:8,objectFit:"cover",marginBottom:6 }}/>
                                   : <div style={{ width:"100%",height:90,borderRadius:8,background:"rgba(108,99,255,0.1)",marginBottom:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24 }}>📦</div>
                                 }
-                                <p style={{ fontWeight:700,fontSize:12,color:theme.text,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{p.title}</p>
+                                <p style={{ fontWeight:700,fontSize:12,color:theme.text,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{p.title||p.name}</p>
                                 <p style={{ color:"#43C6AC",fontWeight:700,fontSize:12 }}>{p.price||"—"}</p>
                                 {p.sponsored && <span style={{ fontSize:10,color:"#FFD700" }}>🌟</span>}
                               </div>
@@ -5535,47 +5562,6 @@ function AppContent() {
               </>
             )}
 
-            {/* ABONNEMENT PRO */}
-            {modal.type==="pro"&&(
-              <>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>👑 Abonnement PRO</h3>
-                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
-                </div>
-                <div style={{ background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:12,padding:16,marginBottom:20,textAlign:"center" }}>
-                  <p style={{ fontSize:32,marginBottom:8 }}>👑</p>
-                  <p style={{ fontWeight:800,fontSize:22,color:"#FFD700",marginBottom:4 }}>MarchéduRoi PRO</p>
-                  <p style={{ color:theme.sub,fontSize:14 }}>Publications illimitées + Badge PRO + Stats avancées</p>
-                </div>
-                <div style={{ marginBottom:20 }}>
-                  {[
-                    "✅ Publications annonces illimitées",
-                    "✅ Badge PRO 👑 visible sur vos annonces",
-                    "✅ Statistiques détaillées (vues, contacts, conversions)",
-                    "✅ Priorité dans les résultats de recherche",
-                    "✅ 1 badge Urgent OFFERT par mois",
-                    "✅ Support prioritaire 24h",
-                  ].map((f,i)=>(
-                    <div key={i} style={{ display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<5?`1px solid ${theme.border}`:"none" }}>
-                      <p style={{ color:theme.text,fontSize:14 }}>{f}</p>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer",textAlign:"center" }}
-                  onClick={()=>handlePayment(10000,"Abonnement PRO MarchéduRoi 1 mois",async()=>{
-                    const expires = new Date(); expires.setMonth(expires.getMonth()+1);
-                    await supabase.from("profiles").update({is_premium:true, plan:"pro", premium_until:expires.toISOString().slice(0,10)}).eq("id",user.id);
-                    setUser(u=>({...u,isPremium:true,plan:"pro",premiumUntil:expires.toISOString().slice(0,10)}));
-                    setModal(null); notify("👑 Bienvenue dans le club PRO MarchéduRoi !");
-                  })}>
-                  <p style={{ fontWeight:800,fontSize:24,color:"#FFD700",marginBottom:4 }}>10 000 FCFA / mois</p>
-                  <p style={{ color:"#FFA500",fontSize:14 }}>≈ 17 USD · Résiliable à tout moment</p>
-                  <div style={{ marginTop:12,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:10,padding:"12px",color:"#000",fontWeight:800,fontSize:15 }}>
-                    💳 S'abonner maintenant
-                  </div>
-                </div>
-              </>
-            )}
 
             {/* PROLONGATION */}
             {modal.type==="prolong"&&(
