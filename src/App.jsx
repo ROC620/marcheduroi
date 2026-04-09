@@ -1120,6 +1120,7 @@ function AppContent() {
   const [showPwaBanner, setShowPwaBanner] = useState(false);
   const [adForm, setAdForm] = useState({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
   const [adSaving, setAdSaving] = useState(false);
+  const [adEditing, setAdEditing] = useState(null); // id de la bannière en cours d'édition
   const [expandedContacts, setExpandedContacts] = useState({}); // postId -> boolean
   const contactTimerRef = useRef(null);
   const [userLocation, setUserLocation] = useState(null);
@@ -3344,13 +3345,10 @@ function AppContent() {
                 <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
-                  <CertifiedBadge size={12}/>{isCertified(b.authorId)?"Certifié ✓":"Certifier"}
-                </button>
-                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(b.id)?"🏆 ✓":"🏆 Vedette"}</button>
-                {!b.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
-                {b.sponsored && <><span style={{ color:"#FFD700",fontSize:13,fontWeight:700 }}>🌟 {b.sponsoredUntil}</span><button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✕</button></>}
-                <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🗑️</button>
+                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"✅ Certifié":"Certifier"}</button>
+                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(b.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
+                <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
           ))}
@@ -3364,13 +3362,10 @@ function AppContent() {
                 <div><p style={{ fontWeight:700,color:theme.text }}>{a.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {a.author} · {a.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(a.authorId, a.author)} style={{ background:isCertified(a.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
-                  <CertifiedBadge size={12}/>{isCertified(a.authorId)?"Certifié ✓":"Certifier"}
-                </button>
-                <button onClick={()=>toggleFeatured(a.id)} style={{ background:featuredPosts.includes(a.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(a.id)?"🏆 ✓":"🏆 Vedette"}</button>
-                {!a.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...a,title:a.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
-                {a.sponsored && <><span style={{ color:"#FFD700",fontSize:13,fontWeight:700 }}>🌟 {a.sponsoredUntil}</span><button onClick={()=>unsponsorPost(a.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✕</button></>}
-                <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🗑️</button>
+                <button onClick={()=>toggleCertified(a.authorId, a.author)} style={{ background:isCertified(a.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(a.authorId)?"✅ Certifié":"Certifier"}</button>
+                <button onClick={()=>toggleFeatured(a.id)} style={{ background:featuredPosts.includes(a.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(a.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                {!a.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...a,title:a.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(a.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
+                <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
           ))}
@@ -3384,13 +3379,10 @@ function AppContent() {
                 <div><p style={{ fontWeight:700,color:theme.text }}>{r.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {r.author} · {r.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(r.authorId, r.author)} style={{ background:isCertified(r.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
-                  <CertifiedBadge size={12}/>{isCertified(r.authorId)?"Certifié ✓":"Certifier"}
-                </button>
-                <button onClick={()=>toggleFeatured(r.id)} style={{ background:featuredPosts.includes(r.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(r.id)?"🏆 ✓":"🏆 Vedette"}</button>
-                {!r.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...r,title:r.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
-                {r.sponsored && <><span style={{ color:"#FFD700",fontSize:13,fontWeight:700 }}>🌟 {r.sponsoredUntil}</span><button onClick={()=>unsponsorPost(r.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✕</button></>}
-                <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🗑️</button>
+                <button onClick={()=>toggleCertified(r.authorId, r.author)} style={{ background:isCertified(r.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(r.authorId)?"✅ Certifié":"Certifier"}</button>
+                <button onClick={()=>toggleFeatured(r.id)} style={{ background:featuredPosts.includes(r.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(r.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                {!r.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...r,title:r.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(r.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
+                <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
           ))}
@@ -3404,13 +3396,10 @@ function AppContent() {
                 <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
-                  <CertifiedBadge size={12}/>{isCertified(b.authorId)?"Certifié ✓":"Certifier"}
-                </button>
-                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(b.id)?"🏆 ✓":"🏆 Vedette"}</button>
-                {!b.sponsored && <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🌟 Sponsoriser</button>}
-                {b.sponsored && <><span style={{ color:"#FFD700",fontSize:13,fontWeight:700 }}>🌟 {b.sponsoredUntil}</span><button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✕</button></>}
-                <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🗑️</button>
+                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"✅ Certifié":"Certifier"}</button>
+                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(b.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
+                <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
           ))}
@@ -3481,24 +3470,49 @@ function AppContent() {
                   <button onClick={async()=>{
                     if (!adForm.entreprise) { notify("Le nom de l'entreprise est requis","error"); return; }
                     setAdSaving(true);
-                    const { data, error } = await supabase.from("ads").insert({
-                      entreprise: adForm.entreprise,
-                      slogan: adForm.slogan || null,
-                      logo_url: adForm.logo_url || null,
-                      lien: adForm.lien || null,
-                      couleur1: adForm.couleur1 || "#6C63FF",
-                      couleur2: adForm.couleur2 || "#8B84FF",
-                      actif: true,
-                      fin: adForm.fin || null,
-                    }).select().single();
-                    setAdSaving(false);
-                    if (error) { notify("Erreur : "+error.message,"error"); return; }
-                    setAds(prev => [data, ...prev]);
-                    setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
-                    notify("✅ Bannière publiée avec succès !");
+                    if (adEditing) {
+                      // Mise à jour
+                      const { error } = await supabase.from("ads").update({
+                        entreprise: adForm.entreprise,
+                        slogan: adForm.slogan || null,
+                        logo_url: adForm.logo_url || null,
+                        lien: adForm.lien || null,
+                        couleur1: adForm.couleur1 || "#6C63FF",
+                        couleur2: adForm.couleur2 || "#8B84FF",
+                        fin: adForm.fin || null,
+                      }).eq("id", adEditing);
+                      setAdSaving(false);
+                      if (error) { notify("Erreur : "+error.message,"error"); return; }
+                      setAds(prev => prev.map(a => a.id===adEditing ? {...a,...adForm} : a));
+                      setAdEditing(null);
+                      setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
+                      notify("✅ Bannière mise à jour !");
+                    } else {
+                      // Nouvelle bannière
+                      const { data, error } = await supabase.from("ads").insert({
+                        entreprise: adForm.entreprise,
+                        slogan: adForm.slogan || null,
+                        logo_url: adForm.logo_url || null,
+                        lien: adForm.lien || null,
+                        couleur1: adForm.couleur1 || "#6C63FF",
+                        couleur2: adForm.couleur2 || "#8B84FF",
+                        actif: true,
+                        fin: adForm.fin || null,
+                      }).select().single();
+                      setAdSaving(false);
+                      if (error) { notify("Erreur : "+error.message,"error"); return; }
+                      setAds(prev => [data, ...prev]);
+                      setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
+                      notify("✅ Bannière publiée avec succès !");
+                    }
                   }} disabled={adSaving} style={{ width:"100%",padding:"13px",background:adSaving?"rgba(108,99,255,0.3)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:adSaving?"not-allowed":"pointer" }}>
-                    {adSaving ? "⏳ Publication en cours..." : "✅ Valider et publier la bannière"}
+                    {adSaving ? "⏳ En cours..." : adEditing ? "✏️ Mettre à jour la bannière" : "✅ Valider et publier la bannière"}
                   </button>
+                  {adEditing && (
+                    <button onClick={()=>{ setAdEditing(null); setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" }); }} style={{ width:"100%",marginTop:8,padding:"10px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,borderRadius:12,fontWeight:600,fontSize:14,cursor:"pointer" }}>
+                      Annuler la modification
+                    </button>
+                  )}
             </div>
 
             {/* Liste des pubs actives */}
@@ -3516,7 +3530,8 @@ function AppContent() {
                     {ad.fin && <p style={{ color:"#FF8C00",fontSize:11,marginTop:2 }}>⏳ Expire le {ad.fin}</p>}
                   </div>
                 </div>
-                <div style={{ display:"flex",gap:8,flexShrink:0 }}>
+                <div style={{ display:"flex",gap:8,flexShrink:0,flexWrap:"wrap" }}>
+                  <button onClick={()=>{ setAdEditing(ad.id); setAdForm({ entreprise:ad.entreprise||"", slogan:ad.slogan||"", logo_url:ad.logo_url||"", lien:ad.lien||"", couleur1:ad.couleur1||"#6C63FF", couleur2:ad.couleur2||"#8B84FF", fin:ad.fin||"" }); window.scrollTo({top:0,behavior:"smooth"}); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"7px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                   <button onClick={async()=>{
                     await supabase.from("ads").update({actif:!ad.actif}).eq("id",ad.id);
                     setAds(prev=>prev.map(a=>a.id===ad.id?{...a,actif:!a.actif}:a));
@@ -3620,15 +3635,15 @@ function AppContent() {
           </div>
 
           {/* Mission */}
-          <div style={{ maxWidth:900,margin:"0 auto 48px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:24 }}>
-            <div style={{ ...{background:theme.card,border:`1px solid ${theme.border}`},borderRadius:20,padding:32 }}>
+          <div style={{ maxWidth:900,margin:"0 auto 48px",display:"flex",flexDirection:windowWidth<=600?"column":"row",gap:24 }}>
+            <div style={{ ...{background:theme.card,border:`1px solid ${theme.border}`},borderRadius:20,padding:windowWidth<=600?20:32,flex:1 }}>
               <div style={{ fontSize:40,marginBottom:16 }}>🎯</div>
               <h2 style={{ fontWeight:800,fontSize:22,marginBottom:16,color:theme.text }}>Notre Mission</h2>
               <p style={{ color:theme.sub,fontSize:15,lineHeight:1.8 }}>
                 Assister tous les commerçants formels et informels, ainsi que toutes personnes physiques et morales, à consulter et prendre des renseignements sur tous les produits, biens et services disponibles dans leur pays et au-delà de leurs frontières.
               </p>
             </div>
-            <div style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:20,padding:32 }}>
+            <div style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:20,padding:windowWidth<=600?20:32,flex:1 }}>
               <div style={{ fontSize:40,marginBottom:16 }}>🌍</div>
               <h2 style={{ fontWeight:800,fontSize:22,marginBottom:16,color:theme.text }}>Notre Vision</h2>
               <p style={{ color:theme.sub,fontSize:15,lineHeight:1.8 }}>
