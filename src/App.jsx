@@ -3642,7 +3642,7 @@ function AppContent() {
             <h2 style={{ fontWeight:800,fontSize:28,marginBottom:24,color:theme.text,textAlign:"center" }}>Nos Valeurs</h2>
             <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16 }}>
               {[
-                { icon:"🤝", title:"Confiance", desc:"Des annonces vérifiées et des vendeurs responsables" },
+                { icon:"🤝", title:"Confiance", desc:"Des annonceurs vérifiés et des vendeurs respectables" },
                 { icon:"💡", title:"Simplicité", desc:"Une interface claire et facile à utiliser pour tous" },
                 { icon:"🚀", title:"Innovation", desc:"Des fonctionnalités modernes adaptées à l'Afrique" },
                 { icon:"❤️", title:"Communauté", desc:"Relier les gens et favoriser les échanges locaux" },
@@ -3662,7 +3662,7 @@ function AppContent() {
               <div style={{ width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:32,fontWeight:800,color:"#fff" }}>M</div>
               <h2 style={{ fontWeight:800,fontSize:22,marginBottom:4,color:theme.text }}>MarchéduRoi SARL</h2>
               <p style={{ color:"#6C63FF",fontWeight:600,fontSize:14,marginBottom:16 }}>Société à Responsabilité Limitée · Ouidah, Bénin</p>
-              <p style={{ color:theme.sub,fontSize:14,lineHeight:1.7,marginBottom:20 }}>MarchéduRoi SARL est une entreprise béninoise dont la mission est de démocratiser le commerce numérique au Bénin et dans toute l'Afrique francophone, en offrant une plateforme de petites annonces accessible à tous.</p>
+              <p style={{ color:theme.sub,fontSize:14,lineHeight:1.7,marginBottom:20 }}>MarchéduRoi, Entreprise Multipolaire, est une entreprise béninoise dont la mission est de démocratiser le commerce numérique au Bénin et dans toute l'Afrique francophone, en offrant une plateforme de petites annonces accessible à tous.</p>
               <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                 <a href="mailto:contact@marcheduroi.com" style={{ textDecoration:"none",display:"flex",alignItems:"center",gap:10,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:10,padding:"10px 16px" }}>
                   <svg width="16" height="16" fill="none" stroke="#43C6AC" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -4977,6 +4977,47 @@ function AppContent() {
                   </button>
                 )}
                 <PhotoUploader photos={shopPhotos} setPhotos={setShopPhotos} theme={theme} folder="beaute"/>
+
+                {/* Lien vidéo salon beauté */}
+                {(()=>{
+                  const isYT = v => /youtube\.com|youtu\.be/.test(v||"");
+                  const isCL = v => /cloudinary\.com/.test(v||"");
+                  const getYTId = v => { const m = (v||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/); return m?m[1]:null; };
+                  return (
+                    <div style={{ marginBottom:16 }}>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎬 Lien vidéo (optionnel)</label>
+                      <input
+                        value={shopVideo||""}
+                        onChange={e=>setShopVideo(e.target.value.trim())}
+                        placeholder="https://youtu.be/... ou https://res.cloudinary.com/..."
+                        style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}
+                      />
+                      {isYT(shopVideo) && getYTId(shopVideo) && (
+                        <div style={{ marginTop:8,borderRadius:10,overflow:"hidden" }}>
+                          <iframe width="100%" height="160" src={`https://www.youtube.com/embed/${getYTId(shopVideo)}`} frameBorder="0" allowFullScreen style={{ display:"block",borderRadius:10 }}/>
+                        </div>
+                      )}
+                      {isCL(shopVideo) && (
+                        <video src={shopVideo} controls style={{ width:"100%",borderRadius:10,marginTop:8,maxHeight:180 }}/>
+                      )}
+                      <details style={{ marginTop:8 }}>
+                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>📋 Comment ajouter ma vidéo ?</summary>
+                        <div style={{ background:theme.bg,borderRadius:8,padding:10,marginTop:6,fontSize:12,color:theme.sub,lineHeight:1.6 }}>
+                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 — YouTube (recommandé)</p>
+                          <p>1. Allez sur youtube.com et connectez-vous</p>
+                          <p>2. Cliquez "Créer" → "Mettre en ligne une vidéo"</p>
+                          <p>3. Choisissez "Non répertorié" pour la confidentialité</p>
+                          <p>4. Copiez le lien et collez-le ici</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 — Cloudinary</p>
+                          <p>1. Créez un compte gratuit sur cloudinary.com</p>
+                          <p>2. Uploadez votre vidéo dans Media Library</p>
+                          <p>3. Copiez l'URL et collez-la ici</p>
+                          <p style={{ marginTop:6,color:"#FF6584" }}>⚠️ Durée recommandée : max 3 minutes</p>
+                        </div>
+                      </details>
+                    </div>
+                  );
+                })()}
                 <div style={{ marginBottom:16 }}>
                   <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Type de salon *</label>
                   <select value={shopForm.type} onChange={e=>setShopForm(s=>({...s,type:e.target.value}))} style={inputStyle}>
