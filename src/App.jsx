@@ -4,7 +4,6 @@ import { supabase } from "./supabase";
 import Icon from "./components/Icon";
 import PhotoCarousel from "./components/PhotoCarousel";
 import PhotoUploader from "./components/PhotoUploader";
-import VideoUploader from "./components/VideoUploader";
 import VehicleCard from "./components/VehicleCard";
 import ImmoCard from "./components/ImmoCard";
 import CertifiedBadge from "./components/CertifiedBadge";
@@ -933,6 +932,7 @@ function AppContent() {
   };
   const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"",lat:"",lng:"" });
   const [postPhotos, setPostPhotos] = useState([]);
+  const [postVideo, setPostVideo] = useState("");
   const [vehicleForm, setVehicleForm] = useState({});
   const [themeId, setThemeId] = useState(() => {
     const saved = localStorage.getItem("mf_theme");
@@ -1656,6 +1656,7 @@ function AppContent() {
       date: new Date().toISOString().slice(0,10),
       likes: 0,
       photos: postPhotos,
+      video: postVideo||null,
       vehicle: isVehicle ? vehicleForm : isMoto ? { ...vehicleForm, _isMoto: true } : null,
       immo: postForm.category==="Immobilier" ? immoForm : null,
       expiresAt: isAdmin ? null : (expiresAt || null),
@@ -1683,7 +1684,7 @@ function AppContent() {
     setPosts(p=>[newPost,...p]);
     setModal(null);
     setPostForm({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"" });
-    setPostPhotos([]); setVehicleForm({}); setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" }); setMonths(1); setSelectedTarif(0);
+    setPostPhotos([]); setPostVideo(""); setVehicleForm({}); setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" }); setMonths(1); setSelectedTarif(0);
     notify(isAdmin ? "✅ Annonce publiée !" : expiresAt ? `✅ Annonce publiée jusqu'au ${expiresAt} !` : "✅ Annonce publiée !");
   };
 
@@ -4255,7 +4256,7 @@ function AppContent() {
               num:"1",
               title:"Présentation de MarchéduRoi",
               icon:"🏢",
-              content:`MarchéduRoi est une plateforme numérique de petites annonces créée et exploitée par MarchéduRoi SARL, société à responsabilité limitée de droit béninois, dont le siège social est établi à Ouidah, République du Bénin. La plateforme permet à toute personne physique ou morale de consulter, publier et diffuser des annonces relatives à des produits, biens et services, au Bénin et dans toute l'Afrique francophone. L'accès et l'utilisation de la plateforme impliquent l'acceptation sans réserve des présentes conditions générales d'utilisation (CGU).`
+              content:`MarchéduRoi est une plateforme numérique de petites annonces créée et exploitée par MarchéduRoi, Entreprise Multipolaire, dont le siège social est établi à Ouidah, République du Bénin. La plateforme permet à toute personne physique ou morale de consulter, publier et diffuser des annonces relatives à des produits, biens et services, au Bénin et dans toute l'Afrique francophone. L'accès et l'utilisation de la plateforme impliquent l'acceptation sans réserve des présentes conditions générales d'utilisation (CGU).`
             },
             {
               num:"2",
@@ -4303,7 +4304,7 @@ function AppContent() {
               num:"9",
               title:"Propriété intellectuelle",
               icon:"©️",
-              content:`La plateforme MarchéduRoi, son logo, sa charte graphique, son design, son code source et l'ensemble de ses contenus originaux sont la propriété exclusive de MarchéduRoi SARL. Toute reproduction, modification, distribution, extraction ou utilisation commerciale, même partielle, sans autorisation écrite préalable est strictement interdite et constitue une contrefaçon passible de sanctions pénales et civiles. Les utilisateurs conservent l'entière propriété des contenus qu'ils publient (textes, photos, vidéos) et accordent à MarchéduRoi une licence d'affichage non exclusive, mondiale et gratuite, limitée à la durée de publication de l'annonce.`
+              content:`La plateforme MarchéduRoi, son logo, sa charte graphique, son design, son code source et l'ensemble de ses contenus originaux sont la propriété exclusive de MarchéduRoi. Toute reproduction, modification, distribution, extraction ou utilisation commerciale, même partielle, sans autorisation écrite préalable est strictement interdite et constitue une contrefaçon passible de sanctions pénales et civiles. Les utilisateurs conservent l'entière propriété des contenus qu'ils publient (textes, photos, vidéos) et accordent à MarchéduRoi une licence d'affichage non exclusive, mondiale et gratuite, limitée à la durée de publication de l'annonce.`
             },
             {
               num:"10",
@@ -4339,7 +4340,7 @@ function AppContent() {
               num:"15",
               title:"Contact et réclamations",
               icon:"📞",
-              content:`Pour toute question, réclamation ou signalement : Email général : contact@marcheduroi.com · Support technique : support@marcheduroi.com · WhatsApp Support : +229 01 47 56 26 40 · Adresse : MarchéduRoi SARL, Ouidah, République du Bénin. Délai de réponse garanti : 48 heures ouvrables pour les demandes générales, 24 heures pour les urgences techniques.`
+              content:`Pour toute question, réclamation ou signalement : Email général : contact@marcheduroi.com · Support technique : support@marcheduroi.com · WhatsApp Support : +229 01 47 56 26 40 · Adresse : MarchéduRoi, Ouidah, République du Bénin. Délai de réponse garanti : 48 heures ouvrables pour les demandes générales, 24 heures pour les urgences techniques.`
             },
           ].map(section=>(
             <div key={section.num} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:16,padding:28,marginBottom:16 }}>
@@ -4464,6 +4465,47 @@ function AppContent() {
                 </div>
 
                 <PhotoUploader photos={postPhotos} setPhotos={setPostPhotos} theme={theme} folder="annonces"/>
+
+                {/* Lien vidéo annonce classique */}
+                {(()=>{
+                  const isYT = v => /youtube\.com|youtu\.be/.test(v||"");
+                  const isCL = v => /cloudinary\.com/.test(v||"");
+                  const getYTId = v => { const m = (v||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/); return m?m[1]:null; };
+                  return (
+                    <div style={{ marginBottom:16 }}>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎬 Lien vidéo (optionnel)</label>
+                      <input
+                        value={postVideo||""}
+                        onChange={e=>setPostVideo(e.target.value.trim())}
+                        placeholder="https://youtu.be/... ou https://res.cloudinary.com/..."
+                        style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}
+                      />
+                      {isYT(postVideo) && getYTId(postVideo) && (
+                        <div style={{ marginTop:8,borderRadius:10,overflow:"hidden" }}>
+                          <iframe width="100%" height="160" src={`https://www.youtube.com/embed/${getYTId(postVideo)}`} frameBorder="0" allowFullScreen style={{ display:"block",borderRadius:10 }}/>
+                        </div>
+                      )}
+                      {isCL(postVideo) && (
+                        <video src={postVideo} controls style={{ width:"100%",borderRadius:10,marginTop:8,maxHeight:180 }}/>
+                      )}
+                      <details style={{ marginTop:8 }}>
+                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>📋 Comment ajouter ma vidéo ?</summary>
+                        <div style={{ background:theme.bg,borderRadius:8,padding:10,marginTop:6,fontSize:12,color:theme.sub,lineHeight:1.6 }}>
+                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 — YouTube (recommandé)</p>
+                          <p>1. Allez sur youtube.com et connectez-vous</p>
+                          <p>2. Cliquez "Créer" → "Mettre en ligne une vidéo"</p>
+                          <p>3. Choisissez "Non répertorié" pour la confidentialité</p>
+                          <p>4. Copiez le lien et collez-le ici</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 — Cloudinary</p>
+                          <p>1. Créez un compte gratuit sur cloudinary.com</p>
+                          <p>2. Uploadez votre vidéo dans Media Library</p>
+                          <p>3. Copiez l'URL et collez-la ici</p>
+                          <p style={{ marginTop:6,color:"#FF6584" }}>⚠️ Durée recommandée : max 60 secondes pour une annonce classique</p>
+                        </div>
+                      </details>
+                    </div>
+                  );
+                })()}
 
                 {/* Champs généraux */}
                 {[
@@ -5032,7 +5074,49 @@ function AppContent() {
                   </button>
                 )}
 
-                <VideoUploader video={shopVideo} setVideo={setShopVideo} theme={theme}/>
+
+                {/* Lien vidéo — YouTube ou Cloudinary */}
+                {(()=>{
+                  const isYT = v => /youtube\.com|youtu\.be/.test(v||"");
+                  const isCL = v => /cloudinary\.com/.test(v||"");
+                  const getYTId = v => { const m = (v||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/); return m?m[1]:null; };
+                  return (
+                    <div style={{ marginBottom:16 }}>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎬 Lien vidéo (optionnel)</label>
+                      <input
+                        value={shopVideo||""}
+                        onChange={e=>setShopVideo(e.target.value.trim())}
+                        placeholder="https://youtu.be/... ou https://res.cloudinary.com/..."
+                        style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}
+                      />
+                      {/* Prévisualisation */}
+                      {isYT(shopVideo) && getYTId(shopVideo) && (
+                        <div style={{ marginTop:8,borderRadius:10,overflow:"hidden" }}>
+                          <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${getYTId(shopVideo)}`} frameBorder="0" allowFullScreen style={{ display:"block",borderRadius:10 }}/>
+                        </div>
+                      )}
+                      {isCL(shopVideo) && (
+                        <video src={shopVideo} controls style={{ width:"100%",borderRadius:10,marginTop:8,maxHeight:200 }}/>
+                      )}
+                      {/* Guide */}
+                      <details style={{ marginTop:8 }}>
+                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>📋 Comment ajouter ma vidéo ?</summary>
+                        <div style={{ background:theme.bg,borderRadius:8,padding:10,marginTop:6,fontSize:12,color:theme.sub,lineHeight:1.6 }}>
+                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 — YouTube (recommandé)</p>
+                          <p>1. Allez sur youtube.com et connectez-vous</p>
+                          <p>2. Cliquez "Créer" → "Mettre en ligne une vidéo"</p>
+                          <p>3. Choisissez "Non répertorié" pour la confidentialité</p>
+                          <p>4. Copiez le lien et collez-le ici</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 — Cloudinary</p>
+                          <p>1. Créez un compte gratuit sur cloudinary.com</p>
+                          <p>2. Uploadez votre vidéo dans Media Library</p>
+                          <p>3. Copiez l'URL et collez-la ici</p>
+                          <p style={{ marginTop:6,color:"#FF6584" }}>⚠️ Durée recommandée : max 60s pour annonces, max 3 min pour boutiques</p>
+                        </div>
+                      </details>
+                    </div>
+                  );
+                })()}
                 <PhotoUploader photos={shopPhotos} setPhotos={setShopPhotos} theme={theme} folder="restos"/>
 
                 <div style={{ marginBottom:16 }}>
@@ -5134,7 +5218,49 @@ function AppContent() {
                     📖 Voir des exemples de {shopMode==="boutique"?"boutiques":"ateliers"}
                   </button>
                 )}
-                <VideoUploader video={shopVideo} setVideo={setShopVideo} theme={theme}/>
+
+                {/* Lien vidéo — YouTube ou Cloudinary */}
+                {(()=>{
+                  const isYT = v => /youtube\.com|youtu\.be/.test(v||"");
+                  const isCL = v => /cloudinary\.com/.test(v||"");
+                  const getYTId = v => { const m = (v||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/); return m?m[1]:null; };
+                  return (
+                    <div style={{ marginBottom:16 }}>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎬 Lien vidéo (optionnel)</label>
+                      <input
+                        value={shopVideo||""}
+                        onChange={e=>setShopVideo(e.target.value.trim())}
+                        placeholder="https://youtu.be/... ou https://res.cloudinary.com/..."
+                        style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}
+                      />
+                      {/* Prévisualisation */}
+                      {isYT(shopVideo) && getYTId(shopVideo) && (
+                        <div style={{ marginTop:8,borderRadius:10,overflow:"hidden" }}>
+                          <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${getYTId(shopVideo)}`} frameBorder="0" allowFullScreen style={{ display:"block",borderRadius:10 }}/>
+                        </div>
+                      )}
+                      {isCL(shopVideo) && (
+                        <video src={shopVideo} controls style={{ width:"100%",borderRadius:10,marginTop:8,maxHeight:200 }}/>
+                      )}
+                      {/* Guide */}
+                      <details style={{ marginTop:8 }}>
+                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>📋 Comment ajouter ma vidéo ?</summary>
+                        <div style={{ background:theme.bg,borderRadius:8,padding:10,marginTop:6,fontSize:12,color:theme.sub,lineHeight:1.6 }}>
+                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 — YouTube (recommandé)</p>
+                          <p>1. Allez sur youtube.com et connectez-vous</p>
+                          <p>2. Cliquez "Créer" → "Mettre en ligne une vidéo"</p>
+                          <p>3. Choisissez "Non répertorié" pour la confidentialité</p>
+                          <p>4. Copiez le lien et collez-le ici</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 — Cloudinary</p>
+                          <p>1. Créez un compte gratuit sur cloudinary.com</p>
+                          <p>2. Uploadez votre vidéo dans Media Library</p>
+                          <p>3. Copiez l'URL et collez-la ici</p>
+                          <p style={{ marginTop:6,color:"#FF6584" }}>⚠️ Durée recommandée : max 60s pour annonces, max 3 min pour boutiques</p>
+                        </div>
+                      </details>
+                    </div>
+                  );
+                })()}
                 <PhotoUploader photos={shopPhotos} setPhotos={setShopPhotos} theme={theme} folder={shopMode==="boutique"?"boutiques":"ateliers"}/>
 
                 {/* Type */}
