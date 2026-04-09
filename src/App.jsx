@@ -1495,7 +1495,7 @@ function AppContent() {
     if (ads.length <= 1 || adPaused) return;
     const timer = setInterval(() => {
       setAdIndex(i => (i + 1) % ads.length);
-    }, 8000);
+    }, 5000);
     return () => clearInterval(timer);
   }, [ads, adPaused]);
 
@@ -2282,7 +2282,7 @@ function AppContent() {
       </a>}
 
       {showScrollTop && !showMessages && (
-        <button onClick={scrollToTop} style={{ position:"fixed",bottom:30,left:16,zIndex:999,width:44,height:44,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(108,99,255,0.5)",cursor:"pointer",fontSize:18,opacity:0.85 }}>↑</button>
+        <button onClick={scrollToTop} style={{ position:"fixed",bottom:30,left:16,zIndex:999,width:windowWidth<=600?52:44,height:windowWidth<=600?52:44,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 24px rgba(108,99,255,0.6)",cursor:"pointer",fontSize:windowWidth<=600?22:18,fontWeight:800,WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>↑</button>
       )}
 
       {/* Signalements annulables */}
@@ -2601,11 +2601,22 @@ function AppContent() {
               </div>
             );
             return (
+              <div style={{ position:"relative",width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0` }}>
+                {/* Flèche précédent */}
+                {ads.length > 1 && (
+                  <button onTouchEnd={e=>{e.preventDefault();e.stopPropagation();setAdPaused(true);setAdIndex(i=>(i-1+ads.length)%ads.length);setTimeout(()=>setAdPaused(false),3000);}} onClick={e=>{e.preventDefault();e.stopPropagation();setAdPaused(true);setAdIndex(i=>(i-1+ads.length)%ads.length);setTimeout(()=>setAdPaused(false),3000);}}
+                    style={{ position:"absolute",left:-14,top:"50%",transform:"translateY(-50%)",zIndex:10,width:30,height:30,borderRadius:"50%",background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18,fontWeight:700,boxShadow:"0 2px 8px rgba(0,0,0,0.2)",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>‹</button>
+                )}
+                {/* Flèche suivant */}
+                {ads.length > 1 && (
+                  <button onTouchEnd={e=>{e.preventDefault();e.stopPropagation();setAdPaused(true);setAdIndex(i=>(i+1)%ads.length);setTimeout(()=>setAdPaused(false),3000);}} onClick={e=>{e.preventDefault();e.stopPropagation();setAdPaused(true);setAdIndex(i=>(i+1)%ads.length);setTimeout(()=>setAdPaused(false),3000);}}
+                    style={{ position:"absolute",right:-14,top:"50%",transform:"translateY(-50%)",zIndex:10,width:30,height:30,borderRadius:"50%",background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18,fontWeight:700,boxShadow:"0 2px 8px rgba(0,0,0,0.2)",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>›</button>
+                )}
               <a href={ad.lien||"#"} target="_blank" rel="noopener noreferrer"
                 onTouchStart={()=>setAdPaused(true)}
                 onTouchEnd={()=>setAdPaused(false)}
                 onTouchCancel={()=>setAdPaused(false)}
-                style={{ textDecoration:"none",display:"block",width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0` }}>
+                style={{ textDecoration:"none",display:"block",width:"100%" }}>
                 <div style={{ borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:`linear-gradient(135deg,${ad.couleur1||"#6C63FF"}22,${ad.couleur2||"#8B84FF"}22)`,transition:"transform 0.3s",cursor:"pointer" }}
                   onMouseEnter={e=>e.currentTarget.style.transform="scale(1.01)"}
                   onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
@@ -2622,10 +2633,10 @@ function AppContent() {
                     </div>
                     <div style={{ display:"flex",alignItems:"center",gap:10,flexShrink:0 }}>
                       {ads.length > 1 && (
-                        <div style={{ display:"flex",gap:4 }}>
+                        <div style={{ display:"flex",gap:5,alignItems:"center" }}>
                           {ads.map((_,i) => (
-                            <div key={i} onClick={e=>{ e.preventDefault(); setAdIndex(i); }}
-                              style={{ width:6,height:6,borderRadius:"50%",background:i===adIndex?(ad.couleur1||"#6C63FF"):"rgba(154,154,176,0.4)",cursor:"pointer",transition:"background 0.3s" }}/>
+                            <div key={i} onClick={e=>{ e.preventDefault(); setAdPaused(true); setAdIndex(i); setTimeout(()=>setAdPaused(false),3000); }}
+                              style={{ width:i===adIndex?18:8,height:8,borderRadius:4,background:i===adIndex?(ad.couleur1||"#6C63FF"):"rgba(154,154,176,0.5)",cursor:"pointer",transition:"all 0.3s" }}/>
                           ))}
                         </div>
                       )}
@@ -2637,6 +2648,7 @@ function AppContent() {
                   <div style={{ height:3,background:`linear-gradient(90deg,${ad.couleur1||"#6C63FF"},${ad.couleur2||"#8B84FF"})`,opacity:0.6 }}/>
                 </div>
               </a>
+              </div>
             );
           })()}
 
@@ -2849,6 +2861,18 @@ function AppContent() {
                     {post.ownerVerified && (
                       <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.15)",border:"1px solid rgba(67,198,172,0.4)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,color:"#43C6AC" }}>
                         ✅ Vendeur vérifié
+                      </div>
+                    )}
+                    {/* Badge Nouveau — annonce < 24h */}
+                    {post.date && (Date.now() - new Date(post.date).getTime()) < 86400000 && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:3,background:"linear-gradient(135deg,#43C6AC,#2ecc71)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:800,color:"#fff" }}>
+                        ✨ Nouveau
+                      </div>
+                    )}
+                    {/* Compteur de vues */}
+                    {(postViews[post.id]||0) > 0 && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:3,background:"rgba(154,154,176,0.1)",borderRadius:20,padding:"3px 8px",fontSize:11,color:theme.sub }}>
+                        👁️ {postViews[post.id]}
                       </div>
                     )}
                   </div>
