@@ -2040,6 +2040,8 @@ function AppContent() {
         ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:#2A2D45;border-radius:3px;}
         input,textarea,select{outline:none;font-family:inherit;}
         button{cursor:pointer;font-family:inherit;}
+        @keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+        .skeleton{background:linear-gradient(90deg,${theme.border} 25%,${theme.card} 50%,${theme.border} 75%);background-size:800px 100%;animation:shimmer 1.5s infinite linear;border-radius:8px;}
         @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes notifIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
         @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.85;transform:scale(1.05)}}
@@ -2651,10 +2653,22 @@ function AppContent() {
 
           {/* État de chargement */}
           {!postsLoaded && (
-            <div style={{ display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"60px 24px",gap:16 }}>
-              <div style={{ width:48,height:48,border:`4px solid ${theme.border}`,borderTop:`4px solid #6C63FF`,borderRadius:"50%",animation:"spin 0.8s linear infinite" }}/>
-              <p style={{ color:theme.sub,fontWeight:600,fontSize:14 }}>Chargement des annonces...</p>
-              <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+            <div style={{ display:"grid",gridTemplateColumns:windowWidth>800?"repeat(3,1fr)":windowWidth>600?"repeat(2,1fr)":"repeat(2,1fr)",gap:12,width:"100%",padding:"8px 0" }}>
+              {Array.from({length:6}).map((_,i)=>(
+                <div key={i} style={{ borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:theme.card,padding:0 }}>
+                  {/* Image skeleton */}
+                  <div style={{ width:"100%",height:140,background:`linear-gradient(90deg,${theme.border} 25%,${theme.bg} 50%,${theme.border} 75%)`,backgroundSize:"800px 100%",animation:"shimmer 1.5s infinite linear" }}/>
+                  <div style={{ padding:12,display:"flex",flexDirection:"column",gap:8 }}>
+                    {/* Badge skeleton */}
+                    <div style={{ width:70,height:18,borderRadius:20,background:`linear-gradient(90deg,${theme.border} 25%,${theme.bg} 50%,${theme.border} 75%)`,backgroundSize:"800px 100%",animation:"shimmer 1.5s infinite linear" }}/>
+                    {/* Title skeleton */}
+                    <div style={{ width:"85%",height:14,borderRadius:6,background:`linear-gradient(90deg,${theme.border} 25%,${theme.bg} 50%,${theme.border} 75%)`,backgroundSize:"800px 100%",animation:"shimmer 1.5s infinite linear" }}/>
+                    <div style={{ width:"60%",height:14,borderRadius:6,background:`linear-gradient(90deg,${theme.border} 25%,${theme.bg} 50%,${theme.border} 75%)`,backgroundSize:"800px 100%",animation:"shimmer 1.5s infinite linear" }}/>
+                    {/* Price skeleton */}
+                    <div style={{ width:80,height:20,borderRadius:8,background:`linear-gradient(90deg,${theme.border} 25%,${theme.bg} 50%,${theme.border} 75%)`,backgroundSize:"800px 100%",animation:"shimmer 1.5s infinite linear",marginTop:4 }}/>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
