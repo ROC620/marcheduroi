@@ -3688,8 +3688,8 @@ function AppContent() {
           <div style={{ maxWidth:600,margin:"0 auto 48px" }}>
             <div style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:20,padding:32,textAlign:"center" }}>
               <div style={{ width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:32,fontWeight:800,color:"#fff" }}>M</div>
-              <h2 style={{ fontWeight:800,fontSize:22,marginBottom:4,color:theme.text }}>MarchéduRoi SARL</h2>
-              <p style={{ color:"#6C63FF",fontWeight:600,fontSize:14,marginBottom:16 }}>Société à Responsabilité Limitée · Ouidah, Bénin</p>
+              <h2 style={{ fontWeight:800,fontSize:22,marginBottom:4,color:theme.text }}>MarchéduRoi</h2>
+              <p style={{ color:"#6C63FF",fontWeight:600,fontSize:14,marginBottom:16 }}>Ouidah, Bénin</p>
               <p style={{ color:theme.sub,fontSize:14,lineHeight:1.7,marginBottom:20 }}>MarchéduRoi est une plateforme numérique multipolaire de petites annonces, créée et exploitée par EDENPORTAIL, établissement spécialisé dans la création et le référencement de sites internet, dont le siège social est établi à Ouidah, République du Bénin.</p>
               <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                 <a href="mailto:contact@marcheduroi.com" style={{ textDecoration:"none",display:"flex",alignItems:"center",gap:10,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:10,padding:"10px 16px" }}>
@@ -4264,7 +4264,7 @@ function AppContent() {
           <div style={{ textAlign:"center",marginBottom:48 }}>
             <div style={{ fontSize:56,marginBottom:16 }}>📋</div>
             <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>Conditions Générales <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>d'Utilisation</span></h1>
-            <p style={{ color:theme.sub,fontSize:15 }}>Dernière mise à jour : Mars 2026 · MarchéduRoi SARL, Ouidah, Bénin</p>
+            <p style={{ color:theme.sub,fontSize:15 }}>Dernière mise à jour : Mars 2026 · MarchéduRoi, Ouidah, Bénin</p>
             <p style={{ color:theme.sub,fontSize:13,marginTop:6 }}>Version 2.0 — Ces conditions remplacent toutes les versions antérieures.</p>
           </div>
 
@@ -4383,7 +4383,7 @@ function AppContent() {
           {/* Signature */}
           <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:16,padding:28,marginTop:32,textAlign:"center" }}>
             <p style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:8 }}>En utilisant MarchéduRoi, vous confirmez avoir lu, compris et accepté l'intégralité des présentes conditions générales d'utilisation.</p>
-            <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>© 2026 MarchéduRoi SARL · Ouidah, Bénin 🇧🇯 · contact@marcheduroi.com</p>
+            <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>© 2026 MarchéduRoi · Ouidah, Bénin 🇧🇯 · contact@marcheduroi.com</p>
             <p style={{ color:theme.sub,fontSize:12,marginBottom:20 }}>Version 2.0 — Mars 2026 · 15 articles</p>
             <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 32px",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
               Retour aux annonces →
