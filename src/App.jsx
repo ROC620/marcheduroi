@@ -1552,10 +1552,11 @@ function AppContent() {
   }, [ads, adPaused]);
 
   useEffect(() => {
-    fetch("https://ip-api.com/json/?fields=countryCode")
-      .then(r => r.json())
-      .then(data => {
-        const code = data.countryCode || "BJ";
+    fetch("https://cloudflare.com/cdn-cgi/trace")
+      .then(r => r.text())
+      .then(text => {
+        const match = text.match(/loc=([A-Z]{2})/);
+        const code = match ? match[1] : "BJ";
         setDetectedCountry(code);
       })
       .catch(() => setDetectedCountry("BJ"));
