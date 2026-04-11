@@ -1489,6 +1489,55 @@ function AppContent() {
   // Pays couverts par FedaPay (zone UEMOA + Guinée)
   const FEDAPAY_COUNTRIES = ["BJ","TG","BF","ML","SN","CI","NE","GN"];
 
+
+  // ── SÉCURITÉ ─────────────────────────────────────────────────────────────────
+  const BLACKLIST = [
+    "arnaque","arnaquer","escroquerie","western union","moneygram","mandat",
+    "avance","acompte","fraude","frauduleux","piratage","hacking","virus",
+    "gratuit argent","gagner de l argent","investissement garanti",
+    "doubler argent","crypto facile","bitcoin gratuit","loterie","gain assuré",
+    "transfert urgent","heritage","succession","ambassade","fonctionnaire étranger",
+    "scam","phishing","faux","contrefaçon"
+  ];
+
+  const checkBlacklist = (text) => {
+    const normalized = (text||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    return BLACKLIST.some(word => normalized.includes(word.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")));
+  };
+
+  const checkRateLimit = () => {
+    if (user?.role === "admin") return true;
+    const key = "mdr_pub_" + user?.id;
+    const now = Date.now();
+    const hour = 3600000;
+    try {
+      const data = JSON.parse(localStorage.getItem(key) || "[]");
+      const recent = data.filter(t => now - t < hour);
+      if (recent.length >= 5) {
+        notify("⚠️ Limite atteinte — max 5 publications par heure. Réessayez plus tard.", "error");
+        return false;
+      }
+      recent.push(now);
+      localStorage.setItem(key, JSON.stringify(recent));
+      return true;
+    } catch { return true; }
+  };
+
+  // Formater un prix XOF en devise locale + USD
+  const formatPriceLocal = (amountXOF) => {
+    const country = getUserCountry();
+    const currency = COUNTRY_CURRENCY[country] || "XOF";
+    const usdRate = 610; // 1 USD ≈ 610 XOF
+    const usd = (amountXOF / usdRate).toFixed(2);
+    if (currency === "XOF" || currency === "XAF") {
+      return `${amountXOF.toLocaleString()} FCFA (~${usd} USD)`;
+    }
+    const rate = XOF_RATES[currency] || 1;
+    const local = Math.round(amountXOF / rate);
+    return `${local.toLocaleString()} ${currency} (~${usd} USD)`;
+  };
+  // ─────────────────────────────────────────────────────────────────────────────
+
   // Pays détecté automatiquement via IP
   const [detectedCountry, setDetectedCountry] = useState("BJ");
   const [showAllCountries, setShowAllCountries] = useState(false);
@@ -1649,6 +1698,10 @@ function AppContent() {
     if (!postForm.title||!postForm.description) { notify("Titre et description requis","error"); return; }
     if (isVehicle && !vehicleForm.marque) { notify("La marque du véhicule est requise","error"); return; }
     if (isMoto && !vehicleForm.marque) { notify("La marque de la moto est requise","error"); return; }
+    if (checkBlacklist(postForm.title) || checkBlacklist(postForm.description)) {
+      notify("⚠️ Votre annonce contient des termes non autorisés. Veuillez modifier le contenu.", "error"); return;
+    }
+    if (!checkRateLimit()) return;
     const isAdmin = user.role === "admin";
     const postId = "post_" + Date.now();
     const newPost = {
@@ -1898,6 +1951,8 @@ function AppContent() {
   };
 
   const addBeaute = async () => {
+    if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("⚠️ Votre annonce contient des termes non autorisés.", "error"); return; }
+    if (!checkRateLimit()) return;
     if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
     const isAdmin = user.role === "admin";
     const expDate = new Date();
@@ -1933,6 +1988,8 @@ function AppContent() {
   };
 
   const addResto = async () => {
+    if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("⚠️ Votre annonce contient des termes non autorisés.", "error"); return; }
+    if (!checkRateLimit()) return;
     if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
     const isAdmin = user.role === "admin";
     const expDate = new Date();
@@ -1967,6 +2024,8 @@ function AppContent() {
   };
 
   const addShop = async () => {
+    if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("⚠️ Votre annonce contient des termes non autorisés.", "error"); return; }
+    if (!checkRateLimit()) return;
     if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
     const isAdmin = user.role === "admin";
     const expDate = new Date();
@@ -4786,7 +4845,10 @@ function AppContent() {
                           <p style={{ fontWeight:700,color:theme.text,fontSize:14 }}>{t.label}</p>
                           <p style={{ color:theme.sub,fontSize:12 }}>{Math.round(t.price/t.days*30).toLocaleString()} FCFA/mois effectif</p>
                         </div>
-                        <span style={{ fontWeight:800,color:"#6C63FF",fontSize:16 }}>{t.price.toLocaleString()} FCFA</span>
+                        <div style={{ textAlign:"right" }}>
+                            <span style={{ fontWeight:800,color:"#6C63FF",fontSize:16,display:"block" }}>{t.price.toLocaleString()} FCFA</span>
+                            <span style={{ fontWeight:600,color:theme.sub,fontSize:11 }}>≈ {(t.price/610).toFixed(1)} USD</span>
+                          </div>
                       </div>
                     ))}
                     <p style={{ fontSize:11,color:"#43C6AC",textAlign:"center",fontWeight:600,marginTop:8 }}>💳 Paiement sécurisé MTN / Moov Money (FedaPay)</p>
