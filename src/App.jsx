@@ -1491,6 +1491,7 @@ function AppContent() {
 
   // Pays détecté automatiquement via IP
   const [detectedCountry, setDetectedCountry] = useState("BJ");
+  const [showAllCountries, setShowAllCountries] = useState(false);
 
   // Rotation automatique des pubs toutes les 8 secondes
   useEffect(() => {
@@ -1506,7 +1507,7 @@ function AppContent() {
       .then(r => r.json())
       .then(data => {
         const code = data.country_code || "BJ";
-        setDetectedCountry(COUNTRY_CURRENCY[code] ? code : "BJ");
+        setDetectedCountry(code);
       })
       .catch(() => setDetectedCountry("BJ"));
   }, []);
@@ -2001,6 +2002,7 @@ function AppContent() {
     notify(shopMode==="boutique" ? "Boutique publiée !" : "Atelier publié !");
   };
 
+  const userCountry = getUserCountry();
   const filtered = posts.filter(p=>{
     if (p.expired) return false;
     if (category!=="Toutes" && p.category!==category) return false;
@@ -2012,6 +2014,12 @@ function AppContent() {
         if (priceMin && numPrice < parseInt(priceMin)) return false;
         if (priceMax && numPrice > parseInt(priceMax)) return false;
       }
+    }
+    // Filtre par pays — si pas showAllCountries et pays détecté
+    if (!showAllCountries && userCountry && !search) {
+      const postCountry = p.country || p.immo?.pays || "";
+      // Si l'annonce a un pays défini et différent → exclure
+      if (postCountry && postCountry !== userCountry) return false;
     }
     return true;
   }).map(p=>({
@@ -2444,23 +2452,30 @@ function AppContent() {
                 BF:"Burkina Faso", NE:"Niger", GN:"Guinée", NG:"Nigeria", CM:"Cameroun",
                 CG:"Congo", CD:"RD Congo", GA:"Gabon", MG:"Madagascar", RW:"Rwanda",
                 BI:"Burundi", TD:"Tchad", MR:"Mauritanie", FR:"France", BE:"Belgique",
-                CH:"Suisse", CA:"Canada",
+                CH:"Suisse", CA:"Canada", US:"États-Unis", GB:"Royaume-Uni", DE:"Allemagne",
+                IT:"Italie", ES:"Espagne", MA:"Maroc", DZ:"Algérie", TN:"Tunisie",
+                EG:"Égypte", KE:"Kenya", ZA:"Afrique du Sud", GH:"Ghana",
               };
               const PREP = {
                 BJ:"au", TG:"au", ML:"au", SN:"au", NE:"au", CM:"au", CG:"au",
                 GA:"au", RW:"au", BI:"au", TD:"au", CA:"au", CD:"en", CI:"en",
                 BF:"au", GN:"en", NG:"au", MG:"à", FR:"en", BE:"en", CH:"en", MR:"en",
+                US:"aux", GB:"au", DE:"en", IT:"en", ES:"en", MA:"au", DZ:"en",
+                TN:"en", EG:"en", KE:"au", ZA:"en", GH:"au",
               };
               const code = getUserCountry() || "BJ";
-              const pays = PAYS_NOMS[code] || "Bénin";
-              const prep = PREP[code] || "au";
+              const pays = PAYS_NOMS[code];
+              const prep = PREP[code];
+              const sloganLoc = pays
+                ? <><strong style={{ color:theme.text }}>{prep} {pays}</strong> et partout dans le <strong style={{ color:theme.text }}>monde</strong> 🌍</>
+                : <strong style={{ color:theme.text }}>partout dans le monde</strong>;
               return windowWidth <= 600 ? (
                 <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:340,lineHeight:1.5,marginBottom:6,padding:"0 16px" }}>
-                  La plateforme qui connecte commerçants, entreprises et particuliers <strong style={{ color:theme.text }}>{prep} {pays}</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
+                  La plateforme qui connecte commerçants, entreprises et particuliers {sloganLoc}
                 </p>
               ) : (
                 <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:560,lineHeight:1.5,marginBottom:6,padding:"0 16px" }}>
-                  La plateforme qui connecte commerçants,<br/>entreprises et particuliers <strong style={{ color:theme.text }}>{prep} {pays}</strong> et partout en <strong style={{ color:theme.text }}>Afrique</strong> 🌍
+                  La plateforme qui connecte commerçants,<br/>entreprises et particuliers {sloganLoc}
                 </p>
               );
             })()}
@@ -3019,8 +3034,31 @@ function AppContent() {
           {filtered.length===0 && postsLoaded && (
             <div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}>
               <p style={{ fontSize:40,marginBottom:12 }}>🔍</p>
-              <p style={{ fontWeight:600,marginBottom:8 }}>Aucune annonce trouvée</p>
-              <p style={{ fontSize:13 }}>Essayez une autre catégorie ou modifiez votre recherche</p>
+              <p style={{ fontWeight:600,marginBottom:8 }}>Aucune annonce trouvée{!showAllCountries?" dans votre pays":""}</p>
+              <p style={{ fontSize:13,marginBottom:16 }}>
+                {!showAllCountries ? "Il n'y a pas encore d'annonces dans votre pays." : "Essayez une autre catégorie ou modifiez votre recherche."}
+              </p>
+              {!showAllCountries && (
+                <button onClick={()=>setShowAllCountries(true)} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 24px",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer" }}>
+                  🌍 Voir toutes les annonces
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Bouton voir toutes les annonces si filtre pays actif */}
+          {filtered.length > 0 && !showAllCountries && !search && postsLoaded && (
+            <div style={{ textAlign:"center",marginTop:16,marginBottom:8 }}>
+              <button onClick={()=>setShowAllCountries(true)} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,padding:"8px 20px",borderRadius:20,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+                🌍 Voir les annonces de tous les pays
+              </button>
+            </div>
+          )}
+          {showAllCountries && !search && postsLoaded && (
+            <div style={{ textAlign:"center",marginTop:8,marginBottom:8 }}>
+              <button onClick={()=>setShowAllCountries(false)} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:"#6C63FF",padding:"8px 20px",borderRadius:20,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+                📍 Afficher mon pays uniquement
+              </button>
             </div>
           )}
 
