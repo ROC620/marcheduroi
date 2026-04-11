@@ -873,6 +873,13 @@ function AppContent() {
     });
   };
   const [authForm, setAuthForm] = useState({ email:"",password:"",name:"",country:"BJ" });
+  const [turnstileToken, setTurnstileToken] = useState("");
+
+  useEffect(() => {
+    const handler = (e) => setTurnstileToken(e.detail);
+    document.addEventListener("turnstile-success", handler);
+    return () => document.removeEventListener("turnstile-success", handler);
+  }, []);
   const [showPassword, setShowPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [isResetMode, setIsResetMode] = useState(false);
@@ -1181,6 +1188,17 @@ function AppContent() {
     window.addEventListener("offline", handleOffline);
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
+    // Charger le script Turnstile
+    window.onTurnstileSuccess = (token) => {
+      // On stocke le token dans une variable globale temporaire
+      window._turnstileToken = token;
+      document.dispatchEvent(new CustomEvent("turnstile-success", { detail: token }));
+    };
+    const ts = document.createElement("script");
+    ts.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+    ts.async = true;
+    ts.defer = true;
+    document.head.appendChild(ts);
     }
     // PWA install prompt
     const handleInstallPrompt = (e) => {
@@ -1286,6 +1304,7 @@ function AppContent() {
 
   const register = async () => {
     if (!authForm.name||!authForm.email||!authForm.password) { notify("Remplissez tous les champs","error"); return; }
+    if (!turnstileToken) { notify("Veuillez compléter la vérification de sécurité","error"); return; }
     // Capturer le code parrain depuis l'URL ou localStorage
     const refFromUrl = new URLSearchParams(window.location.search).get("ref");
     if (refFromUrl) localStorage.setItem("mdr_ref", refFromUrl);
@@ -1294,6 +1313,7 @@ function AppContent() {
     if (error) { notify("Erreur : "+error.message,"error"); return; }
     await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ" });
     setUser({ id:data.user.id, name:authForm.name, role:"user" });
+    setTurnstileToken("");
     setView("home"); notify("Compte créé ! Vérifiez votre email pour confirmer votre compte 📧");
   };
 
@@ -3741,6 +3761,18 @@ function AppContent() {
               </select>
             </div>
             <button onClick={register} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s" }}>Créer mon compte</button>
+            {/* Widget Turnstile */}
+            <div style={{ marginTop:16,display:"flex",justifyContent:"center" }}>
+              <div
+                className="cf-turnstile"
+                data-sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "0x4AAAAAAC788zTLMNgDh7zL"}
+                data-callback="onTurnstileSuccess"
+                data-theme="light"
+              />
+            </div>
+            {!turnstileToken && (
+              <p style={{ textAlign:"center",fontSize:11,color:"#FF4757",marginTop:4 }}>⚠️ Complétez la vérification de sécurité ci-dessus</p>
+            )}
             <p style={{ textAlign:"center",marginTop:20,color:theme.sub,fontSize:13 }}>Déjà inscrit ? <button onClick={()=>setView("login")} style={{ background:"none",border:"none",color:"#6C63FF",fontWeight:600,cursor:"pointer" }}>Se connecter</button></p>
           </div>
         </div>
