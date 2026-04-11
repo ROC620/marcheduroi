@@ -3780,14 +3780,11 @@ function AppContent() {
                 ].map(p=><option key={p.code} value={p.code}>{p.name}</option>)}
               </select>
             </div>
-            <button onClick={register} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s" }}>Créer mon compte</button>
+            <button onClick={register} className="btn-glow" disabled={!authForm.name||!authForm.email||!authForm.password} style={{ width:"100%",padding:"14px",background:(!authForm.name||!authForm.email||!authForm.password)?"rgba(108,99,255,0.4)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s",cursor:(!authForm.name||!authForm.email||!authForm.password)?"not-allowed":"pointer" }}>Créer mon compte</button>
             {/* Widget Turnstile */}
             <div style={{ marginTop:16,display:"flex",justifyContent:"center" }}>
               <div ref={turnstileRef} />
             </div>
-            {!turnstileToken && (
-              <p style={{ textAlign:"center",fontSize:11,color:"#FF4757",marginTop:4 }}>⚠️ Complétez la vérification de sécurité ci-dessus</p>
-            )}
             <p style={{ textAlign:"center",marginTop:20,color:theme.sub,fontSize:13 }}>Déjà inscrit ? <button onClick={()=>setView("login")} style={{ background:"none",border:"none",color:"#6C63FF",fontWeight:600,cursor:"pointer" }}>Se connecter</button></p>
           </div>
         </div>
