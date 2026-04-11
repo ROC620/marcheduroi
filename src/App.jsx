@@ -1452,12 +1452,12 @@ function AppContent() {
   const canPublishFree = async () => {
     if (!user) return false;
     const month = new Date().toISOString().slice(0,7);
-    const { data } = await supabase.from("free_days").select("used").eq("user_id", user.id).eq("month", month).single();
+    const { data } = await supabase.from("free_days").select("used").eq("user_id", user.id).eq("month", month).maybeSingle();
     return !data || data.used < 4;
   };
   const useFreeDay = async () => {
     const month = new Date().toISOString().slice(0,7);
-    const { data } = await supabase.from("free_days").select("used").eq("user_id", user.id).eq("month", month).single();
+    const { data } = await supabase.from("free_days").select("used").eq("user_id", user.id).eq("month", month).maybeSingle();
     if (data) {
       await supabase.from("free_days").update({ used: data.used + 1 }).eq("user_id", user.id).eq("month", month);
     } else {
@@ -1552,10 +1552,10 @@ function AppContent() {
   }, [ads, adPaused]);
 
   useEffect(() => {
-    fetch("https://ipapi.co/json/")
+    fetch("https://ip-api.com/json/?fields=countryCode")
       .then(r => r.json())
       .then(data => {
-        const code = data.country_code || "BJ";
+        const code = data.countryCode || "BJ";
         setDetectedCountry(code);
       })
       .catch(() => setDetectedCountry("BJ"));
