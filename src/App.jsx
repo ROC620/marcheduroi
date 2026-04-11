@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "./supabase";
 import Icon from "./components/Icon";
@@ -874,12 +874,32 @@ function AppContent() {
   };
   const [authForm, setAuthForm] = useState({ email:"",password:"",name:"",country:"BJ" });
   const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = React.useRef(null);
 
   useEffect(() => {
     const handler = (e) => setTurnstileToken(e.detail);
     document.addEventListener("turnstile-success", handler);
     return () => document.removeEventListener("turnstile-success", handler);
   }, []);
+
+  // Rendre le widget Turnstile quand on arrive sur la page d'inscription
+  useEffect(() => {
+    if (view !== "register") return;
+    setTurnstileToken("");
+    const tryRender = () => {
+      if (window.turnstile && turnstileRef.current && !turnstileRef.current.hasChildNodes()) {
+        window.turnstile.render(turnstileRef.current, {
+          sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || "0x4AAAAAAC788zTLMNgDh7zL",
+          callback: (token) => setTurnstileToken(token),
+          "expired-callback": () => setTurnstileToken(""),
+          theme: "light",
+        });
+      } else if (!window.turnstile) {
+        setTimeout(tryRender, 300);
+      }
+    };
+    setTimeout(tryRender, 200);
+  }, [view]);
   const [showPassword, setShowPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [isResetMode, setIsResetMode] = useState(false);
@@ -3763,12 +3783,7 @@ function AppContent() {
             <button onClick={register} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s" }}>Créer mon compte</button>
             {/* Widget Turnstile */}
             <div style={{ marginTop:16,display:"flex",justifyContent:"center" }}>
-              <div
-                className="cf-turnstile"
-                data-sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "0x4AAAAAAC788zTLMNgDh7zL"}
-                data-callback="onTurnstileSuccess"
-                data-theme="light"
-              />
+              <div ref={turnstileRef} />
             </div>
             {!turnstileToken && (
               <p style={{ textAlign:"center",fontSize:11,color:"#FF4757",marginTop:4 }}>⚠️ Complétez la vérification de sécurité ci-dessus</p>
