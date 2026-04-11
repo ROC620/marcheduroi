@@ -1,4 +1,4 @@
-const CACHE_NAME = "marketflow-v1";
+const CACHE_NAME = "marcheduroi-v3";
 const ASSETS = ["/", "/index.html"];
 
 self.addEventListener("install", (e) => {
@@ -18,6 +18,12 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
+  // Ne pas mettre en cache les requêtes non-GET (POST, PUT, DELETE...)
+  if (e.request.method !== "GET") return;
+  // Ne pas mettre en cache les requêtes externes (APIs)
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;
+
   e.respondWith(
     fetch(e.request)
       .then((res) => {
