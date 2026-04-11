@@ -1120,7 +1120,8 @@ function AppContent() {
   const [showPwaBanner, setShowPwaBanner] = useState(false);
   const [adForm, setAdForm] = useState({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
   const [adSaving, setAdSaving] = useState(false);
-  const [adEditing, setAdEditing] = useState(null); // id de la bannière en cours d'édition
+  const [adEditing, setAdEditing] = useState(null);
+  const [showAdForm, setShowAdForm] = useState(false);
   const [expandedContacts, setExpandedContacts] = useState({}); // postId -> boolean
   const contactTimerRef = useRef(null);
   const [userLocation, setUserLocation] = useState(null);
@@ -3424,9 +3425,15 @@ function AppContent() {
               <span style={{ background:"rgba(108,99,255,0.15)",color:"#6C63FF",borderRadius:20,padding:"2px 10px",fontSize:12,fontWeight:600 }}>{ads.length} active{ads.length>1?"s":""}</span>
             </h3>
 
-            {/* Formulaire nouvelle pub */}
-            <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24 }}>
-                  <p style={{ fontWeight:700,fontSize:15,color:theme.text,marginBottom:16 }}>➕ Ajouter une bannière</p>
+            {/* Formulaire nouvelle pub — replié par défaut */}
+            <div style={{ ...cardStyle,borderRadius:16,marginBottom:24,overflow:"hidden" }}>
+                  <button onClick={()=>{ setShowAdForm(s=>!s); setAdEditing(null); setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" }); }}
+                    style={{ width:"100%",padding:"16px 24px",background:"transparent",border:"none",color:theme.text,fontWeight:700,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",WebkitTapHighlightColor:"transparent" }}>
+                    <span>➕ Ajouter une bannière</span>
+                    <span style={{ fontSize:18,transition:"transform 0.3s",transform:showAdForm?"rotate(45deg)":"rotate(0deg)" }}>+</span>
+                  </button>
+                  {(showAdForm || adEditing) && (
+                  <div style={{ padding:"0 24px 24px" }}>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12 }}>
                     <div>
                       <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Nom entreprise *</label>
@@ -3516,15 +3523,18 @@ function AppContent() {
                       if (error) { notify("Erreur : "+error.message,"error"); return; }
                       setAds(prev => [data, ...prev]);
                       setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
+                      setShowAdForm(false);
                       notify("✅ Bannière publiée avec succès !");
                     }
                   }} disabled={adSaving} style={{ width:"100%",padding:"13px",background:adSaving?"rgba(108,99,255,0.3)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:adSaving?"not-allowed":"pointer" }}>
                     {adSaving ? "⏳ En cours..." : adEditing ? "✏️ Mettre à jour la bannière" : "✅ Valider et publier la bannière"}
                   </button>
                   {adEditing && (
-                    <button onClick={()=>{ setAdEditing(null); setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" }); }} style={{ width:"100%",marginTop:8,padding:"10px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,borderRadius:12,fontWeight:600,fontSize:14,cursor:"pointer" }}>
+                    <button onClick={()=>{ setAdEditing(null); setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" }); setShowAdForm(false); }} style={{ width:"100%",marginTop:8,padding:"10px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,borderRadius:12,fontWeight:600,fontSize:14,cursor:"pointer" }}>
                       Annuler la modification
                     </button>
+                  )}
+                  </div>
                   )}
             </div>
 
@@ -3544,7 +3554,7 @@ function AppContent() {
                   </div>
                 </div>
                 <div style={{ display:"flex",gap:8,flexShrink:0,flexWrap:"wrap" }}>
-                  <button onClick={()=>{ setAdEditing(ad.id); setAdForm({ entreprise:ad.entreprise||"", slogan:ad.slogan||"", logo_url:ad.logo_url||"", lien:ad.lien||"", couleur1:ad.couleur1||"#6C63FF", couleur2:ad.couleur2||"#8B84FF", fin:ad.fin||"" }); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"7px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
+                  <button onClick={()=>{ setAdEditing(ad.id); setAdForm({ entreprise:ad.entreprise||"", slogan:ad.slogan||"", logo_url:ad.logo_url||"", lien:ad.lien||"", couleur1:ad.couleur1||"#6C63FF", couleur2:ad.couleur2||"#8B84FF", fin:ad.fin||"" }); setShowAdForm(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"7px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                   <button onClick={async()=>{
                     await supabase.from("ads").update({actif:!ad.actif}).eq("id",ad.id);
                     setAds(prev=>prev.map(a=>a.id===ad.id?{...a,actif:!a.actif}:a));
