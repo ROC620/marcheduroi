@@ -3053,10 +3053,10 @@ function AppContent() {
                   </div>
                   {/* Badge expiration */}
                   {post.expiresAt && (() => { const d = getDaysLeft(post.expiresAt); return d !== null && d <= 7 ? (
-                    <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6 }}>
+                    <button onClick={()=>setView("dashboard")} style={{ width:"100%",background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6,cursor:"pointer",textAlign:"left" }}>
                       <span style={{ fontSize:12 }}>⚠️</span>
-                      <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""} · Prolongez depuis votre tableau de bord</p>
-                    </div>
+                      <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""} · Prolongez depuis votre tableau de bord →</p>
+                    </button>
                   ) : d !== null && d <= 30 ? (
                     <div style={{ background:"rgba(255,165,0,0.1)",border:"1px solid rgba(255,165,0,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8 }}>
                       <p style={{ fontSize:12,color:"#FFA500",fontWeight:600 }}>⏳ Expire le {post.expiresAt}</p>
