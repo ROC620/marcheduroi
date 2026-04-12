@@ -625,6 +625,7 @@ function AppContent() {
           urgentUntil: p.urgent_until,
           ownerVerified: p.owner_verified,
           photos: p.photos || [],
+          video: p.video || null,
           likes: p.likes || 0,
         }));
         setPosts(mapped); // Supabase uniquement — plus de données fictives
@@ -3079,10 +3080,12 @@ function AppContent() {
                     e.stopPropagation();
                     const isOpen = expandedContacts[post.id];
                     if (!isOpen) {
-                      trackView(post.id);
-                      trackContact(post.id);
+                      // Ne pas compter les vues du propriétaire
+                      if (!user || user.id !== post.authorId) {
+                        trackView(post.id);
+                        trackContact(post.id);
+                      }
                     }
-                    // Fermer tous les autres, toggler celui-ci
                     setExpandedContacts(isOpen ? {} : { [post.id]: true });
                   }} style={{ width:"100%",background:expandedContacts[post.id]?"rgba(67,198,172,0.15)":"rgba(67,198,172,0.08)",border:`1px solid rgba(67,198,172,${expandedContacts[post.id]?0.5:0.25})`,color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.2s" }}>
                     <Icon name="mail" size={14}/>
