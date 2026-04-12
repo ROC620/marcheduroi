@@ -1318,21 +1318,20 @@ function AppContent() {
   const login = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });
     if (error) { notify("Email ou mot de passe incorrect","error"); return; }
-    if (!data.user.email_confirmed_at) {
-      await supabase.auth.signOut();
-      notify("Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte mail 📧","error");
-      return;
+    const { data: profile } = await supabase.from("profiles").select("*").eq("id",data.user.id).maybeSingle();
+    if (profile) {
+      setUser({ id:data.user.id, name:profile.name, role:profile.role||"user", emailConfirmed:!!data.user.email_confirmed_at });
+    } else {
+      // Profil manquant — le créer
+      await supabase.from("profiles").insert({ id:data.user.id, name:data.user.email.split("@")[0], role:"user", country:"BJ" });
+      setUser({ id:data.user.id, name:data.user.email.split("@")[0], role:"user" });
     }
-    const { data: profile } = await supabase.from("profiles").select("*").eq("id",data.user.id).single();
-    if (profile) setUser({ id:data.user.id, name:profile.name, role:profile.role||"user",  emailConfirmed:true });
-
-    // Traiter le parrainage en attente (si l'utilisateur vient de confirmer son email)
+    // Traiter le parrainage en attente
     const pendingRef = localStorage.getItem("mdr_ref");
     if (pendingRef && pendingRef !== data.user.id) {
       await processReferral(pendingRef, data.user.id);
       localStorage.removeItem("mdr_ref");
     }
-
     setView("home"); notify("Bienvenue !");
     addNotification("Bienvenue sur MarchéduRoi ! Vos notifications apparaissent ici.", "info");
   };
