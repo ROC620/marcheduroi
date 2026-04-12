@@ -277,15 +277,26 @@ const FLAGS = [
 // ── Composant vidéo auto-play sur les cartes ─────────────────────────────────
 function VideoCardPlayer({ video, photos = [] }) {
   const [playing, setPlaying] = React.useState(false);
+  const containerRef = React.useRef(null);
   const isYT = /youtube\.com|youtu\.be/.test(video||"");
   const isCL = /cloudinary\.com/.test(video||"");
   const ytMatch = (video||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/);
   const ytId = ytMatch ? ytMatch[1] : null;
 
+  // Arrêter la vidéo quand la carte sort du viewport
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) setPlaying(false);
+    }, { threshold: 0.3 });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   if (!video || (!isYT && !isCL)) return null;
 
   return (
-    <div style={{ width:"100%", position:"relative" }}>
+    <div ref={containerRef} style={{ width:"100%", position:"relative" }}>
       {playing ? (
         <div style={{ position:"relative", width:"100%", aspectRatio:"16/9", background:"#000", overflow:"hidden" }}>
           {isYT && ytId ? (
