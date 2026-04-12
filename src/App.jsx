@@ -1291,7 +1291,7 @@ function AppContent() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        supabase.from("profiles").select("*").eq("id", session.user.id).single()
+        supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
           .then(({ data }) => {
             if (data) setUser({ id:session.user.id, name:data.name, role:data.role||"user" });
           });
@@ -1299,16 +1299,18 @@ function AppContent() {
     });
     supabase.auth.onAuthStateChange((event, session) => {
       if (!session) { setUser(null); return; }
-      // Confirmation email — l'utilisateur clique le lien et arrive sur l'app
       if (event === "SIGNED_IN" || event === "USER_UPDATED") {
-        supabase.from("profiles").select("*").eq("id", session.user.id).single()
-          .then(({ data }) => {
-            if (data) {
-              setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
-              setView("home");
-              notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
-            }
-          });
+        // Attendre un peu que le profil soit créé
+        setTimeout(() => {
+          supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
+            .then(({ data }) => {
+              if (data) {
+                setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
+                setView("home");
+                if (event === "USER_UPDATED") notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
+              }
+            });
+        }, 500);
       }
     });
   }, []);
