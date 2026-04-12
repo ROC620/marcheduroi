@@ -275,7 +275,7 @@ const FLAGS = [
 ];
 
 // ── Composant vidéo auto-play sur les cartes ─────────────────────────────────
-function VideoCardPlayer({ video }) {
+function VideoCardPlayer({ video, photos = [] }) {
   const [playing, setPlaying] = React.useState(false);
   const isYT = /youtube\.com|youtu\.be/.test(video||"");
   const isCL = /cloudinary\.com/.test(video||"");
@@ -295,20 +295,20 @@ function VideoCardPlayer({ video }) {
               style={{ width:"100%",height:"100%",border:"none",display:"block" }}
             />
           ) : isCL ? (
-            <video
-              src={video}
-              autoPlay
-              controls
-              playsInline
-              style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
-            />
+            <video src={video} autoPlay controls playsInline style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
           ) : null}
           <button onClick={()=>setPlaying(false)} style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.6)",border:"none",color:"#fff",borderRadius:"50%",width:28,height:28,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10 }}>✕</button>
         </div>
       ) : (
-        <button onClick={()=>setPlaying(true)} style={{ width:"100%",padding:"10px",background:"rgba(108,99,255,0.10)",border:"1px solid rgba(108,99,255,0.25)",color:"#6C63FF",borderRadius:0,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-          ▶ Voir la vidéo
-        </button>
+        <div style={{ position:"relative" }}>
+          {photos && photos.length > 0
+            ? <PhotoCarousel photos={photos}/>
+            : <div style={{ width:"100%",aspectRatio:"16/9",background:"linear-gradient(135deg,#1a1d30,#2a2d45)",display:"flex",alignItems:"center",justifyContent:"center" }}><span style={{ fontSize:32 }}>🎬</span></div>
+          }
+          <button onClick={()=>setPlaying(true)} style={{ position:"absolute",bottom:0,left:0,right:0,padding:"8px",background:"rgba(0,0,0,0.55)",border:"none",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,backdropFilter:"blur(4px)" }}>
+            ▶ Voir la vidéo
+          </button>
+        </div>
       )}
     </div>
   );
@@ -3024,8 +3024,10 @@ function AppContent() {
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
             {filtered.slice(0, visibleCount).map(post=>(
               <div key={post.id} className={`card-hover${post.sponsored?" card-sponsored":post.urgent&&new Date(post.urgentUntil)>new Date()?" card-urgent":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:post.sponsored?"2px solid #FFD700":post.urgent&&new Date(post.urgentUntil)>new Date()?"2px solid #FF4757":`1px solid ${theme.border}` }}>
-                {post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>}
-                {post.video && <VideoCardPlayer video={post.video}/>}
+                {post.video
+                  ? <VideoCardPlayer video={post.video} photos={post.photos}/>
+                  : post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
+                }
                 <div style={{ padding:"14px 16px" }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8 }}>
                     <span className="tag" style={{ background:post.category==="Véhicules"?"rgba(255,101,132,0.15)":"rgba(108,99,255,0.15)",color:post.category==="Véhicules"?"#FF6584":"#8B84FF",display:"flex",alignItems:"center",gap:4 }}>
@@ -5035,21 +5037,6 @@ function AppContent() {
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 {modal.data.photos&&modal.data.photos.length>0&&<div style={{ borderRadius:12,overflow:"hidden",marginBottom:16 }}><PhotoCarousel photos={modal.data.photos}/></div>}
-                {/* Vidéo de l'annonce */}
-                {modal.data.video && (()=>{
-                  const isYT = /youtube\.com|youtu\.be/.test(modal.data.video);
-                  const isCL = /cloudinary\.com/.test(modal.data.video);
-                  const ytMatch = modal.data.video.match(/(?:v=|youtu\.be\/)([\w-]{11})/);
-                  if (isYT && ytMatch) return (
-                    <div style={{ borderRadius:12,overflow:"hidden",marginBottom:16 }}>
-                      <iframe width="100%" height="200" src={`https://www.youtube.com/embed/${ytMatch[1]}`} frameBorder="0" allowFullScreen style={{ display:"block" }}/>
-                    </div>
-                  );
-                  if (isCL) return (
-                    <video src={modal.data.video} controls style={{ width:"100%",borderRadius:12,marginBottom:16,maxHeight:220 }}/>
-                  );
-                  return null;
-                })()}
                 <div style={{ background:theme.bg,borderRadius:12,padding:20,marginBottom:16 }}>
                   <p style={{ fontWeight:700,marginBottom:4,color:theme.text }}>{modal.data.title}</p>
                   <p style={{ color:theme.sub,fontSize:13 }}>Publié par {modal.data.author}{modal.data.price?` · ${modal.data.price}`:""}</p>
