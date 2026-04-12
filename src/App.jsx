@@ -1821,7 +1821,7 @@ function AppContent() {
   };
 
   const editPost = async () => {
-    const updatedPost = {...posts.find(p=>p.id===modal.data.id),...postForm,photos:postPhotos,vehicle:isVehicle?vehicleForm:null};
+    const updatedPost = {...posts.find(p=>p.id===modal.data.id),...postForm,photos:postPhotos,video:postVideo||null,vehicle:isVehicle?vehicleForm:null};
     await supabase.from("posts").update({
       title: updatedPost.title,
       category: updatedPost.category,
@@ -1830,6 +1830,7 @@ function AppContent() {
       contact: updatedPost.contact || "",
       phone: updatedPost.phone || "",
       photos: updatedPost.photos || [],
+      video: updatedPost.video || null,
       vehicle: updatedPost.vehicle || null,
       lat: updatedPost.lat || null,
       lng: updatedPost.lng || null,
@@ -1999,6 +2000,7 @@ function AppContent() {
     if (user?.role === "admin") {
       setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"" });
       setPostPhotos(post.photos||[]);
+      setPostVideo(post.video||"");
       setVehicleForm(post.vehicle||{});
       setModal({ type:"edit", data:post });
       return;
@@ -2016,6 +2018,7 @@ function AppContent() {
     }
     setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"" });
     setPostPhotos(post.photos||[]);
+    setPostVideo(post.video||"");
     setVehicleForm(post.vehicle||{});
     setModal({ type:"edit", data:post });
   };
