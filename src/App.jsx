@@ -4985,6 +4985,21 @@ function AppContent() {
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 {modal.data.photos&&modal.data.photos.length>0&&<div style={{ borderRadius:12,overflow:"hidden",marginBottom:16 }}><PhotoCarousel photos={modal.data.photos}/></div>}
+                {/* Vidéo de l'annonce */}
+                {modal.data.video && (()=>{
+                  const isYT = /youtube\.com|youtu\.be/.test(modal.data.video);
+                  const isCL = /cloudinary\.com/.test(modal.data.video);
+                  const ytMatch = modal.data.video.match(/(?:v=|youtu\.be\/)([\w-]{11})/);
+                  if (isYT && ytMatch) return (
+                    <div style={{ borderRadius:12,overflow:"hidden",marginBottom:16 }}>
+                      <iframe width="100%" height="200" src={`https://www.youtube.com/embed/${ytMatch[1]}`} frameBorder="0" allowFullScreen style={{ display:"block" }}/>
+                    </div>
+                  );
+                  if (isCL) return (
+                    <video src={modal.data.video} controls style={{ width:"100%",borderRadius:12,marginBottom:16,maxHeight:220 }}/>
+                  );
+                  return null;
+                })()}
                 <div style={{ background:theme.bg,borderRadius:12,padding:20,marginBottom:16 }}>
                   <p style={{ fontWeight:700,marginBottom:4,color:theme.text }}>{modal.data.title}</p>
                   <p style={{ color:theme.sub,fontSize:13 }}>Publié par {modal.data.author}{modal.data.price?` · ${modal.data.price}`:""}</p>
