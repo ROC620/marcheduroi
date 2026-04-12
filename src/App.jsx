@@ -1318,15 +1318,21 @@ function AppContent() {
   const login = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });
     if (error) { notify("Email ou mot de passe incorrect","error"); return; }
+
+    // Bloquer si email non confirmé
+    if (!data.user.email_confirmed_at) {
+      await supabase.auth.signOut();
+      notify("📧 Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte mail.", "error");
+      return;
+    }
+
     const { data: profile } = await supabase.from("profiles").select("*").eq("id",data.user.id).maybeSingle();
     if (profile) {
-      setUser({ id:data.user.id, name:profile.name, role:profile.role||"user", emailConfirmed:!!data.user.email_confirmed_at });
+      setUser({ id:data.user.id, name:profile.name, role:profile.role||"user", emailConfirmed:true });
     } else {
-      // Profil manquant — le créer
       await supabase.from("profiles").insert({ id:data.user.id, name:data.user.email.split("@")[0], role:"user", country:"BJ" });
       setUser({ id:data.user.id, name:data.user.email.split("@")[0], role:"user" });
     }
-    // Traiter le parrainage en attente
     const pendingRef = localStorage.getItem("mdr_ref");
     if (pendingRef && pendingRef !== data.user.id) {
       await processReferral(pendingRef, data.user.id);
@@ -1337,18 +1343,33 @@ function AppContent() {
   };
 
   const register = async () => {
+  const register = async () => {
     if (!authForm.name||!authForm.email||!authForm.password) { notify("Remplissez tous les champs","error"); return; }
     if (!turnstileToken) { notify("Veuillez compléter la vérification de sécurité","error"); return; }
-    // Capturer le code parrain depuis l'URL ou localStorage
+    if (authForm.password.length < 6) { notify("Le mot de passe doit faire au moins 6 caractères","error"); return; }
+
     const refFromUrl = new URLSearchParams(window.location.search).get("ref");
     if (refFromUrl) localStorage.setItem("mdr_ref", refFromUrl);
 
-    const { data, error } = await supabase.auth.signUp({ email:authForm.email, password:authForm.password });
+    const { data, error } = await supabase.auth.signUp({
+      email: authForm.email,
+      password: authForm.password,
+      options: {
+        emailRedirectTo: "https://marcheduroi.com",
+        data: { name: authForm.name }
+      }
+    });
     if (error) { notify("Erreur : "+error.message,"error"); return; }
+    if (!data.user) { notify("Erreur lors de la création du compte","error"); return; }
+
+    // Créer le profil
     await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ" });
-    setUser({ id:data.user.id, name:authForm.name, role:"user" });
+
+    // NE PAS connecter l'utilisateur — attendre confirmation email
     setTurnstileToken("");
-    setView("home"); notify("Compte créé ! Vérifiez votre email pour confirmer votre compte 📧");
+    setAuthForm({ email:"",password:"",name:"",country:"BJ" });
+    setView("login");
+    notify("📧 Un email de confirmation vous a été envoyé. Confirmez votre adresse puis connectez-vous !");
   };
 
   // ─── SYSTÈME DE PARRAINAGE ───────────────────────────────────────────────────
