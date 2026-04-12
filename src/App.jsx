@@ -1838,6 +1838,8 @@ function AppContent() {
     }).eq("id", modal.data.id);
     setPosts(p=>p.map(post=>post.id===modal.data.id?updatedPost:post));
     setModal(null); notify("Annonce modifiée !");
+    // Recharger depuis Supabase pour avoir les données à jour
+    setTimeout(() => loadPosts(), 500);
   };
 
   const deletePost = async (id) => {
