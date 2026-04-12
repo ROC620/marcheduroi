@@ -275,84 +275,39 @@ const FLAGS = [
 ];
 
 // ── Composant vidéo auto-play sur les cartes ─────────────────────────────────
-function VideoCardPlayer({ video, maxSeconds = 75 }) {
-  const ref = React.useRef(null);
-  const iframeRef = React.useRef(null);
-  const videoRef = React.useRef(null);
-  const timerRef = React.useRef(null);
-  const startTimer = React.useRef(null);
-  const [active, setActive] = React.useState(false);
-  const [muted, setMuted] = React.useState(true);
-
+function VideoCardPlayer({ video }) {
+  const [playing, setPlaying] = React.useState(false);
   const isYT = /youtube\.com|youtu\.be/.test(video||"");
   const isCL = /cloudinary\.com/.test(video||"");
   const ytMatch = (video||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/);
   const ytId = ytMatch ? ytMatch[1] : null;
 
-  React.useEffect(() => {
-    if (!video) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        // Démarrer après 6 secondes
-        startTimer.current = setTimeout(() => setActive(true), 6000);
-      } else {
-        clearTimeout(startTimer.current);
-        clearTimeout(timerRef.current);
-        setActive(false);
-        setMuted(true);
-      }
-    }, { threshold: 0.5 });
-    if (ref.current) observer.observe(ref.current);
-    return () => { observer.disconnect(); clearTimeout(startTimer.current); clearTimeout(timerRef.current); };
-  }, [video]);
-
-  React.useEffect(() => {
-    if (!active) return;
-    // Timer 75s → recharge l'iframe/video pour repartir du début
-    timerRef.current = setTimeout(() => {
-      setActive(false);
-      setTimeout(() => setActive(true), 200);
-    }, maxSeconds * 1000);
-    return () => clearTimeout(timerRef.current);
-  }, [active]);
-
   if (!video || (!isYT && !isCL)) return null;
 
   return (
-    <div ref={ref} style={{ position:"relative", width:"100%", aspectRatio:"16/9", background:"#000", overflow:"hidden" }}>
-      {active ? (
-        isYT && ytId ? (
-          <iframe
-            ref={iframeRef}
-            key={`yt-${Date.now()}`}
-            src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=${muted?1:0}&loop=1&playlist=${ytId}&controls=0&modestbranding=1&rel=0`}
-            allow="autoplay; fullscreen"
-            style={{ width:"100%",height:"100%",border:"none",display:"block" }}
-          />
-        ) : isCL ? (
-          <video
-            ref={videoRef}
-            key={`cl-${Date.now()}`}
-            src={video}
-            autoPlay
-            muted={muted}
-            loop
-            playsInline
-            style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
-          />
-        ) : null
-      ) : (
-        <div style={{ width:"100%",height:"100%",background:"linear-gradient(135deg,#1a1d30,#2a2d45)",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:8 }}>
-          <span style={{ fontSize:32 }}>▶️</span>
-          <p style={{ color:"rgba(255,255,255,0.6)",fontSize:11 }}>Vidéo en cours de chargement...</p>
+    <div style={{ width:"100%", position:"relative" }}>
+      {playing ? (
+        <div style={{ position:"relative", width:"100%", aspectRatio:"16/9", background:"#000", overflow:"hidden" }}>
+          {isYT && ytId ? (
+            <iframe
+              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&modestbranding=1&rel=0`}
+              allow="autoplay; fullscreen"
+              style={{ width:"100%",height:"100%",border:"none",display:"block" }}
+            />
+          ) : isCL ? (
+            <video
+              src={video}
+              autoPlay
+              controls
+              playsInline
+              style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
+            />
+          ) : null}
+          <button onClick={()=>setPlaying(false)} style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.6)",border:"none",color:"#fff",borderRadius:"50%",width:28,height:28,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10 }}>✕</button>
         </div>
-      )}
-      {/* Bouton son */}
-      {active && (
-        <button
-          onClick={e=>{ e.stopPropagation(); setMuted(m=>!m); }}
-          style={{ position:"absolute",bottom:8,right:8,background:"rgba(0,0,0,0.6)",border:"none",color:"#fff",borderRadius:"50%",width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,zIndex:10 }}>
-          {muted ? "🔇" : "🔊"}
+      ) : (
+        <button onClick={()=>setPlaying(true)} style={{ width:"100%",padding:"10px",background:"rgba(108,99,255,0.10)",border:"1px solid rgba(108,99,255,0.25)",color:"#6C63FF",borderRadius:0,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+          ▶ Voir la vidéo
         </button>
       )}
     </div>
@@ -3069,11 +3024,8 @@ function AppContent() {
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
             {filtered.slice(0, visibleCount).map(post=>(
               <div key={post.id} className={`card-hover${post.sponsored?" card-sponsored":post.urgent&&new Date(post.urgentUntil)>new Date()?" card-urgent":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:post.sponsored?"2px solid #FFD700":post.urgent&&new Date(post.urgentUntil)>new Date()?"2px solid #FF4757":`1px solid ${theme.border}` }}>
-                {post.video ? (
-                  <VideoCardPlayer video={post.video} maxSeconds={75}/>
-                ) : (
-                  post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
-                )}
+                {post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>}
+                {post.video && <VideoCardPlayer video={post.video}/>}
                 <div style={{ padding:"14px 16px" }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8 }}>
                     <span className="tag" style={{ background:post.category==="Véhicules"?"rgba(255,101,132,0.15)":"rgba(108,99,255,0.15)",color:post.category==="Véhicules"?"#FF6584":"#8B84FF",display:"flex",alignItems:"center",gap:4 }}>
