@@ -1343,7 +1343,6 @@ function AppContent() {
   };
 
   const register = async () => {
-  const register = async () => {
     if (!authForm.name||!authForm.email||!authForm.password) { notify("Remplissez tous les champs","error"); return; }
     if (!turnstileToken) { notify("Veuillez compléter la vérification de sécurité","error"); return; }
     if (authForm.password.length < 6) { notify("Le mot de passe doit faire au moins 6 caractères","error"); return; }
