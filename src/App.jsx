@@ -275,9 +275,10 @@ const FLAGS = [
 ];
 
 // ── Composant vidéo auto-play sur les cartes ─────────────────────────────────
-function VideoCardPlayer({ video, photos = [] }) {
+function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
   const [playing, setPlaying] = React.useState(false);
   const containerRef = React.useRef(null);
+  const videoRef = React.useRef(null);
   const isYT = /youtube\.com|youtu\.be/.test(video||"");
   const isCL = /cloudinary\.com/.test(video||"");
   const ytMatch = (video||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/);
@@ -293,6 +294,15 @@ function VideoCardPlayer({ video, photos = [] }) {
     return () => observer.disconnect();
   }, []);
 
+  // Limite de durée pour Cloudinary
+  const handleTimeUpdate = () => {
+    if (videoRef.current && videoRef.current.currentTime >= maxSeconds) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+      setPlaying(false);
+    }
+  };
+
   if (!video || (!isYT && !isCL)) return null;
 
   return (
@@ -301,12 +311,12 @@ function VideoCardPlayer({ video, photos = [] }) {
         <div style={{ position:"relative", width:"100%", aspectRatio:"16/9", background:"#000", overflow:"hidden" }}>
           {isYT && ytId ? (
             <iframe
-              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&modestbranding=1&rel=0`}
+              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&modestbranding=1&rel=0&end=${maxSeconds}`}
               allow="autoplay; fullscreen"
               style={{ width:"100%",height:"100%",border:"none",display:"block" }}
             />
           ) : isCL ? (
-            <video src={video} autoPlay controls playsInline style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
+            <video ref={videoRef} src={video} autoPlay controls playsInline onTimeUpdate={handleTimeUpdate} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
           ) : null}
           <button onClick={()=>setPlaying(false)} style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.6)",border:"none",color:"#fff",borderRadius:"50%",width:28,height:28,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10 }}>✕</button>
         </div>
@@ -3036,7 +3046,7 @@ function AppContent() {
             {filtered.slice(0, visibleCount).map(post=>(
               <div key={post.id} className={`card-hover${post.sponsored?" card-sponsored":post.urgent&&new Date(post.urgentUntil)>new Date()?" card-urgent":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:post.sponsored?"2px solid #FFD700":post.urgent&&new Date(post.urgentUntil)>new Date()?"2px solid #FF4757":`1px solid ${theme.border}` }}>
                 {post.video
-                  ? <VideoCardPlayer video={post.video} photos={post.photos}/>
+                  ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60}/>
                   : post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
                 }
                 <div style={{ padding:"14px 16px" }}>
@@ -4016,7 +4026,7 @@ function AppContent() {
             .map(b=>(
               <div key={b.id} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {b.video && <video src={b.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
+                  {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120}/>}
                   {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
                   {isCertified(b.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
@@ -4111,7 +4121,7 @@ function AppContent() {
             .map(a=>(
               <div key={a.id} className={`card-hover${a.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(a.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(a.id)?"2px solid #FFD700":a.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {a.video && <video src={a.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
+                  {a.video && <VideoCardPlayer video={a.video?.url||a.video} photos={a.photos||[]} maxSeconds={120}/>}
                   {!a.video && a.photos&&a.photos.length>0 && <PhotoCarousel photos={a.photos}/>}
                   {isCertified(a.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
@@ -4214,7 +4224,7 @@ function AppContent() {
             .map(r=>(
               <div key={r.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(r.id)?"0 4px 24px rgba(255,215,0,0.4)":r.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(r.id)?`2px solid #FFD700`:r.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {r.video && <video src={r.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
+                  {r.video && <VideoCardPlayer video={r.video?.url||r.video} photos={r.photos||[]} maxSeconds={120}/>}
                   {!r.video && r.photos&&r.photos.length>0 && <PhotoCarousel photos={r.photos}/>}
                   {isCertified(r.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
@@ -4320,7 +4330,7 @@ function AppContent() {
             .map(b=>(
               <div key={b.id} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {b.video && <video src={b.video.url} controls style={{ width:"100%",height:180,objectFit:"cover" }}/>}
+                  {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120}/>}
                   {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
                   {isCertified(b.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
@@ -6230,8 +6240,12 @@ function AnnonceDetail() {
 
       <div style={{ maxWidth:750,margin:"0 auto",padding:"24px" }}>
 
-        {/* Photos */}
-        {item.video && <video src={item.video?.url||item.video} controls style={{ width:"100%",borderRadius:16,marginBottom:20,maxHeight:320 }}/>}
+        {/* Photos / Vidéo */}
+        {item.video && (
+          <div style={{ borderRadius:16,overflow:"hidden",marginBottom:20 }}>
+            <VideoCardPlayer video={item.video?.url||item.video} photos={photos} maxSeconds={type==="annonce"?60:120}/>
+          </div>
+        )}
         {!item.video && photos.length > 0 && (
           <div style={{ borderRadius:16,overflow:"hidden",marginBottom:20 }}>
             <img src={photos[0]} alt="" style={{ width:"100%",objectFit:"cover",maxHeight:360 }}/>
