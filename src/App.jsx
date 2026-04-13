@@ -1352,6 +1352,9 @@ function AppContent() {
   const notify = (msg, type="success") => { setNotification({msg,type}); setTimeout(()=>setNotification(null),3000); };
 
   useEffect(() => {
+    if (window.location.pathname === "/reset-password") {
+      setViewState("reset-password");
+    }
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
@@ -1363,11 +1366,11 @@ function AppContent() {
     supabase.auth.onAuthStateChange((event, session) => {
       if (!session) { setUser(null); return; }
       if (event === "PASSWORD_RECOVERY") {
-        setView("reset-password");
+        setViewState("reset-password");
         return;
       }
       if (event === "SIGNED_IN" || event === "USER_UPDATED") {
-        // Attendre un peu que le profil soit créé
+        if (window.location.pathname === "/reset-password") return;
         setTimeout(() => {
           supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
             .then(({ data }) => {
