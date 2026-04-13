@@ -1556,6 +1556,19 @@ function AppContent() {
 
   const updatePassword = async () => {
     if (!newPassword || newPassword.length < 6) { notify("Mot de passe trop court (min. 6 caractères)","error"); return; }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      if (code) {
+        const { error: exchError } = await supabase.auth.exchangeCodeForSession(code);
+        if (exchError) { notify("Lien expiré. Veuillez recommencer la réinitialisation.","error"); return; }
+      } else {
+        notify("Session expirée. Veuillez recommencer la réinitialisation.","error");
+        setView("login");
+        return;
+      }
+    }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) { notify("Erreur : "+error.message,"error"); return; }
     notify("Mot de passe mis à jour avec succès ! ✅");
