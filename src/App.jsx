@@ -685,6 +685,7 @@ function AppContent() {
           expiresAt: p.expires_at,
           sponsoredUntil: p.sponsored_until,
           urgentUntil: p.urgent_until,
+          urgentActivatedAt: p.urgent_activated_at,
           ownerVerified: p.owner_verified,
           photos: p.photos || [],
           video: p.video || null,
@@ -1113,7 +1114,7 @@ function AppContent() {
     // Auto-expire badge urgent
     setPosts(prev => prev.map(post => {
       if (!post.urgentUntil) return post;
-      if (new Date(post.urgentUntil) < today) return { ...post, urgent: false, urgentUntil: null };
+      if (new Date(post.urgentUntil) < new Date()) return { ...post, urgent: false, urgentUntil: null, urgentActivatedAt: null };
       return post;
     }));
     // Auto-expire posts past their expiresAt date
@@ -2248,6 +2249,13 @@ function AppContent() {
     ...p,
     distance: userLocation && p.lat && p.lng ? getDistance(userLocation.lat, userLocation.lng, parseFloat(p.lat), parseFloat(p.lng)) : null
   })).sort((a,b)=>{
+    const aUrgent = a.urgent && a.urgentUntil && new Date(a.urgentUntil) > new Date();
+    const bUrgent = b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date();
+    if (aUrgent && !bUrgent) return -1;
+    if (!aUrgent && bUrgent) return 1;
+    if (aUrgent && bUrgent) {
+      return new Date(b.urgentActivatedAt||b.urgentUntil) - new Date(a.urgentActivatedAt||a.urgentUntil);
+    }
     if (a.sponsored && !b.sponsored) return -1;
     if (!a.sponsored && b.sponsored) return 1;
     if (sortByDistance) {
@@ -4580,7 +4588,7 @@ function AppContent() {
               num:"3",
               title:"Publication d'annonces et tarification",
               icon:"💰",
-              content:`TARIFS DE PUBLICATION : Tous les inscrits bénéficient de 4 jours gratuits par mois pour tous types d'annonces. ANNONCES CLASSIQUES (toutes catégories) : 1 000 FCFA pour 30 jours · 2 500 FCFA pour 90 jours · 4 500 FCFA pour 180 jours · 8 000 FCFA pour 360 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. SPONSORING : 500 FCFA par semaine · 1 500 FCFA par mois. BADGE URGENT : 200 FCFA pour 3 jours · 300 FCFA pour 7 jours. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Après 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
+              content:`TARIFS DE PUBLICATION : Tous les inscrits bénéficient de 4 jours gratuits par mois pour tous types d'annonces. ANNONCES CLASSIQUES (toutes catégories) : 1 000 FCFA pour 30 jours · 2 500 FCFA pour 90 jours · 4 500 FCFA pour 180 jours · 8 000 FCFA pour 360 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. SPONSORING : 500 FCFA par semaine · 1 500 FCFA par mois. BADGE URGENT : 500 FCFA pour 6 heures · 1 000 FCFA pour 24 heures. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Après 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
             },
             {
               num:"4",
@@ -6051,18 +6059,19 @@ function AppContent() {
                   <p style={{ color:theme.sub,fontSize:13 }}>Un badge 🔥 URGENT rouge animé s'affiche sur votre annonce — visible par tous.</p>
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
-                  {[{dur:"3 jours",price:200,days:3},{dur:"7 jours",price:300,days:7}].map(opt=>(
+                  {[{dur:"6 heures",price:500,hours:6},{dur:"24 heures",price:1000,hours:24}].map(opt=>(
                     <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Badge Urgent ${opt.dur} sur MarchéduRoi`,async()=>{
-                      const until = new Date(); until.setDate(until.getDate()+opt.days);
-                      const urgent_until = until.toISOString().slice(0,10);
-                      const {error} = await supabase.from("posts").update({urgent:true, urgent_until}).eq("id",modal.data.id);
+                      const until = new Date(); until.setHours(until.getHours()+opt.hours);
+                      const urgent_until = until.toISOString();
+                      const urgent_activated_at = new Date().toISOString();
+                      const {error} = await supabase.from("posts").update({urgent:true, urgent_until, urgent_activated_at}).eq("id",modal.data.id);
                       if (error) { notify("Erreur activation badge urgent","error"); return; }
-                      setPosts(p=>p.map(x=>x.id===modal.data.id?{...x,urgent:true,urgentUntil:urgent_until}:x));
-                      setModal(null); notify("🔥 Badge Urgent activé jusqu'au "+urgent_until);
+                      setPosts(p=>p.map(x=>x.id===modal.data.id?{...x,urgent:true,urgentUntil:urgent_until,urgentActivatedAt:urgent_activated_at}:x));
+                      setModal(null); notify("🔥 Badge Urgent activé pour "+opt.dur+" !");
                     })} style={{ background:theme.card,border:"2px solid #FF4757",borderRadius:14,padding:20,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                       <div>
                         <p style={{ fontWeight:800,fontSize:15,color:"#FF4757",marginBottom:4 }}>🔥 Urgent {opt.dur}</p>
-                        <p style={{ color:theme.sub,fontSize:13 }}>Badge animé rouge pendant {opt.dur}</p>
+                        <p style={{ color:theme.sub,fontSize:13 }}>1ère position + badge animé rouge pendant {opt.dur}</p>
                       </div>
                       <span style={{ fontWeight:800,fontSize:20,color:"#FF4757" }}>{opt.price} FCFA</span>
                     </div>
