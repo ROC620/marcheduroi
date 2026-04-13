@@ -1362,6 +1362,10 @@ function AppContent() {
     });
     supabase.auth.onAuthStateChange((event, session) => {
       if (!session) { setUser(null); return; }
+      if (event === "PASSWORD_RECOVERY") {
+        setView("reset-password");
+        return;
+      }
       if (event === "SIGNED_IN" || event === "USER_UPDATED") {
         // Attendre un peu que le profil soit créé
         setTimeout(() => {
