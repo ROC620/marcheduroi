@@ -609,6 +609,20 @@ function AppContent() {
             "contact",
             payload.new.post_id
           );
+          // Notification push système (même si le site est en arrière-plan)
+          if (Notification.permission === "granted") {
+            const notif = new Notification("💬 Nouveau message — MarchéduRoi", {
+              body: `${payload.new.sender_name} : "${payload.new.content.slice(0, 60)}"`,
+              icon: "/marcheduRoi-icon.svg",
+              badge: "/marcheduRoi-icon.svg",
+              tag: "message_" + payload.new.post_id,
+              renotify: true,
+            });
+            notif.onclick = () => {
+              window.focus();
+              notif.close();
+            };
+          }
         })
         .subscribe();
 
