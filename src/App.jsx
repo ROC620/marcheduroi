@@ -336,6 +336,98 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+function UrgentBanner({ posts, theme, navigate, windowWidth }) {
+  const [idx, setIdx] = React.useState(0);
+  const scrollRef = React.useRef(null);
+
+  const urgents = posts.filter(p =>
+    p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date()
+  ).sort((a, b) =>
+    new Date(b.urgentActivatedAt || b.urgentUntil) - new Date(a.urgentActivatedAt || a.urgentUntil)
+  );
+
+  // Compteur de temps restant
+  const getTimeLeft = (until) => {
+    const diff = new Date(until) - new Date();
+    if (diff <= 0) return "Expiré";
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    if (h > 0) return `⏳ ${h}h${m > 0 ? m + "m" : ""} restant${h > 1 ? "s" : ""}`;
+    return `⏳ ${m} min restantes`;
+  };
+
+  const [times, setTimes] = React.useState(() => urgents.map(p => getTimeLeft(p.urgentUntil)));
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setTimes(urgents.map(p => getTimeLeft(p.urgentUntil)));
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [urgents.length]);
+
+  if (urgents.length === 0) return null;
+
+  // Card width responsive
+  const cardW = windowWidth <= 500 ? 160 : windowWidth <= 800 ? 190 : 220;
+
+  const scrollTo = (dir) => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollBy({ left: dir * (cardW + 12), behavior: "smooth" });
+  };
+
+  return (
+    <div style={{ marginBottom: 24, width: "100%" }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: windowWidth <= 500 ? 16 : 20 }}>🔥</span>
+          <p style={{ fontWeight: 800, fontSize: windowWidth <= 500 ? 14 : 16, color: "#FF4757", letterSpacing: 0.5 }}>
+            EN CE MOMENT
+          </p>
+          <span style={{ background: "rgba(255,71,87,0.15)", color: "#FF4757", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>
+            {urgents.length}
+          </span>
+        </div>
+        {urgents.length > 2 && (
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={() => scrollTo(-1)} style={{ background: "rgba(255,71,87,0.1)", border: "1px solid rgba(255,71,87,0.3)", color: "#FF4757", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
+            <button onClick={() => scrollTo(1)} style={{ background: "rgba(255,71,87,0.1)", border: "1px solid rgba(255,71,87,0.3)", color: "#FF4757", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
+          </div>
+        )}
+      </div>
+
+      {/* Scrollable cards */}
+      <div ref={scrollRef} style={{ display: "flex", gap: 12, overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", paddingBottom: 4 }}>
+        {urgents.map((post, i) => (
+          <div key={post.id} onClick={() => navigate("/annonce/" + post.id)}
+            className="card-urgent"
+            style={{ flexShrink: 0, width: cardW, borderRadius: 14, overflow: "hidden", cursor: "pointer", border: "2px solid #FF4757", background: theme.card, position: "relative" }}>
+            {/* Photo */}
+            <div style={{ width: "100%", height: windowWidth <= 500 ? 100 : 130, background: "linear-gradient(135deg,#1a1d30,#2a2d45)", position: "relative", overflow: "hidden" }}>
+              {post.photos && post.photos[0]
+                ? <img src={post.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>📦</div>
+              }
+              {/* Badge URGENT overlay */}
+              <div style={{ position: "absolute", top: 8, left: 8, background: "#FF4757", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 800, letterSpacing: 0.5 }}>
+                🔥 URGENT
+              </div>
+            </div>
+            {/* Content */}
+            <div style={{ padding: "10px 12px" }}>
+              <p style={{ fontWeight: 700, fontSize: 13, color: theme.text, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{post.title}</p>
+              {post.price && <p style={{ fontWeight: 700, fontSize: 13, color: "#43C6AC", marginBottom: 4 }}>{post.price} FCFA</p>}
+              <p style={{ fontSize: 11, color: "#FF4757", fontWeight: 600 }}>{times[i] || getTimeLeft(post.urgentUntil)}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Separator */}
+      <div style={{ borderBottom: `1px solid ${theme.border}`, marginTop: 16 }} />
+    </div>
+  );
+}
+
 function FlagCylinder({ theme }) {
   const [angle, setAngle] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -2263,13 +2355,6 @@ function AppContent() {
     ...p,
     distance: userLocation && p.lat && p.lng ? getDistance(userLocation.lat, userLocation.lng, parseFloat(p.lat), parseFloat(p.lng)) : null
   })).sort((a,b)=>{
-    const aUrgent = a.urgent && a.urgentUntil && new Date(a.urgentUntil) > new Date();
-    const bUrgent = b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date();
-    if (aUrgent && !bUrgent) return -1;
-    if (!aUrgent && bUrgent) return 1;
-    if (aUrgent && bUrgent) {
-      return new Date(b.urgentActivatedAt||b.urgentUntil) - new Date(a.urgentActivatedAt||a.urgentUntil);
-    }
     if (a.sponsored && !b.sponsored) return -1;
     if (!a.sponsored && b.sponsored) return 1;
     if (sortByDistance) {
@@ -3051,6 +3136,9 @@ function AppContent() {
 
           {/* Annonces en vedette */}
           
+
+          {/* Bandeau Urgent — EN CE MOMENT */}
+          <UrgentBanner posts={posts} theme={theme} navigate={navigate} windowWidth={windowWidth}/>
 
           {/* Résultats de recherche globale — boutiques, ateliers, restos, beauté */}
           {globalSearch.length > 0 && (
