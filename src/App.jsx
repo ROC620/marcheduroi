@@ -336,7 +336,7 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-function UrgentBanner({ posts, theme, navigate, windowWidth }) {
+function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth }) {
   const scrollRef = React.useRef(null);
   const autoScrollRef = React.useRef(null);
   const pausedRef = React.useRef(false);
@@ -3194,7 +3194,7 @@ function AppContent() {
           
 
           {/* Bandeau Urgent — EN CE MOMENT */}
-          <UrgentBanner posts={posts} theme={theme} navigate={navigate} windowWidth={windowWidth}/>
+          <UrgentBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth}/>
 
           {/* Résultats de recherche globale — boutiques, ateliers, restos, beauté */}
           {globalSearch.length > 0 && (
