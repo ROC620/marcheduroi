@@ -341,11 +341,14 @@ function UrgentBanner({ posts, theme, navigate, windowWidth }) {
   const autoScrollRef = React.useRef(null);
   const pausedRef = React.useRef(false);
 
-  const urgents = posts.filter(p =>
-    p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date()
-  ).sort((a, b) =>
-    new Date(b.urgentActivatedAt || b.urgentUntil) - new Date(a.urgentActivatedAt || a.urgentUntil)
-  );
+  const allUrgents = [
+    ...posts.filter(p => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date()).map(p => ({...p, _urgentType:"annonce", _urgentIcon:"📋", _urgentLabel:"Annonce"})),
+    ...boutiques.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"boutique", _urgentIcon:"🛍️", _urgentLabel:"Boutique"})),
+    ...ateliers.filter(a => a.urgent && a.urgentUntil && new Date(a.urgentUntil) > new Date()).map(a => ({...a, title:a.name, _urgentType:"atelier", _urgentIcon:"🔧", _urgentLabel:"Atelier"})),
+    ...restos.filter(r => r.urgent && r.urgentUntil && new Date(r.urgentUntil) > new Date()).map(r => ({...r, title:r.name, _urgentType:"resto", _urgentIcon:"🍽️", _urgentLabel:"Restaurant"})),
+    ...beaute.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"beaute", _urgentIcon:"💇", _urgentLabel:"Beauté"})),
+  ].sort((a, b) => new Date(b.urgentActivatedAt || b.urgentUntil) - new Date(a.urgentActivatedAt || a.urgentUntil));
+  const urgents = allUrgents;
 
   const getTimeLeft = (until) => {
     const diff = new Date(until) - new Date();
@@ -420,7 +423,7 @@ function UrgentBanner({ posts, theme, navigate, windowWidth }) {
         onTouchStart={pause} onTouchEnd={()=>setTimeout(resume,2000)}
         style={{ display: "flex", gap: 12, overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", paddingBottom: 4 }}>
         {urgents.map((post, i) => (
-          <div key={post.id} onClick={() => navigate("/annonce/" + post.id)}
+          <div key={post.id} onClick={() => navigate(`/${post._urgentType==="annonce"?"annonce":post._urgentType}/${post.id}`)}
             className="card-urgent"
             style={{ flexShrink: 0, width: cardW, borderRadius: 14, overflow: "hidden", cursor: "pointer", border: "2px solid #FF4757", background: theme.card, position: "relative" }}>
             {/* Photo */}
@@ -433,6 +436,11 @@ function UrgentBanner({ posts, theme, navigate, windowWidth }) {
               <div style={{ position: "absolute", top: 8, left: 8, background: "#FF4757", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 800, letterSpacing: 0.5 }}>
                 🔥 URGENT
               </div>
+              {post._urgentIcon && post._urgentType !== "annonce" && (
+                <div style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.55)", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>
+                  {post._urgentIcon} {post._urgentLabel}
+                </div>
+              )}
             </div>
             {/* Content */}
             <div style={{ padding: "10px 12px" }}>
@@ -784,7 +792,7 @@ function AppContent() {
 
   const loadShops = async () => {
     try {
-      const mapItem = x => ({...x, authorId: x.author_id, expiresAt: x.expires_at, sponsoredUntil: x.sponsored_until, photos: x.photos||[], likes: x.likes||0});
+      const mapItem = x => ({...x, authorId: x.author_id, expiresAt: x.expires_at, sponsoredUntil: x.sponsored_until, urgentUntil: x.urgent_until, urgentActivatedAt: x.urgent_activated_at, photos: x.photos||[], likes: x.likes||0});
       const { data: bData } = await supabase.from("boutiques").select("*").order("created_at", { ascending: false }).range(0, 99);
       if (bData && bData.length > 0) setBoutiques(bData.map(mapItem));
       const { data: aData } = await supabase.from("ateliers").select("*").order("created_at", { ascending: false }).range(0, 99);
@@ -1330,6 +1338,12 @@ function AppContent() {
   const removeUrgent = async (postId) => {
     await supabase.from("posts").update({ urgent: false, urgent_until: null }).eq("id", postId);
     setPosts(p => p.map(x => x.id === postId ? { ...x, urgent: false, urgentUntil: null } : x));
+    notify("🔥 Badge Urgent retiré ✅");
+  };
+
+  const removeUrgentShop = async (itemId, table, setter) => {
+    await supabase.from(table).update({ urgent: false, urgent_until: null, urgent_activated_at: null }).eq("id", itemId);
+    setter(prev => prev.map(x => x.id === itemId ? { ...x, urgent: false, urgentUntil: null, urgentActivatedAt: null } : x));
     notify("🔥 Badge Urgent retiré ✅");
   };
 
@@ -4300,6 +4314,8 @@ function AppContent() {
                     <button onClick={()=>setModal({type:"report",data:{...b,title:b.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===b.authorId||user.role==="admin")&&(
                       <>
+                        {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && !b.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"boutiques",shopSetter:"setBoutiques"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {b.urgent&&new Date(b.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(b.id,"boutiques",setBoutiques)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>openEditShop(b,"boutique",editShop)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -4402,6 +4418,8 @@ function AppContent() {
                     <button onClick={()=>setModal({type:"report",data:{...a,title:a.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===a.authorId||user.role==="admin")&&(
                       <>
+                        {!(a.urgent&&new Date(a.urgentUntil)>new Date()) && !a.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...a,title:a.name},shopTable:"ateliers",shopSetter:"setAteliers"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {a.urgent&&new Date(a.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(a.id,"ateliers",setAteliers)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>openEditShop(a,"atelier",editShop)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -4508,6 +4526,8 @@ function AppContent() {
                     <button onClick={()=>setModal({type:"report",data:{...r,title:r.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===r.authorId||user.role==="admin")&&(
                       <>
+                        {!(r.urgent&&new Date(r.urgentUntil)>new Date()) && !r.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...r,title:r.name},shopTable:"restos",shopSetter:"setRestos"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {r.urgent&&new Date(r.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(r.id,"restos",setRestos)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>openEditShop(r,"resto",editResto)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -4607,6 +4627,8 @@ function AppContent() {
                     </a>
                     {user&&(user.id===b.authorId||user.role==="admin")&&(
                       <>
+                        {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && !b.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"beaute",shopSetter:"setBeaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {b.urgent&&new Date(b.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(b.id,"beaute",setBeaute)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>openEditShop(b,"beaute",editBeaute)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -6281,6 +6303,41 @@ function AppContent() {
               </>
             )}
 
+
+            {/* URGENT SHOP — boutiques/ateliers/restos/beauté */}
+            {modal.type==="urgentShop"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>🔥 Badge Urgent</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
+                  <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>{modal.data.title}</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Votre établissement apparaît dans le bandeau 🔥 EN CE MOMENT — visible en tête de page par tous les visiteurs.</p>
+                </div>
+                <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
+                  {[{dur:"6 heures",price:500,hours:6},{dur:"24 heures",price:1000,hours:24}].map(opt=>(
+                    <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Badge Urgent ${opt.dur} sur MarchéduRoi`,async()=>{
+                      const until = new Date(); until.setHours(until.getHours()+opt.hours);
+                      const urgent_until = until.toISOString();
+                      const urgent_activated_at = new Date().toISOString();
+                      const setterMap = {boutiques:setBoutiques, ateliers:setAteliers, restos:setRestos, beaute:setBeaute};
+                      const setter = setterMap[modal.shopTable];
+                      const {error} = await supabase.from(modal.shopTable).update({urgent:true, urgent_until, urgent_activated_at}).eq("id",modal.data.id);
+                      if (error) { notify("Erreur activation badge urgent","error"); return; }
+                      if (setter) setter(prev=>prev.map(x=>x.id===modal.data.id?{...x,urgent:true,urgentUntil:urgent_until,urgentActivatedAt:urgent_activated_at}:x));
+                      setModal(null); notify("🔥 Badge Urgent activé pour "+opt.dur+" !");
+                    })} style={{ background:theme.card,border:"2px solid #FF4757",borderRadius:14,padding:20,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                      <div>
+                        <p style={{ fontWeight:800,fontSize:15,color:"#FF4757",marginBottom:4 }}>🔥 Urgent {opt.dur}</p>
+                        <p style={{ color:theme.sub,fontSize:13 }}>Bandeau EN CE MOMENT pendant {opt.dur}</p>
+                      </div>
+                      <span style={{ fontWeight:800,fontSize:20,color:"#FF4757" }}>{opt.price} FCFA</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* PROLONGATION */}
             {modal.type==="prolong"&&(
