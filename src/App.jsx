@@ -337,8 +337,9 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function UrgentBanner({ posts, theme, navigate, windowWidth }) {
-  const [idx, setIdx] = React.useState(0);
   const scrollRef = React.useRef(null);
+  const autoScrollRef = React.useRef(null);
+  const pausedRef = React.useRef(false);
 
   const urgents = posts.filter(p =>
     p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date()
@@ -346,7 +347,6 @@ function UrgentBanner({ posts, theme, navigate, windowWidth }) {
     new Date(b.urgentActivatedAt || b.urgentUntil) - new Date(a.urgentActivatedAt || a.urgentUntil)
   );
 
-  // Compteur de temps restant
   const getTimeLeft = (until) => {
     const diff = new Date(until) - new Date();
     if (diff <= 0) return "Expiré";
@@ -364,14 +364,33 @@ function UrgentBanner({ posts, theme, navigate, windowWidth }) {
     return () => clearInterval(timer);
   }, [urgents.length]);
 
+  // Auto-scroll modéré — 3px toutes les 30ms ≈ vitesse douce
+  React.useEffect(() => {
+    if (urgents.length <= 1) return;
+    autoScrollRef.current = setInterval(() => {
+      if (pausedRef.current || !scrollRef.current) return;
+      const el = scrollRef.current;
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 2) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollLeft += 2;
+      }
+    }, 30);
+    return () => clearInterval(autoScrollRef.current);
+  }, [urgents.length]);
+
+  const pause = () => { pausedRef.current = true; };
+  const resume = () => { pausedRef.current = false; };
+
   if (urgents.length === 0) return null;
 
-  // Card width responsive
   const cardW = windowWidth <= 500 ? 160 : windowWidth <= 800 ? 190 : 220;
 
   const scrollTo = (dir) => {
     if (!scrollRef.current) return;
+    pause();
     scrollRef.current.scrollBy({ left: dir * (cardW + 12), behavior: "smooth" });
+    setTimeout(resume, 2000);
   };
 
   return (
@@ -396,7 +415,10 @@ function UrgentBanner({ posts, theme, navigate, windowWidth }) {
       </div>
 
       {/* Scrollable cards */}
-      <div ref={scrollRef} style={{ display: "flex", gap: 12, overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", paddingBottom: 4 }}>
+      <div ref={scrollRef}
+        onMouseEnter={pause} onMouseLeave={resume}
+        onTouchStart={pause} onTouchEnd={()=>setTimeout(resume,2000)}
+        style={{ display: "flex", gap: 12, overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", paddingBottom: 4 }}>
         {urgents.map((post, i) => (
           <div key={post.id} onClick={() => navigate("/annonce/" + post.id)}
             className="card-urgent"
@@ -3266,26 +3288,6 @@ function AppContent() {
                     </div>
                   )}
 
-                  {/* Mini fiche immobilière sur la carte */}
-                  {post.immo&&(
-                    <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:10 }}>
-                      {[{v:post.immo.transaction},{v:post.immo.sousType},{v:post.immo.superficie?(post.immo.superficie+" "+(post.immo.superficieUnit||"m²")):null},{v:post.immo.pieces?(post.immo.pieces+" pièce"+(parseInt(post.immo.pieces)>1?"s":"")):null},{v:post.immo.ville}].filter(f=>f.v).map((f,i)=>(
-                        <span key={i} className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{f.v}</span>
-                      ))}
-                    </div>
-                  )}
-                  {/* Mini fiche véhicule sur la carte */}
-                  {post.vehicle&&(
-                    <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:10 }}>
-                      {[{k:"marque",v:post.vehicle.marque},{k:"modele",v:post.vehicle.modele},{k:"annee",v:post.vehicle.annee},{k:"carburant",v:post.vehicle.carburant},{k:"cylindree",v:post.vehicle.cylindree},{k:"etat",v:post.vehicle.etat}].filter(f=>f.v).map(f=>(
-                        <span key={f.k} className="tag" style={{ background:`${theme.bg}`,border:`1px solid ${theme.border}`,color:theme.sub }}>{f.v}</span>
-                      ))}
-                      {post.vehicle.position&&<span className="tag" style={{ background:`${theme.bg}`,border:`1px solid ${theme.border}`,color:theme.sub,display:"flex",alignItems:"center",gap:3 }}><Icon name="pin" size={9}/>{post.vehicle.position}</span>}
-                    </div>
-                  )}
-
-                  <p style={{ color:theme.sub,fontSize:12,lineHeight:1.4,marginBottom:10 }}>{post.description.length>80?post.description.slice(0,80)+"...":post.description}</p>
-
                   {/* Bouton Contacter — toujours visible, déplie tout */}
                   <button onClick={(e)=>{
                     e.stopPropagation();
@@ -3306,6 +3308,26 @@ function AppContent() {
                   {/* Panneau déplié — clic intérieur ne ferme pas */}
                   {expandedContacts[post.id] && (
                     <div onClick={e=>e.stopPropagation()} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
+
+                      {/* Mini fiche immobilière */}
+                      {post.immo&&(
+                        <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:10 }}>
+                          {[{v:post.immo.transaction},{v:post.immo.sousType},{v:post.immo.superficie?(post.immo.superficie+" "+(post.immo.superficieUnit||"m²")):null},{v:post.immo.pieces?(post.immo.pieces+" pièce"+(parseInt(post.immo.pieces)>1?"s":"")):null},{v:post.immo.ville}].filter(f=>f.v).map((f,i)=>(
+                            <span key={i} className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{f.v}</span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Mini fiche véhicule */}
+                      {post.vehicle&&(
+                        <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:10 }}>
+                          {[{k:"marque",v:post.vehicle.marque},{k:"modele",v:post.vehicle.modele},{k:"annee",v:post.vehicle.annee},{k:"carburant",v:post.vehicle.carburant},{k:"cylindree",v:post.vehicle.cylindree},{k:"etat",v:post.vehicle.etat}].filter(f=>f.v).map(f=>(
+                            <span key={f.k} className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{f.v}</span>
+                          ))}
+                          {post.vehicle.position&&<span className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub,display:"flex",alignItems:"center",gap:3 }}><Icon name="pin" size={9}/>{post.vehicle.position}</span>}
+                        </div>
+                      )}
+                      {/* Description */}
+                      <p style={{ color:theme.sub,fontSize:12,lineHeight:1.4,marginBottom:10 }}>{post.description.length>120?post.description.slice(0,120)+"...":post.description}</p>
 
                       {/* Auteur + badge vérifié */}
                       <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,paddingBottom:10,borderBottom:`1px solid ${theme.border}` }}>
@@ -6370,7 +6392,7 @@ function AnnonceDetail() {
           <button onClick={handleShare} style={{ background:"rgba(108,99,255,0.15)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             🔗 Partager
           </button>
-          <button onClick={()=>navigate("/")} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+          <button onClick={()=>{ if(window.history.length>1){ navigate(-1); } else { navigate("/"); }}} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             ← Retour
           </button>
         </div>
