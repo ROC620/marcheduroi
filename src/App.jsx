@@ -4144,6 +4144,67 @@ function AppContent() {
             </div>
           </div>
 
+          {/* Bloc légal RCCM + IFU */}
+          <div style={{ maxWidth:700,margin:"0 auto 48px",padding:"0 16px" }}>
+            <div style={{ background:`linear-gradient(135deg,rgba(108,99,255,0.06),rgba(67,198,172,0.06))`,border:`2px solid rgba(108,99,255,0.25)`,borderRadius:20,padding:windowWidth<=600?24:36,position:"relative",overflow:"hidden" }}>
+              {/* Filigrane décoratif */}
+              <div style={{ position:"absolute",right:-20,top:-20,width:120,height:120,borderRadius:"50%",background:"rgba(108,99,255,0.06)",pointerEvents:"none" }}/>
+              <div style={{ position:"absolute",left:-30,bottom:-30,width:160,height:160,borderRadius:"50%",background:"rgba(67,198,172,0.05)",pointerEvents:"none" }}/>
+
+              {/* En-tête */}
+              <div style={{ display:"flex",alignItems:"center",gap:14,marginBottom:24 }}>
+                <div style={{ width:52,height:52,borderRadius:14,background:"linear-gradient(135deg,#6C63FF,#43C6AC)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:24 }}>🏛️</div>
+                <div>
+                  <p style={{ fontWeight:800,fontSize:18,color:theme.text,marginBottom:2 }}>Entreprise légalement enregistrée</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>République du Bénin · Afrique de l'Ouest</p>
+                </div>
+              </div>
+
+              {/* Séparateur */}
+              <div style={{ height:1,background:`linear-gradient(to right,rgba(108,99,255,0.3),transparent)`,marginBottom:20 }}/>
+
+              {/* Informations légales */}
+              <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
+                {/* Raison sociale */}
+                <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
+                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>Raison sociale</span>
+                  <span style={{ fontWeight:800,fontSize:15,color:theme.text }}>EDENPORTAIL</span>
+                </div>
+
+                {/* RCCM */}
+                <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
+                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>N° RCCM</span>
+                  <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+                    <span style={{ fontWeight:800,fontSize:15,color:"#6C63FF",fontFamily:"monospace",letterSpacing:0.5 }}>RB/ABC/26 A 139457</span>
+                    <span style={{ background:"rgba(67,198,172,0.15)",color:"#43C6AC",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700 }}>✅ Vérifié</span>
+                  </div>
+                </div>
+
+                {/* IFU */}
+                <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
+                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>N° IFU</span>
+                  <span style={{ fontWeight:800,fontSize:15,color:"#43C6AC",fontFamily:"monospace",letterSpacing:0.5 }}>0202656155829</span>
+                </div>
+
+                {/* Siège */}
+                <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
+                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>Siège social</span>
+                  <span style={{ fontWeight:600,fontSize:14,color:theme.text }}>Ouidah, République du Bénin 🇧🇯</span>
+                </div>
+              </div>
+
+              {/* Séparateur */}
+              <div style={{ height:1,background:`linear-gradient(to right,rgba(67,198,172,0.3),transparent)`,margin:"20px 0" }}/>
+
+              {/* Mention de confiance */}
+              <p style={{ color:theme.sub,fontSize:12,lineHeight:1.7,fontStyle:"italic" }}>
+                EDENPORTAIL est un établissement spécialisé dans la création et le référencement de sites internet, 
+                légalement reconnu et enregistré auprès des autorités commerciales de la République du Bénin. 
+                MarchéduRoi est exploitée conformément aux lois et règlements en vigueur au Bénin et dans l'espace UEMOA.
+              </p>
+            </div>
+          </div>
+
           {/* Footer about */}
           <div style={{ textAlign:"center",padding:"32px 0",borderTop:`1px solid ${theme.border}` }}>
             <p style={{ color:theme.sub,fontSize:14,marginBottom:16 }}>© 2026 MarchéduRoi · Tous droits réservés · Ouidah, Bénin</p>
