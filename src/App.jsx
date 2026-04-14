@@ -2041,7 +2041,7 @@ function AppContent() {
 
   const editPost = async () => {
     const updatedPost = {...posts.find(p=>p.id===modal.data.id),...postForm,photos:postPhotos,video:postVideo||null,vehicle:isVehicle?vehicleForm:null};
-    await supabase.from("posts").update({
+    const { error, data } = await supabase.from("posts").update({
       title: updatedPost.title,
       category: updatedPost.category,
       description: updatedPost.description,
@@ -2054,10 +2054,19 @@ function AppContent() {
       lat: updatedPost.lat || null,
       lng: updatedPost.lng || null,
       immo: updatedPost.immo || null,
-    }).eq("id", modal.data.id);
+    }).eq("id", modal.data.id).select();
+    if (error) {
+      console.error("Erreur modification:", error);
+      notify("Erreur lors de la modification : " + error.message, "error");
+      return;
+    }
+    if (!data || data.length === 0) {
+      notify("Annonce introuvable dans la base de données", "error");
+      return;
+    }
     setPosts(p=>p.map(post=>post.id===modal.data.id?updatedPost:post));
-    setModal(null); notify("Annonce modifiée !");
-    // Recharger depuis Supabase pour avoir les données à jour
+    setModal(null);
+    notify("✅ Annonce modifiée avec succès !");
     setTimeout(() => loadPosts(), 500);
   };
 
@@ -3354,7 +3363,7 @@ function AppContent() {
                         <button onClick={()=>{ const url="https://marcheduroi.com/annonce/"+post.id; if(navigator.share){navigator.share({title:post.title,url});}else{navigator.clipboard.writeText(url);notify("🔗 Lien copié !"); }}} style={{ background:"rgba(0,0,0,0.06)",border:"none",color:theme.text,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:3 }}>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                         </button>
-                        {user&&(user.id===post.authorId||user.role==="admin")&&canEdit&&(
+                        {user&&(user.id===post.authorId||user.role==="admin")&&(
                           <><button onClick={()=>openEdit(post)} style={{ background:"transparent",border:"none",color:"#6C63FF",padding:6,borderRadius:6 }}><Icon name="edit" size={14}/></button><button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"transparent",border:"none",color:"#FF4757",padding:6,borderRadius:6 }}><Icon name="trash" size={14}/></button></>
                         )}
                       </div>
