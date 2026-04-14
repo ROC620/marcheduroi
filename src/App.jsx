@@ -1458,6 +1458,14 @@ function AppContent() {
 
   const notify = (msg, type="success") => { setNotification({msg,type}); setTimeout(()=>setNotification(null),3000); };
 
+  // Seed aléatoire unique par session — mélange les annonces différemment pour chaque visiteur
+  const [sessionSeed] = React.useState(() => Math.random());
+  const shufflePosts = (arr) => {
+    const seeded = [...arr].map((item, i) => ({ item, sort: (sessionSeed * (i + 1) * 9301 + 49297) % 233280 }));
+    seeded.sort((a, b) => a.sort - b.sort);
+    return seeded.map(x => x.item);
+  };
+
   useEffect(() => {
     if (window.location.pathname === "/reset-password") {
       setViewState("reset-password");
@@ -2332,7 +2340,7 @@ function AppContent() {
   };
 
   const userCountry = getUserCountry();
-  const filtered = posts.filter(p=>{
+  const filteredBase = posts.filter(p=>{
     if (p.expired) return false;
     if (category!=="Toutes" && p.category!==category) return false;
     if (search && !normalizeText(p.title).includes(normalizeText(search)) && !normalizeText(p.description).includes(normalizeText(search))) return false;
@@ -2354,16 +2362,19 @@ function AppContent() {
   }).map(p=>({
     ...p,
     distance: userLocation && p.lat && p.lng ? getDistance(userLocation.lat, userLocation.lng, parseFloat(p.lat), parseFloat(p.lng)) : null
-  })).sort((a,b)=>{
-    if (a.sponsored && !b.sponsored) return -1;
-    if (!a.sponsored && b.sponsored) return 1;
+  }));
+
+  // Urgent actif = dans le bandeau seulement — exclu du tri principal
+  const isUrgentActive = (p) => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date();
+  const filtered = (() => {
+    const sponsored = filteredBase.filter(p => p.sponsored && !isUrgentActive(p));
+    const normal = filteredBase.filter(p => !p.sponsored && !isUrgentActive(p));
     if (sortByDistance) {
-      if (a.distance===null) return 1;
-      if (b.distance===null) return -1;
-      return a.distance - b.distance;
+      const all = [...sponsored, ...normal];
+      return [...all.filter(p=>p.distance!==null).sort((a,b)=>a.distance-b.distance), ...all.filter(p=>p.distance===null)];
     }
-    return 0;
-  });
+    return [...shufflePosts(sponsored), ...shufflePosts(normal)];
+  })();
 
   // Recherche globale — toutes les sections (boutiques, ateliers, restos, beauté)
   const globalSearch = search.trim().length > 1 ? [
@@ -3174,7 +3185,7 @@ function AppContent() {
 
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
             {filtered.slice(0, visibleCount).map(post=>(
-              <div key={post.id} className={`card-hover${post.sponsored?" card-sponsored":post.urgent&&new Date(post.urgentUntil)>new Date()?" card-urgent":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:post.sponsored?"2px solid #FFD700":post.urgent&&new Date(post.urgentUntil)>new Date()?"2px solid #FF4757":`1px solid ${theme.border}` }}>
+              <div key={post.id} className={`card-hover${post.sponsored&&!isUrgentActive(post)?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:post.sponsored&&!isUrgentActive(post)?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 {post.video
                   ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60}/>
                   : post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
@@ -3209,14 +3220,9 @@ function AppContent() {
                   ) : null; })()}
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6,alignItems:"center" }}>
 
-                    {post.sponsored && (
+                    {post.sponsored && !isUrgentActive(post) && (
                       <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,color:"#000" }}>
                         🌟 Sponsorisé
-                      </div>
-                    )}
-                    {post.urgent && new Date(post.urgentUntil) > new Date() && (
-                      <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#FF4757,#FF6584)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,color:"#fff",animation:"pulse 1.5s infinite" }}>
-                        🔥 URGENT
                       </div>
                     )}
                     {post.flash && new Date(post.flashUntil) > new Date() && (
@@ -3519,9 +3525,10 @@ function AppContent() {
                 </div>
                 <div style={{ display:"flex",gap:8,flexShrink:0,flexWrap:"wrap" }}>
                   {post.expiresAt&&<button onClick={()=>setModal({type:"prolong",data:post})} style={{ background:"rgba(67,198,172,0.15)",border:"none",color:"#43C6AC",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>⏳ Prolonger</button>}
-                  {!post.sponsored&&<button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.15)",border:"none",color:"#FFD700",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🌟 Sponsoriser</button>}
-                  {!(post.urgent&&new Date(post.urgentUntil)>new Date())&&<button onClick={()=>setModal({type:"urgent",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🔥 Urgent</button>}
-                  {post.urgent&&new Date(post.urgentUntil)>new Date()&&<button onClick={()=>removeUrgent(post.id)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid rgba(255,71,87,0.4)",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>✕ Retirer urgent</button>}
+                  {!post.sponsored && !isUrgentActive(post) && <button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.15)",border:"none",color:"#FFD700",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🌟 Sponsoriser</button>}
+                  {isUrgentActive(post) && post.sponsored && <span style={{ fontSize:11,color:"#FF8C00",fontWeight:600,padding:"7px 12px" }}>🌟 Sponsorisé suspendu</span>}
+                  {!isUrgentActive(post) && <button onClick={()=>setModal({type:"urgent",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🔥 Urgent</button>}
+                  {isUrgentActive(post) && <button onClick={()=>removeUrgent(post.id)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid rgba(255,71,87,0.4)",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>✕ Retirer urgent</button>}
                   <button onClick={()=>openEdit(post)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>✏️ Modifier</button>
                   <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🗑️</button>
                 </div>
