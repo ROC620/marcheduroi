@@ -2080,6 +2080,7 @@ function AppContent() {
     }
     FedaPay.init({
       public_key: FEDAPAY_PUBLIC_KEY,
+      environment: FEDAPAY_PUBLIC_KEY.startsWith("pk_live") ? "live" : "sandbox",
       transaction: {
         amount: amount,
         description: description,
