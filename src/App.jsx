@@ -1832,7 +1832,13 @@ function AppContent() {
 
   const updatePassword = async () => {
     if (!newPassword || newPassword.length < 6) { notify("Mot de passe trop court (min. 6 caractères)","error"); return; }
-    const { data: { session } } = await supabase.auth.getSession();
+    // Attendre que la session soit disponible (max 5 secondes)
+    let session = null;
+    for (let i = 0; i < 10; i++) {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session) { session = data.session; break; }
+      await new Promise(r => setTimeout(r, 500));
+    }
     if (!session) {
       notify("Session expirée. Veuillez cliquer à nouveau sur le lien reçu par email.","error");
       return;
