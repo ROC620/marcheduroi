@@ -458,6 +458,115 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
   );
 }
 
+// ─── Composant PhoneInput avec indicatif pays ────────────────────────────────
+const COUNTRY_CODES = [
+  // Afrique francophone — prioritaires
+  { code: "+229", flag: "🇧🇯", name: "Bénin", digits: 8 },
+  { code: "+228", flag: "🇹🇬", name: "Togo", digits: 8 },
+  { code: "+225", flag: "🇨🇮", name: "Côte d'Ivoire", digits: 10 },
+  { code: "+221", flag: "🇸🇳", name: "Sénégal", digits: 9 },
+  { code: "+223", flag: "🇲🇱", name: "Mali", digits: 8 },
+  { code: "+226", flag: "🇧🇫", name: "Burkina Faso", digits: 8 },
+  { code: "+227", flag: "🇳🇪", name: "Niger", digits: 8 },
+  { code: "+224", flag: "🇬🇳", name: "Guinée", digits: 9 },
+  { code: "+237", flag: "🇨🇲", name: "Cameroun", digits: 9 },
+  { code: "+241", flag: "🇬🇦", name: "Gabon", digits: 8 },
+  { code: "+242", flag: "🇨🇬", name: "Congo", digits: 9 },
+  { code: "+243", flag: "🇨🇩", name: "RDC", digits: 9 },
+  { code: "+212", flag: "🇲🇦", name: "Maroc", digits: 9 },
+  { code: "+213", flag: "🇩🇿", name: "Algérie", digits: 9 },
+  { code: "+216", flag: "🇹🇳", name: "Tunisie", digits: 8 },
+  { code: "+233", flag: "🇬🇭", name: "Ghana", digits: 9 },
+  { code: "+234", flag: "🇳🇬", name: "Nigeria", digits: 10 },
+  // International
+  { code: "+33", flag: "🇫🇷", name: "France", digits: 9 },
+  { code: "+32", flag: "🇧🇪", name: "Belgique", digits: 9 },
+  { code: "+41", flag: "🇨🇭", name: "Suisse", digits: 9 },
+  { code: "+1", flag: "🇺🇸", name: "USA/Canada", digits: 10 },
+  { code: "+44", flag: "🇬🇧", name: "Royaume-Uni", digits: 10 },
+];
+
+function PhoneInput({ value, onChange, inputStyle, placeholder }) {
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const dropdownRef = React.useRef(null);
+
+  // Detect existing country code in value
+  const detectCountry = (val) => {
+    if (!val) return COUNTRY_CODES[0];
+    const clean = val.replace(/[\s\-()]/g, "");
+    if (clean.startsWith("+")) {
+      return COUNTRY_CODES.find(c => clean.startsWith(c.code)) || COUNTRY_CODES[0];
+    }
+    return COUNTRY_CODES[0];
+  };
+
+  const [selected, setSelected] = React.useState(() => detectCountry(value));
+
+  // Extract local number from full value
+  const localNumber = React.useMemo(() => {
+    if (!value) return "";
+    const clean = value.replace(/[\s\-()]/g, "");
+    if (clean.startsWith(selected.code)) return clean.slice(selected.code.length);
+    if (clean.startsWith("+")) return clean.slice(selected.code.length);
+    return clean.replace(/^0+/, "");
+  }, [value, selected]);
+
+  const handleLocalChange = (e) => {
+    const digits = e.target.value.replace(/[^0-9]/g, "");
+    onChange(selected.code + digits);
+  };
+
+  const handleSelect = (country) => {
+    setSelected(country);
+    setShowDropdown(false);
+    const digits = localNumber.replace(/[^0-9]/g, "");
+    onChange(country.code + digits);
+  };
+
+  // Close dropdown on outside click
+  React.useEffect(() => {
+    const handler = (e) => { if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowDropdown(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div style={{ position: "relative", display: "flex", gap: 0 }} ref={dropdownRef}>
+      {/* Country selector */}
+      <button type="button" onClick={() => setShowDropdown(s => !s)}
+        style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 12px", background: inputStyle?.background || "transparent", border: inputStyle?.border || "1px solid #2A2D45", borderRight: "none", borderRadius: "10px 0 0 10px", cursor: "pointer", whiteSpace: "nowrap", fontSize: 14, color: inputStyle?.color || "#E8E8F0", minWidth: 90, height: 46 }}>
+        <span style={{ fontSize: 18 }}>{selected.flag}</span>
+        <span style={{ fontWeight: 600, fontSize: 13 }}>{selected.code}</span>
+        <span style={{ fontSize: 10, opacity: 0.6 }}>▾</span>
+      </button>
+      {/* Number input */}
+      <input
+        type="tel"
+        value={localNumber}
+        onChange={handleLocalChange}
+        placeholder={placeholder || `Ex: 01234567`}
+        style={{ ...inputStyle, borderRadius: "0 10px 10px 0", flex: 1, borderLeft: "none" }}
+      />
+      {/* Dropdown */}
+      {showDropdown && (
+        <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 999, background: "#1A1D30", border: "1px solid #2A2D45", borderRadius: 12, width: 220, maxHeight: 280, overflowY: "auto", boxShadow: "0 8px 32px rgba(0,0,0,0.4)", marginTop: 4 }}>
+          {COUNTRY_CODES.map(c => (
+            <div key={c.code} onClick={() => handleSelect(c)}
+              style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", cursor: "pointer", background: selected.code === c.code ? "rgba(108,99,255,0.15)" : "transparent", transition: "background 0.15s" }}
+              onMouseEnter={e => e.currentTarget.style.background = "rgba(108,99,255,0.1)"}
+              onMouseLeave={e => e.currentTarget.style.background = selected.code === c.code ? "rgba(108,99,255,0.15)" : "transparent"}>
+              <span style={{ fontSize: 18 }}>{c.flag}</span>
+              <span style={{ fontSize: 13, color: "#E8E8F0", flex: 1 }}>{c.name}</span>
+              <span style={{ fontSize: 12, color: "#6C63FF", fontWeight: 700 }}>{c.code}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function FlagCylinder({ theme }) {
   const [angle, setAngle] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -580,6 +689,7 @@ function AppContent() {
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [postsLoaded, setPostsLoaded] = useState(false);
   const [ads, setAds] = useState([]);
+  const [adRequests, setAdRequests] = useState([]);
   const [adIndex, setAdIndex] = useState(0);
   const [adPaused, setAdPaused] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -852,9 +962,20 @@ function AppContent() {
         .eq("actif", true)
         .or(`fin.is.null,fin.gte.${today}`)
         .order("created_at", { ascending: false });
-      if (data && data.length > 0) setAds(data);
+      if (data && data.length > 0) {
+        // Mélanger les bannières différemment pour chaque session
+        const seed = Math.random();
+        const shuffled = [...data].map((item, i) => ({ item, sort: (seed * (i + 1) * 9301 + 49297) % 233280 }));
+        shuffled.sort((a, b) => a.sort - b.sort);
+        setAds(shuffled.map(x => x.item));
+      }
     };
     loadAds();
+    // Charger les demandes de bannières
+    if (user?.role === "admin") {
+      supabase.from("ad_requests").select("*").order("created_at", { ascending: false })
+        .then(({ data }) => { if (data) setAdRequests(data); });
+    }
     // Restore sponsored state for boutiques/ateliers/restos/beaute
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     if (Object.keys(sponsored).length > 0) {
@@ -2435,7 +2556,7 @@ function AppContent() {
   const cardStyle = { background:theme.card, border:`1px solid ${theme.border}` };
 
   return (
-    <div onContextMenu={e=>e.preventDefault()} style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box" }}>
+    <div onContextMenu={e=>{ const tag = e.target.tagName.toLowerCase(); if(tag==="input"||tag==="textarea") return; e.preventDefault(); }} style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -2504,6 +2625,7 @@ function AppContent() {
               { label:t.parrainage, action:()=>{setView("parrainage");setShowMoreMenu(false);} },
               { label:t.newsletter, action:()=>{setModal({type:"newsletter"});setShowMoreMenu(false);} },
               { label:t.suggestion, action:()=>{setModal({type:"suggestion"});setShowMoreMenu(false);} },
+              { label:"⚡ Show Faster", action:()=>{setModal({type:"showFaster"});setShowMoreMenu(false);} },
               { label:t.apropos, action:()=>{setView("about");setShowMoreMenu(false);} },
               { label:t.cgu, action:()=>{setView("terms");setShowMoreMenu(false);} },
             ].map((item,i,arr)=>(
@@ -2993,21 +3115,18 @@ function AppContent() {
           {(() => {
             const ad = ads[adIndex];
             if (!ad) return (
-              // Bannière par défaut si aucune pub dans Supabase
-              <div style={{ width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0`,borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:theme.card }}>
+              <div style={{ width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0`,borderRadius:16,overflow:"hidden",border:"1px solid rgba(108,99,255,0.3)",background:`linear-gradient(135deg,rgba(108,99,255,0.08),rgba(255,101,132,0.06))` }}>
                 <div style={{ padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
                   <div style={{ display:"flex",alignItems:"center",gap:12 }}>
-                    <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>📢</div>
+                    <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>🚀</div>
                     <div>
-                      <p style={{ fontWeight:800,fontSize:14,color:theme.text,marginBottom:2 }}>Votre entreprise ici</p>
-                      <p style={{ color:theme.sub,fontSize:12 }}>Bannière publicitaire · 50 000 FCFA/mois · Visibilité maximale</p>
+                      <p style={{ fontWeight:800,fontSize:14,color:theme.text,marginBottom:2 }}>Votre pub vue par des milliers de personnes</p>
+                      <p style={{ color:theme.sub,fontSize:12 }}>Bannière visible sur toutes les pages · Résultats immédiats</p>
                     </div>
                   </div>
-                  <a href="mailto:contact@marcheduroi.com?subject=Bannière publicitaire MarchéduRoi" style={{ textDecoration:"none" }}>
-                    <button style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer" }}>
-                      Nous contacter
-                    </button>
-                  </a>
+                  <button onClick={()=>setModal({type:"showFaster"})} style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",whiteSpace:"nowrap" }}>
+                    ⚡ Show Faster
+                  </button>
                 </div>
               </div>
             );
@@ -3855,7 +3974,70 @@ function AppContent() {
             <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text,display:"flex",alignItems:"center",gap:8 }}>
               📢 Bannières publicitaires
               <span style={{ background:"rgba(108,99,255,0.15)",color:"#6C63FF",borderRadius:20,padding:"2px 10px",fontSize:12,fontWeight:600 }}>{ads.length} active{ads.length>1?"s":""}</span>
+              {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
+                <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>
+                  {adRequests.filter(r=>r.status==="en_attente").length}
+                </span>
+              )}
             </h3>
+
+            {/* Demandes en attente */}
+            {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
+              <div style={{ marginBottom:24 }}>
+                <h4 style={{ fontWeight:700,fontSize:15,color:"#FF8C00",marginBottom:12,display:"flex",alignItems:"center",gap:6 }}>
+                  ⏳ Demandes en attente ({adRequests.filter(r=>r.status==="en_attente").length})
+                </h4>
+                {adRequests.filter(r=>r.status==="en_attente").map(req=>(
+                  <div key={req.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,border:"1px solid rgba(255,140,0,0.3)" }}>
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,flexWrap:"wrap" }}>
+                      <div style={{ flex:1 }}>
+                        <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:6 }}>
+                          {req.logo_url && <img src={req.logo_url} alt="" style={{ width:36,height:36,borderRadius:8,objectFit:"cover" }}/>}
+                          <div style={{ height:36,width:36,borderRadius:8,background:`linear-gradient(135deg,${req.couleur1||"#6C63FF"},${req.couleur2||"#8B84FF"})`,display:req.logo_url?"none":"flex",alignItems:"center",justifyContent:"center",fontSize:16 }}>🏢</div>
+                          <div>
+                            <p style={{ fontWeight:700,color:theme.text,fontSize:14 }}>{req.entreprise}</p>
+                            {req.slogan && <p style={{ color:theme.sub,fontSize:12 }}>{req.slogan}</p>}
+                          </div>
+                        </div>
+                        <div style={{ display:"flex",gap:8,flexWrap:"wrap",fontSize:12,color:theme.sub }}>
+                          <span>👤 {req.user_name}</span>
+                          <span>📅 {req.duree} jours</span>
+                          <span>💰 {(req.prix||0).toLocaleString()} FCFA</span>
+                          <span>📆 Expire le {req.expires_at}</span>
+                        </div>
+                      </div>
+                      <div style={{ display:"flex",gap:8,flexShrink:0 }}>
+                        <button onClick={async()=>{
+                          const { error } = await supabase.from("ads").insert({
+                            entreprise: req.entreprise, slogan: req.slogan||"",
+                            logo_url: req.logo_url||"", lien: req.lien||"",
+                            couleur1: req.couleur1||"#6C63FF", couleur2: req.couleur2||"#8B84FF",
+                            fin: req.expires_at, actif: true,
+                          });
+                          if (error) { notify("Erreur activation","error"); return; }
+                          await supabase.from("ad_requests").update({status:"approuve"}).eq("id",req.id);
+                          setAdRequests(prev=>prev.map(r=>r.id===req.id?{...r,status:"approuve"}:r));
+                          // Reload ads
+                          const today = new Date().toISOString().slice(0,10);
+                          const { data } = await supabase.from("ads").select("*").eq("actif",true).or(`fin.is.null,fin.gte.${today}`);
+                          if (data) setAds(data);
+                          notify("✅ Bannière activée !");
+                        }} style={{ background:"rgba(67,198,172,0.15)",border:"1px solid #43C6AC",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                          ✅ Activer
+                        </button>
+                        <button onClick={async()=>{
+                          await supabase.from("ad_requests").update({status:"refuse"}).eq("id",req.id);
+                          setAdRequests(prev=>prev.map(r=>r.id===req.id?{...r,status:"refuse"}:r));
+                          notify("Demande refusée");
+                        }} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                          ✕ Refuser
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Formulaire nouvelle pub — replié par défaut */}
             <div style={{ ...cardStyle,borderRadius:16,marginBottom:24,overflow:"hidden" }}>
@@ -5062,7 +5244,9 @@ function AppContent() {
                     <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
                     {f.type==="textarea"
                       ? <textarea value={postForm[f.key]} onChange={e=>setPostForm(p=>({...p,[f.key]:f.fn(e.target.value)}))} rows={3} maxLength={f.max} style={{ ...inputStyle,resize:"vertical" }}/>
-                      : <input value={postForm[f.key]} onChange={e=>setPostForm(p=>({...p,[f.key]:f.fn(e.target.value)}))} placeholder={f.hint||""} maxLength={f.max} inputMode={f.key==="phone"?"tel":f.key==="price"?"numeric":"text"} style={inputStyle}/>
+                      : f.key==="phone"
+                        ? <PhoneInput value={postForm.phone||""} onChange={v=>setPostForm(p=>({...p,phone:v}))} inputStyle={inputStyle}/>
+                        : <input value={postForm[f.key]} onChange={e=>setPostForm(p=>({...p,[f.key]:f.fn(e.target.value)}))} placeholder={f.hint||""} maxLength={f.max} inputMode={f.key==="price"?"numeric":"text"} style={inputStyle}/>
                     }
                   </div>
                 ))}
@@ -5587,7 +5771,9 @@ function AppContent() {
                     <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
                     {f.textarea
                       ? <textarea value={shopForm[f.key]||""} onChange={e=>setShopForm(s=>({...s,[f.key]:f.fn(e.target.value)}))} rows={2} maxLength={f.max} placeholder={f.placeholder||""} style={{ ...inputStyle,resize:"vertical" }}/>
-                      : <input value={shopForm[f.key]||""} onChange={e=>setShopForm(s=>({...s,[f.key]:f.fn(e.target.value)}))} placeholder={f.placeholder||""} maxLength={f.max} inputMode={f.mode||"text"} style={inputStyle}/>
+                      : f.key==="phone"
+                        ? <PhoneInput value={shopForm.phone||""} onChange={v=>setShopForm(s=>({...s,phone:v}))} inputStyle={inputStyle}/>
+                        : <input value={shopForm[f.key]||""} onChange={e=>setShopForm(s=>({...s,[f.key]:f.fn(e.target.value)}))} placeholder={f.placeholder||""} maxLength={f.max} inputMode={f.mode||"text"} style={inputStyle}/>
                     }
                   </div>
                 ))}
@@ -5731,7 +5917,9 @@ function AppContent() {
                     <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
                     {f.textarea
                       ? <textarea value={shopForm[f.key]||""} onChange={e=>setShopForm(s=>({...s,[f.key]:f.fn(e.target.value)}))} rows={2} maxLength={f.max} placeholder={f.placeholder||""} style={{ ...inputStyle,resize:"vertical" }}/>
-                      : <input value={shopForm[f.key]||""} onChange={e=>setShopForm(s=>({...s,[f.key]:f.fn(e.target.value)}))} placeholder={f.placeholder||""} maxLength={f.max} inputMode={f.mode||"text"} style={inputStyle}/>
+                      : f.key==="phone"
+                        ? <PhoneInput value={shopForm.phone||""} onChange={v=>setShopForm(s=>({...s,phone:v}))} inputStyle={inputStyle}/>
+                        : <input value={shopForm[f.key]||""} onChange={e=>setShopForm(s=>({...s,[f.key]:f.fn(e.target.value)}))} placeholder={f.placeholder||""} maxLength={f.max} inputMode={f.mode||"text"} style={inputStyle}/>
                     }
                   </div>
                 ))}
@@ -5952,7 +6140,7 @@ function AppContent() {
                     <p style={{ fontWeight:700,color:theme.text,fontSize:14,marginBottom:4 }}>📱 Étape 1 — Vérifiez votre numéro</p>
                     <p style={{ color:theme.sub,fontSize:12,marginBottom:12 }}>Pour éviter les abus, un code vous sera envoyé par SMS.</p>
                     <div style={{ display:"flex",gap:8,marginBottom:10 }}>
-                      <input value={reportOtp.phone} onChange={e=>setReportOtp(r=>({...r,phone:e.target.value}))} placeholder="+229 XX XX XX XX" style={{ ...inputStyle,flex:1 }}/>
+                      <PhoneInput value={reportOtp.phone||""} onChange={v=>setReportOtp(r=>({...r,phone:v}))} inputStyle={{ ...inputStyle,flex:1 }}/>
                       <button onClick={()=>sendOtp(reportOtp.phone)} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",whiteSpace:"nowrap" }}>
                         Envoyer OTP
                       </button>
@@ -6400,6 +6588,77 @@ function AppContent() {
             )}
 
             {/* SUGGESTION */}
+            {/* SHOW FASTER */}
+            {modal.type==="showFaster"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>⚡ Show Faster</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <p style={{ color:theme.sub,fontSize:13,marginBottom:20,lineHeight:1.6 }}>Votre bannière publicitaire vue par tous les visiteurs de MarchéduRoi. Choisissez votre durée et payez en ligne.</p>
+
+                {/* Tarifs */}
+                <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:20 }}>
+                  {[{label:"7 jours",prix:5000,days:7},{label:"30 jours",prix:15000,days:30},{label:"90 jours",prix:35000,days:90}].map(t=>(
+                    <div key={t.label} onClick={()=>setModal(m=>({...m,adTarif:t}))}
+                      style={{ background:modal.adTarif?.days===t.days?"rgba(108,99,255,0.15)":theme.card,border:`2px solid ${modal.adTarif?.days===t.days?"#6C63FF":theme.border}`,borderRadius:12,padding:"12px 8px",textAlign:"center",cursor:"pointer" }}>
+                      <p style={{ fontWeight:800,fontSize:13,color:theme.text,marginBottom:4 }}>{t.label}</p>
+                      <p style={{ fontWeight:800,fontSize:16,color:"#6C63FF" }}>{t.prix.toLocaleString()} F</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Formulaire */}
+                <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
+                  {[
+                    {label:"Nom de l'entreprise *",key:"adEntreprise",placeholder:"Ex: Boulangerie Dorée"},
+                    {label:"Slogan",key:"adSlogan",placeholder:"Ex: Les meilleurs pains de Cotonou"},
+                    {label:"URL du logo",key:"adLogo",placeholder:"https://..."},
+                    {label:"Lien de destination",key:"adLien",placeholder:"https://votre-site.com"},
+                  ].map(f=>(
+                    <div key={f.key}>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>{f.label}</label>
+                      <input value={modal[f.key]||""} onChange={e=>setModal(m=>({...m,[f.key]:e.target.value}))} placeholder={f.placeholder} style={{ ...inputStyle,fontSize:13 }}/>
+                    </div>
+                  ))}
+                  <div>
+                    <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Couleurs de la bannière</label>
+                    <div style={{ display:"flex",gap:10 }}>
+                      <input type="color" value={modal.adCouleur1||"#6C63FF"} onChange={e=>setModal(m=>({...m,adCouleur1:e.target.value}))} style={{ width:44,height:40,border:"none",borderRadius:8,cursor:"pointer",background:"transparent" }}/>
+                      <input type="color" value={modal.adCouleur2||"#8B84FF"} onChange={e=>setModal(m=>({...m,adCouleur2:e.target.value}))} style={{ width:44,height:40,border:"none",borderRadius:8,cursor:"pointer",background:"transparent" }}/>
+                      <div style={{ flex:1,height:40,borderRadius:8,background:`linear-gradient(135deg,${modal.adCouleur1||"#6C63FF"},${modal.adCouleur2||"#8B84FF"})` }}/>
+                    </div>
+                  </div>
+                </div>
+
+                <button onClick={async()=>{
+                  if (!modal.adTarif) { notify("Choisissez une durée","error"); return; }
+                  if (!modal.adEntreprise?.trim()) { notify("Nom de l'entreprise requis","error"); return; }
+                  const tarif = modal.adTarif;
+                  handlePayment(tarif.prix, `Bannière publicitaire ${tarif.label} — MarchéduRoi`, async()=>{
+                    const expDate = new Date();
+                    expDate.setDate(expDate.getDate() + tarif.days);
+                    const req = {
+                      entreprise: modal.adEntreprise, slogan: modal.adSlogan||"",
+                      logo_url: modal.adLogo||"", lien: modal.adLien||"",
+                      couleur1: modal.adCouleur1||"#6C63FF", couleur2: modal.adCouleur2||"#8B84FF",
+                      duree: tarif.days, prix: tarif.prix,
+                      status: "en_attente",
+                      user_id: user?.id||"", user_name: user?.name||"Anonyme",
+                      expires_at: expDate.toISOString().slice(0,10),
+                    };
+                    const { error } = await supabase.from("ad_requests").insert(req);
+                    if (error) { notify("Erreur lors de la demande","error"); return; }
+                    setModal(null);
+                    notify("✅ Demande envoyée ! Votre bannière sera activée après validation.");
+                  });
+                }} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+                  ⚡ Payer et soumettre ma bannière
+                </button>
+                <p style={{ textAlign:"center",color:theme.sub,fontSize:11,marginTop:10 }}>Validation manuelle sous 24h · Paiement sécurisé MTN/Moov Money</p>
+              </>
+            )}
+
             {modal.type==="suggestion"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
