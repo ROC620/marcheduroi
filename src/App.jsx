@@ -1626,16 +1626,8 @@ function AppContent() {
   useEffect(() => {
     if (window.location.pathname === "/reset-password") {
       setViewState("reset-password");
-      // Échanger le code PKCE immédiatement à l'arrivée sur la page
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-      if (code) {
-        supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-          if (error) {
-            notify("Lien de réinitialisation invalide ou expiré. Recommencez.", "error");
-          }
-        });
-      }
+      // Supabase gère automatiquement l'échange du code PKCE
+      // et déclenche l'événement PASSWORD_RECOVERY via onAuthStateChange
     }
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -1649,6 +1641,8 @@ function AppContent() {
       if (!session) { setUser(null); return; }
       if (event === "PASSWORD_RECOVERY") {
         setViewState("reset-password");
+        // Stocker la session pour updatePassword
+        setUser(prev => prev || { id: session.user.id, name: session.user.email, role: "user" });
         return;
       }
       if (event === "SIGNED_IN" || event === "USER_UPDATED") {
