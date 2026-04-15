@@ -1626,6 +1626,16 @@ function AppContent() {
   useEffect(() => {
     if (window.location.pathname === "/reset-password") {
       setViewState("reset-password");
+      // Échanger le code PKCE immédiatement à l'arrivée sur la page
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      if (code) {
+        supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+          if (error) {
+            notify("Lien de réinitialisation invalide ou expiré. Recommencez.", "error");
+          }
+        });
+      }
     }
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -1830,20 +1840,12 @@ function AppContent() {
     if (!newPassword || newPassword.length < 6) { notify("Mot de passe trop court (min. 6 caractères)","error"); return; }
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-      if (code) {
-        const { error: exchError } = await supabase.auth.exchangeCodeForSession(code);
-        if (exchError) { notify("Lien expiré. Veuillez recommencer la réinitialisation.","error"); return; }
-      } else {
-        notify("Session expirée. Veuillez recommencer la réinitialisation.","error");
-        setView("login");
-        return;
-      }
+      notify("Session expirée. Veuillez cliquer à nouveau sur le lien reçu par email.","error");
+      return;
     }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) { notify("Erreur : "+error.message,"error"); return; }
-    notify("Mot de passe mis à jour avec succès ! ✅");
+    notify("✅ Mot de passe mis à jour avec succès !");
     setNewPassword("");
     setIsResetMode(false);
     window.location.hash = "";
