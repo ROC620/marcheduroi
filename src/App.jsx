@@ -1870,7 +1870,7 @@ function AppContent() {
   const resetPassword = async (email) => {
     if (!email) { notify("Entrez votre email","error"); return; }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/reset-password",
+      redirectTo: "https://marcheduroi.com/reset-password",
     });
     if (error) { notify("Erreur : "+error.message,"error"); return; }
     notify("Email de réinitialisation envoyé ! Vérifiez votre boîte mail 📧");
