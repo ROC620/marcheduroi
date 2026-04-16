@@ -3,6 +3,16 @@
   <head>
     <meta charset="UTF-8" />
 
+    <!-- Capture params AVANT React (reset password) -->
+    <script>
+      (function() {
+        if (window.location.pathname === '/reset-password') {
+          var search = window.location.search;
+          if (search) sessionStorage.setItem('mdr_reset_params', search);
+        }
+      })();
+    </script>
+
     <!-- Favicons couronne dorée -->
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
