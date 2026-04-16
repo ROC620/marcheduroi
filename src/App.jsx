@@ -3641,9 +3641,86 @@ function AppContent() {
         <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:8 }}>
             <h2 style={{ fontWeight:800,fontSize:28,color:theme.text }}>Panneau Admin</h2>
-            <button onClick={()=>{ const el=document.getElementById("admin-bannières"); if(el) el.scrollIntoView({behavior:"smooth"}); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
-              📢 Gérer les bannières
-            </button>
+            <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+              <button onClick={async()=>{
+                // Charger toutes les données
+                const [pData, bData, aData, rData, beData, prData] = await Promise.all([
+                  supabase.from("posts").select("author,author_id,phone,contact,likes,views,created_at,sponsored,urgent,expires_at").then(r=>r.data||[]),
+                  supabase.from("boutiques").select("author,author_id,phone,likes,created_at,sponsored").then(r=>r.data||[]),
+                  supabase.from("ateliers").select("author,author_id,phone,likes,created_at,sponsored").then(r=>r.data||[]),
+                  supabase.from("restos").select("author,author_id,phone,likes,created_at,sponsored").then(r=>r.data||[]),
+                  supabase.from("beaute").select("author,author_id,phone,likes,created_at,sponsored").then(r=>r.data||[]),
+                  supabase.from("profiles").select("id,name,role,country,created_at").then(r=>r.data||[]),
+                ]);
+                // Regrouper par vendeur
+                const allItems = [
+                  ...pData.map(x=>({...x,_type:"Annonce"})),
+                  ...bData.map(x=>({...x,_type:"Boutique"})),
+                  ...aData.map(x=>({...x,_type:"Atelier"})),
+                  ...rData.map(x=>({...x,_type:"Restaurant"})),
+                  ...beData.map(x=>({...x,_type:"Beauté"})),
+                ];
+                const vendeurs = {};
+                allItems.forEach(item => {
+                  const id = item.author_id || "inconnu";
+                  if (!vendeurs[id]) {
+                    const profile = prData.find(p=>p.id===id);
+                    vendeurs[id] = {
+                      nom: item.author || "Inconnu",
+                      telephone: item.phone || "",
+                      email: item.contact || "",
+                      pays: profile?.country || "",
+                      dateInscription: profile?.created_at ? profile.created_at.slice(0,10) : "",
+                      role: profile?.role || "user",
+                      annonces:0, boutiques:0, ateliers:0, restos:0, beaute:0,
+                      totalVues:0, totalLikes:0, sponsorisations:0, urgents:0,
+                      derniereActivite:"",
+                    };
+                  }
+                  const v = vendeurs[id];
+                  if (item._type==="Annonce") v.annonces++;
+                  if (item._type==="Boutique") v.boutiques++;
+                  if (item._type==="Atelier") v.ateliers++;
+                  if (item._type==="Restaurant") v.restos++;
+                  if (item._type==="Beauté") v.beaute++;
+                  v.totalVues += item.views||0;
+                  v.totalLikes += item.likes||0;
+                  if (item.sponsored) v.sponsorisations++;
+                  if (item.urgent) v.urgents++;
+                  const dat = item.created_at?.slice(0,10)||"";
+                  if (dat > v.derniereActivite) v.derniereActivite = dat;
+                  if (!v.telephone && item.phone) v.telephone = item.phone;
+                  if (!v.email && item.contact) v.email = item.contact;
+                });
+                // Générer CSV
+                const headers = ["Nom","Téléphone","Email","Pays","Date inscription","Rôle","Annonces","Boutiques","Ateliers","Restaurants","Beauté","Total publications","Total vues","Total likes","Sponsorisations","Urgents","Dernière activité"];
+                const rows = Object.values(vendeurs).sort((a,b)=>(b.annonces+b.boutiques+b.ateliers+b.restos+b.beaute)-(a.annonces+a.boutiques+a.ateliers+a.restos+a.beaute));
+                const csvRows = [headers.join(";")];
+                rows.forEach(v => {
+                  const total = v.annonces+v.boutiques+v.ateliers+v.restos+v.beaute;
+                  csvRows.push([
+                    v.nom, v.telephone, v.email, v.pays, v.dateInscription, v.role,
+                    v.annonces, v.boutiques, v.ateliers, v.restos, v.beaute, total,
+                    v.totalVues, v.totalLikes, v.sponsorisations, v.urgents, v.derniereActivite
+                  ].join(";"));
+                });
+                const csv = "﻿" + csvRows.join("
+"); // BOM pour Excel
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `marcheduroi_vendeurs_${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                notify("✅ Export vendeurs téléchargé !");
+              }} style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
+                📊 Exporter vendeurs
+              </button>
+              <button onClick={()=>{ const el=document.getElementById("admin-bannières"); if(el) el.scrollIntoView({behavior:"smooth"}); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
+                📢 Gérer les bannières
+              </button>
+            </div>
           </div>
 
           {/* Statistiques mensuelles */}
