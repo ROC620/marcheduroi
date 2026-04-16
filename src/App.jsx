@@ -3704,8 +3704,7 @@ function AppContent() {
                     v.totalVues, v.totalLikes, v.sponsorisations, v.urgents, v.derniereActivite
                   ].join(";"));
                 });
-                const csv = "﻿" + csvRows.join("
-"); // BOM pour Excel
+                const csv = "\uFEFF" + csvRows.join("\n"); // BOM pour Excel
                 const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
