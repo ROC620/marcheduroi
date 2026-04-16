@@ -1469,6 +1469,7 @@ function AppContent() {
   };
 
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const recoverySessionRef = React.useRef(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pwaPrompt, setPwaPrompt] = useState(null);
   const [showPwaBanner, setShowPwaBanner] = useState(false);
@@ -1667,7 +1668,7 @@ function AppContent() {
       if (!session) { setUser(null); return; }
       if (event === "PASSWORD_RECOVERY") {
         setViewState("reset-password");
-        // Stocker la session pour updatePassword
+        recoverySessionRef.current = session;
         setUser(prev => prev || { id: session.user.id, name: session.user.email, role: "user" });
         return;
       }
@@ -1858,12 +1859,12 @@ function AppContent() {
 
   const updatePassword = async () => {
     if (!newPassword || newPassword.length < 6) { notify("Mot de passe trop court (min. 6 caractères)","error"); return; }
-    // Attendre que la session soit disponible (max 5 secondes)
-    let session = null;
-    for (let i = 0; i < 10; i++) {
+    // Utiliser la session stockée lors de PASSWORD_RECOVERY
+    let session = recoverySessionRef.current;
+    // Sinon essayer getSession
+    if (!session) {
       const { data } = await supabase.auth.getSession();
-      if (data?.session) { session = data.session; break; }
-      await new Promise(r => setTimeout(r, 500));
+      session = data?.session;
     }
     if (!session) {
       notify("Session expirée. Veuillez cliquer à nouveau sur le lien reçu par email.","error");
@@ -1871,6 +1872,7 @@ function AppContent() {
     }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) { notify("Erreur : "+error.message,"error"); return; }
+    recoverySessionRef.current = null;
     notify("✅ Mot de passe mis à jour avec succès !");
     setNewPassword("");
     setIsResetMode(false);
