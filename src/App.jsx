@@ -580,6 +580,7 @@ function AppContent() {
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [postsLoaded, setPostsLoaded] = useState(false);
   const [ads, setAds] = useState([]);
+  const [adRequests, setAdRequests] = useState([]);
   const [adIndex, setAdIndex] = useState(0);
   const [adPaused, setAdPaused] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -855,6 +856,11 @@ function AppContent() {
       if (data && data.length > 0) setAds(data);
     };
     loadAds();
+    // Charger les demandes de bannières (admin)
+    if (user?.role === "admin") {
+      supabase.from("ad_requests").select("*").order("created_at", { ascending: false })
+        .then(({ data }) => { if (data) setAdRequests(data); });
+    }
     // Restore sponsored state for boutiques/ateliers/restos/beaute
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     if (Object.keys(sponsored).length > 0) {
@@ -955,17 +961,24 @@ function AppContent() {
   });
 
   const trackView = (postId) => {
+    if (!postId) return;
     setPostViews(v => {
       const updated = { ...v, [postId]: (v[postId] || 0) + 1 };
       localStorage.setItem("mf_views", JSON.stringify(updated));
+      // Sauvegarder dans Supabase en arrière-plan
+      supabase.from("posts").select("views").eq("id", postId).single()
+        .then(({ data }) => {
+          if (data !== null) {
+            const newViews = (data?.views || 0) + 1;
+            supabase.from("posts").update({ views: newViews }).eq("id", postId).then(() => {});
+            const post = posts.find(p => p.id === postId);
+            if (post && user && post.authorId !== user?.id && newViews % 10 === 0) {
+              addNotification("Votre annonce '" + post.title + "' a atteint " + newViews + " vues !", "view", postId);
+            }
+          }
+        });
       return updated;
     });
-    // Notify post owner
-    const post = posts.find(p=>p.id===postId);
-    if (post && user && post.authorId !== user?.id) {
-      const views = (JSON.parse(localStorage.getItem("mf_views")||"{}")[postId]||0) + 1;
-      if (views % 10 === 0) addNotification("Votre annonce '"+post.title+"' a atteint "+views+" vues !", "view", postId);
-    }
   };
 
   const trackContact = (postId) => {
@@ -999,7 +1012,11 @@ function AppContent() {
       comment: comment || null,
       date: new Date().toISOString().slice(0,10),
     });
-    if (error) { console.error("Erreur rating:", error); }
+    if (error) {
+      console.error("Erreur rating:", error);
+      notify("Erreur lors de la notation : " + error.message, "error");
+      return;
+    }
 
     // Mettre à jour localement
     const newUserRatings = { ...userRatings, [key]: { stars, comment, date: new Date().toISOString().slice(0,10), userName: user.name } };
@@ -2131,13 +2148,17 @@ function AppContent() {
     setRestos(updateLikes);
     setBeaute(updateLikes);
     // Save to Supabase - try each table
+    let saved = false;
     for (const table of ["posts","boutiques","ateliers","restos","beaute"]) {
       const { data } = await supabase.from(table).select("likes").eq("id",id).single();
       if (data) {
-        await supabase.from(table).update({ likes: (data.likes||0)+1 }).eq("id",id);
+        const { error } = await supabase.from(table).update({ likes: (data.likes||0)+1 }).eq("id",id);
+        if (error) console.error("Erreur like:", error);
+        saved = true;
         break;
       }
     }
+    if (!saved) console.warn("Like non sauvegardé pour id:", id);
   };
 
 
@@ -2516,11 +2537,12 @@ function AppContent() {
                 { label:"🎨 "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
               ] : []),
               { label:"📖 Exemples de publications", action:()=>{ window.open("https://marcheduroi.com/exemples.html","_blank"); setShowMoreMenu(false); } },
-              { label:"📞 Support WhatsApp", action:()=>{ window.open("https://wa.me/2290147562640","_blank"); setShowMoreMenu(false); } },
+              { label:"📞 Support WhatsApp", action:()=>{ window.open("https://wa.me/2290140906020","_blank"); setShowMoreMenu(false); } },
               { label:t.stats, action:()=>{setView("stats");setShowMoreMenu(false);} },
               { label:t.parrainage, action:()=>{setView("parrainage");setShowMoreMenu(false);} },
               { label:t.newsletter, action:()=>{setModal({type:"newsletter"});setShowMoreMenu(false);} },
               { label:t.suggestion, action:()=>{setModal({type:"suggestion"});setShowMoreMenu(false);} },
+              { label:"⚡ Show Faster", action:()=>{setModal({type:"showFaster"});setShowMoreMenu(false);} },
               { label:t.apropos, action:()=>{setView("about");setShowMoreMenu(false);} },
               { label:t.cgu, action:()=>{setView("terms");setShowMoreMenu(false);} },
             ].map((item,i,arr)=>(
@@ -2696,7 +2718,7 @@ function AppContent() {
       )}
 
       {/* Bouton WhatsApp Support flottant */}
-      {!showMessages && <a href="https://wa.me/2290147562640?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide%20concernant%20ma%20publication." target="_blank" rel="noopener noreferrer" title="Contacter le support technique" style={{ position:"fixed",bottom:24,right:16,zIndex:999,width:50,height:50,borderRadius:"50%",background:"#25D366",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(37,211,102,0.5)",cursor:"pointer",textDecoration:"none",transition:"transform 0.2s" }}
+      {!showMessages && <a href="https://wa.me/2290140906020?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide%20concernant%20ma%20publication." target="_blank" rel="noopener noreferrer" title="Contacter le support technique" style={{ position:"fixed",bottom:24,right:16,zIndex:999,width:50,height:50,borderRadius:"50%",background:"#25D366",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(37,211,102,0.5)",cursor:"pointer",textDecoration:"none",transition:"transform 0.2s" }}
         onMouseEnter={e=>{ e.currentTarget.style.transform="scale(1.1)"; }}
         onMouseLeave={e=>{ e.currentTarget.style.transform="scale(1)"; }}>
         <svg width="26" height="26" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
@@ -3010,21 +3032,18 @@ function AppContent() {
           {(() => {
             const ad = ads[adIndex];
             if (!ad) return (
-              // Bannière par défaut si aucune pub dans Supabase
-              <div style={{ width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0`,borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:theme.card }}>
+              <div style={{ width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0`,borderRadius:16,overflow:"hidden",border:"1px solid rgba(108,99,255,0.3)",background:`linear-gradient(135deg,rgba(108,99,255,0.08),rgba(255,101,132,0.06))` }}>
                 <div style={{ padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
                   <div style={{ display:"flex",alignItems:"center",gap:12 }}>
-                    <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>📢</div>
+                    <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>🚀</div>
                     <div>
-                      <p style={{ fontWeight:800,fontSize:14,color:theme.text,marginBottom:2 }}>Votre entreprise ici</p>
-                      <p style={{ color:theme.sub,fontSize:12 }}>Bannière publicitaire · 50 000 FCFA/mois · Visibilité maximale</p>
+                      <p style={{ fontWeight:800,fontSize:14,color:theme.text,marginBottom:2 }}>Votre pub vue par des milliers de personnes</p>
+                      <p style={{ color:theme.sub,fontSize:12 }}>Bannière visible sur toutes les pages · Résultats immédiats</p>
                     </div>
                   </div>
-                  <a href="mailto:contact@marcheduroi.com?subject=Bannière publicitaire MarchéduRoi" style={{ textDecoration:"none" }}>
-                    <button style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer" }}>
-                      Nous contacter
-                    </button>
-                  </a>
+                  <button onClick={()=>setModal({type:"showFaster"})} style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",whiteSpace:"nowrap" }}>
+                    ⚡ Show Faster
+                  </button>
                 </div>
               </div>
             );
@@ -3872,7 +3891,59 @@ function AppContent() {
             <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text,display:"flex",alignItems:"center",gap:8 }}>
               📢 Bannières publicitaires
               <span style={{ background:"rgba(108,99,255,0.15)",color:"#6C63FF",borderRadius:20,padding:"2px 10px",fontSize:12,fontWeight:600 }}>{ads.length} active{ads.length>1?"s":""}</span>
+              {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
+                <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>
+                  {adRequests.filter(r=>r.status==="en_attente").length}
+                </span>
+              )}
             </h3>
+            {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
+              <div style={{ marginBottom:24 }}>
+                <h4 style={{ fontWeight:700,fontSize:15,color:"#FF8C00",marginBottom:12 }}>⏳ Demandes en attente ({adRequests.filter(r=>r.status==="en_attente").length})</h4>
+                {adRequests.filter(r=>r.status==="en_attente").map(req=>(
+                  <div key={req.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,border:"1px solid rgba(255,140,0,0.3)" }}>
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,flexWrap:"wrap" }}>
+                      <div style={{ flex:1 }}>
+                        <p style={{ fontWeight:700,color:theme.text,fontSize:14,marginBottom:4 }}>{req.entreprise}</p>
+                        {req.slogan && <p style={{ color:theme.sub,fontSize:12,marginBottom:4 }}>{req.slogan}</p>}
+                        <div style={{ display:"flex",gap:8,flexWrap:"wrap",fontSize:12,color:theme.sub }}>
+                          <span>👤 {req.user_name}</span>
+                          <span>📅 {req.duree} jours</span>
+                          <span>💰 {(req.prix||0).toLocaleString()} FCFA</span>
+                          <span>📆 Expire le {req.expires_at}</span>
+                        </div>
+                      </div>
+                      <div style={{ display:"flex",gap:8,flexShrink:0 }}>
+                        <button onClick={async()=>{
+                          const { error } = await supabase.from("ads").insert({
+                            entreprise:req.entreprise, slogan:req.slogan||"",
+                            logo_url:req.logo_url||"", lien:req.lien||"",
+                            couleur1:req.couleur1||"#6C63FF", couleur2:req.couleur2||"#8B84FF",
+                            fin:req.expires_at, actif:true,
+                          });
+                          if (error) { notify("Erreur activation","error"); return; }
+                          await supabase.from("ad_requests").update({status:"approuve"}).eq("id",req.id);
+                          setAdRequests(prev=>prev.map(r=>r.id===req.id?{...r,status:"approuve"}:r));
+                          const today = new Date().toISOString().slice(0,10);
+                          const { data } = await supabase.from("ads").select("*").eq("actif",true).or(`fin.is.null,fin.gte.${today}`);
+                          if (data) setAds(data);
+                          notify("✅ Bannière activée !");
+                        }} style={{ background:"rgba(67,198,172,0.15)",border:"1px solid #43C6AC",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                          ✅ Activer
+                        </button>
+                        <button onClick={async()=>{
+                          await supabase.from("ad_requests").update({status:"refuse"}).eq("id",req.id);
+                          setAdRequests(prev=>prev.map(r=>r.id===req.id?{...r,status:"refuse"}:r));
+                          notify("Demande refusée");
+                        }} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                          ✕ Refuser
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Formulaire nouvelle pub — replié par défaut */}
             <div style={{ ...cardStyle,borderRadius:16,marginBottom:24,overflow:"hidden" }}>
@@ -4163,9 +4234,9 @@ function AppContent() {
                   <svg width="16" height="16" fill="none" stroke="#6C63FF" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                   <span style={{ color:"#6C63FF",fontWeight:600,fontSize:14 }}>support@marcheduroi.com</span>
                 </a>
-                <a href="https://wa.me/2290147562640" target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"flex",alignItems:"center",gap:10,background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:10,padding:"10px 16px" }}>
+                <a href="https://wa.me/2290140906020" target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"flex",alignItems:"center",gap:10,background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:10,padding:"10px 16px" }}>
                   <svg width="16" height="16" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-                  <span style={{ color:"#25D366",fontWeight:600,fontSize:14 }}>+229 01 47 56 26 40</span>
+                  <span style={{ color:"#25D366",fontWeight:600,fontSize:14 }}>+229 01 40 90 60 20</span>
                 </a>
                 <div style={{ display:"flex",alignItems:"center",gap:10,background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:10,padding:"10px 16px" }}>
                   <svg width="16" height="16" fill="none" stroke={theme.sub} strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -4900,7 +4971,7 @@ function AppContent() {
               num:"15",
               title:"Contact et réclamations",
               icon:"📞",
-              content:`Pour toute question, réclamation ou signalement : Email général : contact@marcheduroi.com · Support technique : support@marcheduroi.com · WhatsApp Support : +229 01 47 56 26 40 · Adresse : EDENPORTAIL, Ouidah, République du Bénin. Délai de réponse garanti : 48 heures ouvrables pour les demandes générales, 24 heures pour les urgences techniques.`
+              content:`Pour toute question, réclamation ou signalement : Email général : contact@marcheduroi.com · Support technique : support@marcheduroi.com · WhatsApp Support : +229 01 40 90 60 20 · Adresse : EDENPORTAIL, Ouidah, République du Bénin. Délai de réponse garanti : 48 heures ouvrables pour les demandes générales, 24 heures pour les urgences techniques.`
             },
           ].map(section=>(
             <div key={section.num} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:16,padding:28,marginBottom:16 }}>
@@ -6417,6 +6488,71 @@ function AppContent() {
             )}
 
             {/* SUGGESTION */}
+            {/* SHOW FASTER */}
+            {modal.type==="showFaster"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>⚡ Show Faster</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <p style={{ color:theme.sub,fontSize:13,marginBottom:20,lineHeight:1.6 }}>Votre bannière publicitaire vue par tous les visiteurs de MarchéduRoi. Choisissez votre durée et payez en ligne.</p>
+                <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:20 }}>
+                  {[{label:"7 jours",prix:5000,days:7},{label:"30 jours",prix:15000,days:30},{label:"90 jours",prix:35000,days:90}].map(t=>(
+                    <div key={t.label} onClick={()=>setModal(m=>({...m,adTarif:t}))}
+                      style={{ background:modal.adTarif?.days===t.days?"rgba(108,99,255,0.15)":theme.card,border:`2px solid ${modal.adTarif?.days===t.days?"#6C63FF":theme.border}`,borderRadius:12,padding:"12px 8px",textAlign:"center",cursor:"pointer" }}>
+                      <p style={{ fontWeight:800,fontSize:13,color:theme.text,marginBottom:4 }}>{t.label}</p>
+                      <p style={{ fontWeight:800,fontSize:16,color:"#6C63FF" }}>{t.prix.toLocaleString()} F</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
+                  {[
+                    {label:"Nom de l'entreprise *",key:"adEntreprise",placeholder:"Ex: Boulangerie Dorée"},
+                    {label:"Slogan",key:"adSlogan",placeholder:"Ex: Les meilleurs pains de Cotonou"},
+                    {label:"URL du logo",key:"adLogo",placeholder:"https://..."},
+                    {label:"Lien de destination",key:"adLien",placeholder:"https://votre-site.com"},
+                  ].map(f=>(
+                    <div key={f.key}>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>{f.label}</label>
+                      <input value={modal[f.key]||""} onChange={e=>setModal(m=>({...m,[f.key]:e.target.value}))} placeholder={f.placeholder} style={{ ...inputStyle,fontSize:13 }}/>
+                    </div>
+                  ))}
+                  <div>
+                    <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Couleurs de la bannière</label>
+                    <div style={{ display:"flex",gap:10 }}>
+                      <input type="color" value={modal.adCouleur1||"#6C63FF"} onChange={e=>setModal(m=>({...m,adCouleur1:e.target.value}))} style={{ width:44,height:40,border:"none",borderRadius:8,cursor:"pointer" }}/>
+                      <input type="color" value={modal.adCouleur2||"#8B84FF"} onChange={e=>setModal(m=>({...m,adCouleur2:e.target.value}))} style={{ width:44,height:40,border:"none",borderRadius:8,cursor:"pointer" }}/>
+                      <div style={{ flex:1,height:40,borderRadius:8,background:`linear-gradient(135deg,${modal.adCouleur1||"#6C63FF"},${modal.adCouleur2||"#8B84FF"})` }}/>
+                    </div>
+                  </div>
+                </div>
+                <button onClick={async()=>{
+                  if (!modal.adTarif) { notify("Choisissez une durée","error"); return; }
+                  if (!modal.adEntreprise?.trim()) { notify("Nom de l'entreprise requis","error"); return; }
+                  const tarif = modal.adTarif;
+                  handlePayment(tarif.prix, `Bannière publicitaire ${tarif.label} — MarchéduRoi`, async()=>{
+                    const expDate = new Date();
+                    expDate.setDate(expDate.getDate() + tarif.days);
+                    const req = {
+                      entreprise: modal.adEntreprise, slogan: modal.adSlogan||"",
+                      logo_url: modal.adLogo||"", lien: modal.adLien||"",
+                      couleur1: modal.adCouleur1||"#6C63FF", couleur2: modal.adCouleur2||"#8B84FF",
+                      duree: tarif.days, prix: tarif.prix, status: "en_attente",
+                      user_id: user?.id||"", user_name: user?.name||"Anonyme",
+                      expires_at: expDate.toISOString().slice(0,10),
+                    };
+                    const { error } = await supabase.from("ad_requests").insert(req);
+                    if (error) { notify("Erreur lors de la demande","error"); return; }
+                    setModal(null);
+                    notify("✅ Demande envoyée ! Votre bannière sera activée après validation.");
+                  });
+                }} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+                  ⚡ Payer et soumettre ma bannière
+                </button>
+                <p style={{ textAlign:"center",color:theme.sub,fontSize:11,marginTop:10 }}>Validation manuelle sous 24h · Paiement sécurisé MTN/Moov Money</p>
+              </>
+            )}
+
             {modal.type==="suggestion"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
