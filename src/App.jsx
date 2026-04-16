@@ -1627,33 +1627,20 @@ function AppContent() {
   useEffect(() => {
     if (window.location.pathname === "/reset-password") {
       setViewState("reset-password");
-      // Lire token_hash depuis ?token_hash=...&type=recovery
       const params = new URLSearchParams(window.location.search);
-      const tokenHash = params.get("token_hash");
-      const type = params.get("type");
-      if (tokenHash && type === "recovery") {
-        supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" })
+      const token = params.get("token");
+      const email = params.get("email");
+      if (token && email) {
+        supabase.auth.verifyOtp({ email, token, type: "recovery" })
           .then(({ data, error }) => {
             if (error) {
               console.error("verifyOtp error:", error);
               notify("Lien invalide ou expiré. Veuillez recommencer.", "error");
             } else if (data?.session) {
-              console.log("Session établie via token_hash");
+              recoverySessionRef.current = data.session;
+              console.log("Session recovery établie ✅");
             }
           });
-      }
-      // Lire aussi le hash #access_token si présent (fallback)
-      const hash = window.location.hash;
-      if (hash && hash.includes("access_token") && hash.includes("type=recovery")) {
-        const hashParams = new URLSearchParams(hash.replace("#", ""));
-        const accessToken = hashParams.get("access_token");
-        const refreshToken = hashParams.get("refresh_token") || "";
-        if (accessToken) {
-          supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
-            .then(({ data, error }) => {
-              if (error) console.error("setSession error:", error);
-            });
-        }
       }
     }
     supabase.auth.getSession().then(({ data: { session } }) => {
