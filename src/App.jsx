@@ -1626,8 +1626,23 @@ function AppContent() {
   useEffect(() => {
     if (window.location.pathname === "/reset-password") {
       setViewState("reset-password");
-      // Supabase gère automatiquement l'échange du code PKCE
-      // et déclenche l'événement PASSWORD_RECOVERY via onAuthStateChange
+      // Lire le token depuis le hash de l'URL (#access_token=...&type=recovery)
+      const hash = window.location.hash;
+      if (hash && hash.includes("access_token") && hash.includes("type=recovery")) {
+        const params = new URLSearchParams(hash.replace("#", ""));
+        const accessToken = params.get("access_token");
+        const refreshToken = params.get("refresh_token") || "";
+        if (accessToken) {
+          supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+            .then(({ data, error }) => {
+              if (error) {
+                console.error("setSession error:", error);
+              } else if (data?.session) {
+                console.log("Session établie pour reset password");
+              }
+            });
+        }
+      }
     }
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
