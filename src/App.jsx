@@ -2582,9 +2582,7 @@ function AppContent() {
                 <button onClick={()=>toggleFavorite(contactDrawer.id)} style={{ background:favorites.includes(contactDrawer.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.2)",color:favorites.includes(contactDrawer.id)?"#FFD700":theme.sub,padding:"8px 14px",borderRadius:10,fontSize:16,cursor:"pointer" }}>
                   {favorites.includes(contactDrawer.id)?"★":"☆"}
                 </button>
-                <a href={"https://wa.me/?text="+encodeURIComponent("*"+contactDrawer.title+"*
-Prix: "+(contactDrawer.price||"Non precisé")+"
-Voir: https://marcheduroi.com/annonce/"+contactDrawer.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                <a href={"https://wa.me/?text="+encodeURIComponent("*"+contactDrawer.title+"*\nPrix: "+(contactDrawer.price||"Non précisé")+"\nVoir: https://marcheduroi.com/annonce/"+contactDrawer.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                   <div style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.2)",color:"#25D366",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:600,display:"flex",alignItems:"center",gap:6,cursor:"pointer" }}>
                     Partager
                   </div>
