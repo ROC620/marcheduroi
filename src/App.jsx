@@ -2573,6 +2573,27 @@ function AppContent() {
               )}
               {/* Description */}
               <p style={{ color:theme.sub,fontSize:13,lineHeight:1.6,marginBottom:16 }}>{contactDrawer.description}</p>
+
+              {/* J'aime + Favoris + Partage */}
+              <div style={{ display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${theme.border}` }}>
+                <button onClick={()=>likePost(contactDrawer.id)} style={{ background:likedPosts.includes(contactDrawer.id)?"rgba(255,101,132,0.2)":"rgba(255,101,132,0.08)",border:"1px solid rgba(255,101,132,0.2)",color:likedPosts.includes(contactDrawer.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:600,cursor:"pointer" }}>
+                  <Icon name="heart" size={14}/> {contactDrawer.likes||0}
+                </button>
+                <button onClick={()=>toggleFavorite(contactDrawer.id)} style={{ background:favorites.includes(contactDrawer.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.2)",color:favorites.includes(contactDrawer.id)?"#FFD700":theme.sub,padding:"8px 14px",borderRadius:10,fontSize:16,cursor:"pointer" }}>
+                  {favorites.includes(contactDrawer.id)?"★":"☆"}
+                </button>
+                <a href={"https://wa.me/?text="+encodeURIComponent("*"+contactDrawer.title+"*
+Prix: "+(contactDrawer.price||"Non precisé")+"
+Voir: https://marcheduroi.com/annonce/"+contactDrawer.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                  <div style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.2)",color:"#25D366",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:600,display:"flex",alignItems:"center",gap:6,cursor:"pointer" }}>
+                    Partager
+                  </div>
+                </a>
+                <button onClick={()=>{ const url="https://marcheduroi.com/annonce/"+contactDrawer.id; if(navigator.share){navigator.share({title:contactDrawer.title,url});}else{navigator.clipboard.writeText(url);notify("Lien copié !"); }}} style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",color:"#6C63FF",padding:"8px 14px",borderRadius:10,fontSize:13,cursor:"pointer",fontWeight:600 }}>
+                  Autres apps
+                </button>
+              </div>
+
               {/* Auteur */}
               <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${theme.border}` }}>
                 <div style={{ width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,color:"#fff",flexShrink:0 }}>{contactDrawer.author?.[0]||"?"}</div>
