@@ -21,7 +21,7 @@ const INITIAL_POSTS = [
     id: 1, title: "Belle villa avec piscine à louer", category: "Immobilier",
     description: "Magnifique villa moderne avec piscine, 4 chambres, 3 salles de bain, jardin paysager. Idéale pour famille ou investissement locatif. Quartier calme et sécurisé à Cotonou.",
     author: "Sophie M.", authorId: "u2", price: "450 000 FCFA/mois", date: "2026-03-01", likes: 14,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600&q=80",
       "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80",
@@ -33,7 +33,7 @@ const INITIAL_POSTS = [
     id: 2, title: "Appartement meublé 3 pièces - Akpakpa", category: "Immobilier",
     description: "Appartement entièrement meublé, climatisé, avec eau et électricité. Situé à Akpakpa près du marché. Disponible immédiatement. Idéal pour cadre ou couple.",
     author: "Adjovi R.", authorId: "u7", price: "120 000 FCFA/mois", date: "2026-03-03", likes: 9,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80",
       "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80"
@@ -44,7 +44,7 @@ const INITIAL_POSTS = [
     id: 16, title: "Grande parcelle à vendre - Calavi", category: "Immobilier",
     description: "Belle parcelle de 600m² dans un quartier résidentiel en plein développement. Proche de toutes commodités. Idéale pour construction d'une maison ou investissement.",
     author: "Germain K.", authorId: "u19", price: "12 000 000 FCFA", date: "2026-03-12", likes: 7,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80",
     ],
@@ -55,7 +55,7 @@ const INITIAL_POSTS = [
     id: 3, title: "iPhone 15 Pro Max 256Go - Neuf", category: "Électronique",
     description: "iPhone 15 Pro Max couleur titane naturel, 256Go. Acheté il y a 2 mois, jamais tombé. Vendu avec boîte originale, chargeur MagSafe et coque de protection.",
     author: "Karim B.", authorId: "u3", price: "580 000 FCFA", date: "2026-03-05", likes: 11,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&q=80",
       "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&q=80"
@@ -65,7 +65,7 @@ const INITIAL_POSTS = [
     id: 4, title: "Samsung 65 pouces QLED 4K Smart TV", category: "Électronique",
     description: "Téléviseur Samsung QLED 65 pouces, 4K, Smart TV avec Netflix, YouTube intégrés. Acheté en janvier 2026, très peu utilisé. Avec télécommande et support mural.",
     author: "Franck T.", authorId: "u8", price: "320 000 FCFA", date: "2026-03-06", likes: 7,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1593359677879-a4bb92f829e1?w=600&q=80",
       "https://images.unsplash.com/photo-1461151304267-38535e780c79?w=600&q=80"
@@ -76,7 +76,7 @@ const INITIAL_POSTS = [
     id: 5, title: "Toyota Corolla 2020 - Première main", category: "Véhicules",
     description: "Toyota Corolla en excellent état, première main, entretien régulier chez concessionnaire. Jamais accidentée. Tous documents à jour. Disponible à Cotonou.",
     author: "Marc D.", authorId: "u5", price: "8 500 000 FCFA", date: "2026-03-09", likes: 5,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1623869675781-80aa31012a5a?w=600&q=80",
       "https://images.unsplash.com/photo-1550355291-bbee04a92027?w=600&q=80",
@@ -88,7 +88,7 @@ const INITIAL_POSTS = [
     id: 6, title: "Mercedes Classe C 2019 - Excellent état", category: "Véhicules",
     description: "Mercedes Benz Classe C 200, intérieur cuir beige, toit ouvrant, caméra de recul, GPS intégré. Voiture de direction, très bien entretenue. Prix négociable.",
     author: "Brice A.", authorId: "u9", price: "18 000 000 FCFA", date: "2026-03-10", likes: 18,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&q=80",
       "https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&q=80"
@@ -100,7 +100,7 @@ const INITIAL_POSTS = [
     id: 7, title: "Cours particuliers Maths & Physique", category: "Services",
     description: "Professeur diplômé en mathématiques et physique-chimie, 8 ans d'expérience. Cours à domicile pour collégiens, lycéens et étudiants. Résultats garantis. Disponible soirs et week-ends.",
     author: "Dr. Koffi M.", authorId: "u10", price: "5 000 FCFA/h", date: "2026-03-07", likes: 22,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80",
       "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80"
@@ -110,7 +110,7 @@ const INITIAL_POSTS = [
     id: 8, title: "Plomberie & Installation sanitaire", category: "Services",
     description: "Plombier professionnel avec 12 ans d'expérience. Installation, réparation, dépannage urgent. Robinetterie, chauffe-eau, WC, douche. Intervention rapide sur Cotonou et environs.",
     author: "Yves P.", authorId: "u11", price: "Sur devis", date: "2026-03-08", likes: 6,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&q=80",
       "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80"
@@ -121,7 +121,7 @@ const INITIAL_POSTS = [
     id: 9, title: "Vélo électrique VTT - Très bon état", category: "Sport",
     description: "VTT électrique 27,5 pouces, batterie longue durée 80km, moteur 250W, 21 vitesses. Parfait pour trajets quotidiens et randonnées. Chargeur inclus. Très peu utilisé.",
     author: "Léa K.", authorId: "u12", price: "280 000 FCFA", date: "2026-03-04", likes: 13,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=600&q=80",
       "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"
@@ -131,7 +131,7 @@ const INITIAL_POSTS = [
     id: 10, title: "Équipement complet de musculation", category: "Sport",
     description: "Banc de musculation multifonction avec barre, haltères et disques de poids (50kg au total). Parfait état, déménagement oblige la vente. À récupérer sur place à Fidjrossè.",
     author: "Arnold S.", authorId: "u13", price: "95 000 FCFA", date: "2026-03-11", likes: 4,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80",
       "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80"
@@ -142,7 +142,7 @@ const INITIAL_POSTS = [
     id: 11, title: "Robe de soirée élégante - Taille M", category: "Mode",
     description: "Magnifique robe de soirée longue, couleur bordeaux, ornements dorés. Portée une seule fois pour un mariage. Taille M (38-40). Parfaite pour cérémonies, soirées de gala.",
     author: "Nadège F.", authorId: "u14", price: "35 000 FCFA", date: "2026-03-02", likes: 16,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=600&q=80",
       "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&q=80"
@@ -152,7 +152,7 @@ const INITIAL_POSTS = [
     id: 12, title: "Costume homme 3 pièces - Taille L", category: "Mode",
     description: "Costume 3 pièces (veste, pantalon, gilet) couleur gris anthracite. Tissu de qualité, coupe italienne. Porté 2 fois. Taille L. Idéal pour entretiens, mariages et cérémonies.",
     author: "Romuald A.", authorId: "u15", price: "28 000 FCFA", date: "2026-03-10", likes: 8,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1594938298603-c8148c4b4a7c?w=600&q=80",
       "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80"
@@ -163,7 +163,7 @@ const INITIAL_POSTS = [
     id: 13, title: "Set de casseroles inox 7 pièces", category: "Autre",
     description: "Lot de 7 casseroles et poêles en inox 18/10, fond épais anti-adhésif. Compatibles toutes plaques dont induction. Idéal pour cuisine professionnelle ou familiale. Neuves dans leur emballage.",
     author: "Ines C.", authorId: "u16", price: "45 000 FCFA", date: "2026-03-06", likes: 10,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80",
       "https://images.unsplash.com/photo-1584622781867-1c5fe959c3f4?w=600&q=80",
@@ -174,7 +174,7 @@ const INITIAL_POSTS = [
     id: 14, title: "Robot de cuisine multifonction 1200W", category: "Autre",
     description: "Robot cuiseur multifonction 1200W, 6 programmes automatiques, bol inox 4L. Hache, mixe, pétrit, cuit à la vapeur. Parfait état, utilisé 3 mois. Avec tous les accessoires d'origine.",
     author: "Céleste M.", authorId: "u17", price: "75 000 FCFA", date: "2026-03-09", likes: 15,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1585515320310-259814833e62?w=600&q=80",
       "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=600&q=80"
@@ -184,7 +184,7 @@ const INITIAL_POSTS = [
     id: 15, title: "Couteaux de chef japonais - Set 5 pièces", category: "Autre",
     description: "Set de 5 couteaux de chef japonais en acier inoxydable, manche en bois d'olivier. Inclus : couteau de chef, couteau à pain, couteau d'office, santoku et cisailles. Avec bloc de rangement.",
     author: "Patrick N.", authorId: "u18", price: "32 000 FCFA", date: "2026-03-11", likes: 9,
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1593618998160-e34014e67546?w=600&q=80",
       "https://images.unsplash.com/photo-1566454544259-f4b94c3d758c?w=600&q=80"
@@ -193,20 +193,20 @@ const INITIAL_POSTS = [
 ];
 
 const INITIAL_BOUTIQUES = [
-  { id:"b1", name:"Beauté Dorée Cosmétiques", type:"Cosmétiques & Beauté", description:"Boutique spécialisée en produits cosmétiques naturels, soins de la peau, parfums et accessoires beauté.", ville:"Cotonou", quartier:"Akpakpa", von:"Von de la pharmacie centrale", horaires:"Lun-Sam 8h-20h · Dim 10h-18h", contact:"contact@marcheduroi.com", phone:"+2290197020788", author:"Adjara K.", authorId:"b_u1", date:"2026-03-01", likes:18, photos:[], video:null, expiresAt:null },
-  { id:"b2", name:"Tech Store Bénin", type:"Électronique & Informatique", description:"Vente et réparation de téléphones, ordinateurs, accessoires informatiques. Garantie sur tous les produits.", ville:"Porto-Novo", quartier:"Ouando", von:"Von du grand marché", horaires:"Lun-Ven 8h-19h · Sam 8h-17h", contact:"contact@marcheduroi.com", phone:"+2290197020788", author:"Fiacre D.", authorId:"b_u2", date:"2026-03-03", likes:12, photos:[], video:null, expiresAt:null },
-  { id:"b3", name:"Boulangerie Saveur d'Or", type:"Alimentation & Restauration", description:"Pains frais, viennoiseries, gâteaux personnalisés. Fabrication artisanale chaque matin. Livraison disponible.", ville:"Ouidah", quartier:"Centre-ville", von:"Von de l'église Saint-François", horaires:"Tous les jours 6h-21h", contact:"contact@marcheduroi.com", phone:"+2290197020788", author:"Marie T.", authorId:"b_u3", date:"2026-03-05", likes:25, photos:[], video:null, expiresAt:null },
+  { id:"b1", name:"Beauté Dorée Cosmétiques", type:"Cosmétiques & Beauté", description:"Boutique spécialisée en produits cosmétiques naturels, soins de la peau, parfums et accessoires beauté.", ville:"Cotonou", quartier:"Akpakpa", von:"Von de la pharmacie centrale", horaires:"Lun-Sam 8h-20h · Dim 10h-18h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Adjara K.", authorId:"b_u1", date:"2026-03-01", likes:18, photos:[], video:null, expiresAt:null },
+  { id:"b2", name:"Tech Store Bénin", type:"Électronique & Informatique", description:"Vente et réparation de téléphones, ordinateurs, accessoires informatiques. Garantie sur tous les produits.", ville:"Porto-Novo", quartier:"Ouando", von:"Von du grand marché", horaires:"Lun-Ven 8h-19h · Sam 8h-17h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Fiacre D.", authorId:"b_u2", date:"2026-03-03", likes:12, photos:[], video:null, expiresAt:null },
+  { id:"b3", name:"Boulangerie Saveur d'Or", type:"Alimentation & Restauration", description:"Pains frais, viennoiseries, gâteaux personnalisés. Fabrication artisanale chaque matin. Livraison disponible.", ville:"Ouidah", quartier:"Centre-ville", von:"Von de l'église Saint-François", horaires:"Tous les jours 6h-21h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Marie T.", authorId:"b_u3", date:"2026-03-05", likes:25, photos:[], video:null, expiresAt:null },
 ];
 
 const INITIAL_RESTOS = [
-  { id:"r1", name:"Maquis Chez Maman Africa", type:"Maquis", specialite:"Cuisine béninoise traditionnelle", plats:"Sauce arachide, Riz au gras, Igname pilée, Poisson braisé, Akassa", prixMoyen:"1 500 - 5 000 FCFA", capacite:"40 couverts", services:"Sur place, À emporter, Terrasse", description:"Maquis familial proposant les meilleurs plats traditionnels béninois dans une ambiance chaleureuse.", ville:"Cotonou", quartier:"Cadjehoun", von:"Von de l'aéroport", horaires:"Lun-Dim 7h-22h", contact:"contact@marcheduroi.com", phone:"+2290197020788", author:"Mama Africa", authorId:"r_u1", date:"2026-03-01", likes:35, photos:[], video:null, keywords:"cuisine béninoise maquis traditionnel", expiresAt:null },
-  { id:"r2", name:"Bar Le Cocotier", type:"Bar", specialite:"Cocktails tropicaux et bières fraîches", plats:"Brochettes, Arachides grillées, Poisson frit, Accras", prixMoyen:"500 - 3 000 FCFA", capacite:"60 couverts", services:"Sur place, Terrasse, Wifi disponible", description:"Bar tendance en bord de mer avec une vue imprenable. Ambiance détendue, musique live le week-end.", ville:"Ouidah", quartier:"Plage", von:"Von de la plage de Ouidah", horaires:"Mar-Dim 16h-02h", contact:"contact@marcheduroi.com", phone:"+2290197020788", author:"Patrick L.", authorId:"r_u2", date:"2026-03-03", likes:28, photos:[], video:null, keywords:"bar cocktails bières terrasse mer", expiresAt:null },
-  { id:"r3", name:"Fast Food Le Goût", type:"Fast-food", specialite:"Burgers, Sandwichs et Grillades", plats:"Burger maison, Sandwich poulet, Brochettes bœuf, Frites", prixMoyen:"1 000 - 4 000 FCFA", capacite:"25 couverts", services:"Sur place, À emporter, Livraison, Salle climatisée", description:"Fast-food moderne proposant des burgers faits maison. Livraison rapide dans tout Cotonou.", ville:"Cotonou", quartier:"Akpakpa", von:"Von du carrefour Missébo", horaires:"Lun-Dim 10h-23h", contact:"contact@marcheduroi.com", phone:"+2290197020788", author:"Hervé G.", authorId:"r_u3", date:"2026-03-05", likes:19, photos:[], video:null, keywords:"burger fast food livraison grillades", expiresAt:null },
+  { id:"r1", name:"Maquis Chez Maman Africa", type:"Maquis", specialite:"Cuisine béninoise traditionnelle", plats:"Sauce arachide, Riz au gras, Igname pilée, Poisson braisé, Akassa", prixMoyen:"1 500 - 5 000 FCFA", capacite:"40 couverts", services:"Sur place, À emporter, Terrasse", description:"Maquis familial proposant les meilleurs plats traditionnels béninois dans une ambiance chaleureuse.", ville:"Cotonou", quartier:"Cadjehoun", von:"Von de l'aéroport", horaires:"Lun-Dim 7h-22h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Mama Africa", authorId:"r_u1", date:"2026-03-01", likes:35, photos:[], video:null, keywords:"cuisine béninoise maquis traditionnel", expiresAt:null },
+  { id:"r2", name:"Bar Le Cocotier", type:"Bar", specialite:"Cocktails tropicaux et bières fraîches", plats:"Brochettes, Arachides grillées, Poisson frit, Accras", prixMoyen:"500 - 3 000 FCFA", capacite:"60 couverts", services:"Sur place, Terrasse, Wifi disponible", description:"Bar tendance en bord de mer avec une vue imprenable. Ambiance détendue, musique live le week-end.", ville:"Ouidah", quartier:"Plage", von:"Von de la plage de Ouidah", horaires:"Mar-Dim 16h-02h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Patrick L.", authorId:"r_u2", date:"2026-03-03", likes:28, photos:[], video:null, keywords:"bar cocktails bières terrasse mer", expiresAt:null },
+  { id:"r3", name:"Fast Food Le Goût", type:"Fast-food", specialite:"Burgers, Sandwichs et Grillades", plats:"Burger maison, Sandwich poulet, Brochettes bœuf, Frites", prixMoyen:"1 000 - 4 000 FCFA", capacite:"25 couverts", services:"Sur place, À emporter, Livraison, Salle climatisée", description:"Fast-food moderne proposant des burgers faits maison. Livraison rapide dans tout Cotonou.", ville:"Cotonou", quartier:"Akpakpa", von:"Von du carrefour Missébo", horaires:"Lun-Dim 10h-23h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Hervé G.", authorId:"r_u3", date:"2026-03-05", likes:19, photos:[], video:null, keywords:"burger fast food livraison grillades", expiresAt:null },
 ];
 
 const INITIAL_BEAUTE = [
-  { id:"beau1", name:"Salon Beauté Divine", type:"Salon de coiffure", specialite:"Tresses africaines et coiffures modernes", services:"Tresses, Locks, Tissages, Lissage, Coloration, Coupe, Soins capillaires", tarifs:"2 000 - 25 000 FCFA", rendezvous:"Les deux", produits:"L'Oréal, Dark & Lovely, Cantu", description:"Salon de coiffure professionnel spécialisé en tresses africaines et coiffures modernes. Accueil chaleureux.", ville:"Cotonou", quartier:"Cadjehoun", von:"Von du supermarché Erevan", horaires:"Lun-Sam 8h-20h · Dim 10h-17h", contact:"contact@marcheduroi.com", phone:"+2290197020788", author:"Nadège K.", authorId:"beau_u1", date:"2026-03-01", likes:42, photos:[], video:null, keywords:"tresses coiffure africaine lissage", expiresAt:null },
-  { id:"beau2", name:"Institut Glam & Style", type:"Institut de beauté", specialite:"Maquillage et soins du visage", services:"Maquillage, Manucure, Pédicure, Soins visage, Épilation", tarifs:"3 000 - 40 000 FCFA", rendezvous:"Oui", produits:"MAC, NYX, L'Oréal Paris", description:"Institut de beauté proposant des soins complets. Personnel professionnel certifié.", ville:"Cotonou", quartier:"Ganhi", von:"Von du marché Ganhi", horaires:"Lun-Sam 9h-19h", contact:"contact@marcheduroi.com", phone:"+2290197020788", author:"Christelle A.", authorId:"beau_u2", date:"2026-03-04", likes:31, photos:[], video:null, keywords:"maquillage manucure soins beauté", expiresAt:null },
+  { id:"beau1", name:"Salon Beauté Divine", type:"Salon de coiffure", specialite:"Tresses africaines et coiffures modernes", services:"Tresses, Locks, Tissages, Lissage, Coloration, Coupe, Soins capillaires", tarifs:"2 000 - 25 000 FCFA", rendezvous:"Les deux", produits:"L'Oréal, Dark & Lovely, Cantu", description:"Salon de coiffure professionnel spécialisé en tresses africaines et coiffures modernes. Accueil chaleureux.", ville:"Cotonou", quartier:"Cadjehoun", von:"Von du supermarché Erevan", horaires:"Lun-Sam 8h-20h · Dim 10h-17h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Nadège K.", authorId:"beau_u1", date:"2026-03-01", likes:42, photos:[], video:null, keywords:"tresses coiffure africaine lissage", expiresAt:null },
+  { id:"beau2", name:"Institut Glam & Style", type:"Institut de beauté", specialite:"Maquillage et soins du visage", services:"Maquillage, Manucure, Pédicure, Soins visage, Épilation", tarifs:"3 000 - 40 000 FCFA", rendezvous:"Oui", produits:"MAC, NYX, L'Oréal Paris", description:"Institut de beauté proposant des soins complets. Personnel professionnel certifié.", ville:"Cotonou", quartier:"Ganhi", von:"Von du marché Ganhi", horaires:"Lun-Sam 9h-19h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Christelle A.", authorId:"beau_u2", date:"2026-03-04", likes:31, photos:[], video:null, keywords:"maquillage manucure soins beauté", expiresAt:null },
 ];
 
 const INITIAL_ATELIERS = [
@@ -216,7 +216,7 @@ const INITIAL_ATELIERS = [
     services: "Couture sur mesure, Tenues de cérémonie, Retouches, Broderie, Formation couture",
     ville: "Cotonou", quartier: "Gbègamey", von: "Von du lycée technique",
     horaires: "Lun-Sam 8h-18h",
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     author: "Rosine A.", authorId: "a_u1", date: "2026-03-02", likes: 20,
     photos: [
       "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
@@ -229,7 +229,7 @@ const INITIAL_ATELIERS = [
     services: "Diagnostic, Vidange, Freinage, Climatisation, Carrosserie, Électricité auto",
     ville: "Abomey-Calavi", quartier: "Godomey", von: "Von du rond-point Erevan",
     horaires: "Lun-Sam 7h30-18h30",
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     author: "Théodore M.", authorId: "a_u2", date: "2026-03-04", likes: 15,
     photos: [
       "https://images.unsplash.com/photo-1632823471565-1ecdf5c6da12?w=600&q=80",
@@ -242,7 +242,7 @@ const INITIAL_ATELIERS = [
     services: "Meubles sur mesure, Portes et fenêtres, Grilles, Soudure, Serrurerie",
     ville: "Parakou", quartier: "Banikanni", von: "Von du marché central",
     horaires: "Lun-Sam 7h-18h",
-    contact: "contact@marcheduroi.com", phone: "+2290197020788",
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
     author: "Justin F.", authorId: "a_u3", date: "2026-03-06", likes: 9,
     photos: [
       "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&q=80",
@@ -5701,26 +5701,21 @@ function AppContent() {
                   const prixPost = parseInt((modal.data.price||"").replace(/[^0-9]/g,"")) || 0;
                   const villePost = modal.data.immo?.ville || modal.data.vehicle?.position || modal.data.ville || "";
                   // Cherche dans toutes les sections
-                  const allItems = [
-                    ...posts.filter(p=>p.id!==modal.data.id&&p.category===modal.data.category&&!p.expired).map(p=>({...p,_section:"post"})),
-                    ...boutiques.map(b=>({...b,title:b.name,_section:"boutique"})),
-                    ...ateliers.map(a=>({...a,title:a.name,_section:"atelier"})),
-                    ...restos.map(r=>({...r,title:r.name,_section:"resto"})),
-                    ...beaute.map(b=>({...b,title:b.name,_section:"beaute"})),
-                  ].filter(p=>p.id!==modal.data.id);
+                  // Filtrer uniquement les annonces de même catégorie
+                  const allItems = posts
+                    .filter(p => p.id !== modal.data.id && p.category === modal.data.category && !p.expired)
+                    .map(p => ({...p, _section:"post"}));
                   const similaires = allItems
                     .map(p => {
-                      let score = 0;
+                      let score = 1; // même catégorie garantie
                       const prixP = parseInt((p.price||"").replace(/[^0-9]/g,"")) || 0;
                       const villeP = p.immo?.ville||p.vehicle?.position||p.ville||"";
                       if (villePost && normalizeText(villeP).includes(normalizeText(villePost))) score += 3;
                       if (prixPost > 0 && prixP > 0 && Math.abs(prixP - prixPost) / prixPost < 0.5) score += 2;
                       if (p.sponsored) score += 1;
-                      // Même type/catégorie
-                      if (p.category===modal.data.category || p.type===modal.data.type) score += 1;
+                      if (p.type && p.type === modal.data.type) score += 2;
                       return { ...p, _score: score };
                     })
-                    .filter(p=>p._score > 0)
                     .sort((a,b) => b._score - a._score)
                     .slice(0, 8);
                   if (similaires.length === 0) return null;
