@@ -1640,9 +1640,10 @@ function AppContent() {
 
     // NE PAS connecter l'utilisateur — attendre confirmation email
     setTurnstileToken("");
+    const emailSent = authForm.email;
     setAuthForm({ email:"",password:"",name:"",country:"BJ" });
     setView("login");
-    notify("📧 Un email de confirmation vous a été envoyé. Confirmez votre adresse puis connectez-vous !");
+    setModal({ type:"emailConfirmation", email: emailSent });
   };
 
   // ─── SYSTÈME DE PARRAINAGE ───────────────────────────────────────────────────
@@ -6771,6 +6772,41 @@ function AppContent() {
                   ⚡ Payer et soumettre ma bannière
                 </button>
                 <p style={{ textAlign:"center",color:theme.sub,fontSize:11,marginTop:10 }}>Validation manuelle sous 24h · Paiement sécurisé MTN/Moov Money</p>
+              </>
+            )}
+
+            {/* CONFIRMATION EMAIL INSCRIPTION */}
+            {modal.type==="emailConfirmation"&&(
+              <>
+                <div style={{ textAlign:"center",marginBottom:24 }}>
+                  <div style={{ fontSize:64,marginBottom:16 }}>📧</div>
+                  <h3 style={{ fontWeight:800,fontSize:22,color:theme.text,marginBottom:8 }}>Confirmez votre adresse email</h3>
+                  <p style={{ color:"#6C63FF",fontWeight:600,fontSize:14,marginBottom:4 }}>{modal.email}</p>
+                </div>
+                <div style={{ background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:14,padding:20,marginBottom:20 }}>
+                  <p style={{ color:theme.text,fontSize:14,lineHeight:1.8,marginBottom:12 }}>
+                    ✅ Votre compte a été créé avec succès !
+                  </p>
+                  <p style={{ color:theme.text,fontSize:14,lineHeight:1.8,marginBottom:12 }}>
+                    Un email de confirmation vient d'être envoyé à votre adresse. 
+                    Cliquez sur le lien dans cet email pour activer votre compte.
+                  </p>
+                  <p style={{ color:"#FF8C00",fontWeight:700,fontSize:13,lineHeight:1.7 }}>
+                    ⚠️ Vous ne trouvez pas l'email ? Vérifiez votre dossier <strong>SPAM</strong> ou <strong>Courrier indésirable</strong> — il s'y trouve parfois automatiquement.
+                  </p>
+                </div>
+                <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:12,padding:14,marginBottom:20,fontSize:13,color:theme.sub,lineHeight:1.7 }}>
+                  <p>📌 <strong style={{ color:theme.text }}>Étapes à suivre :</strong></p>
+                  <p>1. Ouvrez votre boîte email</p>
+                  <p>2. Cherchez un email de <strong style={{ color:"#6C63FF" }}>noreply@marcheduroi.com</strong></p>
+                  <p>3. Vérifiez le dossier SPAM si vous ne le voyez pas</p>
+                  <p>4. Cliquez sur le lien de confirmation</p>
+                  <p>5. Revenez sur MarchéduRoi et connectez-vous</p>
+                </div>
+                <button onClick={()=>setModal(null)} className="btn-glow"
+                  style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
+                  ✅ J'ai compris — Aller vérifier mes emails
+                </button>
               </>
             )}
 
