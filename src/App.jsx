@@ -1374,6 +1374,22 @@ function AppContent() {
   const [adEditing, setAdEditing] = useState(null);
   const [showAdForm, setShowAdForm] = useState(false);
   const [expandedContacts, setExpandedContacts] = useState({}); // postId -> boolean
+
+  // Fermeture automatique du panneau contact au scroll
+  React.useEffect(() => {
+    if (Object.keys(expandedContacts).length === 0) return;
+    const handleScroll = () => {
+      const openId = Object.keys(expandedContacts)[0];
+      const el = document.getElementById("contact-panel-" + openId);
+      if (!el) { setExpandedContacts({}); return; }
+      const rect = el.getBoundingClientRect();
+      if (rect.bottom < -100 || rect.top > window.innerHeight + 100) {
+        setExpandedContacts({});
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [expandedContacts]);
   const contactTimerRef = useRef(null);
   const [userLocation, setUserLocation] = useState(null);
   const [notifications, setNotifications] = useState(() => {
@@ -3352,8 +3368,12 @@ function AppContent() {
                     <button onClick={(e)=>{
                       e.stopPropagation();
                       if (!user || user.id !== post.authorId) {
-                        trackView(post.id);
-                        trackContact(post.id);
+                        const viewKey = "viewed_" + post.id;
+                        if (!sessionStorage.getItem(viewKey)) {
+                          sessionStorage.setItem(viewKey, "1");
+                          trackView(post.id);
+                          trackContact(post.id);
+                        }
                       }
                       setExpandedContacts({ [post.id]: true });
                     }} style={{ width:"100%",background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.25)",color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.2s" }}>
@@ -3364,13 +3384,7 @@ function AppContent() {
 
                   {/* Panneau déplié — clic intérieur ne ferme pas */}
                   {expandedContacts[post.id] && (
-                    <div onClick={e=>e.stopPropagation()} ref={el=>{
-                      if (!el) return;
-                      const obs = new IntersectionObserver(([entry])=>{
-                        if (!entry.isIntersecting) setExpandedContacts({});
-                      }, { threshold: 0, rootMargin: "0px 0px -80% 0px" });
-                      obs.observe(el);
-                    }} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
+                    <div id={"contact-panel-"+post.id} onClick={e=>e.stopPropagation()} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
 
                       {/* Mini fiche immobilière */}
                       {post.immo&&(
