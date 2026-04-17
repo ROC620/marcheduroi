@@ -1374,6 +1374,7 @@ function AppContent() {
   const [adEditing, setAdEditing] = useState(null);
   const [showAdForm, setShowAdForm] = useState(false);
   const [expandedContacts, setExpandedContacts] = useState({}); // postId -> boolean
+  const [contactDrawer, setContactDrawer] = useState(null); // post object for drawer on PC/tablet
 
   // Fermeture automatique du panneau contact au scroll
   React.useEffect(() => {
@@ -2507,6 +2508,7 @@ function AppContent() {
         @keyframes urgentGlow{0%,100%{box-shadow:0 0 8px rgba(255,71,87,0.6),0 0 20px rgba(255,71,87,0.3),0 4px 24px rgba(255,71,87,0.2)}50%{box-shadow:0 0 18px rgba(255,71,87,0.9),0 0 40px rgba(255,71,87,0.5),0 4px 32px rgba(255,71,87,0.35)}}
         .card-sponsored{animation:goldGlow 2.5s ease-in-out infinite!important;border:2px solid #FFD700!important;}
         .card-urgent{animation:urgentGlow 1.8s ease-in-out infinite!important;border:2px solid #FF4757!important;}
+        @keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
         .card-hover{transition:transform 0.25s ease,box-shadow 0.25s ease;}
         .card-hover:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(108,99,255,0.18)!important;}
         .btn-glow:hover{box-shadow:0 0 24px rgba(108,99,255,0.5);}
@@ -2533,6 +2535,95 @@ function AppContent() {
       `}</style>
 
       {/* PANNEAU MESSAGERIE */}
+
+      {/* TIROIR CONTACT — PC et tablette */}
+      {contactDrawer && windowWidth > 600 && (
+        <div onClick={()=>setContactDrawer(null)}
+          style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",zIndex:500,backdropFilter:"blur(2px)" }}>
+          <div onClick={e=>e.stopPropagation()}
+            style={{ position:"fixed",right:0,top:0,bottom:0,width:Math.min(420,window.innerWidth*0.9),background:theme.card,boxShadow:"-20px 0 60px rgba(0,0,0,0.3)",display:"flex",flexDirection:"column",zIndex:501,overflowY:"auto",animation:"slideInRight 0.25s ease" }}>
+            {/* Header */}
+            <div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${theme.border}`,display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0,position:"sticky",top:0,background:theme.card,zIndex:1 }}>
+              <div style={{ flex:1,minWidth:0 }}>
+                <h3 style={{ fontWeight:800,fontSize:17,color:theme.text,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{contactDrawer.title}</h3>
+                {contactDrawer.price && <p style={{ color:"#43C6AC",fontWeight:700,fontSize:15 }}>{contactDrawer.price} FCFA</p>}
+              </div>
+              <button onClick={()=>setContactDrawer(null)} style={{ background:"transparent",border:"none",color:theme.sub,cursor:"pointer",padding:8,flexShrink:0 }}><Icon name="x" size={22}/></button>
+            </div>
+            {/* Photo */}
+            {contactDrawer.photos?.[0] && (
+              <img src={contactDrawer.photos[0]} alt="" style={{ width:"100%",maxHeight:200,objectFit:"cover",flexShrink:0 }}/>
+            )}
+            {/* Content */}
+            <div style={{ padding:"16px 20px",flex:1 }}>
+              {/* Tags véhicule/immo */}
+              {contactDrawer.vehicle && (
+                <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:12 }}>
+                  {[contactDrawer.vehicle.marque,contactDrawer.vehicle.modele,contactDrawer.vehicle.annee,contactDrawer.vehicle.carburant].filter(Boolean).map((v,i)=>(
+                    <span key={i} className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{v}</span>
+                  ))}
+                </div>
+              )}
+              {contactDrawer.immo && (
+                <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:12 }}>
+                  {[contactDrawer.immo.transaction,contactDrawer.immo.sousType,contactDrawer.immo.ville].filter(Boolean).map((v,i)=>(
+                    <span key={i} className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{v}</span>
+                  ))}
+                </div>
+              )}
+              {/* Description */}
+              <p style={{ color:theme.sub,fontSize:13,lineHeight:1.6,marginBottom:16 }}>{contactDrawer.description}</p>
+              {/* Auteur */}
+              <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${theme.border}` }}>
+                <div style={{ width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,color:"#fff",flexShrink:0 }}>{contactDrawer.author?.[0]||"?"}</div>
+                <div>
+                  <p style={{ fontSize:13,fontWeight:600,color:theme.text }}>{contactDrawer.author}</p>
+                  <p style={{ fontSize:11,color:theme.sub }}>{contactDrawer.date}</p>
+                </div>
+                {isCertified(contactDrawer.authorId||contactDrawer.author_id) && <CertifiedBadge size={36}/>}
+              </div>
+              {/* Boutons contact */}
+              <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
+                <button onClick={()=>setModal({type:"contact",data:contactDrawer})} style={{ background:"rgba(67,198,172,0.12)",border:"1px solid rgba(67,198,172,0.3)",color:"#43C6AC",padding:"12px 14px",borderRadius:10,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+                  <Icon name="mail" size={16}/> Envoyer un message
+                </button>
+                {contactDrawer.phone && (
+                  <div style={{ display:"flex",gap:10 }}>
+                    <a href={"tel:"+contactDrawer.phone} style={{ flex:1,textDecoration:"none" }}>
+                      <div style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"12px 14px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,cursor:"pointer" }}>
+                        📞 {contactDrawer.phone}
+                      </div>
+                    </a>
+                    <a href={"https://wa.me/"+contactDrawer.phone.replace(/[\s+\-()]/g,"")+"?text="+encodeURIComponent("Bonjour, je suis intéressé(e) par : *"+contactDrawer.title+"*
+Lien : https://marcheduroi.com/annonce/"+contactDrawer.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                      <div style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",color:"#25D366",padding:"12px 14px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:6,cursor:"pointer" }}>
+                        <svg width="16" height="16" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                        WA
+                      </div>
+                    </a>
+                  </div>
+                )}
+                {contactDrawer.lat && contactDrawer.lng && (
+                  <a href={"https://www.google.com/maps/dir/?api=1&destination="+contactDrawer.lat+","+contactDrawer.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                    <div style={{ background:"rgba(66,133,244,0.1)",border:"1px solid rgba(66,133,244,0.3)",color:"#4285F4",padding:"12px 14px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,cursor:"pointer" }}>
+                      🗺️ Itinéraire Google Maps
+                    </div>
+                  </a>
+                )}
+                {user && user.id !== (contactDrawer.authorId||contactDrawer.author_id) && (contactDrawer.authorId||contactDrawer.author_id) && (
+                  <button onClick={()=>{ const ownerId=contactDrawer.authorId||contactDrawer.author_id; setActiveConv({postId:contactDrawer.id,postTitle:contactDrawer.title,postPrice:contactDrawer.price,postPhoto:contactDrawer.photos?.[0],receiverId:ownerId,receiverName:contactDrawer.author,messages:[]}); setShowMessages(true); setContactDrawer(null); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"12px 14px",borderRadius:10,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+                    💬 Message privé
+                  </button>
+                )}
+                <button onClick={()=>{ setModal({type:"report",data:contactDrawer}); setContactDrawer(null); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"4px 0",fontSize:12,cursor:"pointer",textAlign:"left" }}>
+                  🚩 Signaler cette annonce
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PANNEAU PLUS */}
       {showMoreMenu && (
         <div
@@ -3363,7 +3454,7 @@ function AppContent() {
                     </div>
                   )}
 
-                  {/* Bouton Contacter — visible uniquement quand fermé */}
+                  {/* Bouton Contacter — tiroir sur PC/tablette, inline sur mobile */}
                   {!expandedContacts[post.id] && (
                     <button onClick={(e)=>{
                       e.stopPropagation();
@@ -3375,7 +3466,11 @@ function AppContent() {
                           trackContact(post.id);
                         }
                       }
-                      setExpandedContacts({ [post.id]: true });
+                      if (windowWidth > 600) {
+                        setContactDrawer(post);
+                      } else {
+                        setExpandedContacts({ [post.id]: true });
+                      }
                     }} style={{ width:"100%",background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.25)",color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.2s" }}>
                       <Icon name="mail" size={14}/>
                       Contacter ▾
