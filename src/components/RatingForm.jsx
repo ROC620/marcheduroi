@@ -10,7 +10,6 @@ export default function RatingForm({ itemId, onRate, theme }) {
 
   return (
     <div style={{ background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: 12, padding: 16 }}>
-
       {/* Étoiles */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12, justifyContent: "center" }}>
         {[1, 2, 3, 4, 5].map(s => (
@@ -35,7 +34,7 @@ export default function RatingForm({ itemId, onRate, theme }) {
         ))}
       </div>
 
-      {/* Label de la note */}
+      {/* Label */}
       <p style={{
         textAlign: "center",
         color: stars > 0 ? "#FFD700" : theme.sub,

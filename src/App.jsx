@@ -3347,26 +3347,30 @@ function AppContent() {
                     </div>
                   )}
 
-                  {/* Bouton Contacter — toujours visible, déplie tout */}
-                  <button onClick={(e)=>{
-                    e.stopPropagation();
-                    const isOpen = expandedContacts[post.id];
-                    if (!isOpen) {
-                      // Ne pas compter les vues du propriétaire
+                  {/* Bouton Contacter — visible uniquement quand fermé */}
+                  {!expandedContacts[post.id] && (
+                    <button onClick={(e)=>{
+                      e.stopPropagation();
                       if (!user || user.id !== post.authorId) {
                         trackView(post.id);
                         trackContact(post.id);
                       }
-                    }
-                    setExpandedContacts(isOpen ? {} : { [post.id]: true });
-                  }} style={{ width:"100%",background:expandedContacts[post.id]?"rgba(67,198,172,0.15)":"rgba(67,198,172,0.08)",border:`1px solid rgba(67,198,172,${expandedContacts[post.id]?0.5:0.25})`,color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.2s" }}>
-                    <Icon name="mail" size={14}/>
-                    {expandedContacts[post.id] ? "Masquer ▲" : "Contacter ▾"}
-                  </button>
+                      setExpandedContacts({ [post.id]: true });
+                    }} style={{ width:"100%",background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.25)",color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.2s" }}>
+                      <Icon name="mail" size={14}/>
+                      Contacter ▾
+                    </button>
+                  )}
 
                   {/* Panneau déplié — clic intérieur ne ferme pas */}
                   {expandedContacts[post.id] && (
-                    <div onClick={e=>e.stopPropagation()} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
+                    <div onClick={e=>e.stopPropagation()} ref={el=>{
+                      if (!el) return;
+                      const obs = new IntersectionObserver(([entry])=>{
+                        if (!entry.isIntersecting) setExpandedContacts({});
+                      }, { threshold: 0, rootMargin: "0px 0px -80% 0px" });
+                      obs.observe(el);
+                    }} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
 
                       {/* Mini fiche immobilière */}
                       {post.immo&&(
@@ -3454,6 +3458,11 @@ function AppContent() {
                           🚩 Signaler cette annonce
                         </button>
                       </div>
+                      {/* Bouton Masquer en bas du panneau */}
+                      <button onClick={e=>{ e.stopPropagation(); setExpandedContacts({}); }}
+                        style={{ width:"100%",background:"rgba(67,198,172,0.15)",border:"1px solid rgba(67,198,172,0.5)",color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:10,transition:"all 0.2s" }}>
+                        <Icon name="mail" size={14}/> Masquer ▲
+                      </button>
                     </div>
                   )}
                 </div>
