@@ -2490,7 +2490,21 @@ function AppContent() {
   const cardStyle = { background:theme.card, border:`1px solid ${theme.border}` };
 
   return (
-    <div onContextMenu={e=>e.preventDefault()} style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box" }}>
+    <div onContextMenu={e=>e.preventDefault()} style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box",position:"relative" }}>
+
+      {/* Filigrane MarchéduRoi */}
+      <div aria-hidden="true" style={{ position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden" }}>
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="mdr-watermark" x="0" y="0" width="280" height="180" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+              <image href="/marcheduRoi-icon.svg" x="85" y="8" width="36" height="32" opacity="0.055"/>
+              <text x="50" y="80" fontFamily="Sora,sans-serif" fontSize="16" fontWeight="700" fill="currentColor" opacity="0.045" letterSpacing="1">MarchéduRoi</text>
+              <text x="60" y="100" fontFamily="Sora,sans-serif" fontSize="10" fontWeight="400" fill="currentColor" opacity="0.03" letterSpacing="0.5">marcheduroi.com</text>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#mdr-watermark)"/>
+        </svg>
+      </div>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
