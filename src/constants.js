@@ -1,6 +1,20 @@
 // ─── CONSTANTES GLOBALES MarchéduRoi ───────────────────────────────────────
 
-export const CATEGORIES = ["Toutes", "Immobilier", "Électronique", "Véhicules", "Motos & Tricycles", "Services", "Sport", "Mode", "Autre"];
+export const CATEGORIES = ["Toutes", "Immobilier", "Électronique", "Véhicules", "Location de véhicules", "Motos & Tricycles", "Services", "Sport", "Mode", "Autre"];
+
+// Couleurs associées à chaque catégorie
+export const CATEGORY_COLORS = {
+  "Toutes":                { bg: "rgba(108,99,255,0.15)", border: "rgba(108,99,255,0.4)", text: "#6C63FF",  icon: "🏷️" },
+  "Immobilier":            { bg: "rgba(66,133,244,0.12)", border: "rgba(66,133,244,0.35)", text: "#4285F4", icon: "🏠" },
+  "Électronique":          { bg: "rgba(255,214,0,0.12)",  border: "rgba(255,214,0,0.35)",  text: "#C8A200", icon: "📱" },
+  "Véhicules":             { bg: "rgba(67,198,172,0.12)", border: "rgba(67,198,172,0.35)", text: "#43C6AC", icon: "🚗" },
+  "Location de véhicules": { bg: "rgba(255,159,67,0.12)", border: "rgba(255,159,67,0.35)", text: "#FF9F43", icon: "🔑" },
+  "Motos & Tricycles":     { bg: "rgba(255,101,132,0.12)",border: "rgba(255,101,132,0.35)",text: "#FF6584", icon: "🏍️" },
+  "Services":              { bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.35)", text: "#A855F7", icon: "🛠️" },
+  "Sport":                 { bg: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.35)",  text: "#22C55E", icon: "⚽" },
+  "Mode":                  { bg: "rgba(236,72,153,0.12)", border: "rgba(236,72,153,0.35)", text: "#EC4899", icon: "👗" },
+  "Autre":                 { bg: "rgba(156,163,175,0.12)",border: "rgba(156,163,175,0.35)",text: "#9CA3AF", icon: "📦" },
+};
 
 export const BACKGROUNDS = [
   // Thèmes sombres

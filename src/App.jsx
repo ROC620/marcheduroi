@@ -9,7 +9,7 @@ import ImmoCard from "./components/ImmoCard";
 import CertifiedBadge from "./components/CertifiedBadge";
 import RatingForm from "./components/RatingForm";
 import {
-  CATEGORIES, BACKGROUNDS, VEHICLE_FIELDS, MOTO_FIELDS,
+  CATEGORIES, CATEGORY_COLORS, BACKGROUNDS, VEHICLE_FIELDS, MOTO_FIELDS,
   RESTO_TYPES, BEAUTE_TYPES, MAX_MODIFS,
   SPONSOR_PRICES, MODIF_PRICES, PRICE_PER_MONTH,
   COUNTRIES_FLAGS
@@ -1818,7 +1818,7 @@ function AppContent() {
     setModal(null);
   };
   const canEdit = user !== null;
-  const isVehicle = postForm.category === "Véhicules";
+  const isVehicle = (postForm.category === "Véhicules" || postForm.category === "Location de véhicules");
   const isMoto    = postForm.category === "Motos & Tricycles";
 
   // ─── GRILLE TARIFAIRE ────────────────────────────────────────────────────────
@@ -3378,12 +3378,24 @@ function AppContent() {
                 <span style={{ fontSize:10,color:theme.sub,opacity:0.7 }}>›</span>
               </div>
               <div style={{ display:"flex",gap:5,overflowX:"auto",flexWrap:"nowrap",padding:"2px 0",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-                {CATEGORIES.map(c=>(
-                  <button key={c} onClick={()=>setCategory(c)}
-                    style={{ background:category===c?"linear-gradient(135deg,#6C63FF,#8B84FF)":theme.card,border:category===c?"none":`1px solid ${theme.border}`,color:category===c?"#fff":theme.sub,padding:"5px 14px",borderRadius:18,fontWeight:600,fontSize:12,transition:"all 0.2s",display:"flex",alignItems:"center",gap:4,flexShrink:0,whiteSpace:"nowrap" }}>
-                    {c==="Véhicules"&&<Icon name="car" size={11}/>}{c==="Motos & Tricycles"&&<span style={{fontSize:11}}>🏍️</span>}{c}
-                  </button>
-                ))}
+                {CATEGORIES.map(c=>{
+                  const cc = CATEGORY_COLORS[c]||{bg:"rgba(108,99,255,0.12)",border:"rgba(108,99,255,0.3)",text:"#6C63FF",icon:"🏷️"};
+                  const isActive = category === c;
+                  return (
+                    <button key={c} onClick={()=>setCategory(c)}
+                      style={{
+                        background: isActive ? cc.text : cc.bg,
+                        border: `1px solid ${isActive ? cc.text : cc.border}`,
+                        color: isActive ? "#fff" : cc.text,
+                        padding:"5px 14px",borderRadius:18,fontWeight:700,fontSize:12,
+                        transition:"all 0.2s",display:"flex",alignItems:"center",
+                        gap:4,flexShrink:0,whiteSpace:"nowrap",
+                        boxShadow: isActive ? `0 2px 12px ${cc.text}44` : "none",
+                      }}>
+                      <span style={{fontSize:11}}>{cc.icon}</span>{c}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
