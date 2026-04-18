@@ -3854,6 +3854,21 @@ function AppContent() {
             <h2 style={{ fontWeight:800,fontSize:28,color:theme.text }}>Panneau Admin</h2>
             <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
               <button onClick={async()=>{
+                const { data } = await supabase.from("newsletter").select("*").order("created_at", { ascending: false });
+                if (!data || data.length === 0) { notify("Aucun abonné pour le moment","error"); return; }
+                const csv = "﻿" + "Email;Date inscription
+" + data.map(r => `${r.email};${r.created_at?.slice(0,10)||""}`).join("
+");
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url; a.download = `newsletter_abonnes_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+                URL.revokeObjectURL(url);
+                notify(`✅ ${data.length} abonné(s) exportés !`);
+              }} style={{ background:"linear-gradient(135deg,#FF6584,#FF8C00)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
+                📧 Exporter newsletter
+              </button>
+              <button onClick={async()=>{
                 // Charger toutes les données
                 const [pData, bData, aData, rData, beData, prData] = await Promise.all([
                   supabase.from("posts").select("author,author_id,phone,contact,likes,views,created_at,sponsored,urgent,expires_at").then(r=>r.data||[]),
@@ -6375,7 +6390,20 @@ function AppContent() {
                   <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre email</label>
                   <input type="email" value={authForm.email} onChange={e=>setAuthForm(a=>({...a,email:e.target.value}))} placeholder="contact@marcheduroi.com" style={inputStyle}/>
                 </div>
-                <button onClick={()=>{ if(!authForm.email){notify("Entrez votre email","error");return;} notify("Abonnement confirmé ! Merci 🎉"); setModal(null); }} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
+                <button onClick={async()=>{
+                  if(!authForm.email){notify("Entrez votre email","error");return;}
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  if(!emailRegex.test(authForm.email)){notify("Email invalide","error");return;}
+                  const { error } = await supabase.from("newsletter").insert({ email: authForm.email.toLowerCase().trim() });
+                  if (error) {
+                    if (error.code === "23505") { notify("Vous êtes déjà abonné(e) ! 😊"); }
+                    else { notify("Erreur : "+error.message,"error"); return; }
+                  } else {
+                    notify("✅ Abonnement confirmé ! Merci de rejoindre MarchéduRoi 🎉");
+                  }
+                  setAuthForm(a=>({...a,email:""}));
+                  setModal(null);
+                }} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
                   S'abonner à la newsletter
                 </button>
                 <p style={{ fontSize:11,color:theme.sub,textAlign:"center",marginTop:12 }}>Désabonnement possible à tout moment · Pas de spam</p>
