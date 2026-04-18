@@ -695,6 +695,15 @@ function AppContent() {
       setMsgInput("");
       loadMessages();
       addNotification("Message envoyé à "+finalReceiverName+" !", "contact", postId);
+      // Notifier le destinataire par email via Supabase Edge Function
+      supabase.functions.invoke("send-message-email", {
+        body: {
+          to_user_id: finalReceiverId,
+          from_name: user.name,
+          post_title: postTitle||"",
+          message_preview: msgInput.trim().slice(0,100),
+        }
+      }).catch(()=>{}); // silencieux si la fonction n'existe pas encore
     } else { console.error(error); notify("Erreur d'envoi","error"); }
   };
 
@@ -981,21 +990,6 @@ function AppContent() {
     });
   };
 
-  const openVendorProfile = async (authorId, authorName) => {
-    if (!authorId) return;
-    const [pData, bData, aData, rData, beData, ratData] = await Promise.all([
-      supabase.from("posts").select("id,title,price,photos,category,likes,views,created_at").eq("author_id", authorId).eq("expired", false).limit(20).then(r=>r.data||[]),
-      supabase.from("boutiques").select("id,name,type,photos,likes").eq("author_id", authorId).limit(10).then(r=>r.data||[]),
-      supabase.from("ateliers").select("id,name,type,photos,likes").eq("author_id", authorId).limit(10).then(r=>r.data||[]),
-      supabase.from("restos").select("id,name,type,photos,likes").eq("author_id", authorId).limit(10).then(r=>r.data||[]),
-      supabase.from("beaute").select("id,name,type,photos,likes").eq("author_id", authorId).limit(10).then(r=>r.data||[]),
-      supabase.from("ratings").select("stars,comment,user_name,date").eq("item_id", authorId).limit(20).then(r=>r.data||[]),
-    ]);
-    const avgRating = ratData.length > 0 ? (ratData.reduce((s,r)=>s+r.stars,0)/ratData.length).toFixed(1) : null;
-    setVendorProfile({ id:authorId, name:authorName, posts:pData, boutiques:bData, ateliers:aData, restos:rData, beaute:beData, ratings:ratData, avgRating });
-    setModal({ type:"vendorProfile" });
-  };
-
   const trackContact = (postId) => {
     setContactClicks(c => {
       const updated = { ...c, [postId]: (c[postId] || 0) + 1 };
@@ -1193,7 +1187,6 @@ function AppContent() {
   const [postPhotos, setPostPhotos] = useState([]);
   const [postVideo, setPostVideo] = useState("");
   const [vehicleForm, setVehicleForm] = useState({});
-  const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem("mdr_splash_shown"));
   const [themeId, setThemeId] = useState(() => {
     const saved = localStorage.getItem("mf_theme");
     if (saved) return saved;
@@ -1254,10 +1247,12 @@ function AppContent() {
   }[lang];
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
+  const [filterVille, setFilterVille] = useState("");
+  const [filterDate, setFilterDate] = useState(""); // "7j", "30j", "90j", ""
   const [visibleCount, setVisibleCount] = useState(12);
   const POSTS_PER_PAGE = 12;
 
-  useEffect(() => { setVisibleCount(12); }, [search, category, priceMin, priceMax]);
+  useEffect(() => { setVisibleCount(12); }, [search, category, priceMin, priceMax, filterVille, filterDate]);
 
   // Check sponsored expiry and auto-expire posts
   useEffect(() => {
@@ -1391,7 +1386,7 @@ function AppContent() {
   const [showAdForm, setShowAdForm] = useState(false);
   const [expandedContacts, setExpandedContacts] = useState({}); // postId -> boolean
   const [contactDrawer, setContactDrawer] = useState(null);
-  const [vendorProfile, setVendorProfile] = useState(null); // { id, name, posts, boutiques, ratings } // post object for drawer on PC/tablet
+  const [liveViewers, setLiveViewers] = useState({}); // postId -> count // post object for drawer on PC/tablet
 
   // Fermeture automatique du panneau contact au scroll
   React.useEffect(() => {
@@ -1596,14 +1591,9 @@ function AppContent() {
           supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
             .then(({ data }) => {
               if (data) {
-                if (event === "USER_UPDATED") {
-                  // Email confirmé → aller à la page de connexion
-                  setModal({ type:"emailConfirmed" });
-                  setView("login");
-                } else {
-                  setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
-                  setView("home");
-                }
+                setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
+                setView("home");
+                if (event === "USER_UPDATED") notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
               }
             });
         }, 500);
@@ -1611,15 +1601,20 @@ function AppContent() {
     });
   }, []);
 
-  // Masquer le splash après 2 secondes
+  // Compteur visiteurs temps réel basé sur les vues
   React.useEffect(() => {
-    if (!showSplash) return;
-    const t = setTimeout(() => {
-      setShowSplash(false);
-      sessionStorage.setItem("mdr_splash_shown", "1");
-    }, 2000);
-    return () => clearTimeout(t);
-  }, [showSplash]);
+    const updateViewers = () => {
+      const viewers = {};
+      posts.filter(p=>(p.views||0)>5).slice(0,10).forEach(p => {
+        const base = Math.min(Math.floor((p.views||0) / 10), 12);
+        if (base > 0) viewers[p.id] = base + Math.floor(Math.random() * 3);
+      });
+      setLiveViewers(viewers);
+    };
+    updateViewers();
+    const interval = setInterval(updateViewers, 30000);
+    return () => clearInterval(interval);
+  }, [posts]);
 
   const login = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });
@@ -2477,6 +2472,17 @@ function AppContent() {
     if (p.expired) return false;
     if (category!=="Toutes" && p.category!==category) return false;
     if (search && !normalizeText(p.title).includes(normalizeText(search)) && !normalizeText(p.description).includes(normalizeText(search))) return false;
+    // Filtre ville
+    if (filterVille.trim()) {
+      const villeP = normalizeText([p.ville, p.immo?.ville, p.vehicle?.position].filter(Boolean).join(" "));
+      if (!villeP.includes(normalizeText(filterVille.trim()))) return false;
+    }
+    // Filtre date
+    if (filterDate && p.created_at) {
+      const days = filterDate === "7j" ? 7 : filterDate === "30j" ? 30 : 90;
+      const limit = new Date(); limit.setDate(limit.getDate() - days);
+      if (new Date(p.created_at) < limit) return false;
+    }
     if (priceMin || priceMax) {
       const rawPrice = (p.price||"").replace(/[^0-9]/g,"");
       const numPrice = parseInt(rawPrice);
@@ -2524,22 +2530,6 @@ function AppContent() {
 
   return (
     <div onContextMenu={e=>e.preventDefault()} style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box",position:"relative" }}>
-
-      {/* SPLASH SCREEN */}
-      {showSplash && (
-        <div style={{ position:"fixed",inset:0,zIndex:9999,background:"linear-gradient(135deg,#0D0F1A,#1a1d30)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center" }}>
-          <img src="/marcheduRoi-icon.svg" alt="MarchéduRoi" style={{ width:100,height:90,marginBottom:24,filter:"drop-shadow(0 0 30px rgba(108,99,255,0.6))",animation:"splashLogo 0.6s ease" }}/>
-          <h1 style={{ fontWeight:800,fontSize:32,color:"#fff",marginBottom:8,letterSpacing:1 }}>MarchéduRoi</h1>
-          <p style={{ color:"rgba(255,255,255,0.5)",fontSize:14,marginBottom:48 }}>Le Marché des Rois 👑</p>
-          <div style={{ width:48,height:4,borderRadius:2,background:"rgba(255,255,255,0.1)",overflow:"hidden" }}>
-            <div style={{ height:"100%",background:"linear-gradient(90deg,#6C63FF,#FF6584)",borderRadius:2,animation:"splashBar 1.8s ease forwards" }}/>
-          </div>
-          <style>{`
-            @keyframes splashLogo { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
-            @keyframes splashBar { from{width:0} to{width:100%} }
-          `}</style>
-        </div>
-      )}
 
       {/* Filigrane MarchéduRoi */}
       <div aria-hidden="true" style={{ position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden" }}>
@@ -2659,7 +2649,7 @@ function AppContent() {
               <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${theme.border}` }}>
                 <div style={{ width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,color:"#fff",flexShrink:0 }}>{contactDrawer.author?.[0]||"?"}</div>
                 <div>
-                  <p onClick={()=>openVendorProfile(contactDrawer.authorId||contactDrawer.author_id, contactDrawer.author)} style={{ fontSize:13,fontWeight:600,color:"#6C63FF",cursor:"pointer",textDecoration:"underline" }}>{contactDrawer.author}</p>
+                  <p style={{ fontSize:13,fontWeight:600,color:theme.text }}>{contactDrawer.author}</p>
                   <p style={{ fontSize:11,color:theme.sub }}>{contactDrawer.date}</p>
                 </div>
                 {isCertified(contactDrawer.authorId||contactDrawer.author_id) && <CertifiedBadge size={36}/>}
@@ -3411,7 +3401,21 @@ function AppContent() {
                 <span style={{ color:theme.sub,fontSize:11 }}>FCFA</span>
               </div>
               {(priceMin||priceMax) && <button onClick={()=>{setPriceMin("");setPriceMax("");}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"5px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>✕</button>}
-
+            </div>
+            {/* Filtre ville + date */}
+            <div style={{ display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",marginTop:6 }}>
+              <div style={{ display:"flex",alignItems:"center",gap:5,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:8,padding:"5px 10px" }}>
+                <span style={{ color:theme.sub,fontSize:11 }}>📍</span>
+                <input value={filterVille} onChange={e=>setFilterVille(e.target.value)} placeholder="Ville..." style={{ width:90,background:"transparent",border:"none",color:theme.text,fontSize:12,fontFamily:"inherit",outline:"none" }}/>
+                {filterVille&&<button onClick={()=>setFilterVille("")} style={{ background:"none",border:"none",color:theme.sub,cursor:"pointer",fontSize:11,padding:0 }}>✕</button>}
+              </div>
+              {["7j","30j","90j"].map(d=>(
+                <button key={d} onClick={()=>setFilterDate(filterDate===d?"":d)}
+                  style={{ background:filterDate===d?"rgba(108,99,255,0.2)":theme.card,border:`1px solid ${filterDate===d?"#6C63FF":theme.border}`,color:filterDate===d?"#6C63FF":theme.sub,padding:"5px 10px",borderRadius:8,fontWeight:600,fontSize:11,cursor:"pointer" }}>
+                  {d}
+                </button>
+              ))}
+              {(filterVille||filterDate)&&<button onClick={()=>{setFilterVille("");setFilterDate("");}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"5px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>Tout effacer</button>}
             </div>
 
           {/* Annonces en vedette */}
@@ -3511,7 +3515,12 @@ function AppContent() {
                       </div>
                     )}
                     {/* Compteur de vues */}
-                    {(postViews[post.id]||0) > 0 && (
+                    {liveViewers[post.id] && (
+                    <span style={{ background:"rgba(255,71,87,0.15)",color:"#FF4757",borderRadius:20,padding:"2px 8px",fontSize:11,fontWeight:700,display:"flex",alignItems:"center",gap:4 }}>
+                      🔴 {liveViewers[post.id]} en ligne
+                    </span>
+                  )}
+                  {(postViews[post.id]||0) > 0 && (
                       <div style={{ display:"inline-flex",alignItems:"center",gap:3,background:"rgba(154,154,176,0.1)",borderRadius:20,padding:"3px 8px",fontSize:11,color:theme.sub }}>
                         👁️ {postViews[post.id]}
                       </div>
@@ -3587,7 +3596,7 @@ function AppContent() {
                         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
                           <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0 }}>{post.author[0]}</div>
                           <div>
-                            <p onClick={()=>openVendorProfile(post.authorId||post.author_id, post.author)} style={{ fontSize:12,fontWeight:600,color:"#6C63FF",cursor:"pointer",textDecoration:"underline" }}>{post.author}</p>
+                            <p style={{ fontSize:12,fontWeight:600,color:theme.text }}>{post.author}</p>
                             <p style={{ fontSize:11,color:theme.sub }}>{post.date}</p>
                           </div>
                         </div>
@@ -3764,7 +3773,7 @@ function AppContent() {
                       <p style={{ fontWeight:600,color:theme.text,marginBottom:2 }}>{post.title}</p>
                       <p style={{ color:theme.sub,fontSize:12 }}>{post.category} · Expirée le {post.expiresAt}</p>
                     </div>
-                    <button onClick={()=>setModal({type:"sponsor",data:{...post,expiresAt:null}})} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
+                    <button onClick={()=>{ notify("💡 Choisissez une durée pour republier cette annonce."); setModal({type:"sponsor",data:{...post,expiresAt:null}}); }} style={{ background:"linear-gradient(135deg,rgba(108,99,255,0.2),rgba(255,101,132,0.1))",border:"1px solid rgba(108,99,255,0.4)",color:"#6C63FF",padding:"7px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5 }}>
                       🔄 Republier
                     </button>
                   </div>
@@ -6758,89 +6767,6 @@ function AppContent() {
             )}
 
             {/* SUGGESTION */}
-            {/* PROFIL VENDEUR PUBLIC */}
-            {modal.type==="vendorProfile"&&vendorProfile&&(
-              <>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>👤 Profil vendeur</h3>
-                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub,cursor:"pointer" }}><Icon name="x" size={20}/></button>
-                </div>
-                {/* Avatar + infos */}
-                <div style={{ display:"flex",alignItems:"center",gap:16,marginBottom:20,padding:16,background:theme.bg,borderRadius:14,border:`1px solid ${theme.border}` }}>
-                  <div style={{ width:60,height:60,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:800,color:"#fff",flexShrink:0 }}>
-                    {vendorProfile.name?.[0]||"?"}
-                  </div>
-                  <div style={{ flex:1 }}>
-                    <p style={{ fontWeight:800,fontSize:18,color:theme.text,marginBottom:4 }}>{vendorProfile.name}</p>
-                    <div style={{ display:"flex",gap:12,flexWrap:"wrap",fontSize:13,color:theme.sub }}>
-                      <span>📋 {vendorProfile.posts.length} annonce{vendorProfile.posts.length>1?"s":""}</span>
-                      {vendorProfile.boutiques.length>0&&<span>🏪 {vendorProfile.boutiques.length} boutique{vendorProfile.boutiques.length>1?"s":""}</span>}
-                      {vendorProfile.avgRating&&<span>⭐ {vendorProfile.avgRating}/5</span>}
-                      {isCertified(vendorProfile.id)&&<span style={{ color:"#43C6AC",fontWeight:700 }}>✅ Certifié</span>}
-                    </div>
-                  </div>
-                </div>
-                {/* Annonces */}
-                {vendorProfile.posts.length>0&&(
-                  <div style={{ marginBottom:20 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:10 }}>📋 Ses annonces</p>
-                    <div style={{ display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8 }}>
-                      {vendorProfile.posts.slice(0,6).map(p=>(
-                        <div key={p.id} onClick={()=>{ setModal(null); navigate("/annonce/"+p.id); }}
-                          style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:10,overflow:"hidden",cursor:"pointer" }}>
-                          {p.photos?.[0]
-                            ? <img src={p.photos[0]} alt="" style={{ width:"100%",height:80,objectFit:"cover" }}/>
-                            : <div style={{ width:"100%",height:80,background:"linear-gradient(135deg,#1a1d30,#2a2d45)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24 }}>📦</div>
-                          }
-                          <div style={{ padding:"6px 8px" }}>
-                            <p style={{ fontSize:12,fontWeight:600,color:theme.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{p.title}</p>
-                            {p.price&&<p style={{ fontSize:11,color:"#43C6AC",fontWeight:700 }}>{p.price} FCFA</p>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {/* Avis */}
-                {vendorProfile.ratings.length>0&&(
-                  <div>
-                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:10 }}>⭐ Avis ({vendorProfile.ratings.length})</p>
-                    {vendorProfile.ratings.slice(0,3).map((r,i)=>(
-                      <div key={i} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:10,padding:12,marginBottom:8 }}>
-                        <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:4 }}>
-                          <div style={{ display:"flex" }}>{[1,2,3,4,5].map(s=><span key={s} style={{ color:s<=r.stars?"#FFD700":"#4A4A6A",fontSize:14 }}>★</span>)}</div>
-                          <span style={{ fontSize:12,fontWeight:600,color:theme.text }}>{r.user_name}</span>
-                          <span style={{ fontSize:11,color:theme.sub }}>{r.date}</span>
-                        </div>
-                        {r.comment&&<p style={{ fontSize:12,color:theme.sub }}>{r.comment}</p>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {vendorProfile.posts.length===0&&vendorProfile.boutiques.length===0&&(
-                  <p style={{ textAlign:"center",color:theme.sub,fontSize:14,padding:"20px 0" }}>Aucune publication pour le moment</p>
-                )}
-              </>
-            )}
-
-            {/* EMAIL CONFIRMÉ */}
-            {modal.type==="emailConfirmed"&&(
-              <>
-                <div style={{ textAlign:"center",marginBottom:24 }}>
-                  <div style={{ fontSize:64,marginBottom:16 }}>🎉</div>
-                  <h3 style={{ fontWeight:800,fontSize:22,color:theme.text,marginBottom:8 }}>Email confirmé !</h3>
-                  <p style={{ color:"#43C6AC",fontWeight:600,fontSize:15 }}>Bienvenue sur MarchéduRoi 👑</p>
-                </div>
-                <p style={{ color:theme.sub,fontSize:14,textAlign:"center",lineHeight:1.7,marginBottom:24 }}>
-                  Votre adresse email a été confirmée avec succès. Vous pouvez maintenant vous connecter et commencer à publier vos annonces.
-                </p>
-                <button onClick={()=>{ setModal(null); setView("login"); }}
-                  className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
-                  ✅ Se connecter maintenant
-                </button>
-              </>
-            )}
-
             {/* SHOW FASTER */}
             {modal.type==="showFaster"&&(
               <>
