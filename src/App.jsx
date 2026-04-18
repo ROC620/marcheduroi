@@ -1398,7 +1398,7 @@ function AppContent() {
   const [showAdForm, setShowAdForm] = useState(false);
   const [expandedContacts, setExpandedContacts] = useState({}); // postId -> boolean
   const [contactDrawer, setContactDrawer] = useState(null);
-  const [showWaTooltip, setShowWaTooltip] = useState(false);
+  const [showWaTooltip, setShowWaTooltip] = useState(() => !localStorage.getItem("mdr_wa_tooltip_shown"));
   const [liveViewers, setLiveViewers] = useState({}); // postId -> count // post object for drawer on PC/tablet
 
   // Fermeture automatique du panneau contact au scroll
@@ -1625,11 +1625,7 @@ function AppContent() {
     });
   }, []);
 
-  // WhatsApp tooltip après 30 secondes
-  React.useEffect(() => {
-    const t = setTimeout(() => setShowWaTooltip(true), 30000);
-    return () => clearTimeout(t);
-  }, []);
+  // WhatsApp tooltip — affiché une seule fois dans la vie de l'utilisateur
 
   // Compteur visiteurs temps réel basé sur les vues
   React.useEffect(() => {
@@ -2929,12 +2925,12 @@ function AppContent() {
       {!showMessages && (
         <div style={{ position:"fixed",bottom:24,right:16,zIndex:999,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8 }}>
           {showWaTooltip && (
-            <div style={{ background:"#25D366",color:"#fff",borderRadius:12,padding:"10px 14px",fontSize:13,fontWeight:600,maxWidth:220,boxShadow:"0 4px 20px rgba(37,211,102,0.4)",animation:"fadeIn 0.3s ease",position:"relative",lineHeight:1.5 }}>
+            <div style={{ background:windowWidth<=600?"rgba(37,211,102,0.75)":"#25D366",color:"#fff",borderRadius:12,padding:"10px 14px",fontSize:13,fontWeight:600,maxWidth:220,boxShadow:"0 4px 20px rgba(37,211,102,0.4)",animation:"fadeIn 0.3s ease",position:"relative",lineHeight:1.5,backdropFilter:windowWidth<=600?"blur(4px)":"none" }}>
               👋 Bonjour ! Besoin d'aide ?<br/>Contactez-nous sur WhatsApp !
-              <button onClick={()=>setShowWaTooltip(false)} style={{ position:"absolute",top:4,right:6,background:"none",border:"none",color:"#fff",cursor:"pointer",fontSize:14,fontWeight:800,padding:0 }}>✕</button>
+              <button onClick={()=>{ setShowWaTooltip(false); localStorage.setItem("mdr_wa_tooltip_shown","1"); }} style={{ position:"absolute",top:4,right:6,background:"none",border:"none",color:"#fff",cursor:"pointer",fontSize:14,fontWeight:800,padding:0 }}>✕</button>
             </div>
           )}
-          <a href="https://wa.me/2290147562640?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide%20concernant%20ma%20publication." target="_blank" rel="noopener noreferrer" onClick={()=>setShowWaTooltip(false)} title="Contacter le support technique"
+          <a href="https://wa.me/2290147562640?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide%20concernant%20ma%20publication." target="_blank" rel="noopener noreferrer" onClick={()=>{ setShowWaTooltip(false); localStorage.setItem("mdr_wa_tooltip_shown","1"); }} title="Contacter le support technique"
             style={{ width:50,height:50,borderRadius:"50%",background:"#25D366",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(37,211,102,0.5)",cursor:"pointer",textDecoration:"none",transition:"transform 0.2s" }}
             onMouseEnter={e=>{ e.currentTarget.style.transform="scale(1.1)"; }}
             onMouseLeave={e=>{ e.currentTarget.style.transform="scale(1)"; }}>
