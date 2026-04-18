@@ -3856,9 +3856,7 @@ function AppContent() {
               <button onClick={async()=>{
                 const { data } = await supabase.from("newsletter").select("*").order("created_at", { ascending: false });
                 if (!data || data.length === 0) { notify("Aucun abonné pour le moment","error"); return; }
-                const csv = "﻿" + "Email;Date inscription
-" + data.map(r => `${r.email};${r.created_at?.slice(0,10)||""}`).join("
-");
+                const csv = "\uFEFF" + "Email;Date inscription\n" + data.map(r => r.email + ";" + (r.created_at?.slice(0,10)||"")).join("\n");
                 const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
