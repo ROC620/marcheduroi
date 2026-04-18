@@ -3,12 +3,17 @@
 export const CATEGORIES = ["Toutes", "Immobilier", "Électronique", "Véhicules", "Motos & Tricycles", "Services", "Sport", "Mode", "Autre"];
 
 export const BACKGROUNDS = [
-  { id: "dark",   label: "Sombre",             bg: "#0D0F1A", card: "#1A1D30", border: "#2A2D45", text: "#E8E8F0", sub: "#9A9AB0" },
-  { id: "light",  label: "Clair",              bg: "#F4F6FB", card: "#FFFFFF", border: "#E0E4F0", text: "#1A1D30", sub: "#6B7280" },
-  { id: "green",  label: "Forêt",              bg: "#0A1A10", card: "#122018", border: "#1E3A28", text: "#E0F0E8", sub: "#7AAB8A" },
-  { id: "blue",   label: "Océan",              bg: "#050E1F", card: "#0D1E38", border: "#1A3258", text: "#D8E8FF", sub: "#6A9ACF" },
-  { id: "purple", label: "Galaxie",            bg: "#0E0818", card: "#1A1030", border: "#2E1A50", text: "#EAD8FF", sub: "#9A78CF" },
-  { id: "sunset", label: "Coucher de soleil",  bg: "#1A0A00", card: "#2A1408", border: "#4A2010", text: "#FFE8D0", sub: "#CF8A5A" },
+  // Thèmes sombres
+  { id: "dark",    label: "Sombre",        bg: "#0D0F1A", card: "#1A1D30", border: "#2A2D45", text: "#E8E8F0", sub: "#9A9AB0" },
+  { id: "blue",    label: "Océan",         bg: "#050E1F", card: "#0D1E38", border: "#1A3258", text: "#D8E8FF", sub: "#6A9ACF" },
+  { id: "purple",  label: "Galaxie",       bg: "#0E0818", card: "#1A1030", border: "#2E1A50", text: "#EAD8FF", sub: "#9A78CF" },
+  // Thèmes clairs
+  { id: "light",   label: "Clair",         bg: "#F4F6FB", card: "#FFFFFF", border: "#E0E4F0", text: "#1A1D30", sub: "#6B7280" },
+  { id: "cream",   label: "Crème",         bg: "#FDF8F0", card: "#FFFFFF", border: "#E8DDD0", text: "#2C1810", sub: "#8B7355" },
+  { id: "mint",    label: "Menthe",        bg: "#F0FAF6", card: "#FFFFFF", border: "#C8EAD8", text: "#1A3028", sub: "#4A8A6A" },
+  { id: "lavande", label: "Lavande",       bg: "#F5F0FF", card: "#FFFFFF", border: "#DDD0F0", text: "#2A1850", sub: "#7A60A8" },
+  { id: "peche",   label: "Pêche",         bg: "#FFF5EE", card: "#FFFFFF", border: "#F0D8C0", text: "#3A1A08", sub: "#C07040" },
+  { id: "ciel",    label: "Ciel",          bg: "#EFF6FF", card: "#FFFFFF", border: "#BFDBFE", text: "#1E3A5F", sub: "#5A8AB0" },
 ];
 
 export const VEHICLE_FIELDS = [
