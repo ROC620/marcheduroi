@@ -3043,7 +3043,7 @@ function AppContent() {
               </div>
               {/* Cloche notifications */}
               <div style={{ position:"relative" }}>
-                <button onClick={()=>{ setShowNotifs(s=>!s); if(!showNotifs) markAllRead(); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px",position:"relative",cursor:"pointer",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>
+                <button onClick={()=>{ setShowNotifs(true); markAllRead(); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px",position:"relative",cursor:"pointer",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>
                   <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                   {notifications.filter(n=>!n.read).length > 0 && (
                     <span style={{ position:"absolute",top:4,right:4,background:"#FF4757",color:"#fff",borderRadius:"50%",width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800 }}>
@@ -3088,7 +3088,12 @@ function AppContent() {
             <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span>
           </h1>
 
-          {/* Slogan */}
+          {/* Nouveau slogan officiel */}
+          <p style={{ fontSize:windowWidth<=600?"clamp(14px,4vw,18px)":"20px",fontWeight:700,textAlign:"center",color:"#FFD700",marginBottom:windowWidth<=600?4:8,letterSpacing:0.5 }}>
+            "Sur MarchéduRoi, vous êtes le Roi du Marché" 👑
+          </p>
+
+          {/* Slogan géolocalisé */}
           {(()=>{
               const PAYS_NOMS = {
                 BJ:"Bénin", TG:"Togo", CI:"Côte d'Ivoire", SN:"Sénégal", ML:"Mali",
@@ -3320,6 +3325,7 @@ function AppContent() {
 
           {/* Footer landing */}
           <p style={{ color:theme.sub,fontSize:13,marginTop:24,textAlign:"center" }}>
+            <span style={{ color:"#FFD700",fontWeight:700,fontStyle:"italic" }}>"Sur MarchéduRoi, vous êtes le Roi du Marché" 👑</span><br/>
             © 2026 MarchéduRoi · Ouidah, Bénin 🇧🇯 · <button onClick={()=>setView("terms")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>CGU</button> · <button onClick={()=>setView("about")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>À propos</button>
           </p>
         </div>
@@ -4573,7 +4579,8 @@ function AppContent() {
           <div style={{ textAlign:"center",padding:"80px 40px 48px",background:`linear-gradient(180deg,${theme.card},transparent)` }}>
             <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:120,height:120,borderRadius:20,boxShadow:"0 8px 32px rgba(108,99,255,0.4)",margin:"0 auto 20px",display:"block" }}/>
             <h1 style={{ fontSize:windowWidth<=600?"clamp(28px,8vw,38px)":48,fontWeight:800,marginBottom:16,color:theme.text,textAlign:"center",wordBreak:"break-word" }}>À propos de <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span></h1>
-            <p style={{ color:theme.sub,fontSize:18,maxWidth:700,margin:"0 auto",lineHeight:1.7 }}>La plateforme de petites annonces qui connecte commerçants, entreprises et particuliers au Bénin et au-delà des frontières.</p>
+            <p style={{ color:theme.sub,fontSize:18,maxWidth:700,margin:"0 auto 12px",lineHeight:1.7 }}>La plateforme de petites annonces qui connecte commerçants, entreprises et particuliers au Bénin et au-delà des frontières.</p>
+            <p style={{ fontWeight:800,fontSize:20,color:"#FFD700",textAlign:"center",letterSpacing:0.5,fontStyle:"italic" }}>"Sur MarchéduRoi, vous êtes le Roi du Marché" 👑</p>
           </div>
 
           {/* Mission */}
