@@ -514,10 +514,10 @@ function FlagCylinder({ theme }) {
   const onEnd   = () => setDragging(false);
 
   return (
-    <div style={{ position:"relative", width:"100%", marginBottom:0, userSelect:"none" }}>
+    <div style={{ position:"relative", width:"100%", marginBottom:window.innerWidth<=600?0:-20, userSelect:"none" }}>
 
       {/* Logo — affiché normalement, globe caché par overflow hidden */}
-      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:200 }}>
+      <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:window.innerWidth<=600?160:140 }}>
         <img
           src="/marcheduRoi-icon.svg"
           alt="MarchéduRoi"
@@ -3073,7 +3073,7 @@ function AppContent() {
 
       {/* LANDING PAGE */}
       {view==="landing"&&(
-        <div style={{ width:"100%",minHeight:"calc(100vh - 64px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:windowWidth<=600?"flex-start":"center",padding:windowWidth<=600?"0 16px 8px":"0 24px 8px",animation:"fadeIn 0.6s ease",position:"relative",overflow:"hidden" }}>
+        <div style={{ width:"100%",minHeight:"calc(100vh - 64px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:windowWidth<=600?"flex-start":"center",padding:windowWidth<=600?"0 16px 8px":"0 24px 0",animation:"fadeIn 0.6s ease",position:"relative",overflow:"hidden" }}>
 
           {/* Background decoration */}
           <div style={{ position:"absolute",top:-100,left:-100,width:400,height:400,borderRadius:"50%",background:"rgba(108,99,255,0.06)",pointerEvents:"none" }}/>
@@ -3082,14 +3082,12 @@ function AppContent() {
           {/* Logo + drapeaux en orbite */}
           <FlagCylinder theme={theme}/>
 
-          {/* Titre */}
-          <h1 style={{ fontSize:windowWidth<=600?"clamp(22px,8vw,32px)":"clamp(26px,7vw,52px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:windowWidth<=600?4:8,color:theme.text,padding:"0 8px",width:"100%",marginTop:0 }}>
+          {/* Titre + slogan officiel groupés */}
+          <h1 style={{ fontSize:windowWidth<=600?"clamp(22px,8vw,32px)":"clamp(26px,7vw,52px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:windowWidth<=600?2:4,color:theme.text,padding:"0 8px",width:"100%",marginTop:0 }}>
             Bienvenue sur{" "}
             <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span>
           </h1>
-
-          {/* Nouveau slogan officiel */}
-          <p style={{ fontSize:windowWidth<=600?"clamp(14px,4vw,18px)":"20px",fontWeight:700,textAlign:"center",color:"#FFD700",marginBottom:windowWidth<=600?4:8,letterSpacing:0.5 }}>
+          <p style={{ fontSize:windowWidth<=600?"clamp(13px,3.5vw,16px)":"17px",fontWeight:700,textAlign:"center",color:"#FFD700",marginBottom:windowWidth<=600?2:4,letterSpacing:0.3,marginTop:0 }}>
             "Sur MarchéduRoi, vous êtes le Roi du Marché" 👑
           </p>
 
@@ -3165,7 +3163,7 @@ function AppContent() {
             const dayIndex = Math.floor(Date.now() / (1000*60*60*24)) % VERSETS_LANDING.length;
             const v = VERSETS_LANDING[dayIndex];
             return (
-              <div style={{ display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:"rgba(108,99,255,0.07)",borderLeft:"3px solid #6C63FF",borderRadius:10,marginBottom:12,maxWidth:480 }}>
+              <div style={{ display:"flex",alignItems:"center",gap:8,padding:"6px 14px",background:"rgba(108,99,255,0.07)",borderLeft:"3px solid #6C63FF",borderRadius:10,marginBottom:8,maxWidth:480 }}>
                 <span style={{ fontSize:16,flexShrink:0 }}>✨</span>
                 <div>
                   <span style={{ fontSize:12,fontStyle:"italic",color:theme.text }}>{v.texte} </span>
@@ -3256,7 +3254,7 @@ function AppContent() {
           {(() => {
             const ad = ads[adIndex];
             if (!ad) return (
-              <div style={{ width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0`,borderRadius:16,overflow:"hidden",border:"1px solid rgba(108,99,255,0.3)",background:`linear-gradient(135deg,rgba(108,99,255,0.08),rgba(255,101,132,0.06))` }}>
+              <div style={{ width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"12px"} auto 0`,borderRadius:16,overflow:"hidden",border:"1px solid rgba(108,99,255,0.3)",background:`linear-gradient(135deg,rgba(108,99,255,0.08),rgba(255,101,132,0.06))` }}>
                 <div style={{ padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
                   <div style={{ display:"flex",alignItems:"center",gap:12 }}>
                     <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>🚀</div>
@@ -3272,7 +3270,7 @@ function AppContent() {
               </div>
             );
             return (
-              <div style={{ position:"relative",width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"32px"} auto 0` }}>
+              <div style={{ position:"relative",width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"12px"} auto 0` }}>
                 {/* Flèche précédent */}
                 {ads.length > 1 && (
                   <button onTouchEnd={e=>{e.preventDefault();e.stopPropagation();setAdPaused(true);setAdIndex(i=>(i-1+ads.length)%ads.length);setTimeout(()=>setAdPaused(false),3000);}} onClick={e=>{e.preventDefault();e.stopPropagation();setAdPaused(true);setAdIndex(i=>(i-1+ads.length)%ads.length);setTimeout(()=>setAdPaused(false),3000);}}
