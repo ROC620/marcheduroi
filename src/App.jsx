@@ -1411,16 +1411,7 @@ function AppContent() {
   });
   const [showNotifs, setShowNotifs] = useState(false);
 
-  // Fermer les notifs en cliquant/touchant ailleurs
-  useEffect(() => {
-    if (!showNotifs) return;
-    const close = () => setShowNotifs(false);
-    const t = setTimeout(() => {
-      document.addEventListener('click', close, { once: true });
-      document.addEventListener('touchend', close, { once: true });
-    }, 50);
-    return () => { clearTimeout(t); document.removeEventListener('click', close); document.removeEventListener('touchend', close); };
-  }, [showNotifs]);
+  // Le panneau notifs se ferme via son propre overlay — pas besoin d'écouter le document
 
   const addNotification = (msg, type="info", postId=null) => {
     const newNotif = { id:Date.now(), msg, type, postId, date:new Date().toISOString().slice(0,10), read:false };
