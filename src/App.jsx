@@ -95,6 +95,18 @@ const INITIAL_POSTS = [
     ],
     vehicle: { marque:"Mercedes", modele:"Classe C 200", annee:"2019", transmission:"Automatique", puissance:"184 ch", carburant:"Essence", garniture:"Cuir beige", capacite:"5 places", climatisation:"Automatique bi-zone", docs:"Carte grise, Assurance, Expertise", serie:"AK 5678 BJ", position:"Porto-Novo, Bénin", autre:"Toit ouvrant, GPS, Caméra recul" }
   },
+  // LOCATION DE VÉHICULES
+  {
+    id: 17, title: "Toyota RAV4 2021 — Location journalière", category: "Location de véhicules",
+    description: "Toyota RAV4 en parfait état disponible à la location. Idéal pour voyages, cérémonies ou déplacements professionnels. Chauffeur disponible en option. Caution requise.",
+    author: "Admin MarchéduRoi", authorId: "admin", price: "35 000 FCFA/jour", date: "2026-04-01", likes: 8,
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
+    photos: [
+      "https://images.unsplash.com/photo-1568844293986-ca9c5a794567?w=600&q=80",
+      "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&q=80"
+    ],
+    vehicle: { marque:"Toyota", modele:"RAV4", annee:"2021", transmission:"Automatique", puissance:"203 ch", carburant:"Essence", garniture:"Cuir", capacite:"5 places", climatisation:"Automatique", docs:"Assurance tous risques, Carte grise", position:"Cotonou, Bénin", autre:"Chauffeur en option · 150 000 FCFA caution · Kilométrage illimité dans Cotonou" }
+  },
   // SERVICES
   {
     id: 7, title: "Cours particuliers Maths & Physique", category: "Services",
@@ -1386,6 +1398,7 @@ function AppContent() {
   const [showAdForm, setShowAdForm] = useState(false);
   const [expandedContacts, setExpandedContacts] = useState({}); // postId -> boolean
   const [contactDrawer, setContactDrawer] = useState(null);
+  const [showWaTooltip, setShowWaTooltip] = useState(false);
   const [liveViewers, setLiveViewers] = useState({}); // postId -> count // post object for drawer on PC/tablet
 
   // Fermeture automatique du panneau contact au scroll
@@ -1412,6 +1425,26 @@ function AppContent() {
   const [showNotifs, setShowNotifs] = useState(false);
 
   // Le panneau notifs se ferme via son propre overlay — pas besoin d'écouter le document
+
+  // SEO dynamique — titre de page selon l'annonce/vue active
+  React.useEffect(() => {
+    if (modal?.data?.title) {
+      document.title = `${modal.data.title} — MarchéduRoi`;
+      // Meta OG dynamique
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      let ogDesc = document.querySelector('meta[property="og:description"]');
+      let ogImg = document.querySelector('meta[property="og:image"]');
+      if (ogTitle) ogTitle.setAttribute("content", `${modal.data.title} | MarchéduRoi`);
+      if (ogDesc) ogDesc.setAttribute("content", modal.data.description?.slice(0,160)||"MarchéduRoi — Petites annonces Bénin & Afrique");
+      if (ogImg && modal.data.photos?.[0]) ogImg.setAttribute("content", modal.data.photos[0]);
+    } else if (modal?.data?.name) {
+      document.title = `${modal.data.name} — MarchéduRoi`;
+    } else {
+      document.title = "MarcheduRoi — Petites Annonces Bénin & Afrique";
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.setAttribute("content", "MarcheduRoi — Annonces, Boutiques & Services au Bénin");
+    }
+  }, [modal]);
 
   const addNotification = (msg, type="info", postId=null) => {
     const newNotif = { id:Date.now(), msg, type, postId, date:new Date().toISOString().slice(0,10), read:false };
@@ -1590,6 +1623,12 @@ function AppContent() {
         }, 500);
       }
     });
+  }, []);
+
+  // WhatsApp tooltip après 30 secondes
+  React.useEffect(() => {
+    const t = setTimeout(() => setShowWaTooltip(true), 30000);
+    return () => clearTimeout(t);
   }, []);
 
   // Compteur visiteurs temps réel basé sur les vues
@@ -2887,11 +2926,22 @@ function AppContent() {
       )}
 
       {/* Bouton WhatsApp Support flottant */}
-      {!showMessages && <a href="https://wa.me/2290140906020?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide%20concernant%20ma%20publication." target="_blank" rel="noopener noreferrer" title="Contacter le support technique" style={{ position:"fixed",bottom:24,right:16,zIndex:999,width:50,height:50,borderRadius:"50%",background:"#25D366",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(37,211,102,0.5)",cursor:"pointer",textDecoration:"none",transition:"transform 0.2s" }}
-        onMouseEnter={e=>{ e.currentTarget.style.transform="scale(1.1)"; }}
-        onMouseLeave={e=>{ e.currentTarget.style.transform="scale(1)"; }}>
-        <svg width="26" height="26" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-      </a>}
+      {!showMessages && (
+        <div style={{ position:"fixed",bottom:24,right:16,zIndex:999,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8 }}>
+          {showWaTooltip && (
+            <div style={{ background:"#25D366",color:"#fff",borderRadius:12,padding:"10px 14px",fontSize:13,fontWeight:600,maxWidth:220,boxShadow:"0 4px 20px rgba(37,211,102,0.4)",animation:"fadeIn 0.3s ease",position:"relative",lineHeight:1.5 }}>
+              👋 Bonjour ! Besoin d'aide ?<br/>Contactez-nous sur WhatsApp !
+              <button onClick={()=>setShowWaTooltip(false)} style={{ position:"absolute",top:4,right:6,background:"none",border:"none",color:"#fff",cursor:"pointer",fontSize:14,fontWeight:800,padding:0 }}>✕</button>
+            </div>
+          )}
+          <a href="https://wa.me/2290147562640?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide%20concernant%20ma%20publication." target="_blank" rel="noopener noreferrer" onClick={()=>setShowWaTooltip(false)} title="Contacter le support technique"
+            style={{ width:50,height:50,borderRadius:"50%",background:"#25D366",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(37,211,102,0.5)",cursor:"pointer",textDecoration:"none",transition:"transform 0.2s" }}
+            onMouseEnter={e=>{ e.currentTarget.style.transform="scale(1.1)"; }}
+            onMouseLeave={e=>{ e.currentTarget.style.transform="scale(1)"; }}>
+            <svg width="26" height="26" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+          </a>
+        </div>
+      )}
 
       {showScrollTop && !showMessages && (
         <button onClick={scrollToTop} style={{ position:"fixed",bottom:30,left:16,zIndex:999,width:windowWidth<=600?52:44,height:windowWidth<=600?52:44,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 24px rgba(108,99,255,0.6)",cursor:"pointer",fontSize:windowWidth<=600?22:18,fontWeight:800,WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>↑</button>
@@ -3945,6 +3995,51 @@ function AppContent() {
               </button>
             </div>
           </div>
+
+          {/* Signalements en attente */}
+          {(()=>{
+            const pendingReports = reports.filter(r=>r.status==="En attente");
+            if (pendingReports.length === 0) return null;
+            return (
+              <div style={{ background:"rgba(255,71,87,0.06)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:16,padding:20,marginBottom:24 }}>
+                <p style={{ fontWeight:800,fontSize:14,color:"#FF4757",marginBottom:14,display:"flex",alignItems:"center",gap:8 }}>
+                  🚩 Signalements en attente
+                  <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>{pendingReports.length}</span>
+                </p>
+                {pendingReports.slice(0,5).map((r,i)=>(
+                  <div key={i} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:10,padding:12,marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap" }}>
+                    <div>
+                      <p style={{ fontWeight:700,fontSize:13,color:theme.text,marginBottom:2 }}>🚩 {r.postTitle||"Annonce inconnue"}</p>
+                      <p style={{ fontSize:12,color:theme.sub }}>Motif : {r.motif} · Par : {r.reporter} · {r.date}</p>
+                    </div>
+                    <div style={{ display:"flex",gap:6 }}>
+                      <button onClick={async()=>{
+                        await supabase.from("reports").update({status:"Traité"}).eq("post_id",r.postId);
+                        setReports(prev=>prev.map(x=>x.id===r.id?{...x,status:"Traité"}:x));
+                        notify("Signalement marqué comme traité");
+                      }} style={{ background:"rgba(67,198,172,0.15)",border:"1px solid #43C6AC",color:"#43C6AC",padding:"6px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                        ✅ Traité
+                      </button>
+                      <button onClick={async()=>{
+                        const r2 = reports.find(x=>x.id===r.id);
+                        if (r2?.postId) {
+                          for (const t of ["posts","boutiques","ateliers","restos","beaute"]) {
+                            await supabase.from(t).delete().eq("id",r2.postId);
+                          }
+                          setPosts(p=>p.filter(x=>x.id!==r2.postId));
+                          await supabase.from("reports").update({status:"Supprimé"}).eq("post_id",r2.postId);
+                          setReports(prev=>prev.filter(x=>x.id!==r.id));
+                          notify("Annonce supprimée !");
+                        }
+                      }} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                        🗑️ Supprimer
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Statistiques mensuelles */}
           {(()=>{
