@@ -323,8 +323,10 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
         <div style={{ position:"relative", width:"100%", aspectRatio:"16/9", background:"#000", overflow:"hidden" }}>
           {isYT && ytId ? (
             <iframe
-              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&modestbranding=1&rel=0&end=${maxSeconds}`}
-              allow="autoplay; fullscreen"
+              title="Vidéo annonce MarchéduRoi"
+              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&modestbranding=1&rel=0`}
+              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+              allowFullScreen
               style={{ width:"100%",height:"100%",border:"none",display:"block" }}
             />
           ) : isCL ? (
@@ -5883,7 +5885,10 @@ function AppContent() {
                           addPost(exp.toISOString().slice(0,10));
                         } else {
                           const tarif = TARIFS_ANNONCE[selectedTarif] || TARIFS_ANNONCE[0];
-                          handlePayment(tarif.price, `Publication annonce ${tarif.label} sur MarchéduRoi`, addPost);
+                          const exp2 = new Date();
+                          exp2.setDate(exp2.getDate() + tarif.days);
+                          const expStr = exp2.toISOString().slice(0,10);
+                          handlePayment(tarif.price, `Publication annonce ${tarif.label} sur MarchéduRoi`, () => addPost(expStr));
                         }
                       }
                     : editPost
