@@ -2666,7 +2666,27 @@ function AppContent() {
                     Partager
                   </div>
                 </a>
-                <button onClick={()=>{ const url="https://marcheduroi.com/annonce/"+contactDrawer.id; if(navigator.share){navigator.share({title:contactDrawer.title,url});}else{navigator.clipboard.writeText(url);notify("Lien copié !"); }}} style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",color:"#6C63FF",padding:"8px 14px",borderRadius:10,fontSize:13,cursor:"pointer",fontWeight:600 }}>
+                <button onClick={async()=>{
+                    const url="https://marcheduroi.com/annonce/"+contactDrawer.id;
+                    const photo = contactDrawer.photos?.[0];
+                    if(navigator.share && photo){
+                      try {
+                        const resp = await fetch(photo);
+                        const blob = await resp.blob();
+                        const file = new File([blob], "annonce.jpg", { type: blob.type });
+                        if(navigator.canShare && navigator.canShare({ files:[file] })){
+                          await navigator.share({ title:contactDrawer.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑", url, files:[file] });
+                          return;
+                        }
+                      } catch(e){}
+                      navigator.share({ title:contactDrawer.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑
+"+url });
+                    } else if(navigator.share){
+                      navigator.share({ title:contactDrawer.title, url });
+                    } else {
+                      navigator.clipboard.writeText(url); notify("Lien copié !");
+                    }
+                  }} style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",color:"#6C63FF",padding:"8px 14px",borderRadius:10,fontSize:13,cursor:"pointer",fontWeight:600 }}>
                   Autres apps
                 </button>
               </div>
@@ -3666,7 +3686,27 @@ function AppContent() {
                             Partager
                           </div>
                         </a>
-                        <button onClick={()=>{ const url="https://marcheduroi.com/annonce/"+post.id; if(navigator.share){navigator.share({title:post.title,url});}else{navigator.clipboard.writeText(url);notify("🔗 Lien copié !"); }}} style={{ background:"rgba(0,0,0,0.06)",border:"none",color:theme.text,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:3 }}>
+                        <button onClick={async()=>{
+                          const url="https://marcheduroi.com/annonce/"+post.id;
+                          const photo = post.photos?.[0];
+                          if(navigator.share && photo){
+                            try {
+                              const resp = await fetch(photo);
+                              const blob = await resp.blob();
+                              const file = new File([blob], "annonce.jpg", { type: blob.type });
+                              if(navigator.canShare && navigator.canShare({ files:[file] })){
+                                await navigator.share({ title:post.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑", url, files:[file] });
+                                return;
+                              }
+                            } catch(e){}
+                            navigator.share({ title:post.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑
+"+url });
+                          } else if(navigator.share){
+                            navigator.share({ title:post.title, url });
+                          } else {
+                            navigator.clipboard.writeText(url); notify("🔗 Lien copié !");
+                          }
+                        }} style={{ background:"rgba(0,0,0,0.06)",border:"none",color:theme.text,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:3 }}>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                         </button>
                         {user&&(user.id===post.authorId||user.role==="admin")&&(
