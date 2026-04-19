@@ -31,12 +31,12 @@ function formatPrice(rawPrice) {
   return num.toLocaleString('fr-FR').replace(/\u202f|\s/g, ' ') + ' FCFA';
 }
 
-function buildHtml({ title, image, url, price }) {
+function buildHtml({ title, image, url, price, pathname }) {
   const priceStr = price || '';
   const fullTitle = priceStr ? (title + ' — ' + priceStr + ' | MarchéduRoi') : (title + ' | MarchéduRoi');
   const fullDesc = title + (priceStr ? ' — ' + priceStr : '') + '. ' + SLOGAN + ' - marcheduroi.com';
-  const ogImage = image 
-    ? (SITE_URL + '/api/og-image' + pathname)
+  const ogImage = image
+    ? (SITE_URL + '/api/og-image' + (pathname || ''))
     : DEFAULT_IMAGE;
 
   return [
@@ -109,7 +109,7 @@ export default async function handler(req) {
     const pageUrl = SITE_URL + pathname;
 
     return new Response(
-      buildHtml({ title, image: photo || DEFAULT_IMAGE, url: pageUrl, price }),
+      buildHtml({ title, image: photo || DEFAULT_IMAGE, url: pageUrl, price, pathname }),
       { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 's-maxage=300' } }
     );
 
