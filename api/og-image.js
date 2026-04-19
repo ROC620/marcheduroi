@@ -76,9 +76,11 @@ export default async function handler(req) {
     const photoB64 = arrayBufferToBase64(photoBuffer);
     const photoMime = photoResp.headers.get('content-type') || 'image/jpeg';
 
-    // Logo MarchéduRoi en base64 (SVG inline)
-    const logoSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="44" height="39" viewBox="0 0 36 32"><defs><linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#111"/><stop offset="100%" stop-color="#000"/></linearGradient><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff2a0"/><stop offset="35%" stop-color="#ffd84d"/><stop offset="70%" stop-color="#d59a00"/><stop offset="100%" stop-color="#8a4f00"/></linearGradient></defs><rect x="0.8" y="0.8" width="34.4" height="30.4" rx="6" fill="url(#bg2)" stroke="url(#g2)" stroke-width="0.9"/><g stroke="url(#g2)" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5.2" r="1.9" fill="#ffef8a" stroke-width="0.5"/><circle cx="9.8" cy="9.1" r="1.6" fill="#ffef8a" stroke-width="0.45"/><circle cx="26.2" cy="9.1" r="1.6" fill="#ffef8a" stroke-width="0.45"/><path d="M10.8 10.2 L14.4 5.8 L18 8.7 L21.6 5.8 L25.2 10.2" fill="url(#g2)" stroke-width="0.8"/><path d="M9.6 9.9 L9.4 13.2 L11.5 13.6 L12.4 10.7" fill="url(#g2)" stroke-width="0.55"/><path d="M26.4 9.9 L26.6 13.2 L24.5 13.6 L23.6 10.7" fill="url(#g2)" stroke-width="0.55"/><path d="M14 15.2 L14 24.8 L16.2 24.8 L16.2 19.8 L19.1 24.8 L21 24.8 L18.1 19.7 L20.9 15.2" fill="none" stroke-width="2.05"/><path d="M14 15.2 L16.3 15.2 L16.3 17.5 L18.6 17.5 L18.6 15.2 L20.9 15.2" fill="none" stroke-width="2.05"/></g></svg>';
-    const logoB64 = btoa(unescape(encodeURIComponent(logoSvg)));
+    // Logo MarchéduRoi — charger depuis le site
+    const logoResp = await fetch('https://marcheduroi.com/icons/icon-512x512.png');
+    const logoBuffer = await logoResp.arrayBuffer();
+    const logoB64 = arrayBufferToBase64(logoBuffer);
+    const logoMime = 'image/png';
 
     // Générer le SVG composite
     const svg = [
@@ -101,7 +103,7 @@ export default async function handler(req) {
       '<rect x="14" y="14" width="226" height="54" rx="12" fill="rgba(0,0,0,0.7)"/>',
 
       // Logo
-      '<image href="data:image/svg+xml;base64,' + logoB64 + '" x="20" y="18" width="44" height="44"/>',
+      '<image href="data:' + logoMime + ';base64,' + logoB64 + '" x="18" y="16" width="50" height="50"/>',
 
       // Texte badge
       '<text x="72" y="37" font-family="Arial,sans-serif" font-size="17" font-weight="800" fill="#FFD700">MarchéduRoi</text>',
