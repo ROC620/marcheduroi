@@ -1,12 +1,8 @@
 // api/og.js — Vercel Edge Function
-// Génère des meta OG dynamiques pour chaque annonce
-// avec logo MarchéduRoi en coin haut-gauche sur la photo
-
 export const config = { runtime: 'edge' };
 
 const SUPABASE_URL = 'https://mvkcgrextvxlzkqsyscm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12a2NncmV4dHZ4bHprcXN5c2NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMjIwNDcsImV4cCI6MjA4ODc5ODA0N30.dvVbB0E5F-vhZMYlzIl4r-N1jOrRgrNZsp4xbDI_Nho';
-
 const LOGO_URL = 'https://marcheduroi.com/marcheduRoi-icon.svg';
 const SITE_URL = 'https://marcheduroi.com';
 const DEFAULT_IMAGE = 'https://marcheduroi.com/icons/icon-512x512.png';
@@ -35,45 +31,45 @@ function formatPrice(rawPrice) {
   return num.toLocaleString('fr-FR').replace(/\u202f|\s/g, ' ') + ' FCFA';
 }
 
-function buildHtml({ title, description, image, url, price }) {
+function buildHtml({ title, image, url, price }) {
   const priceStr = price || '';
-  const fullTitle = priceStr
-    ? title + ' — ' + priceStr + ' | MarchéduRoi'
-    : title + ' | MarchéduRoi';
+  const fullTitle = priceStr ? (title + ' — ' + priceStr + ' | MarchéduRoi') : (title + ' | MarchéduRoi');
   const fullDesc = title + (priceStr ? ' — ' + priceStr : '') + '. ' + SLOGAN + ' - marcheduroi.com';
   const ogImage = image || DEFAULT_IMAGE;
 
-  return '<!DOCTYPE html>\n<html lang="fr">\n<head>\n' +
-    '<meta charset="UTF-8" />\n' +
-    '<title>' + fullTitle + '</title>\n' +
-    '<meta name="description" content="' + fullDesc + '" />\n' +
-    '<meta property="og:title" content="' + fullTitle + '" />\n' +
-    '<meta property="og:description" content="' + fullDesc + '" />\n' +
-    '<meta property="og:image" content="' + ogImage + '" />\n' +
-    '<meta property="og:image:width" content="1200" />\n' +
-    '<meta property="og:image:height" content="630" />\n' +
-    '<meta property="og:url" content="' + url + '" />\n' +
-    '<meta property="og:type" content="website" />\n' +
-    '<meta property="og:site_name" content="MarchéduRoi" />\n' +
-    '<meta name="twitter:card" content="summary_large_image" />\n' +
-    '<meta name="twitter:title" content="' + fullTitle + '" />\n' +
-    '<meta name="twitter:description" content="' + fullDesc + '" />\n' +
-    '<meta name="twitter:image" content="' + ogImage + '" />\n' +
-    '<script>if(typeof window!=="undefined"&&!window.location.search.includes("from=og")){window.location.replace("' + url + '?from=og");}</script>\n' +
-    '</head>\n<body style="background:#0D0F1A;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;">\n' +
-    '<div style="max-width:480px;width:100%;text-align:center;">\n' +
-    '<img src="' + LOGO_URL + '" style="width:72px;margin-bottom:16px;" />\n' +
-    '<div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:20px;">\n' +
-    '<img src="' + ogImage + '" style="width:100%;max-height:300px;object-fit:cover;display:block;" />\n' +
-    '<div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.65);border-radius:8px;padding:4px 8px;display:flex;align-items:center;gap:6px;">\n' +
-    '<img src="' + LOGO_URL + '" style="width:20px;" />\n' +
-    '<span style="color:#FFD700;font-size:11px;font-weight:700;">MarchéduRoi</span>\n' +
-    '</div></div>\n' +
-    '<h1 style="font-size:22px;font-weight:800;margin:0 0 8px;">' + title + '</h1>\n' +
-    (priceStr ? '<p style="font-size:24px;font-weight:800;color:#43C6AC;margin:0 0 8px;">' + priceStr + '</p>\n' : '') +
-    '<p style="color:#FFD700;font-style:italic;font-weight:700;margin:0 0 20px;">&ldquo;' + SLOGAN + ' &#128081;&rdquo;</p>\n' +
-    '<a href="' + url + '" style="background:linear-gradient(135deg,#6C63FF,#FF6584);color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:800;">Voir l'annonce &rarr;</a>\n' +
-    '</div></body></html>';
+  return [
+    '<!DOCTYPE html><html lang="fr"><head>',
+    '<meta charset="UTF-8" />',
+    '<title>' + fullTitle + '</title>',
+    '<meta name="description" content="' + fullDesc + '" />',
+    '<meta property="og:title" content="' + fullTitle + '" />',
+    '<meta property="og:description" content="' + fullDesc + '" />',
+    '<meta property="og:image" content="' + ogImage + '" />',
+    '<meta property="og:image:width" content="1200" />',
+    '<meta property="og:image:height" content="630" />',
+    '<meta property="og:url" content="' + url + '" />',
+    '<meta property="og:type" content="website" />',
+    '<meta property="og:site_name" content="MarchéduRoi" />',
+    '<meta name="twitter:card" content="summary_large_image" />',
+    '<meta name="twitter:title" content="' + fullTitle + '" />',
+    '<meta name="twitter:description" content="' + fullDesc + '" />',
+    '<meta name="twitter:image" content="' + ogImage + '" />',
+    '<script>if(typeof window!=="undefined"){window.location.replace("' + url + '?from=og");}</script>',
+    '</head><body style="background:#0D0F1A;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;">',
+    '<div style="max-width:480px;width:100%;text-align:center;">',
+    '<img src="' + LOGO_URL + '" style="width:72px;margin-bottom:16px;" />',
+    '<div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:20px;">',
+    '<img src="' + ogImage + '" style="width:100%;max-height:300px;object-fit:cover;display:block;" />',
+    '<div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.65);border-radius:8px;padding:4px 8px;display:flex;align-items:center;gap:6px;">',
+    '<img src="' + LOGO_URL + '" style="width:20px;" />',
+    '<span style="color:#FFD700;font-size:11px;font-weight:700;">MarchéduRoi</span>',
+    '</div></div>',
+    '<h1 style="font-size:22px;font-weight:800;margin:0 0 8px;">' + title + '</h1>',
+    priceStr ? '<p style="font-size:24px;font-weight:800;color:#43C6AC;margin:0 0 8px;">' + priceStr + '</p>' : '',
+    '<p style="color:#FFD700;font-style:italic;font-weight:700;margin:0 0 20px;">&ldquo;' + SLOGAN + ' &#128081;&rdquo;</p>',
+    '<a href="' + url + '" style="background:linear-gradient(135deg,#6C63FF,#FF6584);color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:800;">Voir sur MarchéduRoi &rarr;</a>',
+    '</div></body></html>'
+  ].join('\n');
 }
 
 export default async function handler(req) {
@@ -99,21 +95,26 @@ export default async function handler(req) {
     const item = data?.[0];
 
     if (!item) {
-      return new Response(buildHtml({ title: 'MarchéduRoi', description: SLOGAN, image: DEFAULT_IMAGE, url: SITE_URL, price: null }),
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+      return new Response(
+        buildHtml({ title: 'MarchéduRoi', image: DEFAULT_IMAGE, url: SITE_URL, price: null }),
+        { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+      );
     }
 
     const title = item[match.titleField] || item.title || item.name || 'MarchéduRoi';
-    const description = item.description || '';
     const price = formatPrice(item.price);
     const photo = (item.photos || [])[0] || null;
     const pageUrl = SITE_URL + pathname;
 
-    return new Response(buildHtml({ title, description, image: photo || DEFAULT_IMAGE, url: pageUrl, price }),
-      { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 's-maxage=300' } });
+    return new Response(
+      buildHtml({ title, image: photo || DEFAULT_IMAGE, url: pageUrl, price }),
+      { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 's-maxage=300' } }
+    );
 
   } catch (e) {
-    return new Response(buildHtml({ title: 'MarchéduRoi', description: SLOGAN, image: DEFAULT_IMAGE, url: SITE_URL, price: null }),
-      { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    return new Response(
+      buildHtml({ title: 'MarchéduRoi', image: DEFAULT_IMAGE, url: SITE_URL, price: null }),
+      { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+    );
   }
 }
