@@ -293,7 +293,8 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
   const videoRef = React.useRef(null);
   const isYT = /youtube\.com|youtu\.be/.test(video||"");
   const isCL = /cloudinary\.com/.test(video||"");
-  const ytMatch = (video||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/);
+  const isShort = /youtube\.com\/shorts\//.test(video||"");
+  const ytMatch = (video||"").match(/(?:v=|youtu\.be\/|shorts\/)([\w-]{11})/);
   const ytId = ytMatch ? ytMatch[1] : null;
 
   // Arrêter la vidéo quand la carte sort du viewport
@@ -322,13 +323,25 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
       {playing ? (
         <div style={{ position:"relative", width:"100%", aspectRatio:"16/9", background:"#000", overflow:"hidden" }}>
           {isYT && ytId ? (
-            <iframe
-              title="Vidéo annonce MarchéduRoi"
-              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&modestbranding=1&rel=0`}
-              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-              allowFullScreen
-              style={{ width:"100%",height:"100%",border:"none",display:"block" }}
-            />
+            isShort ? (
+              <div style={{ display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100%",gap:16,background:"#000" }}>
+                <p style={{ color:"#fff",fontSize:14,fontWeight:600 }}>📱 YouTube Short</p>
+                <a href={video} target="_blank" rel="noopener noreferrer"
+                  style={{ background:"#FF0000",color:"#fff",padding:"12px 24px",borderRadius:10,fontWeight:700,fontSize:14,textDecoration:"none",display:"flex",alignItems:"center",gap:8 }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                  Voir sur YouTube
+                </a>
+                <p style={{ color:"rgba(255,255,255,0.5)",fontSize:11 }}>Les Shorts YouTube ne peuvent pas être lus ici</p>
+              </div>
+            ) : (
+              <iframe
+                title="Vidéo annonce MarchéduRoi"
+                src={`https://www.youtube.com/embed/${ytId}?autoplay=1&modestbranding=1&rel=0`}
+                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                allowFullScreen
+                style={{ width:"100%",height:"100%",border:"none",display:"block" }}
+              />
+            )
           ) : isCL ? (
             <video ref={videoRef} src={video} autoPlay controls playsInline onTimeUpdate={handleTimeUpdate} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
           ) : null}
