@@ -2675,7 +2675,7 @@ function AppContent() {
                         const blob = await resp.blob();
                         const file = new File([blob], "annonce.jpg", { type: blob.type });
                         if(navigator.canShare && navigator.canShare({ files:[file] })){
-                          await navigator.share({ title:contactDrawer.title+(contactDrawer.price?" — "+contactDrawer.price+" FCFA":""), text:contactDrawer.title+(contactDrawer.price?" — "+contactDrawer.price+" FCFA":"")+"\nSur MarchéduRoi, vous êtes le Roi du Marché 👑", files:[file] });
+                          await navigator.share({ title:contactDrawer.title+(contactDrawer.price?" — "+contactDrawer.price+" FCFA":""), text:contactDrawer.title+(contactDrawer.price?" — "+contactDrawer.price+" FCFA":"")+"\n"+url+"\nSur MarchéduRoi, vous êtes le Roi du Marché 👑", files:[file] });
                           return;
                         }
                       } catch(e){}
@@ -3694,7 +3694,7 @@ function AppContent() {
                               const blob = await resp.blob();
                               const file = new File([blob], "annonce.jpg", { type: blob.type });
                               if(navigator.canShare && navigator.canShare({ files:[file] })){
-                                await navigator.share({ title:post.title+(post.price?" — "+post.price+" FCFA":""), text:post.title+(post.price?" — "+post.price+" FCFA":"")+"\nSur MarchéduRoi, vous êtes le Roi du Marché 👑", files:[file] });
+                                await navigator.share({ title:post.title+(post.price?" — "+post.price+" FCFA":""), text:post.title+(post.price?" — "+post.price+" FCFA":"")+"\n"+url+"\nSur MarchéduRoi, vous êtes le Roi du Marché 👑", files:[file] });
                                 return;
                               }
                             } catch(e){}
