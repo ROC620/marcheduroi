@@ -1235,7 +1235,7 @@ function AppContent() {
     setModifHistory(updated);
     localStorage.setItem("mf_modifs", JSON.stringify(updated));
   };
-  const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"",lat:"",lng:"" });
+  const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:"",lat:"",lng:"" });
   const [postPhotos, setPostPhotos] = useState([]);
   const [postVideo, setPostVideo] = useState("");
   const [vehicleForm, setVehicleForm] = useState({});
@@ -2158,6 +2158,7 @@ function AppContent() {
     if (!checkRateLimit()) return;
     const isAdmin = user.role === "admin";
     const postId = "post_" + Date.now();
+    const isLocation = postForm.category === "Location de véhicules";
     const newPost = {
       ...postForm,
       id: postId,
@@ -2170,6 +2171,7 @@ function AppContent() {
       vehicle: isVehicle ? vehicleForm : isMoto ? { ...vehicleForm, _isMoto: true } : null,
       immo: postForm.category==="Immobilier" ? immoForm : null,
       expiresAt: isAdmin ? null : (expiresAt || null),
+      price: isLocation ? (postForm.priceDay ? postForm.priceDay+" FCFA/jour" : postForm.price||"") : postForm.price||"",
     };
     const { error } = await supabase.from("posts").insert({
       id: postId,
@@ -2189,11 +2191,14 @@ function AppContent() {
       lng: newPost.lng || null,
       expires_at: newPost.expiresAt || null,
       likes: 0,
+      price_day: postForm.priceDay || null,
+      price_week: postForm.priceWeek || null,
+      price_month: postForm.priceMonth || null,
     });
     if (error) { console.error("Supabase error:", error); notify("Erreur de sauvegarde","error"); return; }
     setPosts(p=>[newPost,...p]);
     setModal(null);
-    setPostForm({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"" });
+    setPostForm({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:"",lat:"",lng:"" });
     setPostPhotos([]); setPostVideo(""); setVehicleForm({}); setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" }); setMonths(1); setSelectedTarif(0);
     notify(isAdmin ? "✅ Annonce publiée !" : expiresAt ? `✅ Annonce publiée jusqu'au ${expiresAt} !` : "✅ Annonce publiée !");
   };
@@ -3580,10 +3585,20 @@ function AppContent() {
                     <span className="tag" style={{ background:post.category==="Véhicules"?"rgba(255,101,132,0.15)":"rgba(108,99,255,0.15)",color:post.category==="Véhicules"?"#FF6584":"#8B84FF",display:"flex",alignItems:"center",gap:4 }}>
                       {post.category==="Véhicules"&&<Icon name="car" size={10}/>}{post.category}
                     </span>
-                    {post.price&&(
+                    {(post.price||post.price_day||post.priceDay)&&(
                     <div style={{ textAlign:"right" }}>
-                      <p style={{ fontWeight:700,color:"#43C6AC",fontSize:14 }}>{post.price} FCFA</p>
-                      {(()=>{ const num=parseInt((post.price||"").replace(/[^0-9]/g,"")); return num>0?<p style={{ color:theme.sub,fontSize:11 }}>≈ ${(num/600).toFixed(2)} USD</p>:null; })()}
+                      {post.category==="Location de véhicules" ? (
+                        <div>
+                          {(post.price_day||post.priceDay) && <p style={{ fontWeight:800,color:"#FF9F43",fontSize:14 }}>🔑 {(post.price_day||post.priceDay)} FCFA/j</p>}
+                          {(post.price_week||post.priceWeek) && <p style={{ color:theme.sub,fontSize:11 }}>{(post.price_week||post.priceWeek)} FCFA/sem</p>}
+                          {(post.price_month||post.priceMonth) && <p style={{ color:theme.sub,fontSize:11 }}>{(post.price_month||post.priceMonth)} FCFA/mois</p>}
+                        </div>
+                      ) : (
+                        <div>
+                          <p style={{ fontWeight:700,color:"#43C6AC",fontSize:14 }}>{post.price} FCFA</p>
+                          {(()=>{ const num=parseInt((post.price||"").replace(/[^0-9]/g,"")); return num>0?<p style={{ color:theme.sub,fontSize:11 }}>≈ ${(num/600).toFixed(2)} USD</p>:null; })()}
+                        </div>
+                      )}
                     </div>
                   )}
                   </div>
@@ -5616,7 +5631,7 @@ function AppContent() {
                 {[
                   {label:"Titre *",       key:"title",   type:"input",    max:100, fn: v=>cleanText(v,100)},
                   {label:"Description *", key:"description",type:"textarea",max:1000,fn: v=>cleanLongText(v,1000)},
-                  {label:"Prix",          key:"price",   type:"input",    max:30,  fn: formatThousands, hint:"Ex: 15 000",  mode:"numeric"},
+                  {label: postForm.category==="Location de véhicules" ? "Prix de vente (optionnel)" : "Prix", key:"price", type:"input", max:30, fn: formatThousands, hint: postForm.category==="Location de véhicules" ? "Ex: 5 000 000 (si à vendre aussi)" : "Ex: 15 000", mode:"numeric"},
                   {label:"Email de contact",key:"contact",type:"input",   max:80,  fn: noSpaces,         hint:"Ex: nom@email.com"},
                   {label:"Téléphone / WhatsApp",key:"phone",type:"input", max:20,  fn: onlyPhone,    hint:"Ex: +229 01 23 45 67"},
                 ].map(f=>(
@@ -5628,6 +5643,39 @@ function AppContent() {
                     }
                   </div>
                 ))}
+
+                {/* Champs tarifs location */}
+                {postForm.category==="Location de véhicules"&&(
+                  <div style={{ marginTop:8 }}>
+                    <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:16,padding:"12px 16px",background:theme.bg,border:"1px solid rgba(255,159,67,0.4)",borderRadius:10 }}>
+                      <span style={{ fontSize:18 }}>🔑</span>
+                      <p style={{ fontWeight:700,color:"#FF9F43",fontSize:14 }}>Tarifs de location</p>
+                    </div>
+                    <div style={{ display:"grid",gridTemplateColumns:"1fr",gap:12,marginBottom:12 }}>
+                      <div>
+                        <label style={{ fontSize:13,fontWeight:700,color:theme.sub,display:"block",marginBottom:6 }}>Prix / jour * <span style={{ color:"#FF9F43" }}>(obligatoire)</span></label>
+                        <div style={{ position:"relative" }}>
+                          <input value={postForm.priceDay} onChange={e=>setPostForm(p=>({...p,priceDay:formatThousands(e.target.value)}))} placeholder="Ex: 15 000" inputMode="numeric" maxLength={20} style={inputStyle}/>
+                          <span style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:theme.sub,fontSize:12,fontWeight:600 }}>FCFA/jour</span>
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Prix / semaine <span style={{ color:theme.sub,fontSize:11 }}>(optionnel)</span></label>
+                        <div style={{ position:"relative" }}>
+                          <input value={postForm.priceWeek} onChange={e=>setPostForm(p=>({...p,priceWeek:formatThousands(e.target.value)}))} placeholder="Ex: 80 000" inputMode="numeric" maxLength={20} style={inputStyle}/>
+                          <span style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:theme.sub,fontSize:12,fontWeight:600 }}>FCFA/sem</span>
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Prix / mois <span style={{ color:theme.sub,fontSize:11 }}>(optionnel)</span></label>
+                        <div style={{ position:"relative" }}>
+                          <input value={postForm.priceMonth} onChange={e=>setPostForm(p=>({...p,priceMonth:formatThousands(e.target.value)}))} placeholder="Ex: 250 000" inputMode="numeric" maxLength={20} style={inputStyle}/>
+                          <span style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:theme.sub,fontSize:12,fontWeight:600 }}>FCFA/mois</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Champs immobilier */}
                 {postForm.category==="Immobilier"&&(
