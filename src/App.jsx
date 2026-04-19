@@ -2679,8 +2679,7 @@ function AppContent() {
                           return;
                         }
                       } catch(e){}
-                      navigator.share({ title:contactDrawer.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑
-"+url });
+                      navigator.share({ title:contactDrawer.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑 - "+url });
                     } else if(navigator.share){
                       navigator.share({ title:contactDrawer.title, url });
                     } else {
@@ -3699,8 +3698,7 @@ function AppContent() {
                                 return;
                               }
                             } catch(e){}
-                            navigator.share({ title:post.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑
-"+url });
+                            navigator.share({ title:post.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑 - "+url });
                           } else if(navigator.share){
                             navigator.share({ title:post.title, url });
                           } else {
