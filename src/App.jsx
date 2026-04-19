@@ -605,7 +605,7 @@ async function addLogoWatermark(photoUrl) {
     // Charger le logo
     const logo = new Image();
     logo.crossOrigin = 'anonymous';
-    await new Promise((res, rej) => { logo.onload = res; logo.onerror = rej; logo.src = '/marcheduRoi-icon.svg'; });
+    await new Promise((res, rej) => { logo.onload = res; logo.onerror = rej; logo.src = '/icons/icon-512x512.png'; });
 
     // Logo en miniature coin haut-gauche (10% de la largeur)
     const logoSize = Math.round(img.width * 0.1);
