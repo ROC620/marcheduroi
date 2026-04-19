@@ -1,5 +1,10 @@
 {
   "rewrites": [
+    { "source": "/api/og-image/annonce/:id", "destination": "/api/og-image" },
+    { "source": "/api/og-image/boutique/:id", "destination": "/api/og-image" },
+    { "source": "/api/og-image/atelier/:id", "destination": "/api/og-image" },
+    { "source": "/api/og-image/resto/:id", "destination": "/api/og-image" },
+    { "source": "/api/og-image/beaute/:id", "destination": "/api/og-image" },
     { "source": "/annonce/:id", "destination": "/api/og" },
     { "source": "/boutique/:id", "destination": "/api/og" },
     { "source": "/atelier/:id", "destination": "/api/og" },

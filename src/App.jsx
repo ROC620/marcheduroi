@@ -2681,7 +2681,7 @@ function AppContent() {
                       } catch(e){}
                       navigator.share({ title:contactDrawer.title, text:contactDrawer.title+(contactDrawer.price?" — "+contactDrawer.price+" FCFA":"")+" "+url+" Sur MarchéduRoi, vous êtes le Roi du Marché 👑" });
                     } else if(navigator.share){
-                      navigator.share({ title:contactDrawer.title, url });
+                      navigator.share({ title:contactDrawer.title, text:contactDrawer.title+(contactDrawer.price?" — "+contactDrawer.price+(String(contactDrawer.price).includes("FCFA")?"":" FCFA"):"")+". "+url+" Sur MarchéduRoi, vous êtes le Roi du Marché", url });
                     } else {
                       navigator.clipboard.writeText(url); notify("Lien copié !");
                     }
@@ -7106,8 +7106,11 @@ function AnnonceDetail() {
   const handleShare = () => {
     const url = window.location.href;
     const title = item?.title || item?.name || "MarchéduRoi";
+    const price = item?.price ? " — " + item.price + (String(item.price).includes("FCFA") ? "" : " FCFA") : "";
+    const slogan = "Sur MarchéduRoi, vous êtes le Roi du Marché";
+    const shareText = title + price + ". " + url + " " + slogan;
     if (navigator.share) {
-      navigator.share({ title, text:title+" — MarchéduRoi", url });
+      navigator.share({ title, text:shareText, url });
     } else {
       navigator.clipboard.writeText(url);
       alert("Lien copié !");

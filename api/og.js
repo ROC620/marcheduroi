@@ -35,7 +35,9 @@ function buildHtml({ title, image, url, price }) {
   const priceStr = price || '';
   const fullTitle = priceStr ? (title + ' — ' + priceStr + ' | MarchéduRoi') : (title + ' | MarchéduRoi');
   const fullDesc = title + (priceStr ? ' — ' + priceStr : '') + '. ' + SLOGAN + ' - marcheduroi.com';
-  const ogImage = image || DEFAULT_IMAGE;
+  const ogImage = image 
+    ? (SITE_URL + '/api/og-image' + pathname)
+    : DEFAULT_IMAGE;
 
   return [
     '<!DOCTYPE html><html lang="fr"><head>',
