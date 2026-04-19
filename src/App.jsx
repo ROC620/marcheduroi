@@ -2669,19 +2669,20 @@ function AppContent() {
                 <button onClick={async()=>{
                     const url="https://marcheduroi.com/annonce/"+contactDrawer.id;
                     const photo = contactDrawer.photos?.[0];
+                    const shareText = contactDrawer.title+(contactDrawer.price?" — "+contactDrawer.price+" FCFA":"")+" | Sur MarchéduRoi, vous êtes le Roi du Marché 👑 "+url;
                     if(navigator.share && photo){
                       try {
-                        const resp = await fetch(photo);
+                        const resp = await fetch(photo, {mode:"cors"});
                         const blob = await resp.blob();
                         const file = new File([blob], "annonce.jpg", { type: blob.type });
                         if(navigator.canShare && navigator.canShare({ files:[file] })){
-                          await navigator.share({ title:contactDrawer.title, text:contactDrawer.title+(contactDrawer.price?" — "+contactDrawer.price+" FCFA":"")+"\nSur MarchéduRoi, vous êtes le Roi du Marché 👑", url, files:[file] });
+                          await navigator.share({ title:contactDrawer.title, text:shareText, files:[file] });
                           return;
                         }
                       } catch(e){}
-                      navigator.share({ title:contactDrawer.title, text:contactDrawer.title+(contactDrawer.price?" — "+contactDrawer.price+" FCFA":"")+"\n"+url+"\nSur MarchéduRoi, vous êtes le Roi du Marché 👑" });
+                      navigator.share({ title:contactDrawer.title, text:shareText });
                     } else if(navigator.share){
-                      navigator.share({ title:contactDrawer.title, url });
+                      navigator.share({ title:contactDrawer.title, text:shareText });
                     } else {
                       navigator.clipboard.writeText(url); notify("Lien copié !");
                     }
@@ -3688,19 +3689,20 @@ function AppContent() {
                         <button onClick={async()=>{
                           const url="https://marcheduroi.com/annonce/"+post.id;
                           const photo = post.photos?.[0];
+                          const shareText = post.title+(post.price?" — "+post.price+" FCFA":"")+" | Sur MarchéduRoi, vous êtes le Roi du Marché 👑 "+url;
                           if(navigator.share && photo){
                             try {
-                              const resp = await fetch(photo);
+                              const resp = await fetch(photo, {mode:"cors"});
                               const blob = await resp.blob();
                               const file = new File([blob], "annonce.jpg", { type: blob.type });
                               if(navigator.canShare && navigator.canShare({ files:[file] })){
-                                await navigator.share({ title:post.title, text:post.title+(post.price?" — "+post.price+" FCFA":"")+"\nSur MarchéduRoi, vous êtes le Roi du Marché 👑", url, files:[file] });
+                                await navigator.share({ title:post.title, text:shareText, files:[file] });
                                 return;
                               }
                             } catch(e){}
-                            navigator.share({ title:post.title, text:post.title+(post.price?" — "+post.price+" FCFA":"")+"\n"+url+"\nSur MarchéduRoi, vous êtes le Roi du Marché 👑" });
+                            navigator.share({ title:post.title, text:shareText });
                           } else if(navigator.share){
-                            navigator.share({ title:post.title, url });
+                            navigator.share({ title:post.title, text:shareText });
                           } else {
                             navigator.clipboard.writeText(url); notify("🔗 Lien copié !");
                           }
