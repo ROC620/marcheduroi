@@ -35,8 +35,8 @@ function buildHtml({ title, image, url, price, pathname }) {
   const priceStr = price || '';
   const fullTitle = priceStr ? (title + ' — ' + priceStr + ' | MarchéduRoi') : (title + ' | MarchéduRoi');
   const fullDesc = title + (priceStr ? ' — ' + priceStr : '') + '. ' + SLOGAN + ' - marcheduroi.com';
-  const ogImage = image
-    ? (SITE_URL + '/api/og-image' + (pathname || ''))
+  const ogImage = image && pathname
+    ? (SITE_URL + '/api/og-image' + pathname)
     : DEFAULT_IMAGE;
 
   return [
@@ -79,7 +79,18 @@ export default async function handler(req) {
   const pathname = url.pathname;
   const ua = req.headers.get('user-agent') || '';
   const isCrawler = /facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|LinkedInBot|Slackbot|Googlebot|bingbot|Applebot|Discordbot|vk|pinterest/i.test(ua);
-  const match = getTableAndId(pathname);
+
+  // Vercel peut passer l'ID en query param avec le rewrite
+  // On essaie pathname d'abord, puis on reconstruit depuis query params
+  let match = getTableAndId(pathname);
+  if (!match) {
+    const id = url.searchParams.get('id');
+    const source = url.searchParams.get('source') || 'posts';
+    if (id) {
+      const tableMap = { posts:'posts', boutiques:'boutiques', ateliers:'ateliers', restos:'restos', beaute:'beaute' };
+      match = { table: tableMap[source] || 'posts', id, titleField: source === 'posts' ? 'title' : 'name' };
+    }
+  }
 
   if (!match || !isCrawler) {
     return new Response(null, {

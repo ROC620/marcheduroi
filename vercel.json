@@ -1,15 +1,15 @@
 {
   "rewrites": [
-    { "source": "/api/og-image/annonce/:id", "destination": "/api/og-image" },
-    { "source": "/api/og-image/boutique/:id", "destination": "/api/og-image" },
-    { "source": "/api/og-image/atelier/:id", "destination": "/api/og-image" },
-    { "source": "/api/og-image/resto/:id", "destination": "/api/og-image" },
-    { "source": "/api/og-image/beaute/:id", "destination": "/api/og-image" },
-    { "source": "/annonce/:id", "destination": "/api/og" },
-    { "source": "/boutique/:id", "destination": "/api/og" },
-    { "source": "/atelier/:id", "destination": "/api/og" },
-    { "source": "/resto/:id", "destination": "/api/og" },
-    { "source": "/beaute/:id", "destination": "/api/og" },
+    { "source": "/api/og-image/annonce/:id", "destination": "/api/og-image?path=/annonce/:id" },
+    { "source": "/api/og-image/boutique/:id", "destination": "/api/og-image?path=/boutique/:id" },
+    { "source": "/api/og-image/atelier/:id", "destination": "/api/og-image?path=/atelier/:id" },
+    { "source": "/api/og-image/resto/:id", "destination": "/api/og-image?path=/resto/:id" },
+    { "source": "/api/og-image/beaute/:id", "destination": "/api/og-image?path=/beaute/:id" },
+    { "source": "/annonce/:id", "destination": "/api/og?id=:id&source=posts" },
+    { "source": "/boutique/:id", "destination": "/api/og?id=:id&source=boutiques" },
+    { "source": "/atelier/:id", "destination": "/api/og?id=:id&source=ateliers" },
+    { "source": "/resto/:id", "destination": "/api/og?id=:id&source=restos" },
+    { "source": "/beaute/:id", "destination": "/api/og?id=:id&source=beaute" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
