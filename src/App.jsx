@@ -587,6 +587,46 @@ function FlagCylinder({ theme }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 
+// Ajoute le logo MarchéduRoi en miniature coin haut-gauche sur une image
+async function addLogoWatermark(photoUrl) {
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Charger la photo
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = photoUrl; });
+
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+
+    // Charger le logo
+    const logo = new Image();
+    logo.crossOrigin = 'anonymous';
+    await new Promise((res, rej) => { logo.onload = res; logo.onerror = rej; logo.src = '/marcheduRoi-icon.svg'; });
+
+    // Logo en miniature coin haut-gauche (10% de la largeur)
+    const logoSize = Math.round(img.width * 0.1);
+    const padding = Math.round(img.width * 0.02);
+
+    // Fond semi-transparent derrière le logo
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    const bgW = logoSize + padding * 2;
+    const bgH = logoSize + padding * 2;
+    ctx.roundRect(padding, padding, bgW, bgH, 8);
+    ctx.fill();
+
+    // Logo
+    ctx.drawImage(logo, padding * 1.5, padding * 1.5, logoSize, logoSize);
+
+    return new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.9));
+  } catch(e) {
+    return null;
+  }
+}
+
 function AppContent() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState(INITIAL_POSTS);
@@ -2671,9 +2711,9 @@ function AppContent() {
                     const photo = contactDrawer.photos?.[0];
                     if(navigator.share && photo){
                       try {
-                        const resp = await fetch(photo);
-                        const blob = await resp.blob();
-                        const file = new File([blob], "annonce.jpg", { type: blob.type });
+                        let blob = await addLogoWatermark(photo);
+                        if (!blob) { const r = await fetch(photo); blob = await r.blob(); }
+                        const file = new File([blob], "annonce.jpg", { type: "image/jpeg" });
                         if(navigator.canShare && navigator.canShare({ files:[file] })){
                           await navigator.share({ title:contactDrawer.title, text:contactDrawer.title+(contactDrawer.price?" — "+contactDrawer.price+" FCFA":"")+".", url, files:[file] });
                           return;
@@ -3690,9 +3730,9 @@ function AppContent() {
                           const photo = post.photos?.[0];
                           if(navigator.share && photo){
                             try {
-                              const resp = await fetch(photo);
-                              const blob = await resp.blob();
-                              const file = new File([blob], "annonce.jpg", { type: blob.type });
+                              let blob = await addLogoWatermark(photo);
+                              if (!blob) { const r = await fetch(photo); blob = await r.blob(); }
+                              const file = new File([blob], "annonce.jpg", { type: "image/jpeg" });
                               if(navigator.canShare && navigator.canShare({ files:[file] })){
                                 await navigator.share({ title:post.title, text:post.title+(post.price?" — "+post.price+" FCFA":"")+".", url, files:[file] });
                                 return;
