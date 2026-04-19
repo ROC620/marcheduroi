@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "./supabase";
 import Icon from "./components/Icon";
@@ -18,8 +18,8 @@ import {
 const INITIAL_POSTS = [
   // IMMOBILIER
   {
-    id: 1, title: "Belle villa avec piscine ├á louer", category: "Immobilier",
-    description: "Magnifique villa moderne avec piscine, 4 chambres, 3 salles de bain, jardin paysager. Id├®ale pour famille ou investissement locatif. Quartier calme et s├®curis├® ├á Cotonou.",
+    id: 1, title: "Belle villa avec piscine à louer", category: "Immobilier",
+    description: "Magnifique villa moderne avec piscine, 4 chambres, 3 salles de bain, jardin paysager. Idéale pour famille ou investissement locatif. Quartier calme et sécurisé à Cotonou.",
     author: "Sophie M.", authorId: "u2", price: "450 000 FCFA/mois", date: "2026-03-01", likes: 14,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
@@ -27,33 +27,33 @@ const INITIAL_POSTS = [
       "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80",
       "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&q=80"
     ],
-    immo: { sousType:"Villa", transaction:"Location", superficie:"350", pieces:"8 pi├¿ces", titre:"Oui - Titre foncier disponible", ville:"Cotonou", quartier:"Fidjross├¿", von:"Von de la plage", eau:"Oui", electricite:"Oui", etat:"Bon ├®tat", recasee:"", autres:"Piscine, gardien, garage 2 voitures, groupe ├®lectrog├¿ne" }
+    immo: { sousType:"Villa", transaction:"Location", superficie:"350", pieces:"8 pièces", titre:"Oui - Titre foncier disponible", ville:"Cotonou", quartier:"Fidjrossè", von:"Von de la plage", eau:"Oui", electricite:"Oui", etat:"Bon état", recasee:"", autres:"Piscine, gardien, garage 2 voitures, groupe électrogène" }
   },
   {
-    id: 2, title: "Appartement meubl├® 3 pi├¿ces - Akpakpa", category: "Immobilier",
-    description: "Appartement enti├¿rement meubl├®, climatis├®, avec eau et ├®lectricit├®. Situ├® ├á Akpakpa pr├¿s du march├®. Disponible imm├®diatement. Id├®al pour cadre ou couple.",
+    id: 2, title: "Appartement meublé 3 pièces - Akpakpa", category: "Immobilier",
+    description: "Appartement entièrement meublé, climatisé, avec eau et électricité. Situé à Akpakpa près du marché. Disponible immédiatement. Idéal pour cadre ou couple.",
     author: "Adjovi R.", authorId: "u7", price: "120 000 FCFA/mois", date: "2026-03-03", likes: 9,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80",
       "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80"
     ],
-    immo: { sousType:"Appartement", transaction:"Location", superficie:"85", pieces:"3 pi├¿ces", titre:"Oui - Titre foncier disponible", ville:"Cotonou", quartier:"Akpakpa", von:"Von du march├® Akpakpa", eau:"Oui", electricite:"Oui", etat:"Bon ├®tat", autres:"Meubl├®, climatis├®, gardien" }
+    immo: { sousType:"Appartement", transaction:"Location", superficie:"85", pieces:"3 pièces", titre:"Oui - Titre foncier disponible", ville:"Cotonou", quartier:"Akpakpa", von:"Von du marché Akpakpa", eau:"Oui", electricite:"Oui", etat:"Bon état", autres:"Meublé, climatisé, gardien" }
   },
   {
-    id: 16, title: "Grande parcelle ├á vendre - Calavi", category: "Immobilier",
-    description: "Belle parcelle de 600m┬▓ dans un quartier r├®sidentiel en plein d├®veloppement. Proche de toutes commodit├®s. Id├®ale pour construction d'une maison ou investissement.",
+    id: 16, title: "Grande parcelle à vendre - Calavi", category: "Immobilier",
+    description: "Belle parcelle de 600m² dans un quartier résidentiel en plein développement. Proche de toutes commodités. Idéale pour construction d'une maison ou investissement.",
     author: "Germain K.", authorId: "u19", price: "12 000 000 FCFA", date: "2026-03-12", likes: 7,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80",
     ],
-    immo: { sousType:"Parcelle", transaction:"Vente", superficie:"600", pieces:"", titre:"En cours d'obtention", ville:"Abomey-Calavi", quartier:"Godomey", von:"Von du rond-point Erevan", eau:"En attente", electricite:"Oui", etat:"Neuf", recasee:"Non", autres:"Quartier en d├®veloppement, proche universit├®" }
+    immo: { sousType:"Parcelle", transaction:"Vente", superficie:"600", pieces:"", titre:"En cours d'obtention", ville:"Abomey-Calavi", quartier:"Godomey", von:"Von du rond-point Erevan", eau:"En attente", electricite:"Oui", etat:"Neuf", recasee:"Non", autres:"Quartier en développement, proche université" }
   },
-  // ├ëLECTRONIQUE
+  // ÉLECTRONIQUE
   {
-    id: 3, title: "iPhone 15 Pro Max 256Go - Neuf", category: "├ëlectronique",
-    description: "iPhone 15 Pro Max couleur titane naturel, 256Go. Achet├® il y a 2 mois, jamais tomb├®. Vendu avec bo├«te originale, chargeur MagSafe et coque de protection.",
+    id: 3, title: "iPhone 15 Pro Max 256Go - Neuf", category: "Électronique",
+    description: "iPhone 15 Pro Max couleur titane naturel, 256Go. Acheté il y a 2 mois, jamais tombé. Vendu avec boîte originale, chargeur MagSafe et coque de protection.",
     author: "Karim B.", authorId: "u3", price: "580 000 FCFA", date: "2026-03-05", likes: 11,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
@@ -62,8 +62,8 @@ const INITIAL_POSTS = [
     ]
   },
   {
-    id: 4, title: "Samsung 65 pouces QLED 4K Smart TV", category: "├ëlectronique",
-    description: "T├®l├®viseur Samsung QLED 65 pouces, 4K, Smart TV avec Netflix, YouTube int├®gr├®s. Achet├® en janvier 2026, tr├¿s peu utilis├®. Avec t├®l├®commande et support mural.",
+    id: 4, title: "Samsung 65 pouces QLED 4K Smart TV", category: "Électronique",
+    description: "Téléviseur Samsung QLED 65 pouces, 4K, Smart TV avec Netflix, YouTube intégrés. Acheté en janvier 2026, très peu utilisé. Avec télécommande et support mural.",
     author: "Franck T.", authorId: "u8", price: "320 000 FCFA", date: "2026-03-06", likes: 7,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
@@ -71,10 +71,10 @@ const INITIAL_POSTS = [
       "https://images.unsplash.com/photo-1461151304267-38535e780c79?w=600&q=80"
     ]
   },
-  // V├ëHICULES
+  // VÉHICULES
   {
-    id: 5, title: "Toyota Corolla 2020 - Premi├¿re main", category: "V├®hicules",
-    description: "Toyota Corolla en excellent ├®tat, premi├¿re main, entretien r├®gulier chez concessionnaire. Jamais accident├®e. Tous documents ├á jour. Disponible ├á Cotonou.",
+    id: 5, title: "Toyota Corolla 2020 - Première main", category: "Véhicules",
+    description: "Toyota Corolla en excellent état, première main, entretien régulier chez concessionnaire. Jamais accidentée. Tous documents à jour. Disponible à Cotonou.",
     author: "Marc D.", authorId: "u5", price: "8 500 000 FCFA", date: "2026-03-09", likes: 5,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
@@ -82,35 +82,35 @@ const INITIAL_POSTS = [
       "https://images.unsplash.com/photo-1550355291-bbee04a92027?w=600&q=80",
       "https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=80"
     ],
-    vehicle: { marque:"Toyota", modele:"Corolla", annee:"2020", transmission:"Automatique", puissance:"132 ch", carburant:"Essence", garniture:"Tissu", capacite:"5 places", climatisation:"Automatique", docs:"Carte grise, Assurance, Visite technique", serie:"AJ 1234 BJ", position:"Cotonou, B├®nin", autre:"Premi├¿re main, 45 000 km" }
+    vehicle: { marque:"Toyota", modele:"Corolla", annee:"2020", transmission:"Automatique", puissance:"132 ch", carburant:"Essence", garniture:"Tissu", capacite:"5 places", climatisation:"Automatique", docs:"Carte grise, Assurance, Visite technique", serie:"AJ 1234 BJ", position:"Cotonou, Bénin", autre:"Première main, 45 000 km" }
   },
   {
-    id: 6, title: "Mercedes Classe C 2019 - Excellent ├®tat", category: "V├®hicules",
-    description: "Mercedes Benz Classe C 200, int├®rieur cuir beige, toit ouvrant, cam├®ra de recul, GPS int├®gr├®. Voiture de direction, tr├¿s bien entretenue. Prix n├®gociable.",
+    id: 6, title: "Mercedes Classe C 2019 - Excellent état", category: "Véhicules",
+    description: "Mercedes Benz Classe C 200, intérieur cuir beige, toit ouvrant, caméra de recul, GPS intégré. Voiture de direction, très bien entretenue. Prix négociable.",
     author: "Brice A.", authorId: "u9", price: "18 000 000 FCFA", date: "2026-03-10", likes: 18,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&q=80",
       "https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&q=80"
     ],
-    vehicle: { marque:"Mercedes", modele:"Classe C 200", annee:"2019", transmission:"Automatique", puissance:"184 ch", carburant:"Essence", garniture:"Cuir beige", capacite:"5 places", climatisation:"Automatique bi-zone", docs:"Carte grise, Assurance, Expertise", serie:"AK 5678 BJ", position:"Porto-Novo, B├®nin", autre:"Toit ouvrant, GPS, Cam├®ra recul" }
+    vehicle: { marque:"Mercedes", modele:"Classe C 200", annee:"2019", transmission:"Automatique", puissance:"184 ch", carburant:"Essence", garniture:"Cuir beige", capacite:"5 places", climatisation:"Automatique bi-zone", docs:"Carte grise, Assurance, Expertise", serie:"AK 5678 BJ", position:"Porto-Novo, Bénin", autre:"Toit ouvrant, GPS, Caméra recul" }
   },
-  // LOCATION DE V├ëHICULES
+  // LOCATION DE VÉHICULES
   {
-    id: 17, title: "Toyota RAV4 2021 ÔÇö Location journali├¿re", category: "Location de v├®hicules",
-    description: "Toyota RAV4 en parfait ├®tat disponible ├á la location. Id├®al pour voyages, c├®r├®monies ou d├®placements professionnels. Chauffeur disponible en option. Caution requise.",
-    author: "Admin March├®duRoi", authorId: "admin", price: "35 000 FCFA/jour", date: "2026-04-01", likes: 8,
+    id: 17, title: "Toyota RAV4 2021 — Location journalière", category: "Location de véhicules",
+    description: "Toyota RAV4 en parfait état disponible à la location. Idéal pour voyages, cérémonies ou déplacements professionnels. Chauffeur disponible en option. Caution requise.",
+    author: "Admin MarchéduRoi", authorId: "admin", price: "35 000 FCFA/jour", date: "2026-04-01", likes: 8,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1568844293986-ca9c5a794567?w=600&q=80",
       "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&q=80"
     ],
-    vehicle: { marque:"Toyota", modele:"RAV4", annee:"2021", transmission:"Automatique", puissance:"203 ch", carburant:"Essence", garniture:"Cuir", capacite:"5 places", climatisation:"Automatique", docs:"Assurance tous risques, Carte grise", position:"Cotonou, B├®nin", autre:"Chauffeur en option ┬À 150 000 FCFA caution ┬À Kilom├®trage illimit├® dans Cotonou" }
+    vehicle: { marque:"Toyota", modele:"RAV4", annee:"2021", transmission:"Automatique", puissance:"203 ch", carburant:"Essence", garniture:"Cuir", capacite:"5 places", climatisation:"Automatique", docs:"Assurance tous risques, Carte grise", position:"Cotonou, Bénin", autre:"Chauffeur en option · 150 000 FCFA caution · Kilométrage illimité dans Cotonou" }
   },
   // SERVICES
   {
     id: 7, title: "Cours particuliers Maths & Physique", category: "Services",
-    description: "Professeur dipl├┤m├® en math├®matiques et physique-chimie, 8 ans d'exp├®rience. Cours ├á domicile pour coll├®giens, lyc├®ens et ├®tudiants. R├®sultats garantis. Disponible soirs et week-ends.",
+    description: "Professeur diplômé en mathématiques et physique-chimie, 8 ans d'expérience. Cours à domicile pour collégiens, lycéens et étudiants. Résultats garantis. Disponible soirs et week-ends.",
     author: "Dr. Koffi M.", authorId: "u10", price: "5 000 FCFA/h", date: "2026-03-07", likes: 22,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
@@ -120,7 +120,7 @@ const INITIAL_POSTS = [
   },
   {
     id: 8, title: "Plomberie & Installation sanitaire", category: "Services",
-    description: "Plombier professionnel avec 12 ans d'exp├®rience. Installation, r├®paration, d├®pannage urgent. Robinetterie, chauffe-eau, WC, douche. Intervention rapide sur Cotonou et environs.",
+    description: "Plombier professionnel avec 12 ans d'expérience. Installation, réparation, dépannage urgent. Robinetterie, chauffe-eau, WC, douche. Intervention rapide sur Cotonou et environs.",
     author: "Yves P.", authorId: "u11", price: "Sur devis", date: "2026-03-08", likes: 6,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
@@ -130,9 +130,9 @@ const INITIAL_POSTS = [
   },
   // SPORT
   {
-    id: 9, title: "V├®lo ├®lectrique VTT - Tr├¿s bon ├®tat", category: "Sport",
-    description: "VTT ├®lectrique 27,5 pouces, batterie longue dur├®e 80km, moteur 250W, 21 vitesses. Parfait pour trajets quotidiens et randonn├®es. Chargeur inclus. Tr├¿s peu utilis├®.",
-    author: "L├®a K.", authorId: "u12", price: "280 000 FCFA", date: "2026-03-04", likes: 13,
+    id: 9, title: "Vélo électrique VTT - Très bon état", category: "Sport",
+    description: "VTT électrique 27,5 pouces, batterie longue durée 80km, moteur 250W, 21 vitesses. Parfait pour trajets quotidiens et randonnées. Chargeur inclus. Très peu utilisé.",
+    author: "Léa K.", authorId: "u12", price: "280 000 FCFA", date: "2026-03-04", likes: 13,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=600&q=80",
@@ -140,8 +140,8 @@ const INITIAL_POSTS = [
     ]
   },
   {
-    id: 10, title: "├ëquipement complet de musculation", category: "Sport",
-    description: "Banc de musculation multifonction avec barre, halt├¿res et disques de poids (50kg au total). Parfait ├®tat, d├®m├®nagement oblige la vente. ├Ç r├®cup├®rer sur place ├á Fidjross├¿.",
+    id: 10, title: "Équipement complet de musculation", category: "Sport",
+    description: "Banc de musculation multifonction avec barre, haltères et disques de poids (50kg au total). Parfait état, déménagement oblige la vente. À récupérer sur place à Fidjrossè.",
     author: "Arnold S.", authorId: "u13", price: "95 000 FCFA", date: "2026-03-11", likes: 4,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
@@ -151,9 +151,9 @@ const INITIAL_POSTS = [
   },
   // MODE
   {
-    id: 11, title: "Robe de soir├®e ├®l├®gante - Taille M", category: "Mode",
-    description: "Magnifique robe de soir├®e longue, couleur bordeaux, ornements dor├®s. Port├®e une seule fois pour un mariage. Taille M (38-40). Parfaite pour c├®r├®monies, soir├®es de gala.",
-    author: "Nad├¿ge F.", authorId: "u14", price: "35 000 FCFA", date: "2026-03-02", likes: 16,
+    id: 11, title: "Robe de soirée élégante - Taille M", category: "Mode",
+    description: "Magnifique robe de soirée longue, couleur bordeaux, ornements dorés. Portée une seule fois pour un mariage. Taille M (38-40). Parfaite pour cérémonies, soirées de gala.",
+    author: "Nadège F.", authorId: "u14", price: "35 000 FCFA", date: "2026-03-02", likes: 16,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=600&q=80",
@@ -161,8 +161,8 @@ const INITIAL_POSTS = [
     ]
   },
   {
-    id: 12, title: "Costume homme 3 pi├¿ces - Taille L", category: "Mode",
-    description: "Costume 3 pi├¿ces (veste, pantalon, gilet) couleur gris anthracite. Tissu de qualit├®, coupe italienne. Port├® 2 fois. Taille L. Id├®al pour entretiens, mariages et c├®r├®monies.",
+    id: 12, title: "Costume homme 3 pièces - Taille L", category: "Mode",
+    description: "Costume 3 pièces (veste, pantalon, gilet) couleur gris anthracite. Tissu de qualité, coupe italienne. Porté 2 fois. Taille L. Idéal pour entretiens, mariages et cérémonies.",
     author: "Romuald A.", authorId: "u15", price: "28 000 FCFA", date: "2026-03-10", likes: 8,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
@@ -172,8 +172,8 @@ const INITIAL_POSTS = [
   },
   // AUTRE - Ustensiles de cuisine
   {
-    id: 13, title: "Set de casseroles inox 7 pi├¿ces", category: "Autre",
-    description: "Lot de 7 casseroles et po├¬les en inox 18/10, fond ├®pais anti-adh├®sif. Compatibles toutes plaques dont induction. Id├®al pour cuisine professionnelle ou familiale. Neuves dans leur emballage.",
+    id: 13, title: "Set de casseroles inox 7 pièces", category: "Autre",
+    description: "Lot de 7 casseroles et poêles en inox 18/10, fond épais anti-adhésif. Compatibles toutes plaques dont induction. Idéal pour cuisine professionnelle ou familiale. Neuves dans leur emballage.",
     author: "Ines C.", authorId: "u16", price: "45 000 FCFA", date: "2026-03-06", likes: 10,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
@@ -184,8 +184,8 @@ const INITIAL_POSTS = [
   },
   {
     id: 14, title: "Robot de cuisine multifonction 1200W", category: "Autre",
-    description: "Robot cuiseur multifonction 1200W, 6 programmes automatiques, bol inox 4L. Hache, mixe, p├®trit, cuit ├á la vapeur. Parfait ├®tat, utilis├® 3 mois. Avec tous les accessoires d'origine.",
-    author: "C├®leste M.", authorId: "u17", price: "75 000 FCFA", date: "2026-03-09", likes: 15,
+    description: "Robot cuiseur multifonction 1200W, 6 programmes automatiques, bol inox 4L. Hache, mixe, pétrit, cuit à la vapeur. Parfait état, utilisé 3 mois. Avec tous les accessoires d'origine.",
+    author: "Céleste M.", authorId: "u17", price: "75 000 FCFA", date: "2026-03-09", likes: 15,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
       "https://images.unsplash.com/photo-1585515320310-259814833e62?w=600&q=80",
@@ -193,8 +193,8 @@ const INITIAL_POSTS = [
     ]
   },
   {
-    id: 15, title: "Couteaux de chef japonais - Set 5 pi├¿ces", category: "Autre",
-    description: "Set de 5 couteaux de chef japonais en acier inoxydable, manche en bois d'olivier. Inclus : couteau de chef, couteau ├á pain, couteau d'office, santoku et cisailles. Avec bloc de rangement.",
+    id: 15, title: "Couteaux de chef japonais - Set 5 pièces", category: "Autre",
+    description: "Set de 5 couteaux de chef japonais en acier inoxydable, manche en bois d'olivier. Inclus : couteau de chef, couteau à pain, couteau d'office, santoku et cisailles. Avec bloc de rangement.",
     author: "Patrick N.", authorId: "u18", price: "32 000 FCFA", date: "2026-03-11", likes: 9,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: [
@@ -205,28 +205,28 @@ const INITIAL_POSTS = [
 ];
 
 const INITIAL_BOUTIQUES = [
-  { id:"b1", name:"Beaut├® Dor├®e Cosm├®tiques", type:"Cosm├®tiques & Beaut├®", description:"Boutique sp├®cialis├®e en produits cosm├®tiques naturels, soins de la peau, parfums et accessoires beaut├®.", ville:"Cotonou", quartier:"Akpakpa", von:"Von de la pharmacie centrale", horaires:"Lun-Sam 8h-20h ┬À Dim 10h-18h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Adjara K.", authorId:"b_u1", date:"2026-03-01", likes:18, photos:[], video:null, expiresAt:null },
-  { id:"b2", name:"Tech Store B├®nin", type:"├ëlectronique & Informatique", description:"Vente et r├®paration de t├®l├®phones, ordinateurs, accessoires informatiques. Garantie sur tous les produits.", ville:"Porto-Novo", quartier:"Ouando", von:"Von du grand march├®", horaires:"Lun-Ven 8h-19h ┬À Sam 8h-17h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Fiacre D.", authorId:"b_u2", date:"2026-03-03", likes:12, photos:[], video:null, expiresAt:null },
-  { id:"b3", name:"Boulangerie Saveur d'Or", type:"Alimentation & Restauration", description:"Pains frais, viennoiseries, g├óteaux personnalis├®s. Fabrication artisanale chaque matin. Livraison disponible.", ville:"Ouidah", quartier:"Centre-ville", von:"Von de l'├®glise Saint-Fran├ºois", horaires:"Tous les jours 6h-21h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Marie T.", authorId:"b_u3", date:"2026-03-05", likes:25, photos:[], video:null, expiresAt:null },
+  { id:"b1", name:"Beauté Dorée Cosmétiques", type:"Cosmétiques & Beauté", description:"Boutique spécialisée en produits cosmétiques naturels, soins de la peau, parfums et accessoires beauté.", ville:"Cotonou", quartier:"Akpakpa", von:"Von de la pharmacie centrale", horaires:"Lun-Sam 8h-20h · Dim 10h-18h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Adjara K.", authorId:"b_u1", date:"2026-03-01", likes:18, photos:[], video:null, expiresAt:null },
+  { id:"b2", name:"Tech Store Bénin", type:"Électronique & Informatique", description:"Vente et réparation de téléphones, ordinateurs, accessoires informatiques. Garantie sur tous les produits.", ville:"Porto-Novo", quartier:"Ouando", von:"Von du grand marché", horaires:"Lun-Ven 8h-19h · Sam 8h-17h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Fiacre D.", authorId:"b_u2", date:"2026-03-03", likes:12, photos:[], video:null, expiresAt:null },
+  { id:"b3", name:"Boulangerie Saveur d'Or", type:"Alimentation & Restauration", description:"Pains frais, viennoiseries, gâteaux personnalisés. Fabrication artisanale chaque matin. Livraison disponible.", ville:"Ouidah", quartier:"Centre-ville", von:"Von de l'église Saint-François", horaires:"Tous les jours 6h-21h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Marie T.", authorId:"b_u3", date:"2026-03-05", likes:25, photos:[], video:null, expiresAt:null },
 ];
 
 const INITIAL_RESTOS = [
-  { id:"r1", name:"Maquis Chez Maman Africa", type:"Maquis", specialite:"Cuisine b├®ninoise traditionnelle", plats:"Sauce arachide, Riz au gras, Igname pil├®e, Poisson brais├®, Akassa", prixMoyen:"1 500 - 5 000 FCFA", capacite:"40 couverts", services:"Sur place, ├Ç emporter, Terrasse", description:"Maquis familial proposant les meilleurs plats traditionnels b├®ninois dans une ambiance chaleureuse.", ville:"Cotonou", quartier:"Cadjehoun", von:"Von de l'a├®roport", horaires:"Lun-Dim 7h-22h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Mama Africa", authorId:"r_u1", date:"2026-03-01", likes:35, photos:[], video:null, keywords:"cuisine b├®ninoise maquis traditionnel", expiresAt:null },
-  { id:"r2", name:"Bar Le Cocotier", type:"Bar", specialite:"Cocktails tropicaux et bi├¿res fra├«ches", plats:"Brochettes, Arachides grill├®es, Poisson frit, Accras", prixMoyen:"500 - 3 000 FCFA", capacite:"60 couverts", services:"Sur place, Terrasse, Wifi disponible", description:"Bar tendance en bord de mer avec une vue imprenable. Ambiance d├®tendue, musique live le week-end.", ville:"Ouidah", quartier:"Plage", von:"Von de la plage de Ouidah", horaires:"Mar-Dim 16h-02h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Patrick L.", authorId:"r_u2", date:"2026-03-03", likes:28, photos:[], video:null, keywords:"bar cocktails bi├¿res terrasse mer", expiresAt:null },
-  { id:"r3", name:"Fast Food Le Go├╗t", type:"Fast-food", specialite:"Burgers, Sandwichs et Grillades", plats:"Burger maison, Sandwich poulet, Brochettes b┼ôuf, Frites", prixMoyen:"1 000 - 4 000 FCFA", capacite:"25 couverts", services:"Sur place, ├Ç emporter, Livraison, Salle climatis├®e", description:"Fast-food moderne proposant des burgers faits maison. Livraison rapide dans tout Cotonou.", ville:"Cotonou", quartier:"Akpakpa", von:"Von du carrefour Miss├®bo", horaires:"Lun-Dim 10h-23h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Herv├® G.", authorId:"r_u3", date:"2026-03-05", likes:19, photos:[], video:null, keywords:"burger fast food livraison grillades", expiresAt:null },
+  { id:"r1", name:"Maquis Chez Maman Africa", type:"Maquis", specialite:"Cuisine béninoise traditionnelle", plats:"Sauce arachide, Riz au gras, Igname pilée, Poisson braisé, Akassa", prixMoyen:"1 500 - 5 000 FCFA", capacite:"40 couverts", services:"Sur place, À emporter, Terrasse", description:"Maquis familial proposant les meilleurs plats traditionnels béninois dans une ambiance chaleureuse.", ville:"Cotonou", quartier:"Cadjehoun", von:"Von de l'aéroport", horaires:"Lun-Dim 7h-22h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Mama Africa", authorId:"r_u1", date:"2026-03-01", likes:35, photos:[], video:null, keywords:"cuisine béninoise maquis traditionnel", expiresAt:null },
+  { id:"r2", name:"Bar Le Cocotier", type:"Bar", specialite:"Cocktails tropicaux et bières fraîches", plats:"Brochettes, Arachides grillées, Poisson frit, Accras", prixMoyen:"500 - 3 000 FCFA", capacite:"60 couverts", services:"Sur place, Terrasse, Wifi disponible", description:"Bar tendance en bord de mer avec une vue imprenable. Ambiance détendue, musique live le week-end.", ville:"Ouidah", quartier:"Plage", von:"Von de la plage de Ouidah", horaires:"Mar-Dim 16h-02h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Patrick L.", authorId:"r_u2", date:"2026-03-03", likes:28, photos:[], video:null, keywords:"bar cocktails bières terrasse mer", expiresAt:null },
+  { id:"r3", name:"Fast Food Le Goût", type:"Fast-food", specialite:"Burgers, Sandwichs et Grillades", plats:"Burger maison, Sandwich poulet, Brochettes bœuf, Frites", prixMoyen:"1 000 - 4 000 FCFA", capacite:"25 couverts", services:"Sur place, À emporter, Livraison, Salle climatisée", description:"Fast-food moderne proposant des burgers faits maison. Livraison rapide dans tout Cotonou.", ville:"Cotonou", quartier:"Akpakpa", von:"Von du carrefour Missébo", horaires:"Lun-Dim 10h-23h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Hervé G.", authorId:"r_u3", date:"2026-03-05", likes:19, photos:[], video:null, keywords:"burger fast food livraison grillades", expiresAt:null },
 ];
 
 const INITIAL_BEAUTE = [
-  { id:"beau1", name:"Salon Beaut├® Divine", type:"Salon de coiffure", specialite:"Tresses africaines et coiffures modernes", services:"Tresses, Locks, Tissages, Lissage, Coloration, Coupe, Soins capillaires", tarifs:"2 000 - 25 000 FCFA", rendezvous:"Les deux", produits:"L'Or├®al, Dark & Lovely, Cantu", description:"Salon de coiffure professionnel sp├®cialis├® en tresses africaines et coiffures modernes. Accueil chaleureux.", ville:"Cotonou", quartier:"Cadjehoun", von:"Von du supermarch├® Erevan", horaires:"Lun-Sam 8h-20h ┬À Dim 10h-17h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Nad├¿ge K.", authorId:"beau_u1", date:"2026-03-01", likes:42, photos:[], video:null, keywords:"tresses coiffure africaine lissage", expiresAt:null },
-  { id:"beau2", name:"Institut Glam & Style", type:"Institut de beaut├®", specialite:"Maquillage et soins du visage", services:"Maquillage, Manucure, P├®dicure, Soins visage, ├ëpilation", tarifs:"3 000 - 40 000 FCFA", rendezvous:"Oui", produits:"MAC, NYX, L'Or├®al Paris", description:"Institut de beaut├® proposant des soins complets. Personnel professionnel certifi├®.", ville:"Cotonou", quartier:"Ganhi", von:"Von du march├® Ganhi", horaires:"Lun-Sam 9h-19h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Christelle A.", authorId:"beau_u2", date:"2026-03-04", likes:31, photos:[], video:null, keywords:"maquillage manucure soins beaut├®", expiresAt:null },
+  { id:"beau1", name:"Salon Beauté Divine", type:"Salon de coiffure", specialite:"Tresses africaines et coiffures modernes", services:"Tresses, Locks, Tissages, Lissage, Coloration, Coupe, Soins capillaires", tarifs:"2 000 - 25 000 FCFA", rendezvous:"Les deux", produits:"L'Oréal, Dark & Lovely, Cantu", description:"Salon de coiffure professionnel spécialisé en tresses africaines et coiffures modernes. Accueil chaleureux.", ville:"Cotonou", quartier:"Cadjehoun", von:"Von du supermarché Erevan", horaires:"Lun-Sam 8h-20h · Dim 10h-17h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Nadège K.", authorId:"beau_u1", date:"2026-03-01", likes:42, photos:[], video:null, keywords:"tresses coiffure africaine lissage", expiresAt:null },
+  { id:"beau2", name:"Institut Glam & Style", type:"Institut de beauté", specialite:"Maquillage et soins du visage", services:"Maquillage, Manucure, Pédicure, Soins visage, Épilation", tarifs:"3 000 - 40 000 FCFA", rendezvous:"Oui", produits:"MAC, NYX, L'Oréal Paris", description:"Institut de beauté proposant des soins complets. Personnel professionnel certifié.", ville:"Cotonou", quartier:"Ganhi", von:"Von du marché Ganhi", horaires:"Lun-Sam 9h-19h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Christelle A.", authorId:"beau_u2", date:"2026-03-04", likes:31, photos:[], video:null, keywords:"maquillage manucure soins beauté", expiresAt:null },
 ];
 
 const INITIAL_ATELIERS = [
   {
-    id: "a1", name: "Atelier Couture ├ël├®gance", type: "Couture/Mode",
-    description: "Confection de tenues sur mesure pour hommes, femmes et enfants. Sp├®cialiste en tenues traditionnelles et modernes. Retouches et r├®parations accept├®es.",
-    services: "Couture sur mesure, Tenues de c├®r├®monie, Retouches, Broderie, Formation couture",
-    ville: "Cotonou", quartier: "Gb├¿gamey", von: "Von du lyc├®e technique",
+    id: "a1", name: "Atelier Couture Élégance", type: "Couture/Mode",
+    description: "Confection de tenues sur mesure pour hommes, femmes et enfants. Spécialiste en tenues traditionnelles et modernes. Retouches et réparations acceptées.",
+    services: "Couture sur mesure, Tenues de cérémonie, Retouches, Broderie, Formation couture",
+    ville: "Cotonou", quartier: "Gbègamey", von: "Von du lycée technique",
     horaires: "Lun-Sam 8h-18h",
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     author: "Rosine A.", authorId: "a_u1", date: "2026-03-02", likes: 20,
@@ -236,23 +236,23 @@ const INITIAL_ATELIERS = [
     ], video: null, expiresAt: null
   },
   {
-    id: "a2", name: "Garage Auto Pro", type: "M├®canique",
-    description: "R├®paration et entretien de tous types de v├®hicules. Diagnostic ├®lectronique, vidange, freins, climatisation. Pi├¿ces d├®tach├®es disponibles.",
-    services: "Diagnostic, Vidange, Freinage, Climatisation, Carrosserie, ├ëlectricit├® auto",
+    id: "a2", name: "Garage Auto Pro", type: "Mécanique",
+    description: "Réparation et entretien de tous types de véhicules. Diagnostic électronique, vidange, freins, climatisation. Pièces détachées disponibles.",
+    services: "Diagnostic, Vidange, Freinage, Climatisation, Carrosserie, Électricité auto",
     ville: "Abomey-Calavi", quartier: "Godomey", von: "Von du rond-point Erevan",
     horaires: "Lun-Sam 7h30-18h30",
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
-    author: "Th├®odore M.", authorId: "a_u2", date: "2026-03-04", likes: 15,
+    author: "Théodore M.", authorId: "a_u2", date: "2026-03-04", likes: 15,
     photos: [
       "https://images.unsplash.com/photo-1632823471565-1ecdf5c6da12?w=600&q=80",
       "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&q=80"
     ], video: null, expiresAt: null
   },
   {
-    id: "a3", name: "Atelier Bois & M├®tal", type: "Menuiserie/Soudure",
-    description: "Fabrication de meubles sur mesure, portes, fen├¬tres, grilles de s├®curit├®. Travaux de soudure et serrurerie. Devis gratuit.",
-    services: "Meubles sur mesure, Portes et fen├¬tres, Grilles, Soudure, Serrurerie",
-    ville: "Parakou", quartier: "Banikanni", von: "Von du march├® central",
+    id: "a3", name: "Atelier Bois & Métal", type: "Menuiserie/Soudure",
+    description: "Fabrication de meubles sur mesure, portes, fenêtres, grilles de sécurité. Travaux de soudure et serrurerie. Devis gratuit.",
+    services: "Meubles sur mesure, Portes et fenêtres, Grilles, Soudure, Serrurerie",
+    ville: "Parakou", quartier: "Banikanni", von: "Von du marché central",
     horaires: "Lun-Sam 7h-18h",
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     author: "Justin F.", authorId: "a_u3", date: "2026-03-06", likes: 9,
@@ -263,30 +263,30 @@ const INITIAL_ATELIERS = [
   },
 ];
 
-const BOUTIQUE_TYPES = ["Cosm├®tiques & Beaut├®","Alimentation & Restauration","├ëlectronique & Informatique","Mode & V├¬tements","Pharmacie & Sant├®","Mat├®riaux & Construction","Agriculture & ├ëlevage","Librairie & Papeterie","Sport & Loisirs","Autre"];
-const ATELIER_TYPES = ["Couture/Mode","M├®canique","Menuiserie/Soudure","Artistique (peinture, musique...)","├ëlectricit├® & Plomberie","Coiffure & Beaut├®","Imprimerie & Communication","Autre"];
+const BOUTIQUE_TYPES = ["Cosmétiques & Beauté","Alimentation & Restauration","Électronique & Informatique","Mode & Vêtements","Pharmacie & Santé","Matériaux & Construction","Agriculture & Élevage","Librairie & Papeterie","Sport & Loisirs","Autre"];
+const ATELIER_TYPES = ["Couture/Mode","Mécanique","Menuiserie/Soudure","Artistique (peinture, musique...)","Électricité & Plomberie","Coiffure & Beauté","Imprimerie & Communication","Autre"];
 const IMMO_TYPES = ["Maison","Appartement","Parcelle","Domaine / Terrain","Local commercial","Villa"];
-const IMMO_ETATS = ["Neuf","Bon ├®tat","├Ç r├®nover","En construction"];
+const IMMO_ETATS = ["Neuf","Bon état","À rénover","En construction"];
 const IMMO_TITRES = ["Oui - Titre foncier disponible","Non - Sans titre","En cours d'obtention","Lettre d'attribution"];
 
 
 
 // Video Uploader
-// Fiche d├®taill├®e v├®hicule
-// Fiche d├®taill├®e Immobilier
+// Fiche détaillée véhicule
+// Fiche détaillée Immobilier
 // Composant formulaire de notation
-// Badge Certifi├® March├®duRoi ÔÇö Logo officiel complet
-// ÔöÇÔöÇÔöÇ CYLINDRE 3D DE DRAPEAUX ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+// Badge Certifié MarchéduRoi — Logo officiel complet
+// ─── CYLINDRE 3D DE DRAPEAUX ────────────────────────────────────────────────
 const FLAGS = [
-  {code:"bj",pays:"B├®nin"},{code:"tg",pays:"Togo"},{code:"bf",pays:"Burkina Faso"},
-  {code:"ml",pays:"Mali"},{code:"sn",pays:"S├®n├®gal"},{code:"ci",pays:"C├┤te d'Ivoire"},
-  {code:"ng",pays:"Nigeria"},{code:"cm",pays:"Cameroun"},{code:"gn",pays:"Guin├®e"},
+  {code:"bj",pays:"Bénin"},{code:"tg",pays:"Togo"},{code:"bf",pays:"Burkina Faso"},
+  {code:"ml",pays:"Mali"},{code:"sn",pays:"Sénégal"},{code:"ci",pays:"Côte d'Ivoire"},
+  {code:"ng",pays:"Nigeria"},{code:"cm",pays:"Cameroun"},{code:"gn",pays:"Guinée"},
   {code:"ne",pays:"Niger"},{code:"cg",pays:"Congo"},{code:"cd",pays:"RDC"},
   {code:"ga",pays:"Gabon"},{code:"mg",pays:"Madagascar"},{code:"rw",pays:"Rwanda"},
   {code:"bi",pays:"Burundi"},{code:"td",pays:"Tchad"},{code:"mr",pays:"Mauritanie"},
 ];
 
-// ÔöÇÔöÇ Composant vid├®o auto-play sur les cartes ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+// ── Composant vidéo auto-play sur les cartes ─────────────────────────────────
 function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
   const [playing, setPlaying] = React.useState(false);
   const containerRef = React.useRef(null);
@@ -296,7 +296,7 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
   const ytMatch = (video||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/);
   const ytId = ytMatch ? ytMatch[1] : null;
 
-  // Arr├¬ter la vid├®o quand la carte sort du viewport
+  // Arrêter la vidéo quand la carte sort du viewport
   React.useEffect(() => {
     if (!containerRef.current) return;
     const observer = new IntersectionObserver(([entry]) => {
@@ -306,7 +306,7 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
     return () => observer.disconnect();
   }, []);
 
-  // Limite de dur├®e pour Cloudinary
+  // Limite de durée pour Cloudinary
   const handleTimeUpdate = () => {
     if (videoRef.current && videoRef.current.currentTime >= maxSeconds) {
       videoRef.current.pause();
@@ -330,23 +330,23 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
           ) : isCL ? (
             <video ref={videoRef} src={video} autoPlay controls playsInline onTimeUpdate={handleTimeUpdate} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}/>
           ) : null}
-          <button onClick={()=>setPlaying(false)} style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.6)",border:"none",color:"#fff",borderRadius:"50%",width:28,height:28,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10 }}>Ô£ò</button>
+          <button onClick={()=>setPlaying(false)} style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.6)",border:"none",color:"#fff",borderRadius:"50%",width:28,height:28,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10 }}>✕</button>
         </div>
       ) : (
         <div style={{ position:"relative" }}>
           {photos && photos.length > 0
             ? <PhotoCarousel photos={photos}/>
-            : <div style={{ width:"100%",aspectRatio:"16/9",background:"linear-gradient(135deg,#1a1d30,#2a2d45)",display:"flex",alignItems:"center",justifyContent:"center" }}><span style={{ fontSize:32 }}>­ƒÄ¼</span></div>
+            : <div style={{ width:"100%",aspectRatio:"16/9",background:"linear-gradient(135deg,#1a1d30,#2a2d45)",display:"flex",alignItems:"center",justifyContent:"center" }}><span style={{ fontSize:32 }}>🎬</span></div>
           }
           <button onClick={()=>setPlaying(true)} style={{ position:"absolute",bottom:0,left:0,right:0,padding:"8px",background:"rgba(0,0,0,0.55)",border:"none",color:"#fff",fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,backdropFilter:"blur(4px)" }}>
-            ÔûÂ Voir la vid├®o
+            ▶ Voir la vidéo
           </button>
         </div>
       )}
     </div>
   );
 }
-// ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+// ─────────────────────────────────────────────────────────────────────────────
 
 function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth }) {
   const scrollRef = React.useRef(null);
@@ -354,21 +354,21 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
   const pausedRef = React.useRef(false);
 
   const allUrgents = [
-    ...posts.filter(p => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date()).map(p => ({...p, _urgentType:"annonce", _urgentIcon:"­ƒôï", _urgentLabel:"Annonce"})),
-    ...boutiques.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"boutique", _urgentIcon:"­ƒøì´©Å", _urgentLabel:"Boutique"})),
-    ...ateliers.filter(a => a.urgent && a.urgentUntil && new Date(a.urgentUntil) > new Date()).map(a => ({...a, title:a.name, _urgentType:"atelier", _urgentIcon:"­ƒöº", _urgentLabel:"Atelier"})),
-    ...restos.filter(r => r.urgent && r.urgentUntil && new Date(r.urgentUntil) > new Date()).map(r => ({...r, title:r.name, _urgentType:"resto", _urgentIcon:"­ƒì¢´©Å", _urgentLabel:"Restaurant"})),
-    ...beaute.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"beaute", _urgentIcon:"­ƒÆç", _urgentLabel:"Beaut├®"})),
+    ...posts.filter(p => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date()).map(p => ({...p, _urgentType:"annonce", _urgentIcon:"📋", _urgentLabel:"Annonce"})),
+    ...boutiques.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"boutique", _urgentIcon:"🛍️", _urgentLabel:"Boutique"})),
+    ...ateliers.filter(a => a.urgent && a.urgentUntil && new Date(a.urgentUntil) > new Date()).map(a => ({...a, title:a.name, _urgentType:"atelier", _urgentIcon:"🔧", _urgentLabel:"Atelier"})),
+    ...restos.filter(r => r.urgent && r.urgentUntil && new Date(r.urgentUntil) > new Date()).map(r => ({...r, title:r.name, _urgentType:"resto", _urgentIcon:"🍽️", _urgentLabel:"Restaurant"})),
+    ...beaute.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"beaute", _urgentIcon:"💇", _urgentLabel:"Beauté"})),
   ].sort((a, b) => new Date(b.urgentActivatedAt || b.urgentUntil) - new Date(a.urgentActivatedAt || a.urgentUntil));
   const urgents = allUrgents;
 
   const getTimeLeft = (until) => {
     const diff = new Date(until) - new Date();
-    if (diff <= 0) return "Expir├®";
+    if (diff <= 0) return "Expiré";
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
-    if (h > 0) return `ÔÅ│ ${h}h${m > 0 ? m + "m" : ""} restant${h > 1 ? "s" : ""}`;
-    return `ÔÅ│ ${m} min restantes`;
+    if (h > 0) return `⏳ ${h}h${m > 0 ? m + "m" : ""} restant${h > 1 ? "s" : ""}`;
+    return `⏳ ${m} min restantes`;
   };
 
   const [times, setTimes] = React.useState(() => urgents.map(p => getTimeLeft(p.urgentUntil)));
@@ -379,7 +379,7 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
     return () => clearInterval(timer);
   }, [urgents.length]);
 
-  // Auto-scroll mod├®r├® ÔÇö 3px toutes les 30ms Ôëê vitesse douce
+  // Auto-scroll modéré — 3px toutes les 30ms ≈ vitesse douce
   React.useEffect(() => {
     if (urgents.length <= 1) return;
     autoScrollRef.current = setInterval(() => {
@@ -413,7 +413,7 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: windowWidth <= 500 ? 16 : 20 }}>­ƒöÑ</span>
+          <span style={{ fontSize: windowWidth <= 500 ? 16 : 20 }}>🔥</span>
           <p style={{ fontWeight: 800, fontSize: windowWidth <= 500 ? 14 : 16, color: "#FF4757", letterSpacing: 0.5 }}>
             EN CE MOMENT
           </p>
@@ -423,8 +423,8 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
         </div>
         {urgents.length > 2 && (
           <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={() => scrollTo(-1)} style={{ background: "rgba(255,71,87,0.1)", border: "1px solid rgba(255,71,87,0.3)", color: "#FF4757", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>ÔÇ╣</button>
-            <button onClick={() => scrollTo(1)} style={{ background: "rgba(255,71,87,0.1)", border: "1px solid rgba(255,71,87,0.3)", color: "#FF4757", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>ÔÇ║</button>
+            <button onClick={() => scrollTo(-1)} style={{ background: "rgba(255,71,87,0.1)", border: "1px solid rgba(255,71,87,0.3)", color: "#FF4757", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
+            <button onClick={() => scrollTo(1)} style={{ background: "rgba(255,71,87,0.1)", border: "1px solid rgba(255,71,87,0.3)", color: "#FF4757", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
           </div>
         )}
       </div>
@@ -442,11 +442,11 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
             <div style={{ width: "100%", height: windowWidth <= 500 ? 100 : 130, background: "linear-gradient(135deg,#1a1d30,#2a2d45)", position: "relative", overflow: "hidden" }}>
               {post.photos && post.photos[0]
                 ? <img src={post.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>­ƒôª</div>
+                : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>📦</div>
               }
               {/* Badge URGENT overlay */}
               <div style={{ position: "absolute", top: 8, left: 8, background: "#FF4757", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 800, letterSpacing: 0.5 }}>
-                ­ƒöÑ URGENT
+                🔥 URGENT
               </div>
               {post._urgentIcon && post._urgentType !== "annonce" && (
                 <div style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.55)", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>
@@ -482,7 +482,7 @@ function FlagCylinder({ theme }) {
   const n = FLAGS.length;
   const angleStep = 360 / n;
   const itemW = 50; // largeur drapeau + gap
-  // rayon du cylindre : r = (n * itemW) / (2¤Ç)
+  // rayon du cylindre : r = (n * itemW) / (2π)
   const radius = Math.round((n * itemW) / (2 * Math.PI));
 
   // Auto-rotation
@@ -516,17 +516,17 @@ function FlagCylinder({ theme }) {
   return (
     <div style={{ position:"relative", width:"100%", marginBottom:window.innerWidth<=600?0:-20, userSelect:"none" }}>
 
-      {/* Logo ÔÇö affich├® normalement, globe cach├® par overflow hidden */}
+      {/* Logo — affiché normalement, globe caché par overflow hidden */}
       <div style={{ display:"flex", justifyContent:"center", pointerEvents:"none", overflow:"hidden", height:window.innerWidth<=600?160:140 }}>
         <img
           src="/marcheduRoi-icon.svg"
-          alt="March├®duRoi"
+          alt="MarchéduRoi"
           draggable={false}
           style={{ width:260, height:"auto", filter:"drop-shadow(0 8px 32px rgba(108,99,255,0.35))", display:"block" }}
         />
       </div>
 
-      {/* Cylindre 3D ÔÇö positionn├® sur le M */}
+      {/* Cylindre 3D — positionné sur le M */}
       <div
         style={{
           position:"absolute",
@@ -584,7 +584,7 @@ function FlagCylinder({ theme }) {
     </div>
   );
 }
-// ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+// ─────────────────────────────────────────────────────────────────────────────
 
 
 function AppContent() {
@@ -614,7 +614,7 @@ function AppContent() {
   const [ateliers, setAteliers] = useState(INITIAL_ATELIERS);
   const [restos, setRestos] = useState(INITIAL_RESTOS);
   const [beaute, setBeaute] = useState(INITIAL_BEAUTE);
-  const [suggestions, setSuggestions] = useState([{ id:1,text:"Ajouter un syst├¿me de messagerie interne",author:"Visiteur anonyme",date:"2026-03-10",status:"en attente" }]);
+  const [suggestions, setSuggestions] = useState([{ id:1,text:"Ajouter un système de messagerie interne",author:"Visiteur anonyme",date:"2026-03-10",status:"en attente" }]);
   const [user, setUser] = useState(null);
   const [view, setViewState] = useState(() => {
     // Restaurer la vue depuis l'historique si disponible
@@ -622,7 +622,7 @@ function AppContent() {
   });
   const [showCategories, setShowCategories] = useState(false);
 
-  // Navigation avec historique ÔÇö remplace setView partout
+  // Navigation avec historique — remplace setView partout
   const setView = (newView) => {
     if (newView === view) return;
     history.pushState({ view: newView }, "", window.location.pathname);
@@ -630,7 +630,7 @@ function AppContent() {
     window.scrollTo(0, 0);
   };
   const [shopForm, setShopForm] = useState({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"",lat:"",lng:"" });
-  const [immoForm, setImmoForm] = useState({ sousType:"Maison", transaction:"Vente", superficie:"", pieces:"", titre:"", ville:"", quartier:"", von:"", eau:"Oui", electricite:"Oui", etat:"Bon ├®tat", recasee:"", autres:"" });
+  const [immoForm, setImmoForm] = useState({ sousType:"Maison", transaction:"Vente", superficie:"", pieces:"", titre:"", ville:"", quartier:"", von:"", eau:"Oui", electricite:"Oui", etat:"Bon état", recasee:"", autres:"" });
   const [shopPhotos, setShopPhotos] = useState([]);
   const [shopVideo, setShopVideo] = useState(null);
   const [shopMode, setShopMode] = useState("boutique");
@@ -706,7 +706,7 @@ function AppContent() {
     if (!error) {
       setMsgInput("");
       loadMessages();
-      addNotification("Message envoy├® ├á "+finalReceiverName+" !", "contact", postId);
+      addNotification("Message envoyé à "+finalReceiverName+" !", "contact", postId);
       // Notifier le destinataire par email via Supabase Edge Function
       supabase.functions.invoke("send-message-email", {
         body: {
@@ -738,7 +738,7 @@ function AppContent() {
         }
       });
 
-      // ÔöÇÔöÇ Realtime : nouveaux messages en temps r├®el ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+      // ── Realtime : nouveaux messages en temps réel ──────────────────────────
       const channel = supabase
         .channel("messages_realtime_" + user.id)
         .on("postgres_changes", {
@@ -753,9 +753,9 @@ function AppContent() {
             "contact",
             payload.new.post_id
           );
-          // Notification push syst├¿me (m├¬me si le site est en arri├¿re-plan)
+          // Notification push système (même si le site est en arrière-plan)
           if (Notification.permission === "granted") {
-            const notif = new Notification("­ƒÆ¼ Nouveau message ÔÇö March├®duRoi", {
+            const notif = new Notification("💬 Nouveau message — MarchéduRoi", {
               body: `${payload.new.sender_name} : "${payload.new.content.slice(0, 60)}"`,
               icon: "/marcheduRoi-icon.svg",
               badge: "/marcheduRoi-icon.svg",
@@ -849,11 +849,11 @@ function AppContent() {
           video: p.video || null,
           likes: p.likes || 0,
         }));
-        setPosts(mapped); // Supabase uniquement ÔÇö plus de donn├®es fictives
+        setPosts(mapped); // Supabase uniquement — plus de données fictives
       }
     } catch(err) {
       console.error("Erreur chargement annonces:", err);
-      notify("Erreur de chargement des annonces. V├®rifiez votre connexion.", "error");
+      notify("Erreur de chargement des annonces. Vérifiez votre connexion.", "error");
     } finally {
       setPostsLoaded(true);
     }
@@ -877,7 +877,7 @@ function AppContent() {
       if (data && data.length > 0) setAds(data);
     };
     loadAds();
-    // Charger les demandes de banni├¿res (admin)
+    // Charger les demandes de bannières (admin)
     if (user?.role === "admin") {
       supabase.from("ad_requests").select("*").order("created_at", { ascending: false })
         .then(({ data }) => { if (data) setAdRequests(data); });
@@ -905,7 +905,7 @@ function AppContent() {
       const updated = f.includes(itemId) ? f.filter(id=>id!==itemId) : [...f, itemId];
       localStorage.setItem("mf_featured", JSON.stringify(updated));
       saveAdminSetting("featured", updated);
-      notify(f.includes(itemId) ? "Retir├® des vedettes" : "Ajout├® en vedette ­ƒÅå !");
+      notify(f.includes(itemId) ? "Retiré des vedettes" : "Ajouté en vedette 🏆 !");
       return updated;
     });
   };
@@ -915,18 +915,18 @@ function AppContent() {
   const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
   const sendOtp = (phone) => {
-    if (!phone || phone.length < 8) { notify("Entrez un num├®ro valide","error"); return; }
+    if (!phone || phone.length < 8) { notify("Entrez un numéro valide","error"); return; }
     const code = generateOtp();
     setReportOtp(r=>({...r, phone, generated:code}));
-    notify(`Code OTP simul├® : ${code} (SMS r├®el bient├┤t disponible)`);
+    notify(`Code OTP simulé : ${code} (SMS réel bientôt disponible)`);
   };
 
   const verifyOtp = (enteredCode) => {
     if (enteredCode === reportOtp.generated) {
       setReportOtp(r=>({...r, verified:true}));
-      notify("Num├®ro v├®rifi├® ! Ô£à");
+      notify("Numéro vérifié ! ✅");
     } else {
-      notify("Code incorrect. R├®essayez.","error");
+      notify("Code incorrect. Réessayez.","error");
     }
   };
 
@@ -964,13 +964,13 @@ function AppContent() {
     }, 5 * 60 * 1000);
     setReportOtp({ phone:"", code:"", generated:"", verified:false, postData:null });
     setModal(null);
-    notify("Signalement envoy├® ! Vous avez 5 minutes pour annuler.");
+    notify("Signalement envoyé ! Vous avez 5 minutes pour annuler.");
   };
 
   const cancelReport = (reportId) => {
     setReports(r=>r.filter(x=>x.id!==reportId));
     setCancelableReports(c=>{ const n={...c}; delete n[reportId]; return n; });
-    notify("Signalement annul├® Ô£à");
+    notify("Signalement annulé ✅");
   };
   const [postViews, setPostViews] = useState(() => {
     try { return JSON.parse(localStorage.getItem("mf_views") || "{}"); }
@@ -986,7 +986,7 @@ function AppContent() {
     setPostViews(v => {
       const updated = { ...v, [postId]: (v[postId] || 0) + 1 };
       localStorage.setItem("mf_views", JSON.stringify(updated));
-      // Sauvegarder dans Supabase en arri├¿re-plan
+      // Sauvegarder dans Supabase en arrière-plan
       supabase.from("posts").select("views").eq("id", postId).single()
         .then(({ data }) => {
           if (data !== null) {
@@ -1011,7 +1011,7 @@ function AppContent() {
     // Notify post owner
     const post = posts.find(p=>p.id===postId);
     if (post && user && post.authorId !== user?.id) {
-      addNotification("Quelqu'un a contact├® votre annonce '"+post.title+"' !", "contact", postId);
+      addNotification("Quelqu'un a contacté votre annonce '"+post.title+"' !", "contact", postId);
     }
   };
   const [userRatings, setUserRatings] = useState(() => {
@@ -1022,7 +1022,7 @@ function AppContent() {
   const addRating = async (itemId, stars, comment) => {
     if (!user) { notify("Connectez-vous pour noter","error"); return; }
     const key = user.id + "_" + itemId;
-    if (userRatings[key]) { notify("Vous avez d├®j├á not├® cet ├®l├®ment","error"); return; }
+    if (userRatings[key]) { notify("Vous avez déjà noté cet élément","error"); return; }
 
     // Sauvegarder dans Supabase
     const { error } = await supabase.from("ratings").insert({
@@ -1039,7 +1039,7 @@ function AppContent() {
       return;
     }
 
-    // Mettre ├á jour localement
+    // Mettre à jour localement
     const newUserRatings = { ...userRatings, [key]: { stars, comment, date: new Date().toISOString().slice(0,10), userName: user.name } };
     localStorage.setItem("mf_ratings", JSON.stringify(newUserRatings));
     setUserRatings(newUserRatings);
@@ -1050,7 +1050,7 @@ function AppContent() {
         count: existing.count + 1,
         comments: comment ? [...existing.comments, { stars, comment, userName: user.name, date: new Date().toISOString().slice(0,10) }] : existing.comments
       };
-      // Auto badge v├®rifi├® apr├¿s 5 avis positifs (4+ ├®toiles)
+      // Auto badge vérifié après 5 avis positifs (4+ étoiles)
       const post = posts.find(p=>p.id===itemId);
       if (post && stars >= 4 && newRating.count >= 5) {
         setPosts(prev => prev.map(p => p.id===itemId ? {...p, ownerVerified:true} : p));
@@ -1061,7 +1061,7 @@ function AppContent() {
     notify("Merci pour votre note !");
   };
 
-  // Charger les notes depuis Supabase au d├®marrage
+  // Charger les notes depuis Supabase au démarrage
   const loadRatings = async () => {
     const { data } = await supabase.from("ratings").select("*");
     if (data && data.length > 0) {
@@ -1090,7 +1090,7 @@ function AppContent() {
   const renderStars = (rating, size=14) => {
     const stars = [];
     for (let i=1; i<=5; i++) {
-      stars.push(<span key={i} style={{ color: i<=Math.round(rating)?"#FFD700":"#4A4A6A", fontSize:size }}>Ôÿà</span>);
+      stars.push(<span key={i} style={{ color: i<=Math.round(rating)?"#FFD700":"#4A4A6A", fontSize:size }}>★</span>);
     }
     return stars;
   };
@@ -1160,8 +1160,8 @@ function AppContent() {
       localStorage.setItem("mf_certified", JSON.stringify(updated));
       saveAdminSetting("certified", updated);
       notify(prev.includes(authorId)
-        ? `Certification retir├®e ├á ${authorName}`
-        : `${authorName} est maintenant Certifi├® March├®duRoi ­ƒÅà !`);
+        ? `Certification retirée à ${authorName}`
+        : `${authorName} est maintenant Certifié MarchéduRoi 🏅 !`);
       return updated;
     });
   };
@@ -1177,7 +1177,7 @@ function AppContent() {
   };
 
   const getModifPrice = (post) => {
-    const isSimple = !["Boutiques","Ateliers","Restos","Beaut├®"].includes(post.category);
+    const isSimple = !["Boutiques","Ateliers","Restos","Beauté"].includes(post.category);
     return isSimple ? MODIF_PRICES.simple : MODIF_PRICES.pro;
   };
 
@@ -1209,7 +1209,7 @@ function AppContent() {
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
-  // Fermer le menu Plus en cliquant/touchant ailleurs ÔÇö d├®lai 50ms pour ├®viter fermeture imm├®diate
+  // Fermer le menu Plus en cliquant/touchant ailleurs — délai 50ms pour éviter fermeture immédiate
   useEffect(() => {
     if (!showMoreMenu) return;
     const close = () => setShowMoreMenu(false);
@@ -1224,37 +1224,37 @@ function AppContent() {
   const t = {
     fr: {
       annonces:"Annonces", rechercher:"Rechercher une annonce...", publier:"Publier une annonce",
-      connexion:"Connexion", inscrire:"S'inscrire", decouvrez:"D├®couvrez des", uniques:"annonces uniques",
-      gratuitement:"Consultez gratuitement ┬À Publiez avec un abonnement",
-      boutiques:"Boutiques", ateliers:"Ateliers", restos:"Restos & Bars", beaute:"Beaut├®", mode:"Mode",
+      connexion:"Connexion", inscrire:"S'inscrire", decouvrez:"Découvrez des", uniques:"annonces uniques",
+      gratuitement:"Consultez gratuitement · Publiez avec un abonnement",
+      boutiques:"Boutiques", ateliers:"Ateliers", restos:"Restos & Bars", beaute:"Beauté", mode:"Mode",
       contact:"Contact", partager:"Partager", signaler:"Signaler", favoris:"Favoris",
-      voirPlus:"Voir plus", reduire:"Ôåæ R├®duire la liste", pressDeMoi:"­ƒôì Pr├¿s de moi",
-      parDistance:"Par distance", effacer:"Ô£ò Effacer", sponsorise:"­ƒîƒ Sponsoris├®",
-      vendeurVerifie:"Ô£à Vendeur v├®rifi├®", avis:"avis", noter:"Ô¡É Noter cet ├®l├®ment",
-      envoyer:"Envoyer ma note", aucuneAnnonce:"Aucune annonce trouv├®e",
-      tableau:"Tableau de bord", deconnexion:"D├®connexion", admin:"Admin",
-      theme:"Th├¿me", plus:"Plus Ôû¥", stats:"­ƒôè Statistiques", parrainage:"­ƒÄü Parrainage",
-      newsletter:"­ƒôº Newsletter", suggestion:"­ƒÆ¼ Suggestion", apropos:"Ôä╣´©Å ├Ç propos", cgu:"­ƒôï CGU",
+      voirPlus:"Voir plus", reduire:"↑ Réduire la liste", pressDeMoi:"📍 Près de moi",
+      parDistance:"Par distance", effacer:"✕ Effacer", sponsorise:"🌟 Sponsorisé",
+      vendeurVerifie:"✅ Vendeur vérifié", avis:"avis", noter:"⭐ Noter cet élément",
+      envoyer:"Envoyer ma note", aucuneAnnonce:"Aucune annonce trouvée",
+      tableau:"Tableau de bord", deconnexion:"Déconnexion", admin:"Admin",
+      theme:"Thème", plus:"Plus ▾", stats:"📊 Statistiques", parrainage:"🎁 Parrainage",
+      newsletter:"📧 Newsletter", suggestion:"💬 Suggestion", apropos:"ℹ️ À propos", cgu:"📋 CGU",
       messages:"Messages", notifications:"Notifications", profil:"Mon profil",
       modifier:"Modifier", supprimer:"Supprimer", annuler:"Annuler", confirmer:"Confirmer",
-      publierAnnonce:"­ƒÆí Publier ?", chargement:"Chargement...",
+      publierAnnonce:"💡 Publier ?", chargement:"Chargement...",
     },
     en: {
       annonces:"Listings", rechercher:"Search a listing...", publier:"Post a listing",
       connexion:"Login", inscrire:"Sign up", decouvrez:"Discover", uniques:"unique listings",
-      gratuitement:"Browse free ┬À Post with a subscription",
+      gratuitement:"Browse free · Post with a subscription",
       boutiques:"Shops", ateliers:"Workshops", restos:"Restaurants & Bars", beaute:"Beauty", mode:"Fashion",
       contact:"Contact", partager:"Share", signaler:"Report", favoris:"Favorites",
-      voirPlus:"See more", reduire:"Ôåæ Collapse list", pressDeMoi:"­ƒôì Near me",
-      parDistance:"By distance", effacer:"Ô£ò Clear", sponsorise:"­ƒîƒ Sponsored",
-      vendeurVerifie:"Ô£à Verified seller", avis:"reviews", noter:"Ô¡É Rate this",
+      voirPlus:"See more", reduire:"↑ Collapse list", pressDeMoi:"📍 Near me",
+      parDistance:"By distance", effacer:"✕ Clear", sponsorise:"🌟 Sponsored",
+      vendeurVerifie:"✅ Verified seller", avis:"reviews", noter:"⭐ Rate this",
       envoyer:"Send my rating", aucuneAnnonce:"No listings found",
       tableau:"Dashboard", deconnexion:"Logout", admin:"Admin",
-      theme:"Theme", plus:"More Ôû¥", stats:"­ƒôè Statistics", parrainage:"­ƒÄü Referral",
-      newsletter:"­ƒôº Newsletter", suggestion:"­ƒÆ¼ Suggestion", apropos:"Ôä╣´©Å About", cgu:"­ƒôï Terms",
+      theme:"Theme", plus:"More ▾", stats:"📊 Statistics", parrainage:"🎁 Referral",
+      newsletter:"📧 Newsletter", suggestion:"💬 Suggestion", apropos:"ℹ️ About", cgu:"📋 Terms",
       messages:"Messages", notifications:"Notifications", profil:"My profile",
       modifier:"Edit", supprimer:"Delete", annuler:"Cancel", confirmer:"Confirm",
-      publierAnnonce:"­ƒÆí How to post?", chargement:"Loading...",
+      publierAnnonce:"💡 How to post?", chargement:"Loading...",
     }
   }[lang];
   const [priceMin, setPriceMin] = useState("");
@@ -1322,7 +1322,7 @@ function AppContent() {
   }, []);
 
   const unsponsorPost = async (postId) => {
-    // Mettre ├á jour l'├®tat local imm├®diatement
+    // Mettre à jour l'état local immédiatement
     setPosts(p => p.map(post => post.id === postId ? { ...post, sponsored: false, sponsoredUntil: null } : post));
     setBoutiques(b => b.map(x => x.id === postId ? { ...x, sponsored: false, sponsoredUntil: null } : x));
     setAteliers(a => a.map(x => x.id === postId ? { ...x, sponsored: false, sponsoredUntil: null } : x));
@@ -1332,7 +1332,7 @@ function AppContent() {
     const sponsored = JSON.parse(localStorage.getItem("mf_sponsored") || "{}");
     delete sponsored[postId];
     localStorage.setItem("mf_sponsored", JSON.stringify(sponsored));
-    // Supabase en arri├¿re-plan
+    // Supabase en arrière-plan
     Promise.all([
       supabase.from("posts").update({ sponsored: false, sponsored_until: null }).eq("id", postId),
       supabase.from("boutiques").update({ sponsored: false, sponsored_until: null }).eq("id", postId),
@@ -1341,7 +1341,7 @@ function AppContent() {
       supabase.from("beaute").update({ sponsored: false, sponsored_until: null }).eq("id", postId),
       saveAdminSetting("sponsored", sponsored),
     ]).catch(()=>{});
-    notify("Sponsoring retir├® Ô£à");
+    notify("Sponsoring retiré ✅");
   };
 
   const sponsorPost = async (postId, duration) => {
@@ -1350,7 +1350,7 @@ function AppContent() {
     else expDate.setMonth(expDate.getMonth() + 1);
     const expStr = expDate.toISOString().slice(0,10);
 
-    // Mettre ├á jour l'├®tat local imm├®diatement (pas d'attente r├®seau)
+    // Mettre à jour l'état local immédiatement (pas d'attente réseau)
     setPosts(p => p.map(post => post.id === postId ? { ...post, sponsored: true, sponsoredUntil: expStr } : post));
     setBoutiques(b => b.map(x => x.id === postId ? { ...x, sponsored: true, sponsoredUntil: expStr } : x));
     setAteliers(a => a.map(x => x.id === postId ? { ...x, sponsored: true, sponsoredUntil: expStr } : x));
@@ -1362,7 +1362,7 @@ function AppContent() {
     sponsored[postId] = { sponsored: true, sponsoredUntil: expStr };
     localStorage.setItem("mf_sponsored", JSON.stringify(sponsored));
 
-    // Sauvegarder dans Supabase en arri├¿re-plan (sans bloquer l'UI)
+    // Sauvegarder dans Supabase en arrière-plan (sans bloquer l'UI)
     Promise.all([
       supabase.from("posts").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId),
       supabase.from("boutiques").update({ sponsored: true, sponsored_until: expStr }).eq("id", postId),
@@ -1372,19 +1372,19 @@ function AppContent() {
       saveAdminSetting("sponsored", sponsored),
     ]).catch(()=>{});
 
-    notify("­ƒîƒ Sponsoris├® jusqu'au " + expStr + " !");
+    notify("🌟 Sponsorisé jusqu'au " + expStr + " !");
   };
 
   const removeUrgent = async (postId) => {
     await supabase.from("posts").update({ urgent: false, urgent_until: null }).eq("id", postId);
     setPosts(p => p.map(x => x.id === postId ? { ...x, urgent: false, urgentUntil: null } : x));
-    notify("­ƒöÑ Badge Urgent retir├® Ô£à");
+    notify("🔥 Badge Urgent retiré ✅");
   };
 
   const removeUrgentShop = async (itemId, table, setter) => {
     await supabase.from(table).update({ urgent: false, urgent_until: null, urgent_activated_at: null }).eq("id", itemId);
     setter(prev => prev.map(x => x.id === itemId ? { ...x, urgent: false, urgentUntil: null, urgentActivatedAt: null } : x));
-    notify("­ƒöÑ Badge Urgent retir├® Ô£à");
+    notify("🔥 Badge Urgent retiré ✅");
   };
 
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -1424,25 +1424,25 @@ function AppContent() {
   });
   const [showNotifs, setShowNotifs] = useState(false);
 
-  // Le panneau notifs se ferme via son propre overlay ÔÇö pas besoin d'├®couter le document
+  // Le panneau notifs se ferme via son propre overlay — pas besoin d'écouter le document
 
-  // SEO dynamique ÔÇö titre de page selon l'annonce/vue active
+  // SEO dynamique — titre de page selon l'annonce/vue active
   React.useEffect(() => {
     if (modal?.data?.title) {
-      document.title = `${modal.data.title} ÔÇö March├®duRoi`;
+      document.title = `${modal.data.title} — MarchéduRoi`;
       // Meta OG dynamique
       let ogTitle = document.querySelector('meta[property="og:title"]');
       let ogDesc = document.querySelector('meta[property="og:description"]');
       let ogImg = document.querySelector('meta[property="og:image"]');
-      if (ogTitle) ogTitle.setAttribute("content", `${modal.data.title} | March├®duRoi`);
-      if (ogDesc) ogDesc.setAttribute("content", modal.data.description?.slice(0,160)||"March├®duRoi ÔÇö Petites annonces B├®nin & Afrique");
+      if (ogTitle) ogTitle.setAttribute("content", `${modal.data.title} | MarchéduRoi`);
+      if (ogDesc) ogDesc.setAttribute("content", modal.data.description?.slice(0,160)||"MarchéduRoi — Petites annonces Bénin & Afrique");
       if (ogImg && modal.data.photos?.[0]) ogImg.setAttribute("content", modal.data.photos[0]);
     } else if (modal?.data?.name) {
-      document.title = `${modal.data.name} ÔÇö March├®duRoi`;
+      document.title = `${modal.data.name} — MarchéduRoi`;
     } else {
-      document.title = "MarcheduRoi ÔÇö Petites Annonces B├®nin & Afrique";
+      document.title = "MarcheduRoi — Petites Annonces Bénin & Afrique";
       let ogTitle = document.querySelector('meta[property="og:title"]');
-      if (ogTitle) ogTitle.setAttribute("content", "MarcheduRoi ÔÇö Annonces, Boutiques & Services au B├®nin");
+      if (ogTitle) ogTitle.setAttribute("content", "MarcheduRoi — Annonces, Boutiques & Services au Bénin");
     }
   }, [modal]);
 
@@ -1479,7 +1479,7 @@ function AppContent() {
     document.addEventListener("click", handleClickOutside);
     const handleScroll = () => setShowScrollTop(window.scrollY > 300);
     window.addEventListener("scroll", handleScroll);
-    const handleOnline = () => { setIsOnline(true); notify("Connexion r├®tablie ! Ô£à"); };
+    const handleOnline = () => { setIsOnline(true); notify("Connexion rétablie ! ✅"); };
     const handleOffline = () => setIsOnline(false);
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
@@ -1506,7 +1506,7 @@ function AppContent() {
     };
     window.addEventListener("beforeinstallprompt", handleInstallPrompt);
 
-    // Bouton Retour mobile ÔÇö restaurer la vue pr├®c├®dente
+    // Bouton Retour mobile — restaurer la vue précédente
     const handlePopState = (e) => {
       const previousView = e.state?.view || "landing";
       setViewState(previousView);
@@ -1515,7 +1515,7 @@ function AppContent() {
     };
     window.addEventListener("popstate", handlePopState);
 
-    // Initialiser l'historique avec la vue de d├®part
+    // Initialiser l'historique avec la vue de départ
     if (!history.state?.view) {
       history.replaceState({ view: "landing" }, "", window.location.pathname);
     }
@@ -1565,7 +1565,7 @@ function AppContent() {
 
   const notify = (msg, type="success") => { setNotification({msg,type}); setTimeout(()=>setNotification(null),3000); };
 
-  // Seed al├®atoire unique par session ÔÇö m├®lange les annonces diff├®remment pour chaque visiteur
+  // Seed aléatoire unique par session — mélange les annonces différemment pour chaque visiteur
   const [sessionSeed] = React.useState(() => Math.random());
   const shufflePosts = (arr) => {
     const seeded = [...arr].map((item, i) => ({ item, sort: (sessionSeed * (i + 1) * 9301 + 49297) % 233280 }));
@@ -1576,7 +1576,7 @@ function AppContent() {
   useEffect(() => {
     if (window.location.pathname === "/reset-password") {
       setViewState("reset-password");
-      // Lire params depuis sessionStorage (captur├®s avant React dans index.html)
+      // Lire params depuis sessionStorage (capturés avant React dans index.html)
       const savedParams = sessionStorage.getItem("mdr_reset_params") || "";
       const params = new URLSearchParams(savedParams);
       const token = params.get("token");
@@ -1589,7 +1589,7 @@ function AppContent() {
               console.error("verifyOtp error:", error);
             } else if (data?.session) {
               recoverySessionRef.current = data.session;
-              console.log("Session recovery OK Ô£à");
+              console.log("Session recovery OK ✅");
             }
           });
       }
@@ -1617,7 +1617,7 @@ function AppContent() {
               if (data) {
                 setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
                 setView("home");
-                if (event === "USER_UPDATED") notify("Ô£à Email confirm├® ! Bienvenue sur March├®duRoi ­ƒÄë");
+                if (event === "USER_UPDATED") notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
               }
             });
         }, 500);
@@ -1625,9 +1625,9 @@ function AppContent() {
     });
   }, []);
 
-  // WhatsApp tooltip ÔÇö affich├® une seule fois dans la vie de l'utilisateur
+  // WhatsApp tooltip — affiché une seule fois dans la vie de l'utilisateur
 
-  // Compteur visiteurs temps r├®el bas├® sur les vues
+  // Compteur visiteurs temps réel basé sur les vues
   React.useEffect(() => {
     const updateViewers = () => {
       const viewers = {};
@@ -1646,10 +1646,10 @@ function AppContent() {
     const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });
     if (error) { notify("Email ou mot de passe incorrect","error"); return; }
 
-    // Bloquer si email non confirm├®
+    // Bloquer si email non confirmé
     if (!data.user.email_confirmed_at) {
       await supabase.auth.signOut();
-      notify("­ƒôº Veuillez confirmer votre email avant de vous connecter. V├®rifiez votre bo├«te mail.", "error");
+      notify("📧 Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte mail.", "error");
       return;
     }
 
@@ -1666,13 +1666,13 @@ function AppContent() {
       localStorage.removeItem("mdr_ref");
     }
     setView("home"); notify("Bienvenue !");
-    addNotification("Bienvenue sur March├®duRoi ! Vos notifications apparaissent ici.", "info");
+    addNotification("Bienvenue sur MarchéduRoi ! Vos notifications apparaissent ici.", "info");
   };
 
   const register = async () => {
     if (!authForm.name||!authForm.email||!authForm.password) { notify("Remplissez tous les champs","error"); return; }
-    if (!turnstileToken) { notify("Veuillez compl├®ter la v├®rification de s├®curit├®","error"); return; }
-    if (authForm.password.length < 6) { notify("Le mot de passe doit faire au moins 6 caract├¿res","error"); return; }
+    if (!turnstileToken) { notify("Veuillez compléter la vérification de sécurité","error"); return; }
+    if (authForm.password.length < 6) { notify("Le mot de passe doit faire au moins 6 caractères","error"); return; }
 
     const refFromUrl = new URLSearchParams(window.location.search).get("ref");
     if (refFromUrl) localStorage.setItem("mdr_ref", refFromUrl);
@@ -1686,12 +1686,12 @@ function AppContent() {
       }
     });
     if (error) { notify("Erreur : "+error.message,"error"); return; }
-    if (!data.user) { notify("Erreur lors de la cr├®ation du compte","error"); return; }
+    if (!data.user) { notify("Erreur lors de la création du compte","error"); return; }
 
-    // Cr├®er le profil
+    // Créer le profil
     await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ" });
 
-    // NE PAS connecter l'utilisateur ÔÇö attendre confirmation email
+    // NE PAS connecter l'utilisateur — attendre confirmation email
     setTurnstileToken("");
     const emailSent = authForm.email;
     setAuthForm({ email:"",password:"",name:"",country:"BJ" });
@@ -1699,9 +1699,9 @@ function AppContent() {
     setModal({ type:"emailConfirmation", email: emailSent });
   };
 
-  // ÔöÇÔöÇÔöÇ SYST├êME DE PARRAINAGE ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ─── SYSTÈME DE PARRAINAGE ───────────────────────────────────────────────────
   const processReferral = async (referrerId, referredId) => {
-    // ├ëviter les doublons
+    // Éviter les doublons
     const { data: existing } = await supabase
       .from("referrals")
       .select("id")
@@ -1726,25 +1726,25 @@ function AppContent() {
 
     const count = refs?.length || 0;
 
-    // R├®compense tous les 10 parrainages
+    // Récompense tous les 10 parrainages
     if (count % 10 === 0) {
       await supabase.from("credits").insert({
         user_id: referrerId,
         months: 1,
-        reason: `Parrainage ÔÇö ${count} filleuls confirm├®s`,
+        reason: `Parrainage — ${count} filleuls confirmés`,
         used: false,
       });
       // Notifier le parrain
       await supabase.from("notifications").insert({
         user_id: referrerId,
-        message: `­ƒÄü F├®licitations ! Vous avez parrain├® ${count} personnes. 1 mois gratuit cr├®dit├® sur votre compte !`,
+        message: `🎁 Félicitations ! Vous avez parrainé ${count} personnes. 1 mois gratuit crédité sur votre compte !`,
         type: "success",
         date: new Date().toISOString(),
       }).catch(()=>{});
     }
   };
 
-  // R├®cup├®rer les stats de parrainage d'un utilisateur
+  // Récupérer les stats de parrainage d'un utilisateur
   const [referralStats, setReferralStats] = useState({ count:0, credits:0, saved:0 });
 
   useEffect(() => {
@@ -1771,7 +1771,7 @@ function AppContent() {
     loadReferralStats();
   }, [user]);
 
-  // Utiliser un cr├®dit disponible avant de payer
+  // Utiliser un crédit disponible avant de payer
   const useCredit = async () => {
     const { data: cred } = await supabase
       .from("credits")
@@ -1787,15 +1787,15 @@ function AppContent() {
     return true;
   };
 
-  // ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  // ÔöÇÔöÇÔöÇ VALIDATION & SANITISATION DES CHAMPS ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ─── VALIDATION & SANITISATION DES CHAMPS ────────────────────────────────────
   const onlyDigits     = v => v.replace(/[^0-9]/g, "");
   const onlyYear       = v => v.replace(/[^0-9]/g, "").slice(0, 4);
   const onlyPhone      = v => v.replace(/[^0-9+\s\-()]/g, "").slice(0, 20);
   const onlyPrice      = v => v.replace(/[^0-9\s.,FCFA]/gi, "").slice(0, 30);
-  const onlyAlpha      = v => v.replace(/[^a-zA-Z├Ç-├┐\s\-']/g, "");
-  const onlyAlphaNum   = v => v.replace(/[^a-zA-Z├Ç-├┐0-9\s\-'.,()]/g, "");
+  const onlyAlpha      = v => v.replace(/[^a-zA-ZÀ-ÿ\s\-']/g, "");
+  const onlyAlphaNum   = v => v.replace(/[^a-zA-ZÀ-ÿ0-9\s\-'.,()]/g, "");
   const onlyEmail      = v => v.replace(/\s/g, "").toLowerCase();
   const maxLen         = (v, n) => v.slice(0, n);
   const cleanText      = (v, n=200) => maxLen(v.replace(/[<>{}[\]\\]/g, ""), n);
@@ -1803,31 +1803,31 @@ function AppContent() {
   const noSpaces       = v => v.replace(/\s/g, "");
   // Normalisation pour la recherche : supprime les accents et met en minuscules
   const normalizeText  = v => (v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  // S├®parateur de milliers automatique : "15000" ÔåÆ "15 000"
+  // Séparateur de milliers automatique : "15000" → "15 000"
   const formatThousands = v => {
     const digits = v.replace(/[^0-9]/g, "");
     return digits.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   };
-  // ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  const logout = async () => { await supabase.auth.signOut(); setUser(null); setView("home"); notify("├Ç bient├┤t !"); };
+  const logout = async () => { await supabase.auth.signOut(); setUser(null); setView("home"); notify("À bientôt !"); };
 
   const updatePassword = async () => {
-    if (!newPassword || newPassword.length < 6) { notify("Mot de passe trop court (min. 6 caract├¿res)","error"); return; }
-    // Utiliser la session stock├®e lors de PASSWORD_RECOVERY ou verifyOtp
+    if (!newPassword || newPassword.length < 6) { notify("Mot de passe trop court (min. 6 caractères)","error"); return; }
+    // Utiliser la session stockée lors de PASSWORD_RECOVERY ou verifyOtp
     let session = recoverySessionRef.current;
     if (!session) {
       const { data } = await supabase.auth.getSession();
       session = data?.session;
     }
     if (!session) {
-      notify("Session expir├®e. Veuillez cliquer ├á nouveau sur le lien re├ºu par email.", "error");
+      notify("Session expirée. Veuillez cliquer à nouveau sur le lien reçu par email.", "error");
       return;
     }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) { notify("Erreur : " + error.message, "error"); return; }
     recoverySessionRef.current = null;
-    notify("Ô£à Mot de passe mis ├á jour avec succ├¿s !");
+    notify("✅ Mot de passe mis à jour avec succès !");
     setNewPassword("");
     setIsResetMode(false);
     window.location.hash = "";
@@ -1840,14 +1840,14 @@ function AppContent() {
       redirectTo: "https://marcheduroi.com/reset-password",
     });
     if (error) { notify("Erreur : "+error.message,"error"); return; }
-    notify("Email de r├®initialisation envoy├® ! V├®rifiez votre bo├«te mail ­ƒôº");
+    notify("Email de réinitialisation envoyé ! Vérifiez votre boîte mail 📧");
     setModal(null);
   };
   const canEdit = user !== null;
-  const isVehicle = (postForm.category === "V├®hicules" || postForm.category === "Location de v├®hicules");
+  const isVehicle = (postForm.category === "Véhicules" || postForm.category === "Location de véhicules");
   const isMoto    = postForm.category === "Motos & Tricycles";
 
-  // ÔöÇÔöÇÔöÇ GRILLE TARIFAIRE ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ─── GRILLE TARIFAIRE ────────────────────────────────────────────────────────
   const TARIFS_ANNONCE = [
     { label:"30 jours",  days:30,  price:1000 },
     { label:"90 jours",  days:90,  price:2500 },
@@ -1861,7 +1861,7 @@ function AppContent() {
     { label:"360 jours", days:360, price:18000 },
   ];
 
-  // 4 jours gratuits par mois ÔÇö v├®rifie si l'utilisateur a d├®j├á utilis├® son cr├®dit ce mois
+  // 4 jours gratuits par mois — vérifie si l'utilisateur a déjà utilisé son crédit ce mois
   const canPublishFree = async () => {
     if (!user) return false;
     const month = new Date().toISOString().slice(0,7);
@@ -1881,9 +1881,9 @@ function AppContent() {
   useEffect(() => {
     if (user) canPublishFree().then(setCanFree);
   }, [user]);
-  // ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  // ÔöÇÔöÇÔöÇ FEDAPAY : Paiement avant publication ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ─── FEDAPAY : Paiement avant publication ───────────────────────────────────
   const FEDAPAY_PUBLIC_KEY = import.meta.env.VITE_FEDAPAY_PUBLIC_KEY || "pk_sandbox_VOTRE_CLE_ICI";
   const FLUTTERWAVE_PUBLIC_KEY = import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY || "FLWPUBK_TEST-VOTRE_CLE_ICI-X";
 
@@ -1899,18 +1899,18 @@ function AppContent() {
     XOF:1, XAF:1, NGN:0.54, CDF:0.00018, MGA:0.11, RWF:0.38, BIF:0.28, MRU:10.8,
   };
 
-  // Pays couverts par FedaPay (zone UEMOA + Guin├®e)
+  // Pays couverts par FedaPay (zone UEMOA + Guinée)
   const FEDAPAY_COUNTRIES = ["BJ","TG","BF","ML","SN","CI","NE","GN"];
 
 
-  // ÔöÇÔöÇ S├ëCURIT├ë ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ── SÉCURITÉ ─────────────────────────────────────────────────────────────────
   const BLACKLIST = [
     "arnaque","arnaquer","escroquerie","western union","moneygram","mandat",
     "avance","acompte","fraude","frauduleux","piratage","hacking","virus",
     "gratuit argent","gagner de l argent","investissement garanti",
-    "doubler argent","crypto facile","bitcoin gratuit","loterie","gain assur├®",
-    "transfert urgent","heritage","succession","ambassade","fonctionnaire ├®tranger",
-    "scam","phishing","faux","contrefa├ºon"
+    "doubler argent","crypto facile","bitcoin gratuit","loterie","gain assuré",
+    "transfert urgent","heritage","succession","ambassade","fonctionnaire étranger",
+    "scam","phishing","faux","contrefaçon"
   ];
 
   const checkBlacklist = (text) => {
@@ -1927,7 +1927,7 @@ function AppContent() {
       const data = JSON.parse(localStorage.getItem(key) || "[]");
       const recent = data.filter(t => now - t < hour);
       if (recent.length >= 5) {
-        notify("ÔÜá´©Å Limite atteinte ÔÇö max 5 publications par heure. R├®essayez plus tard.", "error");
+        notify("⚠️ Limite atteinte — max 5 publications par heure. Réessayez plus tard.", "error");
         return false;
       }
       recent.push(now);
@@ -1940,7 +1940,7 @@ function AppContent() {
   const formatPriceLocal = (amountXOF) => {
     const country = getUserCountry();
     const currency = COUNTRY_CURRENCY[country] || "XOF";
-    const usdRate = 610; // 1 USD Ôëê 610 XOF
+    const usdRate = 610; // 1 USD ≈ 610 XOF
     const usd = (amountXOF / usdRate).toFixed(2);
     if (currency === "XOF" || currency === "XAF") {
       return `${amountXOF.toLocaleString()} FCFA (~${usd} USD)`;
@@ -1949,9 +1949,9 @@ function AppContent() {
     const local = Math.round(amountXOF / rate);
     return `${local.toLocaleString()} ${currency} (~${usd} USD)`;
   };
-  // ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  // Pays d├®tect├® automatiquement via IP
+  // Pays détecté automatiquement via IP
   const [detectedCountry, setDetectedCountry] = useState("BJ");
   const [showAllCountries, setShowAllCountries] = useState(false);
 
@@ -1981,7 +1981,7 @@ function AppContent() {
     return Math.round(amountXOF / rate);
   };
 
-  // Retourne le pays actif ÔÇö profil utilisateur prioritaire, sinon IP
+  // Retourne le pays actif — profil utilisateur prioritaire, sinon IP
   const getUserCountry = () => user?.country || detectedCountry;
 
   const handleFlutterwavePayment = (amountXOF, description, onSuccess) => {
@@ -1990,11 +1990,11 @@ function AppContent() {
     const currency = COUNTRY_CURRENCY[country] || "XOF";
     const amount = convertAmount(amountXOF, currency);
 
-    // Charger le script Flutterwave dynamiquement si pas encore charg├®
+    // Charger le script Flutterwave dynamiquement si pas encore chargé
     const doPayment = () => {
       const FlutterwaveCheckout = window.FlutterwaveCheckout;
       if (!FlutterwaveCheckout) {
-        notify("Module de paiement non charg├®. Rechargez la page.", "error");
+        notify("Module de paiement non chargé. Rechargez la page.", "error");
         return;
       }
       FlutterwaveCheckout({
@@ -2005,23 +2005,23 @@ function AppContent() {
         payment_options: "mobilemoney,card,ussd",
         customer: {
           email: user?.email || "",
-          name: user?.name || "Client March├®duRoi",
+          name: user?.name || "Client MarchéduRoi",
         },
         customizations: {
-          title: "March├®duRoi",
+          title: "MarchéduRoi",
           description,
           logo: "https://marcheduroi.com/marcheduRoi-icon.svg",
         },
         callback: (response) => {
           if (response.status === "successful" || response.status === "completed") {
-            notify("Ô£à Paiement confirm├® ! Publication en cours...");
+            notify("✅ Paiement confirmé ! Publication en cours...");
             onSuccess();
           } else {
-            notify("Paiement ├®chou├®. R├®essayez ou contactez le support.", "error");
+            notify("Paiement échoué. Réessayez ou contactez le support.", "error");
           }
         },
         onclose: () => {
-          notify("Paiement annul├® ÔÇö votre annonce n'a pas ├®t├® publi├®e.", "error");
+          notify("Paiement annulé — votre annonce n'a pas été publiée.", "error");
         },
       });
     };
@@ -2036,17 +2036,17 @@ function AppContent() {
     }
   };
 
-  // Gestionnaire universel ÔÇö v├®rifie d'abord les cr├®dits parrainage, sinon FedaPay ou Flutterwave
+  // Gestionnaire universel — vérifie d'abord les crédits parrainage, sinon FedaPay ou Flutterwave
   const handlePayment = async (amountXOF, description, onSuccess) => {
     if (user?.role === "admin") { onSuccess(); return; }
-    // V├®rifier si l'utilisateur a un cr├®dit parrainage disponible
+    // Vérifier si l'utilisateur a un crédit parrainage disponible
     const creditUsed = await useCredit();
     if (creditUsed) {
-      notify("­ƒÄü Cr├®dit parrainage utilis├® ÔÇö Publication gratuite !");
+      notify("🎁 Crédit parrainage utilisé — Publication gratuite !");
       onSuccess();
       return;
     }
-    // Sinon paiement selon le pays d├®tect├®
+    // Sinon paiement selon le pays détecté
     const country = getUserCountry();
     if (FEDAPAY_COUNTRIES.includes(country)) {
       handleFedaPayment(amountXOF, description, onSuccess);
@@ -2059,7 +2059,7 @@ function AppContent() {
     if (user?.role === "admin") { onSuccess(); return; } // admins publient gratuitement
     const FedaPay = window["FedaPay"];
     if (!FedaPay) {
-      notify("Le module de paiement n'est pas charg├®. Rechargez la page.", "error");
+      notify("Le module de paiement n'est pas chargé. Rechargez la page.", "error");
       return;
     }
     FedaPay.init({
@@ -2071,21 +2071,21 @@ function AppContent() {
       currency: { iso: "XOF" },
       customer: {
         email: user?.email || "",
-        lastname: user?.name || "Client March├®duRoi",
+        lastname: user?.name || "Client MarchéduRoi",
       },
       onComplete(resp) {
         if (resp.reason === FedaPay.DIALOG_DISMISSED) {
-          notify("Paiement annul├® ÔÇö votre annonce n'a pas ├®t├® publi├®e.", "error");
+          notify("Paiement annulé — votre annonce n'a pas été publiée.", "error");
         } else if (resp.reason === FedaPay.TRANSACTION_APPROVED) {
-          notify("Ô£à Paiement confirm├® ! Publication en cours...");
+          notify("✅ Paiement confirmé ! Publication en cours...");
           onSuccess();
         } else {
-          notify("Paiement ├®chou├®. R├®essayez ou contactez le support.", "error");
+          notify("Paiement échoué. Réessayez ou contactez le support.", "error");
         }
       }
     }).open();
   };
-  // ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ────────────────────────────────────────────────────────────────────────────
 
   const [months, setMonths] = useState(1);
   const [selectedTarif, setSelectedTarif] = useState(0); // index dans TARIFS_ANNONCE ou TARIFS_BOUTIQUE
@@ -2110,10 +2110,10 @@ function AppContent() {
 
   const addPost = async (expiresAt) => {
     if (!postForm.title||!postForm.description) { notify("Titre et description requis","error"); return; }
-    if (isVehicle && !vehicleForm.marque) { notify("La marque du v├®hicule est requise","error"); return; }
+    if (isVehicle && !vehicleForm.marque) { notify("La marque du véhicule est requise","error"); return; }
     if (isMoto && !vehicleForm.marque) { notify("La marque de la moto est requise","error"); return; }
     if (checkBlacklist(postForm.title) || checkBlacklist(postForm.description)) {
-      notify("ÔÜá´©Å Votre annonce contient des termes non autoris├®s. Veuillez modifier le contenu.", "error"); return;
+      notify("⚠️ Votre annonce contient des termes non autorisés. Veuillez modifier le contenu.", "error"); return;
     }
     if (!checkRateLimit()) return;
     const isAdmin = user.role === "admin";
@@ -2154,8 +2154,8 @@ function AppContent() {
     setPosts(p=>[newPost,...p]);
     setModal(null);
     setPostForm({ title:"",category:"Autre",description:"",price:"",contact:"",phone:"" });
-    setPostPhotos([]); setPostVideo(""); setVehicleForm({}); setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon ├®tat",recasee:"",autres:"" }); setMonths(1); setSelectedTarif(0);
-    notify(isAdmin ? "Ô£à Annonce publi├®e !" : expiresAt ? `Ô£à Annonce publi├®e jusqu'au ${expiresAt} !` : "Ô£à Annonce publi├®e !");
+    setPostPhotos([]); setPostVideo(""); setVehicleForm({}); setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" }); setMonths(1); setSelectedTarif(0);
+    notify(isAdmin ? "✅ Annonce publiée !" : expiresAt ? `✅ Annonce publiée jusqu'au ${expiresAt} !` : "✅ Annonce publiée !");
   };
 
   const editPost = async () => {
@@ -2180,12 +2180,12 @@ function AppContent() {
       return;
     }
     if (!data || data.length === 0) {
-      notify("Annonce introuvable dans la base de donn├®es", "error");
+      notify("Annonce introuvable dans la base de données", "error");
       return;
     }
     setPosts(p=>p.map(post=>post.id===modal.data.id?updatedPost:post));
     setModal(null);
-    notify("Ô£à Annonce modifi├®e avec succ├¿s !");
+    notify("✅ Annonce modifiée avec succès !");
     setTimeout(() => loadPosts(), 500);
   };
 
@@ -2202,12 +2202,12 @@ function AppContent() {
     if (error) { console.error("Delete error:", error); notify("Erreur suppression : " + error.message, "error"); return; }
     setPosts(p=>p.filter(post=>post.id!==id));
     setModal(null);
-    notify("Ô£à Annonce supprim├®e.");
+    notify("✅ Annonce supprimée.");
   };
 
   const likePost = async (id) => {
     if (!user) { notify("Connectez-vous pour liker","error"); return; }
-    if (likedPosts.includes(id)) { notify("Vous avez d├®j├á aim├® cette publication","error"); return; }
+    if (likedPosts.includes(id)) { notify("Vous avez déjà aimé cette publication","error"); return; }
     const updated = [...likedPosts, id];
     setLikedPosts(updated);
     localStorage.setItem("mf_liked", JSON.stringify(updated));
@@ -2229,7 +2229,7 @@ function AppContent() {
         break;
       }
     }
-    if (!saved) console.warn("Like non sauvegard├® pour id:", id);
+    if (!saved) console.warn("Like non sauvegardé pour id:", id);
   };
 
 
@@ -2258,7 +2258,7 @@ function AppContent() {
     setModal(null);
     setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
     setShopPhotos([]); setShopVideo(null);
-    notify("Ô£à Modification appliqu├®e !");
+    notify("✅ Modification appliquée !");
   };
 
   const editResto = async () => {
@@ -2279,7 +2279,7 @@ function AppContent() {
     setModal(null);
     setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
     setShopPhotos([]); setShopVideo(null);
-    notify("Ô£à Modification appliqu├®e !");
+    notify("✅ Modification appliquée !");
   };
 
   const editBeaute = async () => {
@@ -2301,7 +2301,7 @@ function AppContent() {
     setModal(null);
     setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
     setShopPhotos([]); setShopVideo(null);
-    notify("Ô£à Modification appliqu├®e !");
+    notify("✅ Modification appliquée !");
   };
 
   const openEditShop = (item, shopType, editFn) => {
@@ -2377,13 +2377,13 @@ function AppContent() {
   };
 
   const submitSuggestion = () => {
-    if (!suggestionText.trim()) { notify("├ëcrivez votre suggestion","error"); return; }
+    if (!suggestionText.trim()) { notify("Écrivez votre suggestion","error"); return; }
     setSuggestions(s=>[{ id:Date.now(), text:suggestionText, author:suggestionName||"Visiteur anonyme", date:new Date().toISOString().slice(0,10), status:"en attente" },...s]);
     setSuggestionText(""); setSuggestionName(""); setModal(null); notify("Merci pour votre suggestion !");
   };
 
   const addBeaute = async () => {
-    if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("ÔÜá´©Å Votre annonce contient des termes non autoris├®s.", "error"); return; }
+    if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("⚠️ Votre annonce contient des termes non autorisés.", "error"); return; }
     if (!checkRateLimit()) return;
     if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
     const isAdmin = user.role === "admin";
@@ -2416,11 +2416,11 @@ function AppContent() {
     setModal(null);
     setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"" });
     setShopPhotos([]); setShopVideo(null); setMonths(1);
-    notify("Salon publi├® !");
+    notify("Salon publié !");
   };
 
   const addResto = async () => {
-    if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("ÔÜá´©Å Votre annonce contient des termes non autoris├®s.", "error"); return; }
+    if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("⚠️ Votre annonce contient des termes non autorisés.", "error"); return; }
     if (!checkRateLimit()) return;
     if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
     const isAdmin = user.role === "admin";
@@ -2452,11 +2452,11 @@ function AppContent() {
     setModal(null);
     setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"" });
     setShopPhotos([]); setShopVideo(null); setMonths(1);
-    notify("Restaurant/Bar publi├® !");
+    notify("Restaurant/Bar publié !");
   };
 
   const addShop = async () => {
-    if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("ÔÜá´©Å Votre annonce contient des termes non autoris├®s.", "error"); return; }
+    if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("⚠️ Votre annonce contient des termes non autorisés.", "error"); return; }
     if (!checkRateLimit()) return;
     if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
     const isAdmin = user.role === "admin";
@@ -2490,7 +2490,7 @@ function AppContent() {
     setModal(null);
     setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"" });
     setShopPhotos([]); setShopVideo(null); setMonths(1);
-    notify(shopMode==="boutique" ? "Boutique publi├®e !" : "Atelier publi├® !");
+    notify(shopMode==="boutique" ? "Boutique publiée !" : "Atelier publié !");
   };
 
   const userCountry = getUserCountry();
@@ -2517,10 +2517,10 @@ function AppContent() {
         if (priceMax && numPrice > parseInt(priceMax)) return false;
       }
     }
-    // Filtre par pays ÔÇö si pas showAllCountries et pays d├®tect├®
+    // Filtre par pays — si pas showAllCountries et pays détecté
     if (!showAllCountries && userCountry && !search) {
       const postCountry = p.country || p.immo?.pays || "";
-      // Si l'annonce a un pays d├®fini et diff├®rent ÔåÆ exclure
+      // Si l'annonce a un pays défini et différent → exclure
       if (postCountry && postCountry !== userCountry) return false;
     }
     return true;
@@ -2529,7 +2529,7 @@ function AppContent() {
     distance: userLocation && p.lat && p.lng ? getDistance(userLocation.lat, userLocation.lng, parseFloat(p.lat), parseFloat(p.lng)) : null
   }));
 
-  // Urgent actif = dans le bandeau seulement ÔÇö exclu du tri principal
+  // Urgent actif = dans le bandeau seulement — exclu du tri principal
   const isUrgentActive = (p) => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date();
   const filtered = (() => {
     const sponsored = filteredBase.filter(p => p.sponsored && !isUrgentActive(p));
@@ -2541,12 +2541,12 @@ function AppContent() {
     return [...shufflePosts(sponsored), ...shufflePosts(normal)];
   })();
 
-  // Recherche globale ÔÇö toutes les sections (boutiques, ateliers, restos, beaut├®)
+  // Recherche globale — toutes les sections (boutiques, ateliers, restos, beauté)
   const globalSearch = search.trim().length > 1 ? [
-    ...boutiques.filter(b=> normalizeText([b.name,b.description,b.type,b.services,b.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(b=>({...b,_type:"boutique",_label:"­ƒøì´©Å Boutique"})),
-    ...ateliers.filter(a=> normalizeText([a.name,a.description,a.type,a.services,a.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(a=>({...a,_type:"atelier",_label:"­ƒöº Atelier"})),
-    ...restos.filter(r=> normalizeText([r.name,r.description,r.type,r.plats,r.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(r=>({...r,_type:"resto",_label:"­ƒì¢´©Å Resto & Bar"})),
-    ...beaute.filter(b=> normalizeText([b.name,b.description,b.type,b.services,b.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(b=>({...b,_type:"beaute",_label:"­ƒÆç Beaut├®"})),
+    ...boutiques.filter(b=> normalizeText([b.name,b.description,b.type,b.services,b.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(b=>({...b,_type:"boutique",_label:"🛍️ Boutique"})),
+    ...ateliers.filter(a=> normalizeText([a.name,a.description,a.type,a.services,a.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(a=>({...a,_type:"atelier",_label:"🔧 Atelier"})),
+    ...restos.filter(r=> normalizeText([r.name,r.description,r.type,r.plats,r.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(r=>({...r,_type:"resto",_label:"🍽️ Resto & Bar"})),
+    ...beaute.filter(b=> normalizeText([b.name,b.description,b.type,b.services,b.ville].filter(Boolean).join(" ")).includes(normalizeText(search))).map(b=>({...b,_type:"beaute",_label:"💇 Beauté"})),
   ] : [];
 
   const myPosts = user?posts.filter(p=>p.authorId===user.id):[];
@@ -2557,13 +2557,13 @@ function AppContent() {
   return (
     <div onContextMenu={e=>e.preventDefault()} style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box",position:"relative" }}>
 
-      {/* Filigrane March├®duRoi */}
+      {/* Filigrane MarchéduRoi */}
       <div aria-hidden="true" style={{ position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden" }}>
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="mdr-watermark" x="0" y="0" width="280" height="180" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
               <image href="/marcheduRoi-icon.svg" x="85" y="8" width="36" height="32" opacity="0.055"/>
-              <text x="50" y="80" fontFamily="Sora,sans-serif" fontSize="16" fontWeight="700" fill="currentColor" opacity="0.045" letterSpacing="1">March├®duRoi</text>
+              <text x="50" y="80" fontFamily="Sora,sans-serif" fontSize="16" fontWeight="700" fill="currentColor" opacity="0.045" letterSpacing="1">MarchéduRoi</text>
               <text x="60" y="100" fontFamily="Sora,sans-serif" fontSize="10" fontWeight="400" fill="currentColor" opacity="0.03" letterSpacing="0.5">marcheduroi.com</text>
             </pattern>
           </defs>
@@ -2615,7 +2615,7 @@ function AppContent() {
 
       {/* PANNEAU MESSAGERIE */}
 
-      {/* TIROIR CONTACT ÔÇö PC et tablette */}
+      {/* TIROIR CONTACT — PC et tablette */}
       {contactDrawer && windowWidth > 600 && (
         <div onClick={()=>setContactDrawer(null)}
           style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",zIndex:500,backdropFilter:"blur(2px)" }}>
@@ -2635,7 +2635,7 @@ function AppContent() {
             )}
             {/* Content */}
             <div style={{ padding:"16px 20px",flex:1 }}>
-              {/* Tags v├®hicule/immo */}
+              {/* Tags véhicule/immo */}
               {contactDrawer.vehicle && (
                 <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:12 }}>
                   {[contactDrawer.vehicle.marque,contactDrawer.vehicle.modele,contactDrawer.vehicle.annee,contactDrawer.vehicle.carburant].filter(Boolean).map((v,i)=>(
@@ -2659,9 +2659,9 @@ function AppContent() {
                   <Icon name="heart" size={14}/> {contactDrawer.likes||0}
                 </button>
                 <button onClick={()=>toggleFavorite(contactDrawer.id)} style={{ background:favorites.includes(contactDrawer.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.2)",color:favorites.includes(contactDrawer.id)?"#FFD700":theme.sub,padding:"8px 14px",borderRadius:10,fontSize:16,cursor:"pointer" }}>
-                  {favorites.includes(contactDrawer.id)?"Ôÿà":"Ôÿå"}
+                  {favorites.includes(contactDrawer.id)?"★":"☆"}
                 </button>
-                <a href={"https://wa.me/?text="+encodeURIComponent("*"+contactDrawer.title+"*\nPrix: "+(contactDrawer.price||"Non pr├®cis├®")+"\nVoir: https://marcheduroi.com/annonce/"+contactDrawer.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                <a href={"https://wa.me/?text="+encodeURIComponent("*"+contactDrawer.title+"*\nPrix: "+(contactDrawer.price||"Non précisé")+"\nVoir: https://marcheduroi.com/annonce/"+contactDrawer.id+"\n\"Sur MarchéduRoi, vous êtes le Roi du Marché 👑\"")} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                   <div style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.2)",color:"#25D366",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:600,display:"flex",alignItems:"center",gap:6,cursor:"pointer" }}>
                     Partager
                   </div>
@@ -2675,15 +2675,15 @@ function AppContent() {
                         const blob = await resp.blob();
                         const file = new File([blob], "annonce.jpg", { type: blob.type });
                         if(navigator.canShare && navigator.canShare({ files:[file] })){
-                          await navigator.share({ title:contactDrawer.title, text:"Sur March├®duRoi, vous ├¬tes le Roi du March├® ­ƒææ", url, files:[file] });
+                          await navigator.share({ title:contactDrawer.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑", url, files:[file] });
                           return;
                         }
                       } catch(e){}
-                      navigator.share({ title:contactDrawer.title, text:"Sur March├®duRoi, vous ├¬tes le Roi du March├® ­ƒææ - "+url });
+                      navigator.share({ title:contactDrawer.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑 - "+url });
                     } else if(navigator.share){
                       navigator.share({ title:contactDrawer.title, url });
                     } else {
-                      navigator.clipboard.writeText(url); notify("Lien copi├® !");
+                      navigator.clipboard.writeText(url); notify("Lien copié !");
                     }
                   }} style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",color:"#6C63FF",padding:"8px 14px",borderRadius:10,fontSize:13,cursor:"pointer",fontWeight:600 }}>
                   Autres apps
@@ -2708,10 +2708,10 @@ function AppContent() {
                   <div style={{ display:"flex",gap:10 }}>
                     <a href={"tel:"+contactDrawer.phone} style={{ flex:1,textDecoration:"none" }}>
                       <div style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"12px 14px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,cursor:"pointer" }}>
-                        ­ƒô× {contactDrawer.phone}
+                        📞 {contactDrawer.phone}
                       </div>
                     </a>
-                    <a href={"https://wa.me/"+contactDrawer.phone.replace(/[\s+\-()]/g,"")+"?text="+encodeURIComponent("Bonjour, je suis int├®ress├®(e) par : *"+contactDrawer.title+"*\nLien : https://marcheduroi.com/annonce/"+contactDrawer.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                    <a href={"https://wa.me/"+contactDrawer.phone.replace(/[\s+\-()]/g,"")+"?text="+encodeURIComponent("Bonjour, je suis intéressé(e) par : *"+contactDrawer.title+"*\nLien : https://marcheduroi.com/annonce/"+contactDrawer.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",color:"#25D366",padding:"12px 14px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:6,cursor:"pointer" }}>
                         <svg width="16" height="16" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                         WA
@@ -2722,17 +2722,17 @@ function AppContent() {
                 {contactDrawer.lat && contactDrawer.lng && (
                   <a href={"https://www.google.com/maps/dir/?api=1&destination="+contactDrawer.lat+","+contactDrawer.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                     <div style={{ background:"rgba(66,133,244,0.1)",border:"1px solid rgba(66,133,244,0.3)",color:"#4285F4",padding:"12px 14px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,cursor:"pointer" }}>
-                      ­ƒù║´©Å Itin├®raire Google Maps
+                      🗺️ Itinéraire Google Maps
                     </div>
                   </a>
                 )}
                 {user && user.id !== (contactDrawer.authorId||contactDrawer.author_id) && (contactDrawer.authorId||contactDrawer.author_id) && (
                   <button onClick={()=>{ const ownerId=contactDrawer.authorId||contactDrawer.author_id; setActiveConv({postId:contactDrawer.id,postTitle:contactDrawer.title,postPrice:contactDrawer.price,postPhoto:contactDrawer.photos?.[0],receiverId:ownerId,receiverName:contactDrawer.author,messages:[]}); setShowMessages(true); setContactDrawer(null); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"12px 14px",borderRadius:10,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
-                    ­ƒÆ¼ Message priv├®
+                    💬 Message privé
                   </button>
                 )}
                 <button onClick={()=>{ setModal({type:"report",data:contactDrawer}); setContactDrawer(null); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"4px 0",fontSize:12,cursor:"pointer",textAlign:"left" }}>
-                  ­ƒÜ® Signaler cette annonce
+                  🚩 Signaler cette annonce
                 </button>
               </div>
             </div>
@@ -2753,19 +2753,19 @@ function AppContent() {
             </div>
             {[
               ...(windowWidth <= 600 ? [
-                { label:"­ƒôï "+t.annonces, action:()=>{setView("home");setShowMoreMenu(false);} },
-                { label:"­ƒÆí "+t.publierAnnonce, action:()=>{setModal({type:"howto"});setShowMoreMenu(false);} },
-                ...(user?.role==="admin"?[{ label:"ÔÜÖ´©Å "+t.admin, action:()=>{setView("admin");setShowMoreMenu(false);} }]:[]),
-                { label:lang==="fr"?"­ƒç¼­ƒçº English":"­ƒç½­ƒçÀ Fran├ºais", action:()=>{ const newLang=lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); setShowMoreMenu(false); } },
-                { label:"­ƒÄ¿ "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
+                { label:"📋 "+t.annonces, action:()=>{setView("home");setShowMoreMenu(false);} },
+                { label:"💡 "+t.publierAnnonce, action:()=>{setModal({type:"howto"});setShowMoreMenu(false);} },
+                ...(user?.role==="admin"?[{ label:"⚙️ "+t.admin, action:()=>{setView("admin");setShowMoreMenu(false);} }]:[]),
+                { label:lang==="fr"?"🇬🇧 English":"🇫🇷 Français", action:()=>{ const newLang=lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); setShowMoreMenu(false); } },
+                { label:"🎨 "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
               ] : []),
-              { label:"­ƒôû Exemples de publications", action:()=>{ window.open("https://marcheduroi.com/exemples.html","_blank"); setShowMoreMenu(false); } },
-              { label:"­ƒô× Support WhatsApp", action:()=>{ window.open("https://wa.me/2290140906020","_blank"); setShowMoreMenu(false); } },
+              { label:"📖 Exemples de publications", action:()=>{ window.open("https://marcheduroi.com/exemples.html","_blank"); setShowMoreMenu(false); } },
+              { label:"📞 Support WhatsApp", action:()=>{ window.open("https://wa.me/2290140906020","_blank"); setShowMoreMenu(false); } },
               { label:t.stats, action:()=>{setView("stats");setShowMoreMenu(false);} },
               { label:t.parrainage, action:()=>{setView("parrainage");setShowMoreMenu(false);} },
               { label:t.newsletter, action:()=>{setModal({type:"newsletter"});setShowMoreMenu(false);} },
               { label:t.suggestion, action:()=>{setModal({type:"suggestion"});setShowMoreMenu(false);} },
-              { label:"ÔÜí Show Faster", action:()=>{setModal({type:"showFaster"});setShowMoreMenu(false);} },
+              { label:"⚡ Show Faster", action:()=>{setModal({type:"showFaster"});setShowMoreMenu(false);} },
               { label:t.apropos, action:()=>{setView("about");setShowMoreMenu(false);} },
               { label:t.cgu, action:()=>{setView("terms");setShowMoreMenu(false);} },
             ].map((item,i,arr)=>(
@@ -2785,7 +2785,7 @@ function AppContent() {
         <div onClick={()=>setShowNotifs(false)} style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:500 }}>
           <div onClick={e=>e.stopPropagation()} style={{ position:"fixed",right:0,top:0,bottom:0,width:Math.min(340,window.innerWidth),background:theme.card,boxShadow:"-20px 0 60px rgba(0,0,0,0.3)",display:"flex",flexDirection:"column",zIndex:501 }}>
             <div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${theme.border}`,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-              <h3 style={{ fontWeight:800,fontSize:18,color:theme.text }}>­ƒöö Notifications</h3>
+              <h3 style={{ fontWeight:800,fontSize:18,color:theme.text }}>🔔 Notifications</h3>
               <div style={{ display:"flex",gap:8,alignItems:"center" }}>
                 {notifications.length > 0 && <button onClick={clearNotifications} style={{ background:"none",border:"none",color:theme.sub,fontSize:12,cursor:"pointer",fontWeight:600 }}>Tout effacer</button>}
                 <button onClick={()=>setShowNotifs(false)} style={{ background:"transparent",border:"none",color:theme.sub,cursor:"pointer" }}><Icon name="x" size={20}/></button>
@@ -2794,13 +2794,13 @@ function AppContent() {
             <div style={{ flex:1,overflowY:"auto" }}>
               {notifications.length === 0 ? (
                 <div style={{ textAlign:"center",padding:"48px 16px",color:theme.sub }}>
-                  <p style={{ fontSize:32,marginBottom:8 }}>­ƒöö</p>
+                  <p style={{ fontSize:32,marginBottom:8 }}>🔔</p>
                   <p style={{ fontSize:14 }}>Aucune notification</p>
                 </div>
               ) : notifications.map(n=>(
                 <div key={n.id} style={{ padding:"14px 20px",borderBottom:`1px solid ${theme.border}`,background:n.read?theme.card:theme.bg,cursor:"pointer" }} onClick={()=>setShowNotifs(false)}>
                   <div style={{ display:"flex",gap:10,alignItems:"flex-start" }}>
-                    <span style={{ fontSize:20,flexShrink:0 }}>{n.type==="contact"?"­ƒÆ¼":n.type==="view"?"­ƒæü´©Å":"­ƒöö"}</span>
+                    <span style={{ fontSize:20,flexShrink:0 }}>{n.type==="contact"?"💬":n.type==="view"?"👁️":"🔔"}</span>
                     <div>
                       <p style={{ fontSize:14,color:theme.text,lineHeight:1.4,marginBottom:2 }}>{n.msg}</p>
                       <p style={{ fontSize:12,color:theme.sub }}>{n.date}</p>
@@ -2819,7 +2819,7 @@ function AppContent() {
             
             {/* Header */}
             <div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${theme.border}`,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-              <h3 style={{ fontWeight:800,fontSize:18,color:theme.text }}>­ƒÆ¼ Messages</h3>
+              <h3 style={{ fontWeight:800,fontSize:18,color:theme.text }}>💬 Messages</h3>
               <button onClick={()=>{ setShowMessages(false); setActiveConv(null); }} style={{ background:"transparent",border:"none",color:theme.sub,cursor:"pointer" }}><Icon name="x" size={20}/></button>
             </div>
 
@@ -2828,13 +2828,13 @@ function AppContent() {
               <div style={{ flex:1,overflowY:"auto" }}>
                 {conversations.length === 0 ? (
                   <div style={{ textAlign:"center",padding:"60px 20px",color:theme.sub }}>
-                    <p style={{ fontSize:40,marginBottom:12 }}>­ƒÆ¼</p>
+                    <p style={{ fontSize:40,marginBottom:12 }}>💬</p>
                     <p style={{ fontWeight:600,marginBottom:8 }}>Aucun message</p>
-                    <p style={{ fontSize:13 }}>Cliquez sur ­ƒÆ¼ sur une annonce pour envoyer un message</p>
+                    <p style={{ fontSize:13 }}>Cliquez sur 💬 sur une annonce pour envoyer un message</p>
                   </div>
                 ) : conversations.map(conv=>(
                   <div key={conv.key} onClick={()=>{ setActiveConv(conv); markConvRead(conv); }} style={{ padding:"16px 20px",borderBottom:`1px solid ${theme.border}`,cursor:"pointer",display:"flex",gap:12,alignItems:"center",background:conv.unread>0?`rgba(108,99,255,0.05)`:"transparent" }}>
-                    {conv.postPhoto ? <img src={conv.postPhoto} alt="" style={{ width:48,height:48,borderRadius:10,objectFit:"cover",flexShrink:0 }}/> : <div style={{ width:48,height:48,borderRadius:10,background:"rgba(108,99,255,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>­ƒøì´©Å</div>}
+                    {conv.postPhoto ? <img src={conv.postPhoto} alt="" style={{ width:48,height:48,borderRadius:10,objectFit:"cover",flexShrink:0 }}/> : <div style={{ width:48,height:48,borderRadius:10,background:"rgba(108,99,255,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>🛍️</div>}
                     <div style={{ flex:1,minWidth:0 }}>
                       <p style={{ fontWeight:700,color:theme.text,fontSize:13,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{conv.postTitle}</p>
                       <p style={{ color:theme.sub,fontSize:12,marginBottom:2 }}>avec {conv.otherName}</p>
@@ -2850,7 +2850,7 @@ function AppContent() {
                 {/* Back + annonce */}
                 <div style={{ borderBottom:`1px solid ${theme.border}` }}>
                   <button onClick={()=>setActiveConv(null)} style={{ background:"transparent",border:"none",color:"#6C63FF",padding:"12px 20px",fontWeight:600,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
-                    ÔåÉ Retour
+                    ← Retour
                   </button>
                   {/* Annonce en haut */}
                   <div style={{ margin:"0 16px 12px",background:theme.bg,borderRadius:12,padding:12,display:"flex",gap:10,alignItems:"center" }}>
@@ -2876,8 +2876,8 @@ function AppContent() {
                       <div style={{ display:"flex",alignItems:"center",gap:4,marginTop:3 }}>
                         <p style={{ color:theme.sub,fontSize:10 }}>{new Date(msg.created_at).toLocaleTimeString("fr",{hour:"2-digit",minute:"2-digit"})}</p>
                         {msg.sender_id===user.id && (
-                          <span style={{ fontSize:11,color:msg.read?"#43C6AC":theme.sub }} title={msg.read?"Lu":"Envoy├®"}>
-                            {msg.read ? "Ô£ôÔ£ô" : "Ô£ô"}
+                          <span style={{ fontSize:11,color:msg.read?"#43C6AC":theme.sub }} title={msg.read?"Lu":"Envoyé"}>
+                            {msg.read ? "✓✓" : "✓"}
                           </span>
                         )}
                       </div>
@@ -2887,7 +2887,7 @@ function AppContent() {
 
                 {/* Input */}
                 <div style={{ padding:"12px 16px",paddingBottom:"env(safe-area-inset-bottom, 12px)",borderTop:`1px solid ${theme.border}`,display:"flex",gap:8,position:"relative",zIndex:10 }}>
-                  <input value={msgInput} onChange={e=>setMsgInput(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendMessage(activeConv.postId,activeConv.postTitle,activeConv.postPrice,activeConv.postPhoto,activeConv.otherId||activeConv.receiverId,activeConv.otherName||activeConv.receiverName); loadMessages(); }}} placeholder="├ëcrire un message..." style={{ ...inputStyle,flex:1,padding:"10px 14px",borderRadius:24,fontSize:14 }}/>
+                  <input value={msgInput} onChange={e=>setMsgInput(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendMessage(activeConv.postId,activeConv.postTitle,activeConv.postPrice,activeConv.postPhoto,activeConv.otherId||activeConv.receiverId,activeConv.otherName||activeConv.receiverName); loadMessages(); }}} placeholder="Écrire un message..." style={{ ...inputStyle,flex:1,padding:"10px 14px",borderRadius:24,fontSize:14 }}/>
                   <button onClick={()=>{ sendMessage(activeConv.postId,activeConv.postTitle,activeConv.postPrice,activeConv.postPhoto,activeConv.otherId||activeConv.receiverId,activeConv.otherName||activeConv.receiverName); setTimeout(loadMessages,500); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",width:42,height:42,borderRadius:"50%",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
                     <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                   </button>
@@ -2898,44 +2898,44 @@ function AppContent() {
         </div>
       )}
 
-      {/* Banni├¿re hors ligne */}
+      {/* Bannière hors ligne */}
       {!isOnline && (
         <div style={{ position:"fixed",top:64,left:0,right:0,zIndex:998,background:"linear-gradient(135deg,#FF4757,#FF6584)",color:"#fff",padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"center",gap:10,fontSize:14,fontWeight:600,boxShadow:"0 4px 20px rgba(255,71,87,0.4)" }}>
-          <span style={{ fontSize:18 }}>­ƒôÁ</span>
-          Vous ├¬tes hors ligne ÔÇö Les derni├¿res annonces charg├®es restent disponibles
+          <span style={{ fontSize:18 }}>📵</span>
+          Vous êtes hors ligne — Les dernières annonces chargées restent disponibles
         </div>
       )}
 
-      {/* Banni├¿re PWA ÔÇö installer l'application */}
+      {/* Bannière PWA — installer l'application */}
       {showPwaBanner && (
         <div style={{ position:"fixed",bottom:80,left:12,right:12,zIndex:997,background:"linear-gradient(135deg,#1A1D30,#2A2D45)",border:"1px solid #6C63FF",borderRadius:16,padding:"14px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 8px 32px rgba(108,99,255,0.4)",maxWidth:480,margin:"0 auto" }}>
           <img src="/marcheduRoi-icon.svg" alt="" style={{ width:44,height:44,borderRadius:10,flexShrink:0 }}/>
           <div style={{ flex:1,minWidth:0 }}>
-            <p style={{ fontWeight:800,fontSize:14,color:"#E8E8F0",marginBottom:2 }}>Installer March├®duRoi</p>
-            <p style={{ fontSize:12,color:"#9A9AB0" }}>Acc├¿s rapide ┬À Fonctionne hors ligne</p>
+            <p style={{ fontWeight:800,fontSize:14,color:"#E8E8F0",marginBottom:2 }}>Installer MarchéduRoi</p>
+            <p style={{ fontSize:12,color:"#9A9AB0" }}>Accès rapide · Fonctionne hors ligne</p>
           </div>
           <button onClick={async()=>{
             if (pwaPrompt) {
               pwaPrompt.prompt();
               const result = await pwaPrompt.userChoice;
-              if (result.outcome === "accepted") notify("Ô£à Application install├®e !");
+              if (result.outcome === "accepted") notify("✅ Application installée !");
             }
             setShowPwaBanner(false);
             localStorage.setItem("mdr_pwa_dismissed","1");
           }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",flexShrink:0 }}>
             Installer
           </button>
-          <button onClick={()=>{ setShowPwaBanner(false); localStorage.setItem("mdr_pwa_dismissed","1"); }} style={{ background:"transparent",border:"none",color:"#9A9AB0",fontSize:18,cursor:"pointer",flexShrink:0,lineHeight:1 }}>Ô£ò</button>
+          <button onClick={()=>{ setShowPwaBanner(false); localStorage.setItem("mdr_pwa_dismissed","1"); }} style={{ background:"transparent",border:"none",color:"#9A9AB0",fontSize:18,cursor:"pointer",flexShrink:0,lineHeight:1 }}>✕</button>
         </div>
       )}
 
-      {/* Banni├¿re erreur Supabase */}
+      {/* Bannière erreur Supabase */}
       {isOnline && postsLoaded && posts.length === 0 && (
         <div style={{ position:"fixed",top:64,left:0,right:0,zIndex:997,background:"rgba(255,140,0,0.95)",color:"#fff",padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"center",gap:10,fontSize:14,fontWeight:600 }}>
-          <span>ÔÜá´©Å</span>
+          <span>⚠️</span>
           Impossible de charger les annonces.
           <button onClick={()=>{ loadPosts(); loadShops(); }} style={{ background:"rgba(255,255,255,0.2)",border:"1px solid rgba(255,255,255,0.4)",color:"#fff",padding:"4px 12px",borderRadius:8,fontWeight:700,cursor:"pointer",fontSize:13 }}>
-            R├®essayer
+            Réessayer
           </button>
         </div>
       )}
@@ -2945,8 +2945,8 @@ function AppContent() {
         <div style={{ position:"fixed",bottom:24,right:16,zIndex:999,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8 }}>
           {showWaTooltip && (
             <div style={{ background:windowWidth<=600?"rgba(37,211,102,0.75)":"#25D366",color:"#fff",borderRadius:12,padding:"10px 14px",fontSize:13,fontWeight:600,maxWidth:220,boxShadow:"0 4px 20px rgba(37,211,102,0.4)",animation:"fadeIn 0.3s ease",position:"relative",lineHeight:1.5,backdropFilter:windowWidth<=600?"blur(4px)":"none" }}>
-              ­ƒæï Bonjour ! Besoin d'aide ?<br/>Contactez-nous sur WhatsApp !
-              <button onClick={()=>{ setShowWaTooltip(false); localStorage.setItem("mdr_wa_tooltip_shown","1"); }} style={{ position:"absolute",top:4,right:6,background:"none",border:"none",color:"#fff",cursor:"pointer",fontSize:14,fontWeight:800,padding:0 }}>Ô£ò</button>
+              👋 Bonjour ! Besoin d'aide ?<br/>Contactez-nous sur WhatsApp !
+              <button onClick={()=>{ setShowWaTooltip(false); localStorage.setItem("mdr_wa_tooltip_shown","1"); }} style={{ position:"absolute",top:4,right:6,background:"none",border:"none",color:"#fff",cursor:"pointer",fontSize:14,fontWeight:800,padding:0 }}>✕</button>
             </div>
           )}
           <a href="https://wa.me/2290147562640?text=Bonjour%20MarcheduRoi%20Support%2C%20j'ai%20besoin%20d'aide%20concernant%20ma%20publication." target="_blank" rel="noopener noreferrer" onClick={()=>{ setShowWaTooltip(false); localStorage.setItem("mdr_wa_tooltip_shown","1"); }} title="Contacter le support technique"
@@ -2959,7 +2959,7 @@ function AppContent() {
       )}
 
       {showScrollTop && !showMessages && (
-        <button onClick={scrollToTop} style={{ position:"fixed",bottom:30,left:16,zIndex:999,width:windowWidth<=600?52:44,height:windowWidth<=600?52:44,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 24px rgba(108,99,255,0.6)",cursor:"pointer",fontSize:windowWidth<=600?22:18,fontWeight:800,WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>Ôåæ</button>
+        <button onClick={scrollToTop} style={{ position:"fixed",bottom:30,left:16,zIndex:999,width:windowWidth<=600?52:44,height:windowWidth<=600?52:44,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 24px rgba(108,99,255,0.6)",cursor:"pointer",fontSize:windowWidth<=600?22:18,fontWeight:800,WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>↑</button>
       )}
 
       {/* Signalements annulables */}
@@ -2967,9 +2967,9 @@ function AppContent() {
         <div style={{ position:"fixed",bottom:100,left:20,zIndex:9998,display:"flex",flexDirection:"column",gap:8 }}>
           {reports.filter(r=>cancelableReports[r.id]).map(r=>(
             <div key={r.id} style={{ background:"#1A1D30",border:"1px solid #FF4757",borderRadius:12,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 4px 20px rgba(0,0,0,0.3)",maxWidth:320 }}>
-              <span style={{ fontSize:16 }}>­ƒÜ®</span>
+              <span style={{ fontSize:16 }}>🚩</span>
               <div style={{ flex:1 }}>
-                <p style={{ fontSize:12,color:"#E8E8F0",fontWeight:600 }}>Signalement envoy├®</p>
+                <p style={{ fontSize:12,color:"#E8E8F0",fontWeight:600 }}>Signalement envoyé</p>
                 <p style={{ fontSize:11,color:"#9A9AB0" }}>{r.postTitle?.slice(0,30)}...</p>
               </div>
               <button onClick={()=>cancelReport(r.id)} style={{ background:"rgba(255,71,87,0.2)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer",whiteSpace:"nowrap" }}>
@@ -2986,7 +2986,7 @@ function AppContent() {
       {showBgPicker && (
         <div onClick={()=>setShowBgPicker(false)} style={{ position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,0.3)" }}>
           <div onClick={e=>e.stopPropagation()} style={{ position:"absolute",top:72,right:16,...cardStyle,borderRadius:16,padding:20,width:280,boxShadow:"0 20px 60px rgba(0,0,0,0.4)" }}>
-            <p style={{ fontWeight:700,fontSize:14,marginBottom:14,color:theme.text }}>­ƒÄ¿ Choisir l'arri├¿re-plan</p>
+            <p style={{ fontWeight:700,fontSize:14,marginBottom:14,color:theme.text }}>🎨 Choisir l'arrière-plan</p>
             <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10 }}>
               {BACKGROUNDS.map(bg=>(
                 <div key={bg.id} className="bg-opt" onClick={()=>{setThemeId(bg.id);setShowBgPicker(false);}} style={{ background:bg.bg,border:`2px solid ${themeId===bg.id?"#6C63FF":bg.border}`,borderRadius:12,padding:"14px 8px",textAlign:"center",boxShadow:themeId===bg.id?"0 0 12px rgba(108,99,255,0.5)":"none" }}>
@@ -3002,19 +3002,19 @@ function AppContent() {
       {/* Navbar */}
       <nav style={{ background:`${theme.bg}EE`,borderBottom:`1px solid ${theme.border}`,padding:"0 16px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)",width:"100%" }}>
 
-        {/* LOGO ÔÇö complet sur desktop, "M" seul sur mobile */}
+        {/* LOGO — complet sur desktop, "M" seul sur mobile */}
         <div style={{ display:"flex",alignItems:"center",cursor:"pointer",flexShrink:0 }} onClick={()=>setView("landing")}>
           {windowWidth > 600 ? (
             <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,width:"auto",objectFit:"contain" }}/>
           ) : (
-            <img src="/icons/icon-72x72.png" alt="March├®duRoi" style={{ width:40,height:40,borderRadius:10,objectFit:"cover",boxShadow:"0 2px 12px rgba(108,99,255,0.4)" }}/>
+            <img src="/icons/icon-72x72.png" alt="MarchéduRoi" style={{ width:40,height:40,borderRadius:10,objectFit:"cover",boxShadow:"0 2px 12px rgba(108,99,255,0.4)" }}/>
           )}
         </div>
 
         {/* BOUTONS DROITE */}
         <div style={{ display:"flex",gap:4,alignItems:"center" }}>
 
-          {/* Annonces + Publier + Admin ÔÇö desktop seulement */}
+          {/* Annonces + Publier + Admin — desktop seulement */}
           {windowWidth > 600 && <>
             <button onClick={()=>setView("home")} style={{ background:view==="home"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="home"?"#6C63FF":theme.sub,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
               {t.annonces}
@@ -3024,12 +3024,12 @@ function AppContent() {
             </button>
             {user?.role==="admin" && <button onClick={()=>setView("admin")} style={{ background:"transparent",border:"none",color:"#FF6584",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>{t.admin}</button>}
             <button onClick={()=>{ const newLang=lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); }} style={{ background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,padding:"6px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5 }}>
-              {lang==="fr"?<>­ƒç½­ƒçÀ FR</>:<>­ƒç¼­ƒçº EN</>}
+              {lang==="fr"?<>🇫🇷 FR</>:<>🇬🇧 EN</>}
             </button>
             <button onClick={()=>setShowBgPicker(p=>!p)} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 10px",borderRadius:8,display:"flex",alignItems:"center",gap:4,fontWeight:600,fontSize:13 }}><Icon name="palette" size={14}/></button>
           </>}
 
-          {/* CONNEXION / INSCRIPTION ÔÇö avant Plus sur mobile, dans user block sur desktop */}
+          {/* CONNEXION / INSCRIPTION — avant Plus sur mobile, dans user block sur desktop */}
           {!user && windowWidth <= 600 && (
             <>
               <button onClick={()=>setView("login")} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,padding:"7px 10px",borderRadius:8,fontWeight:600,fontSize:12,WebkitTapHighlightColor:"transparent" }}>{t.connexion}</button>
@@ -3037,16 +3037,16 @@ function AppContent() {
             </>
           )}
 
-          {/* MENU PLUS Ôû¥ */}
+          {/* MENU PLUS ▾ */}
           <div style={{ position:"relative" }}>
             <button
               onClick={()=>setShowMoreMenu(m=>!m)}
               style={{ background:showMoreMenu?`rgba(108,99,255,0.15)`:theme.card,border:`1px solid ${showMoreMenu?"#6C63FF":theme.border}`,color:showMoreMenu?"#6C63FF":theme.text,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>
-              Plus {showMoreMenu?"Ôû▓":"Ôû¥"}
+              Plus {showMoreMenu?"▲":"▾"}
             </button>
           </div>
 
-          {/* UTILISATEUR CONNECT├ë */}
+          {/* UTILISATEUR CONNECTÉ */}
           {user ? (
             <div style={{ display:"flex",alignItems:"center",gap:4 }}>
               {/* Messagerie */}
@@ -3075,7 +3075,7 @@ function AppContent() {
               <button onClick={logout} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px" }}><Icon name="logout" size={16}/></button>
             </div>
           ) : (
-            /* Connexion/Inscription ÔÇö desktop seulement (sur mobile c'est avant Plus) */
+            /* Connexion/Inscription — desktop seulement (sur mobile c'est avant Plus) */
             windowWidth > 600 && (
               <div style={{ display:"flex",gap:6 }}>
                 <button onClick={()=>setView("login")} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{t.connexion}</button>
@@ -3097,30 +3097,30 @@ function AppContent() {
           {/* Logo + drapeaux en orbite */}
           <FlagCylinder theme={theme}/>
 
-          {/* Titre + slogan officiel group├®s */}
+          {/* Titre + slogan officiel groupés */}
           <h1 style={{ fontSize:windowWidth<=600?"clamp(22px,8vw,32px)":"clamp(26px,7vw,52px)",fontWeight:800,textAlign:"center",lineHeight:1.1,marginBottom:windowWidth<=600?2:4,color:theme.text,padding:"0 8px",width:"100%",marginTop:0 }}>
             Bienvenue sur{" "}
-            <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>March├®duRoi</span>
+            <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span>
           </h1>
           <p style={{ fontSize:windowWidth<=600?"clamp(13px,3.5vw,16px)":"17px",fontWeight:700,textAlign:"center",color:"#FFD700",marginBottom:windowWidth<=600?2:4,letterSpacing:0.3,marginTop:0 }}>
-            "Sur March├®duRoi, vous ├¬tes le Roi du March├®" ­ƒææ
+            "Sur MarchéduRoi, vous êtes le Roi du Marché" 👑
           </p>
 
-          {/* Slogan g├®olocalis├® */}
+          {/* Slogan géolocalisé */}
           {(()=>{
               const PAYS_NOMS = {
-                BJ:"B├®nin", TG:"Togo", CI:"C├┤te d'Ivoire", SN:"S├®n├®gal", ML:"Mali",
-                BF:"Burkina Faso", NE:"Niger", GN:"Guin├®e", NG:"Nigeria", CM:"Cameroun",
+                BJ:"Bénin", TG:"Togo", CI:"Côte d'Ivoire", SN:"Sénégal", ML:"Mali",
+                BF:"Burkina Faso", NE:"Niger", GN:"Guinée", NG:"Nigeria", CM:"Cameroun",
                 CG:"Congo", CD:"RD Congo", GA:"Gabon", MG:"Madagascar", RW:"Rwanda",
                 BI:"Burundi", TD:"Tchad", MR:"Mauritanie", FR:"France", BE:"Belgique",
-                CH:"Suisse", CA:"Canada", US:"├ëtats-Unis", GB:"Royaume-Uni", DE:"Allemagne",
-                IT:"Italie", ES:"Espagne", MA:"Maroc", DZ:"Alg├®rie", TN:"Tunisie",
-                EG:"├ëgypte", KE:"Kenya", ZA:"Afrique du Sud", GH:"Ghana",
+                CH:"Suisse", CA:"Canada", US:"États-Unis", GB:"Royaume-Uni", DE:"Allemagne",
+                IT:"Italie", ES:"Espagne", MA:"Maroc", DZ:"Algérie", TN:"Tunisie",
+                EG:"Égypte", KE:"Kenya", ZA:"Afrique du Sud", GH:"Ghana",
               };
               const PREP = {
                 BJ:"au", TG:"au", ML:"au", SN:"au", NE:"au", CM:"au", CG:"au",
                 GA:"au", RW:"au", BI:"au", TD:"au", CA:"au", CD:"en", CI:"en",
-                BF:"au", GN:"en", NG:"au", MG:"├á", FR:"en", BE:"en", CH:"en", MR:"en",
+                BF:"au", GN:"en", NG:"au", MG:"à", FR:"en", BE:"en", CH:"en", MR:"en",
                 US:"aux", GB:"au", DE:"en", IT:"en", ES:"en", MA:"au", DZ:"en",
                 TN:"en", EG:"en", KE:"au", ZA:"en", GH:"au",
               };
@@ -3128,61 +3128,61 @@ function AppContent() {
               const pays = PAYS_NOMS[code];
               const prep = PREP[code];
               const sloganLoc = pays
-                ? <><strong style={{ color:theme.text }}>{prep} {pays}</strong> et partout dans le <strong style={{ color:theme.text }}>monde</strong> ­ƒîì</>
+                ? <><strong style={{ color:theme.text }}>{prep} {pays}</strong> et partout dans le <strong style={{ color:theme.text }}>monde</strong> 🌍</>
                 : <strong style={{ color:theme.text }}>partout dans le monde</strong>;
               return windowWidth <= 600 ? (
                 <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:340,lineHeight:1.5,marginBottom:6,padding:"0 16px" }}>
-                  La plateforme qui connecte commer├ºants, entreprises et particuliers {sloganLoc}
+                  La plateforme qui connecte commerçants, entreprises et particuliers {sloganLoc}
                 </p>
               ) : (
                 <p style={{ fontSize:"clamp(13px,3.5vw,17px)",color:theme.sub,textAlign:"center",maxWidth:560,lineHeight:1.5,marginBottom:6,padding:"0 16px" }}>
-                  La plateforme qui connecte commer├ºants,<br/>entreprises et particuliers {sloganLoc}
+                  La plateforme qui connecte commerçants,<br/>entreprises et particuliers {sloganLoc}
                 </p>
               );
             })()}
 
-          {/* Verset du jour ÔÇö change chaque jour */}
+          {/* Verset du jour — change chaque jour */}
           {(()=>{
             const VERSETS_LANDING = [
-              {ref:"Jean 3:16",texte:"Car Dieu a tant aim├® le monde qu'il a donn├® son Fils unique."},
+              {ref:"Jean 3:16",texte:"Car Dieu a tant aimé le monde qu'il a donné son Fils unique."},
               {ref:"Phil 4:13",texte:"Je puis tout par celui qui me fortifie."},
-              {ref:"J├®r 29:11",texte:"Des projets de paix et non de malheur, pour vous donner un avenir."},
-              {ref:"Ps 23:1",texte:"L'├ëternel est mon berger : je ne manquerai de rien."},
+              {ref:"Jér 29:11",texte:"Des projets de paix et non de malheur, pour vous donner un avenir."},
+              {ref:"Ps 23:1",texte:"L'Éternel est mon berger : je ne manquerai de rien."},
               {ref:"Rom 8:28",texte:"Toutes choses concourent au bien de ceux qui aiment Dieu."},
-              {ref:"Matt 6:33",texte:"Cherchez premi├¿rement le royaume et la justice de Dieu."},
-              {ref:"Prov 3:5",texte:"Confie-toi en l'├ëternel de tout ton c┼ôur."},
-              {ref:"├ës 40:31",texte:"Ceux qui se confient en l'├ëternel renouvellent leur force."},
-              {ref:"Luc 1:37",texte:"Rien n'est impossible ├á Dieu."},
+              {ref:"Matt 6:33",texte:"Cherchez premièrement le royaume et la justice de Dieu."},
+              {ref:"Prov 3:5",texte:"Confie-toi en l'Éternel de tout ton cœur."},
+              {ref:"És 40:31",texte:"Ceux qui se confient en l'Éternel renouvellent leur force."},
+              {ref:"Luc 1:37",texte:"Rien n'est impossible à Dieu."},
               {ref:"Ps 46:1",texte:"Dieu est pour nous un refuge et un appui."},
               {ref:"Gal 6:9",texte:"Ne nous lassons pas de faire le bien."},
               {ref:"2 Tim 1:7",texte:"Un esprit de force, d'amour et de sagesse."},
-              {ref:"Prov 16:3",texte:"Recommande ├á l'├ëternel tes ┼ôuvres, et tes projets r├®ussiront."},
-              {ref:"Matt 11:28",texte:"Venez ├á moi, vous tous qui ├¬tes fatigu├®s et charg├®s."},
-              {ref:"├ës 41:10",texte:"Ne crains rien, car je suis avec toi."},
-              {ref:"Jean 14:6",texte:"Je suis le chemin, la v├®rit├®, et la vie."},
-              {ref:"Ps 37:4",texte:"Fais de l'├ëternel tes d├®lices, et il te donnera ce que ton c┼ôur d├®sire."},
-              {ref:"H├®b 11:1",texte:"La foi est une ferme assurance des choses qu'on esp├¿re."},
-              {ref:"Col 3:23",texte:"Quoi que vous fassiez, faites-le de bon c┼ôur, comme pour le Seigneur."},
-              {ref:"Deut 31:6",texte:"Fortifiez-vous ! L'├ëternel, ton Dieu, marchera avec toi."},
-              {ref:"Apo 3:20",texte:"Voici, je me tiens ├á la porte et je frappe."},
-              {ref:"Ps 118:24",texte:"C'est ici la journ├®e que l'├ëternel a faite : qu'elle soit un sujet d'all├®gresse !"},
-              {ref:"1 Cor 10:13",texte:"Dieu est fid├¿le, et il ne permettra pas que vous soyez tent├®s au-del├á de vos forces."},
-              {ref:"Ps 121:2",texte:"Mon secours vient de l'├ëternel, qui a fait les cieux et la terre."},
+              {ref:"Prov 16:3",texte:"Recommande à l'Éternel tes œuvres, et tes projets réussiront."},
+              {ref:"Matt 11:28",texte:"Venez à moi, vous tous qui êtes fatigués et chargés."},
+              {ref:"És 41:10",texte:"Ne crains rien, car je suis avec toi."},
+              {ref:"Jean 14:6",texte:"Je suis le chemin, la vérité, et la vie."},
+              {ref:"Ps 37:4",texte:"Fais de l'Éternel tes délices, et il te donnera ce que ton cœur désire."},
+              {ref:"Héb 11:1",texte:"La foi est une ferme assurance des choses qu'on espère."},
+              {ref:"Col 3:23",texte:"Quoi que vous fassiez, faites-le de bon cœur, comme pour le Seigneur."},
+              {ref:"Deut 31:6",texte:"Fortifiez-vous ! L'Éternel, ton Dieu, marchera avec toi."},
+              {ref:"Apo 3:20",texte:"Voici, je me tiens à la porte et je frappe."},
+              {ref:"Ps 118:24",texte:"C'est ici la journée que l'Éternel a faite : qu'elle soit un sujet d'allégresse !"},
+              {ref:"1 Cor 10:13",texte:"Dieu est fidèle, et il ne permettra pas que vous soyez tentés au-delà de vos forces."},
+              {ref:"Ps 121:2",texte:"Mon secours vient de l'Éternel, qui a fait les cieux et la terre."},
               {ref:"1 Jean 4:4",texte:"Celui qui est en vous est plus grand que celui qui est dans le monde."},
-              {ref:"Nomb 6:24",texte:"Que l'├ëternel te b├®nisse et te garde !"},
-              {ref:"Prov 18:10",texte:"Le nom de l'├ëternel est une tour forte ; le juste s'y r├®fugie."},
+              {ref:"Nomb 6:24",texte:"Que l'Éternel te bénisse et te garde !"},
+              {ref:"Prov 18:10",texte:"Le nom de l'Éternel est une tour forte ; le juste s'y réfugie."},
               {ref:"Apo 21:4",texte:"Il essuiera toute larme de leurs yeux, et la mort ne sera plus."},
-              {ref:"Rom 5:8",texte:"Lorsque nous ├®tions encore des p├®cheurs, Christ est mort pour nous."},
-              {ref:"Ps 27:1",texte:"L'├ëternel est ma lumi├¿re et mon salut : de qui aurais-je crainte ?"},
+              {ref:"Rom 5:8",texte:"Lorsque nous étions encore des pécheurs, Christ est mort pour nous."},
+              {ref:"Ps 27:1",texte:"L'Éternel est ma lumière et mon salut : de qui aurais-je crainte ?"},
             ];
             const dayIndex = Math.floor(Date.now() / (1000*60*60*24)) % VERSETS_LANDING.length;
             const v = VERSETS_LANDING[dayIndex];
             return (
               <div style={{ display:"flex",alignItems:"center",gap:8,padding:"6px 14px",background:"rgba(108,99,255,0.07)",borderLeft:"3px solid #6C63FF",borderRadius:10,marginBottom:8,maxWidth:480 }}>
-                <span style={{ fontSize:16,flexShrink:0 }}>Ô£¿</span>
+                <span style={{ fontSize:16,flexShrink:0 }}>✨</span>
                 <div>
                   <span style={{ fontSize:12,fontStyle:"italic",color:theme.text }}>{v.texte} </span>
-                  <span style={{ fontSize:12,fontWeight:700,color:"#FF6584" }}>ÔÇö {v.ref}</span>
+                  <span style={{ fontSize:12,fontWeight:700,color:"#FF6584" }}>— {v.ref}</span>
                 </div>
               </div>
             );
@@ -3191,21 +3191,21 @@ function AppContent() {
           {/* Boutons CTA */}
           <div style={{ display:"flex",gap:12,flexWrap:"wrap",justifyContent:"center",marginBottom:8 }}>
             <button onClick={()=>setShowCategories(s=>!s)} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
-              {showCategories ? "Masquer Ôû▓" : "Voir les annonces Ôû¥"}
+              {showCategories ? "Masquer ▲" : "Voir les annonces ▾"}
             </button>
             {!user && windowWidth > 600 && (
               <button onClick={()=>setView("register")} style={{ background:"transparent",border:`2px solid ${theme.border}`,color:theme.text,padding:"13px 28px",borderRadius:14,fontWeight:700,fontSize:16,cursor:"pointer" }}>
-                Cr├®er un compte
+                Créer un compte
               </button>
             )}
             {windowWidth > 600 && (
               <button onClick={()=>window.open("https://marcheduroi.com/exemples.html","_blank")} style={{ background:"rgba(67,198,172,0.1)",border:`1px solid rgba(67,198,172,0.4)`,color:"#43C6AC",padding:"13px 20px",borderRadius:14,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
-                ­ƒôû Exemples
+                📖 Exemples
               </button>
             )}
           </div>
 
-          {/* Cat├®gories + Sections ÔÇö apparaissent au clic sur "Voir les annonces" */}
+          {/* Catégories + Sections — apparaissent au clic sur "Voir les annonces" */}
           <div style={{
             width:"100%",maxWidth:700,
             overflow:"hidden",
@@ -3213,21 +3213,21 @@ function AppContent() {
             opacity: showCategories ? 1 : 0,
             transition:"max-height 0.4s ease, opacity 0.3s ease",
           }}>
-            {/* Cat├®gories ÔÇö d├®filement horizontal */}
+            {/* Catégories — défilement horizontal */}
             <div style={{ position:"relative",marginBottom:10 }}>
               <div style={{ position:"absolute",right:0,top:0,bottom:0,width:40,background:`linear-gradient(to left,${theme.bg} 30%,transparent)`,zIndex:2,pointerEvents:"none",display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:4 }}>
-                <span style={{ fontSize:12,color:theme.sub,opacity:0.6 }}>ÔÇ║</span>
+                <span style={{ fontSize:12,color:theme.sub,opacity:0.6 }}>›</span>
               </div>
               <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 4px 4px 0",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
                 {[
-                  {label:"Immobilier",icon:"­ƒÅá",color:"#6C63FF"},
-                  {label:"V├®hicules",icon:"­ƒÜù",color:"#FF6584"},
-                  {label:"Motos & Tricycles",icon:"­ƒÅì´©Å",color:"#FF8C42"},
-                  {label:"├ëlectronique",icon:"­ƒô▒",color:"#43C6AC"},
-                  {label:"Services",icon:"­ƒöº",color:"#FFD700"},
-                  {label:"Sport",icon:"ÔÜ¢",color:"#FF6584"},
-                  {label:"Mode",icon:"­ƒæù",color:"#9A78CF"},
-                  {label:"Autre",icon:"­ƒì│",color:"#43C6AC"},
+                  {label:"Immobilier",icon:"🏠",color:"#6C63FF"},
+                  {label:"Véhicules",icon:"🚗",color:"#FF6584"},
+                  {label:"Motos & Tricycles",icon:"🏍️",color:"#FF8C42"},
+                  {label:"Électronique",icon:"📱",color:"#43C6AC"},
+                  {label:"Services",icon:"🔧",color:"#FFD700"},
+                  {label:"Sport",icon:"⚽",color:"#FF6584"},
+                  {label:"Mode",icon:"👗",color:"#9A78CF"},
+                  {label:"Autre",icon:"🍳",color:"#43C6AC"},
                 ].map(c=>(
                   <button key={c.label} onClick={()=>{ setCategory(c.label); setView("home"); }}
                     style={{ background:`${c.color}15`,border:`1px solid ${c.color}44`,color:c.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
@@ -3237,17 +3237,17 @@ function AppContent() {
               </div>
             </div>
 
-            {/* Sections ÔÇö d├®filement horizontal (sans Mode ÔÇö d├®j├á dans Cat├®gories) */}
+            {/* Sections — défilement horizontal (sans Mode — déjà dans Catégories) */}
             <div style={{ position:"relative",marginBottom:16 }}>
               <div style={{ position:"absolute",right:0,top:0,bottom:0,width:40,background:`linear-gradient(to left,${theme.bg} 30%,transparent)`,zIndex:2,pointerEvents:"none",display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:4 }}>
-                <span style={{ fontSize:12,color:theme.sub,opacity:0.6 }}>ÔÇ║</span>
+                <span style={{ fontSize:12,color:theme.sub,opacity:0.6 }}>›</span>
               </div>
               <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 4px 4px 0",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
                 {[
-                  {label:"­ƒøì´©Å Boutiques",color:"#FF6584",bg:"rgba(255,101,132,0.1)",border:"rgba(255,101,132,0.3)",count:boutiques.length,action:()=>setView("boutiques")},
-                  {label:"­ƒöº Ateliers",color:"#43C6AC",bg:"rgba(67,198,172,0.1)",border:"rgba(67,198,172,0.3)",count:ateliers.length,action:()=>setView("ateliers")},
-                  {label:"­ƒì¢´©Å Restos & Bars",color:"#FF8C00",bg:"rgba(255,140,0,0.1)",border:"rgba(255,140,0,0.3)",count:restos.length,action:()=>setView("restos")},
-                  {label:"­ƒÆç Beaut├® & Coiffure",color:"#FF69B4",bg:"rgba(255,105,180,0.1)",border:"rgba(255,105,180,0.3)",count:beaute.length,action:()=>setView("beaute")},
+                  {label:"🛍️ Boutiques",color:"#FF6584",bg:"rgba(255,101,132,0.1)",border:"rgba(255,101,132,0.3)",count:boutiques.length,action:()=>setView("boutiques")},
+                  {label:"🔧 Ateliers",color:"#43C6AC",bg:"rgba(67,198,172,0.1)",border:"rgba(67,198,172,0.3)",count:ateliers.length,action:()=>setView("ateliers")},
+                  {label:"🍽️ Restos & Bars",color:"#FF8C00",bg:"rgba(255,140,0,0.1)",border:"rgba(255,140,0,0.3)",count:restos.length,action:()=>setView("restos")},
+                  {label:"💇 Beauté & Coiffure",color:"#FF69B4",bg:"rgba(255,105,180,0.1)",border:"rgba(255,105,180,0.3)",count:beaute.length,action:()=>setView("beaute")},
                 ].map(s=>(
                   <button key={s.label} onClick={s.action}
                     style={{ background:s.bg,border:`1px solid ${s.border}`,color:s.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
@@ -3260,41 +3260,41 @@ function AppContent() {
             {/* Bouton direct vers toutes les annonces */}
             <div style={{ textAlign:"center",paddingBottom:8 }}>
               <button onClick={()=>setView("home")} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 20px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer" }}>
-                ­ƒôï Toutes les annonces ÔåÆ
+                📋 Toutes les annonces →
               </button>
             </div>
           </div>
 
-          {/* Banni├¿re publicitaire ÔÇö dynamique */}
+          {/* Bannière publicitaire — dynamique */}
           {(() => {
             const ad = ads[adIndex];
             if (!ad) return (
               <div style={{ width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"12px"} auto 0`,borderRadius:16,overflow:"hidden",border:"1px solid rgba(108,99,255,0.3)",background:`linear-gradient(135deg,rgba(108,99,255,0.08),rgba(255,101,132,0.06))` }}>
                 <div style={{ padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
                   <div style={{ display:"flex",alignItems:"center",gap:12 }}>
-                    <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>­ƒÜÇ</div>
+                    <div style={{ width:44,height:44,borderRadius:10,background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0 }}>🚀</div>
                     <div>
                       <p style={{ fontWeight:800,fontSize:14,color:theme.text,marginBottom:2 }}>Votre pub vue par des milliers de personnes</p>
-                      <p style={{ color:theme.sub,fontSize:12 }}>Banni├¿re visible sur toutes les pages ┬À R├®sultats imm├®diats</p>
+                      <p style={{ color:theme.sub,fontSize:12 }}>Bannière visible sur toutes les pages · Résultats immédiats</p>
                     </div>
                   </div>
                   <button onClick={()=>setModal({type:"showFaster"})} style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",whiteSpace:"nowrap" }}>
-                    ÔÜí Show Faster
+                    ⚡ Show Faster
                   </button>
                 </div>
               </div>
             );
             return (
               <div style={{ position:"relative",width:"100%",maxWidth:700,margin:`${windowWidth<=600?"8px":"12px"} auto 0` }}>
-                {/* Fl├¿che pr├®c├®dent */}
+                {/* Flèche précédent */}
                 {ads.length > 1 && (
                   <button onTouchEnd={e=>{e.preventDefault();e.stopPropagation();setAdPaused(true);setAdIndex(i=>(i-1+ads.length)%ads.length);setTimeout(()=>setAdPaused(false),3000);}} onClick={e=>{e.preventDefault();e.stopPropagation();setAdPaused(true);setAdIndex(i=>(i-1+ads.length)%ads.length);setTimeout(()=>setAdPaused(false),3000);}}
-                    style={{ position:"absolute",left:-14,top:"50%",transform:"translateY(-50%)",zIndex:10,width:30,height:30,borderRadius:"50%",background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18,fontWeight:700,boxShadow:"0 2px 8px rgba(0,0,0,0.2)",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>ÔÇ╣</button>
+                    style={{ position:"absolute",left:-14,top:"50%",transform:"translateY(-50%)",zIndex:10,width:30,height:30,borderRadius:"50%",background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18,fontWeight:700,boxShadow:"0 2px 8px rgba(0,0,0,0.2)",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>‹</button>
                 )}
-                {/* Fl├¿che suivant */}
+                {/* Flèche suivant */}
                 {ads.length > 1 && (
                   <button onTouchEnd={e=>{e.preventDefault();e.stopPropagation();setAdPaused(true);setAdIndex(i=>(i+1)%ads.length);setTimeout(()=>setAdPaused(false),3000);}} onClick={e=>{e.preventDefault();e.stopPropagation();setAdPaused(true);setAdIndex(i=>(i+1)%ads.length);setTimeout(()=>setAdPaused(false),3000);}}
-                    style={{ position:"absolute",right:-14,top:"50%",transform:"translateY(-50%)",zIndex:10,width:30,height:30,borderRadius:"50%",background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18,fontWeight:700,boxShadow:"0 2px 8px rgba(0,0,0,0.2)",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>ÔÇ║</button>
+                    style={{ position:"absolute",right:-14,top:"50%",transform:"translateY(-50%)",zIndex:10,width:30,height:30,borderRadius:"50%",background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18,fontWeight:700,boxShadow:"0 2px 8px rgba(0,0,0,0.2)",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>›</button>
                 )}
               <a href={ad.lien||"#"} target="_blank" rel="noopener noreferrer"
                 onTouchStart={()=>setAdPaused(true)}
@@ -3308,7 +3308,7 @@ function AppContent() {
                     <div style={{ display:"flex",alignItems:"center",gap:14 }}>
                       {ad.logo_url
                         ? <img src={ad.logo_url} alt={ad.entreprise} style={{ width:48,height:48,borderRadius:10,objectFit:"cover",flexShrink:0 }}/>
-                        : <div style={{ width:48,height:48,borderRadius:10,background:`linear-gradient(135deg,${ad.couleur1},${ad.couleur2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0 }}>­ƒÅó</div>
+                        : <div style={{ width:48,height:48,borderRadius:10,background:`linear-gradient(135deg,${ad.couleur1},${ad.couleur2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0 }}>🏢</div>
                       }
                       <div>
                         <p style={{ fontWeight:800,fontSize:15,color:theme.text,marginBottom:3 }}>{ad.entreprise}</p>
@@ -3325,7 +3325,7 @@ function AppContent() {
                         </div>
                       )}
                       <div style={{ background:`linear-gradient(135deg,${ad.couleur1||"#6C63FF"},${ad.couleur2||"#8B84FF"})`,color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13 }}>
-                        Voir ÔåÆ
+                        Voir →
                       </div>
                     </div>
                   </div>
@@ -3338,8 +3338,8 @@ function AppContent() {
 
           {/* Footer landing */}
           <p style={{ color:theme.sub,fontSize:13,marginTop:24,textAlign:"center" }}>
-            <span style={{ color:"#FFD700",fontWeight:700,fontStyle:"italic" }}>"Sur March├®duRoi, vous ├¬tes le Roi du March├®" ­ƒææ</span><br/>
-            ┬® 2026 March├®duRoi ┬À Ouidah, B├®nin ­ƒçº­ƒç» ┬À <button onClick={()=>setView("terms")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>CGU</button> ┬À <button onClick={()=>setView("about")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>├Ç propos</button>
+            <span style={{ color:"#FFD700",fontWeight:700,fontStyle:"italic" }}>"Sur MarchéduRoi, vous êtes le Roi du Marché" 👑</span><br/>
+            © 2026 MarchéduRoi · Ouidah, Bénin 🇧🇯 · <button onClick={()=>setView("terms")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>CGU</button> · <button onClick={()=>setView("about")} style={{ background:"none",border:"none",color:"#6C63FF",cursor:"pointer",fontSize:13 }}>À propos</button>
           </p>
         </div>
       )}
@@ -3348,7 +3348,7 @@ function AppContent() {
       {view==="home"&&(
         <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
 
-          {/* ├ëtat de chargement */}
+          {/* État de chargement */}
           {!postsLoaded && (
             <div style={{ display:"grid",gridTemplateColumns:windowWidth>800?"repeat(3,1fr)":windowWidth>600?"repeat(2,1fr)":"repeat(2,1fr)",gap:12,width:"100%",padding:"8px 0" }}>
               {Array.from({length:6}).map((_,i)=>(
@@ -3369,29 +3369,29 @@ function AppContent() {
             </div>
           )}
 
-          {/* Contenu principal ÔÇö affich├® seulement quand charg├® */}
+          {/* Contenu principal — affiché seulement quand chargé */}
           {postsLoaded && (<>
 
           {/* Titre + compteur + bouton publier */}
           <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:8 }}>
             <div style={{ display:"flex",alignItems:"center",gap:8,flexWrap:"wrap" }}>
-              {windowWidth > 600 && <h1 style={{ fontSize:"clamp(18px,3vw,28px)",fontWeight:800,color:theme.text,margin:0 }}>D├®couvrez des <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>annonces</span></h1>}
+              {windowWidth > 600 && <h1 style={{ fontSize:"clamp(18px,3vw,28px)",fontWeight:800,color:theme.text,margin:0 }}>Découvrez des <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>annonces</span></h1>}
               <span style={{ background:theme.card,border:`1px solid ${theme.border}`,color:theme.sub,padding:"2px 10px",borderRadius:20,fontSize:12,fontWeight:600 }}>{filtered.length} annonce{filtered.length!==1?"s":""}</span>
             </div>
             {canEdit ? (
-              <button onClick={()=>{setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:""});setPostPhotos([]);setVehicleForm({});setImmoForm({sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon ├®tat",recasee:"",autres:""}); setMonths(1); setModal({type:"add"});}} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"9px 18px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6,transition:"box-shadow 0.2s",flexShrink:0 }}>
+              <button onClick={()=>{setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:""});setPostPhotos([]);setVehicleForm({});setImmoForm({sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:""}); setMonths(1); setModal({type:"add"});}} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"9px 18px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6,transition:"box-shadow 0.2s",flexShrink:0 }}>
                 <Icon name="plus" size={14}/>Publier
               </button>
             ) : (
               windowWidth > 600 ? (
                 <button onClick={()=>setView("register")} style={{ ...cardStyle,border:`1px dashed #6C63FF`,color:"#6C63FF",padding:"9px 14px",borderRadius:10,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,flexShrink:0 }}>
-                  <Icon name="lock" size={13}/>Cr├®er un compte
+                  <Icon name="lock" size={13}/>Créer un compte
                 </button>
               ) : null
             )}
           </div>
 
-            {/* Recherche + GPS ÔÇö m├¬me ligne sur desktop */}
+            {/* Recherche + GPS — même ligne sur desktop */}
             <div style={{ marginBottom:8, width:"100%" }}>
               <div style={{ display:"flex",gap:6,alignItems:"center",flexWrap:windowWidth>700?"nowrap":"wrap" }}>
                 <div style={{ position:"relative",flex:1,minWidth:0 }}>
@@ -3399,30 +3399,30 @@ function AppContent() {
                   <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.rechercher} maxLength={100} style={{ ...inputStyle,padding:"11px 16px 11px 40px",borderRadius:10,fontSize:13,width:"100%",boxSizing:"border-box" }}/>
                 </div>
                 <button onClick={getUserLocation} style={{ background:userLocation?"rgba(67,198,172,0.15)":"rgba(108,99,255,0.1)",border:`1px solid ${userLocation?"rgba(67,198,172,0.5)":"rgba(108,99,255,0.3)"}`,color:userLocation?"#43C6AC":"#6C63FF",padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap",flexShrink:0 }}>
-                  {locationLoading?"ÔÅ│":userLocation?"­ƒôì Actif":t.pressDeMoi}
+                  {locationLoading?"⏳":userLocation?"📍 Actif":t.pressDeMoi}
                 </button>
                 {userLocation && (<>
                   <button onClick={()=>setSortByDistance(s=>!s)} style={{ background:sortByDistance?"rgba(67,198,172,0.15)":"transparent",border:`1px solid ${theme.border}`,color:sortByDistance?"#43C6AC":theme.sub,padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
-                    {sortByDistance?"Ô£à Distance":"Distance"}
+                    {sortByDistance?"✅ Distance":"Distance"}
                   </button>
                   <button onClick={()=>{ setUserLocation(null); setSortByDistance(false); }} style={{ background:"rgba(255,71,87,0.08)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"11px 12px",borderRadius:10,fontWeight:600,fontSize:12,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
-                    Ô£ò
+                    ✕
                   </button>
                 </>)}
               </div>
             </div>
 
-            {/* Boutiques Ateliers Restos ÔÇö d├®filement horizontal */}
+            {/* Boutiques Ateliers Restos — défilement horizontal */}
             <div style={{ position:"relative",marginBottom:8 }}>
               <div style={{ position:"absolute",right:0,top:0,bottom:0,width:36,background:`linear-gradient(to left,${theme.bg} 30%,transparent)`,zIndex:2,pointerEvents:"none",display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:4 }}>
-                <span style={{ fontSize:10,color:theme.sub,opacity:0.7 }}>ÔÇ║</span>
+                <span style={{ fontSize:10,color:theme.sub,opacity:0.7 }}>›</span>
               </div>
               <div style={{ display:"flex",gap:6,overflowX:"auto",flexWrap:"nowrap",padding:"2px 0",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
                 {[
-                  { label:`­ƒøì´©Å ${t.boutiques}`, count:boutiques.length, bg:"linear-gradient(135deg,#FF6584,#FFB347)", action:()=>setView("boutiques") },
-                  { label:`­ƒöº ${t.ateliers}`,   count:ateliers.length,  bg:"linear-gradient(135deg,#43C6AC,#6C63FF)", action:()=>setView("ateliers") },
-                  { label:`­ƒì¢´©Å ${t.restos}`,     count:restos.length,    bg:"linear-gradient(135deg,#FF8C00,#FF6584)", action:()=>setView("restos") },
-                  { label:`­ƒÆç ${t.beaute}`,     count:beaute.length,    bg:"linear-gradient(135deg,#FF69B4,#FF1493)", action:()=>setView("beaute") },
+                  { label:`🛍️ ${t.boutiques}`, count:boutiques.length, bg:"linear-gradient(135deg,#FF6584,#FFB347)", action:()=>setView("boutiques") },
+                  { label:`🔧 ${t.ateliers}`,   count:ateliers.length,  bg:"linear-gradient(135deg,#43C6AC,#6C63FF)", action:()=>setView("ateliers") },
+                  { label:`🍽️ ${t.restos}`,     count:restos.length,    bg:"linear-gradient(135deg,#FF8C00,#FF6584)", action:()=>setView("restos") },
+                  { label:`💇 ${t.beaute}`,     count:beaute.length,    bg:"linear-gradient(135deg,#FF69B4,#FF1493)", action:()=>setView("beaute") },
                 ].map(s=>(
                   <button key={s.label} onClick={s.action}
                     style={{ background:s.bg,border:"none",color:"#fff",padding:"6px 14px",borderRadius:18,fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap" }}>
@@ -3432,14 +3432,14 @@ function AppContent() {
               </div>
             </div>
 
-            {/* Cat├®gories ÔÇö d├®filement horizontal */}
+            {/* Catégories — défilement horizontal */}
             <div style={{ position:"relative",marginBottom:8 }}>
               <div style={{ position:"absolute",right:0,top:0,bottom:0,width:36,background:`linear-gradient(to left,${theme.bg} 30%,transparent)`,zIndex:2,pointerEvents:"none",display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:4 }}>
-                <span style={{ fontSize:10,color:theme.sub,opacity:0.7 }}>ÔÇ║</span>
+                <span style={{ fontSize:10,color:theme.sub,opacity:0.7 }}>›</span>
               </div>
               <div style={{ display:"flex",gap:5,overflowX:"auto",flexWrap:"nowrap",padding:"2px 0",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
                 {CATEGORIES.map(c=>{
-                  const cc = CATEGORY_COLORS[c]||{bg:"rgba(108,99,255,0.12)",border:"rgba(108,99,255,0.3)",text:"#6C63FF",icon:"­ƒÅÀ´©Å"};
+                  const cc = CATEGORY_COLORS[c]||{bg:"rgba(108,99,255,0.12)",border:"rgba(108,99,255,0.3)",text:"#6C63FF",icon:"🏷️"};
                   const isActive = category === c;
                   return (
                     <button key={c} onClick={()=>setCategory(c)}
@@ -3466,20 +3466,20 @@ function AppContent() {
                 <input value={priceMin} onChange={e=>setPriceMin(e.target.value)} placeholder="0" type="number" style={{ width:70,background:"transparent",border:"none",color:theme.text,fontSize:12,fontFamily:"inherit",outline:"none" }}/>
                 <span style={{ color:theme.sub,fontSize:11 }}>FCFA</span>
               </div>
-              <span style={{ color:theme.sub,fontSize:13 }}>ÔÇö</span>
+              <span style={{ color:theme.sub,fontSize:13 }}>—</span>
               <div style={{ display:"flex",alignItems:"center",gap:5,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:8,padding:"5px 10px" }}>
                 <span style={{ color:theme.sub,fontSize:11,fontWeight:600 }}>Max</span>
-                <input value={priceMax} onChange={e=>setPriceMax(e.target.value)} placeholder="Ôê×" type="number" style={{ width:70,background:"transparent",border:"none",color:theme.text,fontSize:12,fontFamily:"inherit",outline:"none" }}/>
+                <input value={priceMax} onChange={e=>setPriceMax(e.target.value)} placeholder="∞" type="number" style={{ width:70,background:"transparent",border:"none",color:theme.text,fontSize:12,fontFamily:"inherit",outline:"none" }}/>
                 <span style={{ color:theme.sub,fontSize:11 }}>FCFA</span>
               </div>
-              {(priceMin||priceMax) && <button onClick={()=>{setPriceMin("");setPriceMax("");}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"5px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>Ô£ò</button>}
+              {(priceMin||priceMax) && <button onClick={()=>{setPriceMin("");setPriceMax("");}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"5px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>✕</button>}
             </div>
             {/* Filtre ville + date */}
             <div style={{ display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",marginTop:6 }}>
               <div style={{ display:"flex",alignItems:"center",gap:5,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:8,padding:"5px 10px" }}>
-                <span style={{ color:theme.sub,fontSize:11 }}>­ƒôì</span>
+                <span style={{ color:theme.sub,fontSize:11 }}>📍</span>
                 <input value={filterVille} onChange={e=>setFilterVille(e.target.value)} placeholder="Ville..." style={{ width:90,background:"transparent",border:"none",color:theme.text,fontSize:12,fontFamily:"inherit",outline:"none" }}/>
-                {filterVille&&<button onClick={()=>setFilterVille("")} style={{ background:"none",border:"none",color:theme.sub,cursor:"pointer",fontSize:11,padding:0 }}>Ô£ò</button>}
+                {filterVille&&<button onClick={()=>setFilterVille("")} style={{ background:"none",border:"none",color:theme.sub,cursor:"pointer",fontSize:11,padding:0 }}>✕</button>}
               </div>
               {["7j","30j","90j"].map(d=>(
                 <button key={d} onClick={()=>setFilterDate(filterDate===d?"":d)}
@@ -3493,14 +3493,14 @@ function AppContent() {
           {/* Annonces en vedette */}
           
 
-          {/* Bandeau Urgent ÔÇö EN CE MOMENT */}
+          {/* Bandeau Urgent — EN CE MOMENT */}
           <UrgentBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth}/>
 
-          {/* R├®sultats de recherche globale ÔÇö boutiques, ateliers, restos, beaut├® */}
+          {/* Résultats de recherche globale — boutiques, ateliers, restos, beauté */}
           {globalSearch.length > 0 && (
             <div style={{ marginBottom:24,width:"100%" }}>
               <p style={{ fontWeight:700,fontSize:14,color:theme.sub,marginBottom:12 }}>
-                ­ƒöì {globalSearch.length} r├®sultat{globalSearch.length>1?"s":""} dans les sections ÔÇö <span style={{ color:theme.text }}>"{search}"</span>
+                🔍 {globalSearch.length} résultat{globalSearch.length>1?"s":""} dans les sections — <span style={{ color:theme.text }}>"{search}"</span>
               </p>
               <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                 {globalSearch.slice(0,6).map(item=>(
@@ -3515,12 +3515,12 @@ function AppContent() {
                     <div style={{ flex:1,minWidth:0 }}>
                       <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:3 }}>
                         <span style={{ fontSize:11,fontWeight:700,color:theme.sub }}>{item._label}</span>
-                        {item.ville && <span style={{ fontSize:11,color:theme.sub }}>┬À {item.ville}</span>}
+                        {item.ville && <span style={{ fontSize:11,color:theme.sub }}>· {item.ville}</span>}
                       </div>
                       <p style={{ fontWeight:700,fontSize:14,color:theme.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{item.name}</p>
                       {item.description && <p style={{ fontSize:12,color:theme.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{item.description}</p>}
                     </div>
-                    <span style={{ color:"#6C63FF",fontSize:12,fontWeight:600,flexShrink:0 }}>Voir ÔåÆ</span>
+                    <span style={{ color:"#6C63FF",fontSize:12,fontWeight:600,flexShrink:0 }}>Voir →</span>
                   </div>
                 ))}
               </div>
@@ -3537,13 +3537,13 @@ function AppContent() {
                 }
                 <div style={{ padding:"14px 16px" }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8 }}>
-                    <span className="tag" style={{ background:post.category==="V├®hicules"?"rgba(255,101,132,0.15)":"rgba(108,99,255,0.15)",color:post.category==="V├®hicules"?"#FF6584":"#8B84FF",display:"flex",alignItems:"center",gap:4 }}>
-                      {post.category==="V├®hicules"&&<Icon name="car" size={10}/>}{post.category}
+                    <span className="tag" style={{ background:post.category==="Véhicules"?"rgba(255,101,132,0.15)":"rgba(108,99,255,0.15)",color:post.category==="Véhicules"?"#FF6584":"#8B84FF",display:"flex",alignItems:"center",gap:4 }}>
+                      {post.category==="Véhicules"&&<Icon name="car" size={10}/>}{post.category}
                     </span>
                     {post.price&&(
                     <div style={{ textAlign:"right" }}>
                       <p style={{ fontWeight:700,color:"#43C6AC",fontSize:14 }}>{post.price} FCFA</p>
-                      {(()=>{ const num=parseInt((post.price||"").replace(/[^0-9]/g,"")); return num>0?<p style={{ color:theme.sub,fontSize:11 }}>Ôëê ${(num/600).toFixed(2)} USD</p>:null; })()}
+                      {(()=>{ const num=parseInt((post.price||"").replace(/[^0-9]/g,"")); return num>0?<p style={{ color:theme.sub,fontSize:11 }}>≈ ${(num/600).toFixed(2)} USD</p>:null; })()}
                     </div>
                   )}
                   </div>
@@ -3551,60 +3551,60 @@ function AppContent() {
                   {post.expiresAt && (() => { const d = getDaysLeft(post.expiresAt); const isOwner = user && user.id === post.authorId; return d !== null && d <= 7 ? (
                     isOwner
                       ? <button onClick={()=>setView("dashboard")} style={{ width:"100%",background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6,cursor:"pointer",textAlign:"left" }}>
-                          <span style={{ fontSize:12 }}>ÔÜá´©Å</span>
-                          <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""} ┬À Prolongez depuis votre tableau de bord ÔåÆ</p>
+                          <span style={{ fontSize:12 }}>⚠️</span>
+                          <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""} · Prolongez depuis votre tableau de bord →</p>
                         </button>
                       : <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6 }}>
-                          <span style={{ fontSize:12 }}>ÔÜá´©Å</span>
+                          <span style={{ fontSize:12 }}>⚠️</span>
                           <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""}</p>
                         </div>
                   ) : d !== null && d <= 30 ? (
                     <div style={{ background:"rgba(255,165,0,0.1)",border:"1px solid rgba(255,165,0,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8 }}>
-                      <p style={{ fontSize:12,color:"#FFA500",fontWeight:600 }}>ÔÅ│ Expire le {post.expiresAt}</p>
+                      <p style={{ fontSize:12,color:"#FFA500",fontWeight:600 }}>⏳ Expire le {post.expiresAt}</p>
                     </div>
                   ) : null; })()}
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6,alignItems:"center" }}>
 
                     {post.sponsored && !isUrgentActive(post) && (
                       <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,color:"#000" }}>
-                        ­ƒîƒ Sponsoris├®
+                        🌟 Sponsorisé
                       </div>
                     )}
                     {post.flash && new Date(post.flashUntil) > new Date() && (
                       <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#6C63FF,#8B84FF)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,color:"#fff" }}>
-                        ÔÜí FLASH
+                        ⚡ FLASH
                       </div>
                     )}
                     {post.ownerVerified && (
                       <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.15)",border:"1px solid rgba(67,198,172,0.4)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,color:"#43C6AC" }}>
-                        Ô£à Vendeur v├®rifi├®
+                        ✅ Vendeur vérifié
                       </div>
                     )}
-                    {/* Badge Nouveau ÔÇö annonce < 24h */}
+                    {/* Badge Nouveau — annonce < 24h */}
                     {post.date && (Date.now() - new Date(post.date).getTime()) < 86400000 && (
                       <div style={{ display:"inline-flex",alignItems:"center",gap:3,background:"linear-gradient(135deg,#43C6AC,#2ecc71)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:800,color:"#fff" }}>
-                        Ô£¿ Nouveau
+                        ✨ Nouveau
                       </div>
                     )}
                     {/* Compteur de vues */}
                     {liveViewers[post.id] && (
                     <span style={{ background:"rgba(255,71,87,0.15)",color:"#FF4757",borderRadius:20,padding:"2px 8px",fontSize:11,fontWeight:700,display:"flex",alignItems:"center",gap:4 }}>
-                      ­ƒö┤ {liveViewers[post.id]} en ligne
+                      🔴 {liveViewers[post.id]} en ligne
                     </span>
                   )}
                   {(postViews[post.id]||0) > 0 && (
                       <div style={{ display:"inline-flex",alignItems:"center",gap:3,background:"rgba(154,154,176,0.1)",borderRadius:20,padding:"3px 8px",fontSize:11,color:theme.sub }}>
-                        ­ƒæü´©Å {postViews[post.id]}
+                        👁️ {postViews[post.id]}
                       </div>
                     )}
                   </div>
                   {post.distance!==null ? (
                     <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>
-                      ­ƒôì {formatDistance(post.distance)}
+                      📍 {formatDistance(post.distance)}
                     </div>
                   ) : (post.lat && post.lng) ? (
                     <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.2)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:600 }}>
-                      ­ƒôì Localisation disponible
+                      📍 Localisation disponible
                     </div>
                   ) : null}
                   <h3 style={{ fontWeight:700,fontSize:15,marginBottom:4,lineHeight:1.3,color:theme.text }}>{post.title}</h3>
@@ -3616,7 +3616,7 @@ function AppContent() {
                     </div>
                   )}
 
-                  {/* Bouton Contacter ÔÇö tiroir sur PC/tablette, inline sur mobile */}
+                  {/* Bouton Contacter — tiroir sur PC/tablette, inline sur mobile */}
                   {!expandedContacts[post.id] && (
                     <button onClick={(e)=>{
                       e.stopPropagation();
@@ -3635,23 +3635,23 @@ function AppContent() {
                       }
                     }} style={{ width:"100%",background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.25)",color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.2s" }}>
                       <Icon name="mail" size={14}/>
-                      Contacter Ôû¥
+                      Contacter ▾
                     </button>
                   )}
 
-                  {/* Panneau d├®pli├® ÔÇö clic int├®rieur ne ferme pas */}
+                  {/* Panneau déplié — clic intérieur ne ferme pas */}
                   {expandedContacts[post.id] && (
                     <div id={"contact-panel-"+post.id} onClick={e=>e.stopPropagation()} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
 
-                      {/* Mini fiche immobili├¿re */}
+                      {/* Mini fiche immobilière */}
                       {post.immo&&(
                         <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:10 }}>
-                          {[{v:post.immo.transaction},{v:post.immo.sousType},{v:post.immo.superficie?(post.immo.superficie+" "+(post.immo.superficieUnit||"m┬▓")):null},{v:post.immo.pieces?(post.immo.pieces+" pi├¿ce"+(parseInt(post.immo.pieces)>1?"s":"")):null},{v:post.immo.ville}].filter(f=>f.v).map((f,i)=>(
+                          {[{v:post.immo.transaction},{v:post.immo.sousType},{v:post.immo.superficie?(post.immo.superficie+" "+(post.immo.superficieUnit||"m²")):null},{v:post.immo.pieces?(post.immo.pieces+" pièce"+(parseInt(post.immo.pieces)>1?"s":"")):null},{v:post.immo.ville}].filter(f=>f.v).map((f,i)=>(
                             <span key={i} className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{f.v}</span>
                           ))}
                         </div>
                       )}
-                      {/* Mini fiche v├®hicule */}
+                      {/* Mini fiche véhicule */}
                       {post.vehicle&&(
                         <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:10 }}>
                           {[{k:"marque",v:post.vehicle.marque},{k:"modele",v:post.vehicle.modele},{k:"annee",v:post.vehicle.annee},{k:"carburant",v:post.vehicle.carburant},{k:"cylindree",v:post.vehicle.cylindree},{k:"etat",v:post.vehicle.etat}].filter(f=>f.v).map(f=>(
@@ -3663,7 +3663,7 @@ function AppContent() {
                       {/* Description */}
                       <p style={{ color:theme.sub,fontSize:12,lineHeight:1.4,marginBottom:10 }}>{post.description.length>120?post.description.slice(0,120)+"...":post.description}</p>
 
-                      {/* Auteur + badge v├®rifi├® */}
+                      {/* Auteur + badge vérifié */}
                       <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,paddingBottom:10,borderBottom:`1px solid ${theme.border}` }}>
                         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
                           <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0 }}>{post.author[0]}</div>
@@ -3678,8 +3678,8 @@ function AppContent() {
                       {/* Likes + Favoris + Partage */}
                       <div style={{ display:"flex",gap:4,alignItems:"center",flexWrap:"wrap",marginBottom:10 }}>
                         <button onClick={()=>likePost(post.id)} style={{ background:likedPosts.includes(post.id)?"rgba(255,101,132,0.2)":"transparent",border:"none",color:likedPosts.includes(post.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{post.likes}</button>
-                        <button onClick={()=>toggleFavorite(post.id)} style={{ background:favorites.includes(post.id)?"rgba(255,215,0,0.2)":"transparent",border:"none",color:favorites.includes(post.id)?"#FFD700":theme.sub,padding:"6px 8px",borderRadius:8,fontSize:16,cursor:"pointer" }}>{favorites.includes(post.id)?"Ôÿà":"Ôÿå"}</button>
-                        <a href={"https://wa.me/?text="+encodeURIComponent("*"+post.title+"*"+"\n"+"Prix: "+(post.price||"Non precise")+"\n"+"Voir: https://marcheduroi.com/annonce/"+post.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                        <button onClick={()=>toggleFavorite(post.id)} style={{ background:favorites.includes(post.id)?"rgba(255,215,0,0.2)":"transparent",border:"none",color:favorites.includes(post.id)?"#FFD700":theme.sub,padding:"6px 8px",borderRadius:8,fontSize:16,cursor:"pointer" }}>{favorites.includes(post.id)?"★":"☆"}</button>
+                        <a href={"https://wa.me/?text="+encodeURIComponent("*"+post.title+"*"+"\nPrix: "+(post.price||"Non précisé")+"\nVoir: https://marcheduroi.com/annonce/"+post.id+"\n\"Sur MarchéduRoi, vous êtes le Roi du Marché 👑\"")} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                           <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4,cursor:"pointer" }}>
                             <svg width="13" height="13" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                             Partager
@@ -3694,15 +3694,15 @@ function AppContent() {
                               const blob = await resp.blob();
                               const file = new File([blob], "annonce.jpg", { type: blob.type });
                               if(navigator.canShare && navigator.canShare({ files:[file] })){
-                                await navigator.share({ title:post.title, text:"Sur March├®duRoi, vous ├¬tes le Roi du March├® ­ƒææ", url, files:[file] });
+                                await navigator.share({ title:post.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑", url, files:[file] });
                                 return;
                               }
                             } catch(e){}
-                            navigator.share({ title:post.title, text:"Sur March├®duRoi, vous ├¬tes le Roi du March├® ­ƒææ - "+url });
+                            navigator.share({ title:post.title, text:"Sur MarchéduRoi, vous êtes le Roi du Marché 👑 - "+url });
                           } else if(navigator.share){
                             navigator.share({ title:post.title, url });
                           } else {
-                            navigator.clipboard.writeText(url); notify("­ƒöù Lien copi├® !");
+                            navigator.clipboard.writeText(url); notify("🔗 Lien copié !");
                           }
                         }} style={{ background:"rgba(0,0,0,0.06)",border:"none",color:theme.text,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:3 }}>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -3721,10 +3721,10 @@ function AppContent() {
                           <div style={{ display:"flex",gap:8 }}>
                             <a href={"tel:"+post.phone} style={{ flex:1,textDecoration:"none" }}>
                               <div style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"9px 14px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:8,cursor:"pointer" }}>
-                                ­ƒô× {post.phone}
+                                📞 {post.phone}
                               </div>
                             </a>
-                            <a href={"https://wa.me/"+post.phone.replace(/[\s+\-()]/g,"")+"?text="+encodeURIComponent("Bonjour, je suis int├®ress├®(e) par votre annonce : *"+post.title+"*\nPrix : "+(post.price||"Non pr├®cis├®")+"\nLien : https://marcheduroi.com/annonce/"+post.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                            <a href={"https://wa.me/"+post.phone.replace(/[\s+\-()]/g,"")+"?text="+encodeURIComponent("Bonjour, je suis intéressé(e) par votre annonce : *"+post.title+"*\nPrix : "+(post.price||"Non précisé")+"\nLien : https://marcheduroi.com/annonce/"+post.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                               <div style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",color:"#25D366",padding:"9px 12px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6,cursor:"pointer" }}>
                                 <svg width="14" height="14" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                                 WA
@@ -3735,23 +3735,23 @@ function AppContent() {
                         {post.lat && post.lng && (
                           <a href={"https://www.google.com/maps/dir/?api=1&destination="+post.lat+","+post.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                             <div style={{ background:"rgba(66,133,244,0.1)",border:"1px solid rgba(66,133,244,0.3)",color:"#4285F4",padding:"9px 14px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:8,cursor:"pointer" }}>
-                              ­ƒù║´©Å Itin├®raire Google Maps
+                              🗺️ Itinéraire Google Maps
                             </div>
                           </a>
                         )}
                         {user && user.id !== (post.authorId||post.author_id) && (post.authorId||post.author_id) && (
                           <button onClick={()=>{ const ownerId=post.authorId||post.author_id; setActiveConv({postId:post.id,postTitle:post.title,postPrice:post.price,postPhoto:post.photos?.[0],receiverId:ownerId,receiverName:post.author,messages:messages.filter(m=>(m.post_id===post.id)&&((m.sender_id===user.id&&m.receiver_id===ownerId)||(m.receiver_id===user.id&&m.sender_id===ownerId)))}); setShowMessages(true); markConvRead({messages:messages.filter(m=>m.post_id===post.id&&m.receiver_id===user.id)}); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"9px 14px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
-                            ­ƒÆ¼ Message priv├®
+                            💬 Message privé
                           </button>
                         )}
                         <button onClick={()=>setModal({type:"report",data:post})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"4px 0",fontSize:11,cursor:"pointer",textAlign:"left" }}>
-                          ­ƒÜ® Signaler cette annonce
+                          🚩 Signaler cette annonce
                         </button>
                       </div>
                       {/* Bouton Masquer en bas du panneau */}
                       <button onClick={e=>{ e.stopPropagation(); setExpandedContacts({}); }}
                         style={{ width:"100%",background:"rgba(67,198,172,0.15)",border:"1px solid rgba(67,198,172,0.5)",color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:10,transition:"all 0.2s" }}>
-                        <Icon name="mail" size={14}/> Masquer Ôû▓
+                        <Icon name="mail" size={14}/> Masquer ▲
                       </button>
                     </div>
                   )}
@@ -3761,14 +3761,14 @@ function AppContent() {
           </div>
           {filtered.length===0 && postsLoaded && (
             <div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}>
-              <p style={{ fontSize:40,marginBottom:12 }}>­ƒöì</p>
-              <p style={{ fontWeight:600,marginBottom:8 }}>Aucune annonce trouv├®e{!showAllCountries?" dans votre pays":""}</p>
+              <p style={{ fontSize:40,marginBottom:12 }}>🔍</p>
+              <p style={{ fontWeight:600,marginBottom:8 }}>Aucune annonce trouvée{!showAllCountries?" dans votre pays":""}</p>
               <p style={{ fontSize:13,marginBottom:16 }}>
-                {!showAllCountries ? "Il n'y a pas encore d'annonces dans votre pays." : "Essayez une autre cat├®gorie ou modifiez votre recherche."}
+                {!showAllCountries ? "Il n'y a pas encore d'annonces dans votre pays." : "Essayez une autre catégorie ou modifiez votre recherche."}
               </p>
               {!showAllCountries && (
                 <button onClick={()=>setShowAllCountries(true)} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 24px",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer" }}>
-                  ­ƒîì Voir toutes les annonces
+                  🌍 Voir toutes les annonces
                 </button>
               )}
             </div>
@@ -3778,14 +3778,14 @@ function AppContent() {
           {filtered.length > 0 && !showAllCountries && !search && postsLoaded && (
             <div style={{ textAlign:"center",marginTop:16,marginBottom:8 }}>
               <button onClick={()=>setShowAllCountries(true)} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,padding:"8px 20px",borderRadius:20,fontWeight:600,fontSize:13,cursor:"pointer" }}>
-                ­ƒîì Voir les annonces de tous les pays
+                🌍 Voir les annonces de tous les pays
               </button>
             </div>
           )}
           {showAllCountries && !search && postsLoaded && (
             <div style={{ textAlign:"center",marginTop:8,marginBottom:8 }}>
               <button onClick={()=>setShowAllCountries(false)} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:"#6C63FF",padding:"8px 20px",borderRadius:20,fontWeight:600,fontSize:13,cursor:"pointer" }}>
-                ­ƒôì Afficher mon pays uniquement
+                📍 Afficher mon pays uniquement
               </button>
             </div>
           )}
@@ -3797,14 +3797,14 @@ function AppContent() {
                 Affichage de {Math.min(visibleCount,filtered.length)} sur {filtered.length} annonces
               </p>
               <button onClick={()=>setVisibleCount(v=>v+POSTS_PER_PAGE)} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
-                Voir plus ({filtered.length-visibleCount} restantes) Ôåô
+                Voir plus ({filtered.length-visibleCount} restantes) ↓
               </button>
             </div>
           )}
           {filtered.length > POSTS_PER_PAGE && visibleCount >= filtered.length && (
             <div style={{ textAlign:"center",marginTop:24 }}>
               <button onClick={()=>setVisibleCount(12)} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,padding:"10px 24px",borderRadius:12,fontWeight:600,fontSize:13,cursor:"pointer" }}>
-                Ôåæ R├®duire la liste
+                ↑ Réduire la liste
               </button>
             </div>
           )}
@@ -3832,14 +3832,14 @@ function AppContent() {
           {/* Mes Favoris */}
           {favorites.length > 0 && (
             <div style={{ marginBottom:32 }}>
-              <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text }}>Ô¡É Mes Favoris ({favorites.length})</h3>
+              <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text }}>⭐ Mes Favoris ({favorites.length})</h3>
               {posts.filter(p=>favorites.includes(p.id)).map(post=>(
                 <div key={post.id} style={{ ...cardStyle,borderRadius:14,padding:16,marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
                   <div style={{ display:"flex",gap:12,alignItems:"center" }}>
                     {post.photos&&post.photos.length>0&&<img src={post.photos[0]} alt="" style={{ width:50,height:50,borderRadius:8,objectFit:"cover" }}/>}
                     <div>
                       <p style={{ fontWeight:700,marginBottom:4,color:theme.text }}>{post.title}</p>
-                      <p style={{ color:theme.sub,fontSize:12 }}>{post.category} ┬À {post.price||""}</p>
+                      <p style={{ color:theme.sub,fontSize:12 }}>{post.category} · {post.price||""}</p>
                     </div>
                   </div>
                   <div style={{ display:"flex",gap:8 }}>
@@ -3855,17 +3855,17 @@ function AppContent() {
           {myPosts.filter(p=>p.expired).length > 0 && (
             <div style={{ marginBottom:24 }}>
               <h3 style={{ fontWeight:700,fontSize:16,marginBottom:12,color:theme.sub,display:"flex",alignItems:"center",gap:8 }}>
-                ­ƒôï Historique ({myPosts.filter(p=>p.expired).length} expir├®es)
+                📋 Historique ({myPosts.filter(p=>p.expired).length} expirées)
               </h3>
               {myPosts.filter(p=>p.expired).map(post=>(
                 <div key={post.id} style={{ ...cardStyle,borderRadius:12,padding:14,marginBottom:8,opacity:0.7 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                     <div>
                       <p style={{ fontWeight:600,color:theme.text,marginBottom:2 }}>{post.title}</p>
-                      <p style={{ color:theme.sub,fontSize:12 }}>{post.category} ┬À Expir├®e le {post.expiresAt}</p>
+                      <p style={{ color:theme.sub,fontSize:12 }}>{post.category} · Expirée le {post.expiresAt}</p>
                     </div>
-                    <button onClick={()=>{ notify("­ƒÆí Choisissez une dur├®e pour republier cette annonce."); setModal({type:"sponsor",data:{...post,expiresAt:null}}); }} style={{ background:"linear-gradient(135deg,rgba(108,99,255,0.2),rgba(255,101,132,0.1))",border:"1px solid rgba(108,99,255,0.4)",color:"#6C63FF",padding:"7px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5 }}>
-                      ­ƒöä Republier
+                    <button onClick={()=>{ notify("💡 Choisissez une durée pour republier cette annonce."); setModal({type:"sponsor",data:{...post,expiresAt:null}}); }} style={{ background:"linear-gradient(135deg,rgba(108,99,255,0.2),rgba(255,101,132,0.1))",border:"1px solid rgba(108,99,255,0.4)",color:"#6C63FF",padding:"7px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5 }}>
+                      🔄 Republier
                     </button>
                   </div>
                 </div>
@@ -3876,11 +3876,11 @@ function AppContent() {
           {/* Statistiques globales vendeur */}
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:12,marginBottom:24 }}>
             {[
-              { label:"Mes annonces", val:myPosts.length, color:"#6C63FF", icon:"­ƒôï" },
-              { label:"Total vues", val:myPosts.reduce((a,p)=>a+(postViews[p.id]||0),0), color:"#43C6AC", icon:"­ƒæü´©Å" },
-              { label:"Total contacts", val:myPosts.reduce((a,p)=>a+(contactClicks[p.id]||0),0), color:"#FF6584", icon:"­ƒÆ¼" },
-              { label:"Total likes", val:myPosts.reduce((a,p)=>a+p.likes,0), color:"#FFD700", icon:"ÔØñ´©Å" },
-              { label:"Sponsoris├®es", val:myPosts.filter(p=>p.sponsored).length, color:"#FFD700", icon:"­ƒîƒ" },
+              { label:"Mes annonces", val:myPosts.length, color:"#6C63FF", icon:"📋" },
+              { label:"Total vues", val:myPosts.reduce((a,p)=>a+(postViews[p.id]||0),0), color:"#43C6AC", icon:"👁️" },
+              { label:"Total contacts", val:myPosts.reduce((a,p)=>a+(contactClicks[p.id]||0),0), color:"#FF6584", icon:"💬" },
+              { label:"Total likes", val:myPosts.reduce((a,p)=>a+p.likes,0), color:"#FFD700", icon:"❤️" },
+              { label:"Sponsorisées", val:myPosts.filter(p=>p.sponsored).length, color:"#FFD700", icon:"🌟" },
             ].map(s=>(
               <div key={s.label} style={{ ...cardStyle,borderRadius:14,padding:16,textAlign:"center" }}>
                 <p style={{ fontSize:22,marginBottom:4 }}>{s.icon}</p>
@@ -3898,30 +3898,30 @@ function AppContent() {
                   {post.photos&&post.photos.length>0&&<img src={post.photos[0]} alt="" style={{ width:52,height:52,borderRadius:8,objectFit:"cover",flexShrink:0 }}/>}
                   <div>
                     <p style={{ fontWeight:700,marginBottom:4,color:theme.text }}>{post.title}</p>
-                    <p style={{ color:theme.sub,fontSize:12 }}>{post.category}{post.vehicle?` ┬À ${post.vehicle.marque} ${post.vehicle.modele}`:""} ┬À {post.date}</p>
-                    {post.sponsored&&<span style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700",padding:"2px 8px",borderRadius:10,fontSize:11,fontWeight:700,display:"inline-block",marginTop:4 }}>­ƒîƒ Sponsoris├® jusqu'au {post.sponsoredUntil}</span>}
-                    {post.expiresAt&&<span style={{ background:"rgba(255,71,87,0.1)",color:"#FF4757",padding:"2px 8px",borderRadius:10,fontSize:11,fontWeight:600,display:"inline-block",marginTop:4,marginLeft:4 }}>ÔÅ│ Expire le {post.expiresAt}</span>}
+                    <p style={{ color:theme.sub,fontSize:12 }}>{post.category}{post.vehicle?` · ${post.vehicle.marque} ${post.vehicle.modele}`:""} · {post.date}</p>
+                    {post.sponsored&&<span style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700",padding:"2px 8px",borderRadius:10,fontSize:11,fontWeight:700,display:"inline-block",marginTop:4 }}>🌟 Sponsorisé jusqu'au {post.sponsoredUntil}</span>}
+                    {post.expiresAt&&<span style={{ background:"rgba(255,71,87,0.1)",color:"#FF4757",padding:"2px 8px",borderRadius:10,fontSize:11,fontWeight:600,display:"inline-block",marginTop:4,marginLeft:4 }}>⏳ Expire le {post.expiresAt}</span>}
                   </div>
                 </div>
                 <div style={{ display:"flex",gap:8,flexShrink:0,flexWrap:"wrap" }}>
-                  {post.expiresAt&&<button onClick={()=>setModal({type:"prolong",data:post})} style={{ background:"rgba(67,198,172,0.15)",border:"none",color:"#43C6AC",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>ÔÅ│ Prolonger</button>}
-                  {!post.sponsored && !isUrgentActive(post) && <button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.15)",border:"none",color:"#FFD700",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>­ƒîƒ Sponsoriser</button>}
-                  {isUrgentActive(post) && post.sponsored && <span style={{ fontSize:11,color:"#FF8C00",fontWeight:600,padding:"7px 12px" }}>­ƒîƒ Sponsoris├® suspendu</span>}
-                  {!isUrgentActive(post) && <button onClick={()=>setModal({type:"urgent",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>­ƒöÑ Urgent</button>}
-                  {isUrgentActive(post) && <button onClick={()=>removeUrgent(post.id)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid rgba(255,71,87,0.4)",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>Ô£ò Retirer urgent</button>}
-                  <button onClick={()=>openEdit(post)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>Ô£Å´©Å Modifier</button>
-                  <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>­ƒùæ´©Å</button>
+                  {post.expiresAt&&<button onClick={()=>setModal({type:"prolong",data:post})} style={{ background:"rgba(67,198,172,0.15)",border:"none",color:"#43C6AC",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>⏳ Prolonger</button>}
+                  {!post.sponsored && !isUrgentActive(post) && <button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.15)",border:"none",color:"#FFD700",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🌟 Sponsoriser</button>}
+                  {isUrgentActive(post) && post.sponsored && <span style={{ fontSize:11,color:"#FF8C00",fontWeight:600,padding:"7px 12px" }}>🌟 Sponsorisé suspendu</span>}
+                  {!isUrgentActive(post) && <button onClick={()=>setModal({type:"urgent",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🔥 Urgent</button>}
+                  {isUrgentActive(post) && <button onClick={()=>removeUrgent(post.id)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid rgba(255,71,87,0.4)",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>✕ Retirer urgent</button>}
+                  <button onClick={()=>openEdit(post)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>✏️ Modifier</button>
+                  <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>🗑️</button>
                 </div>
               </div>
               {/* Stats par annonce */}
               <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
                 {[
-                  { icon:"­ƒæü´©Å", val:postViews[post.id]||0, label:"vues", color:"#43C6AC" },
-                  { icon:"­ƒÆ¼", val:contactClicks[post.id]||0, label:"contacts", color:"#6C63FF" },
-                  { icon:"ÔØñ´©Å", val:post.likes, label:"likes", color:"#FF6584" },
-                  { icon:"Ô¡É", val:getAvgRating(post.id)?`${getAvgRating(post.id)}/5`:"ÔÇô", label:"note", color:"#FFD700" },
-                  { icon:"­ƒôè", val: postViews[post.id]>0 ? Math.round((contactClicks[post.id]||0)/postViews[post.id]*100)+"%" : "ÔÇô", label:"conversion", color:"#43C6AC" },
-                  { icon:"Ô£Å´©Å", val:`${getModifCount(post.id)}/${MAX_MODIFS}`, label:"modifs ce mois", color: getModifCount(post.id)>=MAX_MODIFS?"#FF4757":"#6C63FF" },
+                  { icon:"👁️", val:postViews[post.id]||0, label:"vues", color:"#43C6AC" },
+                  { icon:"💬", val:contactClicks[post.id]||0, label:"contacts", color:"#6C63FF" },
+                  { icon:"❤️", val:post.likes, label:"likes", color:"#FF6584" },
+                  { icon:"⭐", val:getAvgRating(post.id)?`${getAvgRating(post.id)}/5`:"–", label:"note", color:"#FFD700" },
+                  { icon:"📊", val: postViews[post.id]>0 ? Math.round((contactClicks[post.id]||0)/postViews[post.id]*100)+"%" : "–", label:"conversion", color:"#43C6AC" },
+                  { icon:"✏️", val:`${getModifCount(post.id)}/${MAX_MODIFS}`, label:"modifs ce mois", color: getModifCount(post.id)>=MAX_MODIFS?"#FF4757":"#6C63FF" },
                 ].map(s=>(
                   <div key={s.label} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:8,padding:"5px 10px",display:"flex",alignItems:"center",gap:4 }}>
                     <span style={{ fontSize:12 }}>{s.icon}</span>
@@ -3943,19 +3943,19 @@ function AppContent() {
             <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
               <button onClick={async()=>{
                 const { data } = await supabase.from("newsletter").select("*").order("created_at", { ascending: false });
-                if (!data || data.length === 0) { notify("Aucun abonn├® pour le moment","error"); return; }
+                if (!data || data.length === 0) { notify("Aucun abonné pour le moment","error"); return; }
                 const csv = "\uFEFF" + "Email;Date inscription\n" + data.map(r => r.email + ";" + (r.created_at?.slice(0,10)||"")).join("\n");
                 const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url; a.download = `newsletter_abonnes_${new Date().toISOString().slice(0,10)}.csv`; a.click();
                 URL.revokeObjectURL(url);
-                notify(`Ô£à ${data.length} abonn├®(s) export├®s !`);
+                notify(`✅ ${data.length} abonné(s) exportés !`);
               }} style={{ background:"linear-gradient(135deg,#FF6584,#FF8C00)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
-                ­ƒôº Exporter newsletter
+                📧 Exporter newsletter
               </button>
               <button onClick={async()=>{
-                // Charger toutes les donn├®es
+                // Charger toutes les données
                 const [pData, bData, aData, rData, beData, prData] = await Promise.all([
                   supabase.from("posts").select("author,author_id,phone,contact,likes,views,created_at,sponsored,urgent,expires_at").then(r=>r.data||[]),
                   supabase.from("boutiques").select("author,author_id,phone,likes,created_at,sponsored").then(r=>r.data||[]),
@@ -3970,7 +3970,7 @@ function AppContent() {
                   ...bData.map(x=>({...x,_type:"Boutique"})),
                   ...aData.map(x=>({...x,_type:"Atelier"})),
                   ...rData.map(x=>({...x,_type:"Restaurant"})),
-                  ...beData.map(x=>({...x,_type:"Beaut├®"})),
+                  ...beData.map(x=>({...x,_type:"Beauté"})),
                 ];
                 const vendeurs = {};
                 allItems.forEach(item => {
@@ -3994,7 +3994,7 @@ function AppContent() {
                   if (item._type==="Boutique") v.boutiques++;
                   if (item._type==="Atelier") v.ateliers++;
                   if (item._type==="Restaurant") v.restos++;
-                  if (item._type==="Beaut├®") v.beaute++;
+                  if (item._type==="Beauté") v.beaute++;
                   v.totalVues += item.views||0;
                   v.totalLikes += item.likes||0;
                   if (item.sponsored) v.sponsorisations++;
@@ -4004,8 +4004,8 @@ function AppContent() {
                   if (!v.telephone && item.phone) v.telephone = item.phone;
                   if (!v.email && item.contact) v.email = item.contact;
                 });
-                // G├®n├®rer CSV
-                const headers = ["Nom","T├®l├®phone","Email","Pays","Date inscription","R├┤le","Annonces","Boutiques","Ateliers","Restaurants","Beaut├®","Total publications","Total vues","Total likes","Sponsorisations","Urgents","Derni├¿re activit├®"];
+                // Générer CSV
+                const headers = ["Nom","Téléphone","Email","Pays","Date inscription","Rôle","Annonces","Boutiques","Ateliers","Restaurants","Beauté","Total publications","Total vues","Total likes","Sponsorisations","Urgents","Dernière activité"];
                 const rows = Object.values(vendeurs).sort((a,b)=>(b.annonces+b.boutiques+b.ateliers+b.restos+b.beaute)-(a.annonces+a.boutiques+a.ateliers+a.restos+a.beaute));
                 const csvRows = [headers.join(";")];
                 rows.forEach(v => {
@@ -4024,12 +4024,12 @@ function AppContent() {
                 a.download = `marcheduroi_vendeurs_${new Date().toISOString().slice(0,10)}.csv`;
                 a.click();
                 URL.revokeObjectURL(url);
-                notify("Ô£à Export vendeurs t├®l├®charg├® !");
+                notify("✅ Export vendeurs téléchargé !");
               }} style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
-                ­ƒôè Exporter vendeurs
+                📊 Exporter vendeurs
               </button>
-              <button onClick={()=>{ const el=document.getElementById("admin-banni├¿res"); if(el) el.scrollIntoView({behavior:"smooth"}); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
-                ­ƒôó G├®rer les banni├¿res
+              <button onClick={()=>{ const el=document.getElementById("admin-bannières"); if(el) el.scrollIntoView({behavior:"smooth"}); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
+                📢 Gérer les bannières
               </button>
             </div>
           </div>
@@ -4041,22 +4041,22 @@ function AppContent() {
             return (
               <div style={{ background:"rgba(255,71,87,0.06)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:16,padding:20,marginBottom:24 }}>
                 <p style={{ fontWeight:800,fontSize:14,color:"#FF4757",marginBottom:14,display:"flex",alignItems:"center",gap:8 }}>
-                  ­ƒÜ® Signalements en attente
+                  🚩 Signalements en attente
                   <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>{pendingReports.length}</span>
                 </p>
                 {pendingReports.slice(0,5).map((r,i)=>(
                   <div key={i} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:10,padding:12,marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap" }}>
                     <div>
-                      <p style={{ fontWeight:700,fontSize:13,color:theme.text,marginBottom:2 }}>­ƒÜ® {r.postTitle||"Annonce inconnue"}</p>
-                      <p style={{ fontSize:12,color:theme.sub }}>Motif : {r.motif} ┬À Par : {r.reporter} ┬À {r.date}</p>
+                      <p style={{ fontWeight:700,fontSize:13,color:theme.text,marginBottom:2 }}>🚩 {r.postTitle||"Annonce inconnue"}</p>
+                      <p style={{ fontSize:12,color:theme.sub }}>Motif : {r.motif} · Par : {r.reporter} · {r.date}</p>
                     </div>
                     <div style={{ display:"flex",gap:6 }}>
                       <button onClick={async()=>{
-                        await supabase.from("reports").update({status:"Trait├®"}).eq("post_id",r.postId);
-                        setReports(prev=>prev.map(x=>x.id===r.id?{...x,status:"Trait├®"}:x));
-                        notify("Signalement marqu├® comme trait├®");
+                        await supabase.from("reports").update({status:"Traité"}).eq("post_id",r.postId);
+                        setReports(prev=>prev.map(x=>x.id===r.id?{...x,status:"Traité"}:x));
+                        notify("Signalement marqué comme traité");
                       }} style={{ background:"rgba(67,198,172,0.15)",border:"1px solid #43C6AC",color:"#43C6AC",padding:"6px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
-                        Ô£à Trait├®
+                        ✅ Traité
                       </button>
                       <button onClick={async()=>{
                         const r2 = reports.find(x=>x.id===r.id);
@@ -4065,12 +4065,12 @@ function AppContent() {
                             await supabase.from(t).delete().eq("id",r2.postId);
                           }
                           setPosts(p=>p.filter(x=>x.id!==r2.postId));
-                          await supabase.from("reports").update({status:"Supprim├®"}).eq("post_id",r2.postId);
+                          await supabase.from("reports").update({status:"Supprimé"}).eq("post_id",r2.postId);
                           setReports(prev=>prev.filter(x=>x.id!==r.id));
-                          notify("Annonce supprim├®e !");
+                          notify("Annonce supprimée !");
                         }
                       }} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
-                        ­ƒùæ´©Å Supprimer
+                        🗑️ Supprimer
                       </button>
                     </div>
                   </div>
@@ -4085,17 +4085,17 @@ function AppContent() {
             const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,10);
             const postsMonth = posts.filter(p=>p.created_at&&p.created_at>=monthStart).length;
             const sponsoredActive = posts.filter(p=>p.sponsored&&p.sponsoredUntil&&new Date(p.sponsoredUntil)>now).length;
-            // Revenus estim├®s : annonces ├ù 1000 + boutiques ├ù 2500 + sponsoris├®s ├ù 500
+            // Revenus estimés : annonces × 1000 + boutiques × 2500 + sponsorisés × 500
             const revEst = postsMonth*1000 + boutiques.filter(b=>b.created_at&&b.created_at>=monthStart).length*2500 + sponsoredActive*500;
             return (
               <div style={{ background:`linear-gradient(135deg,rgba(108,99,255,0.08),rgba(255,101,132,0.05))`,border:`1px solid rgba(108,99,255,0.2)`,borderRadius:16,padding:20,marginBottom:24 }}>
-                <p style={{ fontWeight:800,fontSize:14,color:"#6C63FF",marginBottom:14,textTransform:"uppercase",letterSpacing:1 }}>­ƒôè Ce mois-ci ÔÇö {now.toLocaleString("fr",{month:"long",year:"numeric"})}</p>
+                <p style={{ fontWeight:800,fontSize:14,color:"#6C63FF",marginBottom:14,textTransform:"uppercase",letterSpacing:1 }}>📊 Ce mois-ci — {now.toLocaleString("fr",{month:"long",year:"numeric"})}</p>
                 <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:12 }}>
                   {[
-                    {icon:"­ƒôï",label:"Nouvelles annonces",val:postsMonth,color:"#6C63FF"},
-                    {icon:"­ƒîƒ",label:"Sponsoris├®es actives",val:sponsoredActive,color:"#FFD700"},
-                    {icon:"­ƒÜ®",label:"Signalements",val:reports.filter(r=>r.status==="En attente").length,color:"#FF4757"},
-                    {icon:"­ƒÆ░",label:"Revenus estim├®s",val:revEst.toLocaleString()+" F",color:"#43C6AC"},
+                    {icon:"📋",label:"Nouvelles annonces",val:postsMonth,color:"#6C63FF"},
+                    {icon:"🌟",label:"Sponsorisées actives",val:sponsoredActive,color:"#FFD700"},
+                    {icon:"🚩",label:"Signalements",val:reports.filter(r=>r.status==="En attente").length,color:"#FF4757"},
+                    {icon:"💰",label:"Revenus estimés",val:revEst.toLocaleString()+" F",color:"#43C6AC"},
                   ].map(s=>(
                     <div key={s.label} style={{ background:theme.card,borderRadius:12,padding:"12px 16px",textAlign:"center" }}>
                       <p style={{ fontSize:22,marginBottom:4 }}>{s.icon}</p>
@@ -4109,12 +4109,12 @@ function AppContent() {
           })()}
 
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:16,marginBottom:32,maxWidth:700 }}>
-            {[{label:"Annonces",val:posts.length,color:"#6C63FF"},{label:"Boutiques",val:boutiques.length,color:"#FF6584"},{label:"Ateliers",val:ateliers.length,color:"#43C6AC"},{label:"Restos & Bars",val:restos.length,color:"#FF8C00"},{label:"Beaut├®",val:beaute.length,color:"#FF69B4"},{label:"Signalements",val:reports.filter(r=>r.status==="En attente").length,color:"#FF4757"},{label:"Suggestions",val:suggestions.length,color:"#9A78CF"}].map(s=>(
+            {[{label:"Annonces",val:posts.length,color:"#6C63FF"},{label:"Boutiques",val:boutiques.length,color:"#FF6584"},{label:"Ateliers",val:ateliers.length,color:"#43C6AC"},{label:"Restos & Bars",val:restos.length,color:"#FF8C00"},{label:"Beauté",val:beaute.length,color:"#FF69B4"},{label:"Signalements",val:reports.filter(r=>r.status==="En attente").length,color:"#FF4757"},{label:"Suggestions",val:suggestions.length,color:"#9A78CF"}].map(s=>(
               <div key={s.label} style={{ ...cardStyle,borderRadius:14,padding:20,textAlign:"center" }}><p style={{ fontSize:36,fontWeight:800,color:s.color }}>{s.val}</p><p style={{ color:theme.sub,fontSize:13 }}>{s.label}</p></div>
             ))}
           </div>
           <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text }}>
-            ­ƒÆ¼ Suggestions ({suggestions.length})
+            💬 Suggestions ({suggestions.length})
             {suggestions.filter(s=>s.status==="en attente").length > 0 && <span style={{ background:"#FF8C00",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,marginLeft:8 }}>{suggestions.filter(s=>s.status==="en attente").length}</span>}
           </h3>
           {suggestions.length===0 && <p style={{ color:theme.sub,fontSize:13,marginBottom:24 }}>Aucune suggestion pour le moment.</p>}
@@ -4123,33 +4123,33 @@ function AppContent() {
               <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,flexWrap:"wrap",marginBottom:s.reply?8:0 }}>
                 <div style={{ flex:1 }}>
                   <p style={{ fontWeight:600,color:theme.text,marginBottom:4 }}>{s.text}</p>
-                  <p style={{ color:theme.sub,fontSize:12 }}>Par {s.author} ┬À {s.date}</p>
+                  <p style={{ color:theme.sub,fontSize:12 }}>Par {s.author} · {s.date}</p>
                   {s.reply && (
                     <div style={{ marginTop:8,padding:"8px 12px",background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:8 }}>
-                      <p style={{ fontSize:12,color:"#6C63FF",fontWeight:600,marginBottom:2 }}>Ôå®´©Å R├®ponse admin :</p>
+                      <p style={{ fontSize:12,color:"#6C63FF",fontWeight:600,marginBottom:2 }}>↩️ Réponse admin :</p>
                       <p style={{ fontSize:12,color:theme.text }}>{s.reply}</p>
                     </div>
                   )}
                 </div>
                 <div style={{ display:"flex",gap:8,alignItems:"center",flexShrink:0 }}>
-                  <span style={{ background:s.status==="r├®solu"?"rgba(67,198,172,0.15)":"rgba(255,140,0,0.15)", color:s.status==="r├®solu"?"#43C6AC":"#FF8C00", padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:600 }}>
-                    {s.status==="r├®solu"?"Ô£à R├®solu":"ÔÅ│ En attente"}
+                  <span style={{ background:s.status==="résolu"?"rgba(67,198,172,0.15)":"rgba(255,140,0,0.15)", color:s.status==="résolu"?"#43C6AC":"#FF8C00", padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:600 }}>
+                    {s.status==="résolu"?"✅ Résolu":"⏳ En attente"}
                   </span>
-                  {s.status!=="r├®solu" && (
-                    <button onClick={()=>setSuggestions(prev=>prev.map(x=>x.id===s.id?{...x,status:"r├®solu"}:x))} style={{ background:"rgba(67,198,172,0.15)",border:"none",color:"#43C6AC",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
-                      Ô£à R├®soudre
+                  {s.status!=="résolu" && (
+                    <button onClick={()=>setSuggestions(prev=>prev.map(x=>x.id===s.id?{...x,status:"résolu"}:x))} style={{ background:"rgba(67,198,172,0.15)",border:"none",color:"#43C6AC",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
+                      ✅ Résoudre
                     </button>
                   )}
                   <button onClick={()=>setSuggestions(prev=>prev.filter(x=>x.id!==s.id))} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
-                    ­ƒùæ´©Å
+                    🗑️
                   </button>
                 </div>
               </div>
-              {/* Zone de r├®ponse admin */}
-              {s.status!=="r├®solu" && (
+              {/* Zone de réponse admin */}
+              {s.status!=="résolu" && (
                 <div style={{ display:"flex",gap:8,marginTop:8 }}>
                   <input
-                    placeholder="R├®pondre ├á cette suggestion..."
+                    placeholder="Répondre à cette suggestion..."
                     defaultValue={s.reply||""}
                     id={`reply-${s.id}`}
                     style={{ ...{background:theme.bg,border:`1px solid ${theme.border}`,color:theme.text,borderRadius:8,padding:"7px 12px",fontSize:12,fontFamily:"inherit",outline:"none",width:"100%",flex:1} }}
@@ -4157,9 +4157,9 @@ function AppContent() {
                   <button onClick={()=>{
                     const val = document.getElementById(`reply-${s.id}`)?.value;
                     if (!val?.trim()) return;
-                    setSuggestions(prev=>prev.map(x=>x.id===s.id?{...x,reply:val.trim(),status:"r├®solu"}:x));
+                    setSuggestions(prev=>prev.map(x=>x.id===s.id?{...x,reply:val.trim(),status:"résolu"}:x));
                   }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"7px 14px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
-                    Ôå®´©Å R├®pondre
+                    ↩️ Répondre
                   </button>
                 </div>
               )}
@@ -4169,16 +4169,16 @@ function AppContent() {
           {reports.length > 0 && (
             <div style={{ marginBottom:32 }}>
               <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:"#FF4757",display:"flex",alignItems:"center",gap:8 }}>
-                ­ƒÜ® Signalements ({reports.length})
+                🚩 Signalements ({reports.length})
                 {reports.filter(r=>r.status==="En attente").length > 0 && <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>{reports.filter(r=>r.status==="En attente").length}</span>}
               </h3>
               {reports.map(r=>(
                 <div key={r.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,flexWrap:"wrap" }}>
                     <div>
-                      <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>­ƒÜ® {r.motif}</p>
+                      <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>🚩 {r.motif}</p>
                       <p style={{ color:theme.sub,fontSize:13 }}>Annonce : "{r.postTitle}"</p>
-                      <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>Signal├® par {r.reporter} ┬À {r.date}</p>
+                      <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>Signalé par {r.reporter} · {r.date}</p>
                     </div>
                     <div style={{ display:"flex",gap:8,flexShrink:0 }}>
                       <button onClick={()=>{
@@ -4187,8 +4187,8 @@ function AppContent() {
                       }} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
                         Supprimer
                       </button>
-                      <button onClick={()=>setReports(rep=>rep.map(x=>x.id===r.id?{...x,status:"Trait├®"}:x))} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
-                        Ô£à Trait├®
+                      <button onClick={()=>setReports(rep=>rep.map(x=>x.id===r.id?{...x,status:"Traité"}:x))} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+                        ✅ Traité
                       </button>
                     </div>
                   </div>
@@ -4198,21 +4198,21 @@ function AppContent() {
             </div>
           )}
 
-          {/* Barre de recherche unifi├®e + boutons navigation rapide */}
+          {/* Barre de recherche unifiée + boutons navigation rapide */}
           <div style={{ ...cardStyle,borderRadius:14,padding:16,marginBottom:24 }}>
             <div style={{ position:"relative",marginBottom:12 }}>
               <div style={{ position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={15}/></div>
               <input value={adminSearch} onChange={e=>setAdminSearch(e.target.value)} placeholder="Rechercher dans toutes les sections..." style={{ ...inputStyle,padding:"11px 16px 11px 40px",borderRadius:10,fontSize:13,width:"100%" }}/>
-              {adminSearch && <button onClick={()=>setAdminSearch("")} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:16 }}>Ô£ò</button>}
+              {adminSearch && <button onClick={()=>setAdminSearch("")} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:16 }}>✕</button>}
             </div>
             <p style={{ color:theme.sub,fontSize:12,marginBottom:10,fontWeight:600 }}>Navigation rapide :</p>
             <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
               {[
-                { label:"­ƒôï Annonces", id:"admin-annonces", color:"#6C63FF", count:posts.length },
-                { label:"­ƒøì´©Å Boutiques", id:"admin-boutiques", color:"#FF6584", count:boutiques.length },
-                { label:"­ƒöº Ateliers", id:"admin-ateliers", color:"#43C6AC", count:ateliers.length },
-                { label:"­ƒì¢´©Å Restos", id:"admin-restos", color:"#FF8C00", count:restos.length },
-                { label:"­ƒÆç Beaut├®", id:"admin-beaute", color:"#FF69B4", count:beaute.length },
+                { label:"📋 Annonces", id:"admin-annonces", color:"#6C63FF", count:posts.length },
+                { label:"🛍️ Boutiques", id:"admin-boutiques", color:"#FF6584", count:boutiques.length },
+                { label:"🔧 Ateliers", id:"admin-ateliers", color:"#43C6AC", count:ateliers.length },
+                { label:"🍽️ Restos", id:"admin-restos", color:"#FF8C00", count:restos.length },
+                { label:"💇 Beauté", id:"admin-beaute", color:"#FF69B4", count:beaute.length },
               ].map(s=>(
                 <button key={s.id} onClick={()=>document.getElementById(s.id)?.scrollIntoView({behavior:"smooth",block:"start"})} style={{ background:`rgba(${s.color.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.1)`,border:`1px solid ${s.color}44`,color:s.color,padding:"6px 14px",borderRadius:20,fontWeight:700,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
                   {s.label} <span style={{ background:`${s.color}22`,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>
@@ -4221,108 +4221,108 @@ function AppContent() {
             </div>
           </div>
 
-          <h3 id="admin-annonces" style={{ fontWeight:700,fontSize:18,margin:"24px 0 16px",color:theme.text,scrollMarginTop:80 }}>­ƒôï Toutes les annonces ({posts.length})</h3>
-          {adminSearch && <p style={{ color:theme.sub,fontSize:12,marginBottom:12 }}>{posts.filter(p=>(p.title+p.author+p.category).toLowerCase().includes(adminSearch.toLowerCase())).length} r├®sultat(s)</p>}
+          <h3 id="admin-annonces" style={{ fontWeight:700,fontSize:18,margin:"24px 0 16px",color:theme.text,scrollMarginTop:80 }}>📋 Toutes les annonces ({posts.length})</h3>
+          {adminSearch && <p style={{ color:theme.sub,fontSize:12,marginBottom:12 }}>{posts.filter(p=>(p.title+p.author+p.category).toLowerCase().includes(adminSearch.toLowerCase())).length} résultat(s)</p>}
           {posts.filter(p=>!adminSearch||(p.title+p.author+p.category).toLowerCase().includes(adminSearch.toLowerCase())).map(post=>(
             <div key={post.id} className="admin-row" style={{ ...cardStyle,borderRadius:12,padding:12,marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,flexWrap:"wrap" }}>
               <div style={{ display:"flex",gap:12,alignItems:"center" }}>
                 {post.photos&&post.photos.length>0&&<img src={post.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
-                <div><p style={{ fontWeight:700,color:theme.text }}>{post.title}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {post.author} ┬À {post.category}</p></div>
+                <div><p style={{ fontWeight:700,color:theme.text }}>{post.title}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {post.author} · {post.category}</p></div>
               </div>
               <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
                 {!post.sponsored
-                  ? <button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>­ƒîƒ Sponsoriser</button>
-                  : <button onClick={()=>unsponsorPost(post.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>Ô£à Sponsoris├® jusqu'au {post.sponsoredUntil} ┬À Retirer</button>
+                  ? <button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>🌟 Sponsoriser</button>
+                  : <button onClick={()=>unsponsorPost(post.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>✅ Sponsorisé jusqu'au {post.sponsoredUntil} · Retirer</button>
                 }
                 {!(post.urgent&&new Date(post.urgentUntil)>new Date())
-                  ? <button onClick={async()=>{ const until=new Date(); until.setDate(until.getDate()+7); const u=until.toISOString().slice(0,10); await supabase.from("posts").update({urgent:true,urgent_until:u}).eq("id",post.id); setPosts(p=>p.map(x=>x.id===post.id?{...x,urgent:true,urgentUntil:u}:x)); notify("­ƒöÑ Badge Urgent activ├® 7j !"); }} style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>­ƒöÑ Mettre Urgent</button>
-                  : <button onClick={()=>removeUrgent(post.id)} style={{ background:"rgba(255,71,87,0.2)",border:"2px solid #FF4757",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>Ô£à Urgent jusqu'au {post.urgentUntil} ┬À Retirer</button>
+                  ? <button onClick={async()=>{ const until=new Date(); until.setDate(until.getDate()+7); const u=until.toISOString().slice(0,10); await supabase.from("posts").update({urgent:true,urgent_until:u}).eq("id",post.id); setPosts(p=>p.map(x=>x.id===post.id?{...x,urgent:true,urgentUntil:u}:x)); notify("🔥 Badge Urgent activé 7j !"); }} style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🔥 Mettre Urgent</button>
+                  : <button onClick={()=>removeUrgent(post.id)} style={{ background:"rgba(255,71,87,0.2)",border:"2px solid #FF4757",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>✅ Urgent jusqu'au {post.urgentUntil} · Retirer</button>
                 }
-                <button onClick={()=>toggleFeatured(post.id)} style={{ background:featuredPosts.includes(post.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(post.id)?"­ƒÅå Vedette Ô£ô":"­ƒÅå Vedette"}</button>
+                <button onClick={()=>toggleFeatured(post.id)} style={{ background:featuredPosts.includes(post.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(post.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
                 <button onClick={()=>toggleCertified(post.authorId||post.author_id, post.author)} style={{ background:isCertified(post.authorId||post.author_id)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
-                  <CertifiedBadge size={16}/>{isCertified(post.authorId||post.author_id)?"Certifi├® Ô£ô":"Certifier"}
+                  <CertifiedBadge size={16}/>{isCertified(post.authorId||post.author_id)?"Certifié ✓":"Certifier"}
                 </button>
-                <button onClick={()=>openEdit(post)} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Ô£Å´©Å Modifier</button>
+                <button onClick={()=>openEdit(post)} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                 <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>Supprimer</button>
               </div>
             </div>
           ))}
           {/* Boutiques */}
-          <h3 id="admin-boutiques" style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text,scrollMarginTop:80 }}>­ƒøì´©Å Boutiques ({boutiques.length})</h3>
+          <h3 id="admin-boutiques" style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text,scrollMarginTop:80 }}>🛍️ Boutiques ({boutiques.length})</h3>
           {boutiques.filter(b=>!adminSearch||(b.name+b.author+(b.type||"")).toLowerCase().includes(adminSearch.toLowerCase())).map(b=>(
             <div key={b.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
               <div style={{ display:"flex",gap:12,alignItems:"center" }}>
                 {b.photos&&b.photos.length>0&&<img src={b.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
-                <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} ┬À {b.type}</p></div>
+                <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"Ô£à Certifi├®":"Certifier"}</button>
-                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(b.id)?"­ƒÅå Vedette Ô£ô":"­ƒÅå Vedette"}</button>
-                {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>­ƒîƒ Sponsoriser</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>Ô£à Sponsoris├® ┬À Retirer</button>}
-                <button onClick={()=>{ openEditShop(b,"boutique", setBoutiques); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Ô£Å´©Å Modifier</button>
+                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"✅ Certifié":"Certifier"}</button>
+                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(b.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
+                <button onClick={()=>{ openEditShop(b,"boutique", setBoutiques); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                 <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
           ))}
 
           {/* Ateliers */}
-          <h3 id="admin-ateliers" style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text,scrollMarginTop:80 }}>­ƒöº Ateliers ({ateliers.length})</h3>
+          <h3 id="admin-ateliers" style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text,scrollMarginTop:80 }}>🔧 Ateliers ({ateliers.length})</h3>
           {ateliers.filter(a=>!adminSearch||(a.name+a.author+(a.type||"")).toLowerCase().includes(adminSearch.toLowerCase())).map(a=>(
             <div key={a.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
               <div style={{ display:"flex",gap:12,alignItems:"center" }}>
                 {a.photos&&a.photos.length>0&&<img src={a.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
-                <div><p style={{ fontWeight:700,color:theme.text }}>{a.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {a.author} ┬À {a.type}</p></div>
+                <div><p style={{ fontWeight:700,color:theme.text }}>{a.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {a.author} · {a.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(a.authorId, a.author)} style={{ background:isCertified(a.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(a.authorId)?"Ô£à Certifi├®":"Certifier"}</button>
-                <button onClick={()=>toggleFeatured(a.id)} style={{ background:featuredPosts.includes(a.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(a.id)?"­ƒÅå Vedette Ô£ô":"­ƒÅå Vedette"}</button>
-                {!a.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...a,title:a.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>­ƒîƒ Sponsoriser</button> : <button onClick={()=>unsponsorPost(a.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>Ô£à Sponsoris├® ┬À Retirer</button>}
-                <button onClick={()=>{ openEditShop(a,"atelier", setAteliers); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Ô£Å´©Å Modifier</button>
+                <button onClick={()=>toggleCertified(a.authorId, a.author)} style={{ background:isCertified(a.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(a.authorId)?"✅ Certifié":"Certifier"}</button>
+                <button onClick={()=>toggleFeatured(a.id)} style={{ background:featuredPosts.includes(a.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(a.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                {!a.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...a,title:a.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(a.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
+                <button onClick={()=>{ openEditShop(a,"atelier", setAteliers); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                 <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
           ))}
 
           {/* Restos */}
-          <h3 id="admin-restos" style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text,scrollMarginTop:80 }}>­ƒì¢´©Å Restaurants & Bars ({restos.length})</h3>
+          <h3 id="admin-restos" style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text,scrollMarginTop:80 }}>🍽️ Restaurants & Bars ({restos.length})</h3>
           {restos.filter(r=>!adminSearch||(r.name+r.author+(r.type||"")).toLowerCase().includes(adminSearch.toLowerCase())).map(r=>(
             <div key={r.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
               <div style={{ display:"flex",gap:12,alignItems:"center" }}>
                 {r.photos&&r.photos.length>0&&<img src={r.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
-                <div><p style={{ fontWeight:700,color:theme.text }}>{r.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {r.author} ┬À {r.type}</p></div>
+                <div><p style={{ fontWeight:700,color:theme.text }}>{r.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {r.author} · {r.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(r.authorId, r.author)} style={{ background:isCertified(r.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(r.authorId)?"Ô£à Certifi├®":"Certifier"}</button>
-                <button onClick={()=>toggleFeatured(r.id)} style={{ background:featuredPosts.includes(r.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(r.id)?"­ƒÅå Vedette Ô£ô":"­ƒÅå Vedette"}</button>
-                {!r.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...r,title:r.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>­ƒîƒ Sponsoriser</button> : <button onClick={()=>unsponsorPost(r.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>Ô£à Sponsoris├® ┬À Retirer</button>}
-                <button onClick={()=>{ openEditShop(r,"resto", setRestos); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Ô£Å´©Å Modifier</button>
+                <button onClick={()=>toggleCertified(r.authorId, r.author)} style={{ background:isCertified(r.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(r.authorId)?"✅ Certifié":"Certifier"}</button>
+                <button onClick={()=>toggleFeatured(r.id)} style={{ background:featuredPosts.includes(r.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(r.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                {!r.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...r,title:r.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(r.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
+                <button onClick={()=>{ openEditShop(r,"resto", setRestos); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                 <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
           ))}
 
-          {/* Beaut├® */}
-          <h3 id="admin-beaute" style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text,scrollMarginTop:80 }}>­ƒÆç Beaut├® & Coiffure ({beaute.length})</h3>
+          {/* Beauté */}
+          <h3 id="admin-beaute" style={{ fontWeight:700,fontSize:18,margin:"32px 0 16px",color:theme.text,scrollMarginTop:80 }}>💇 Beauté & Coiffure ({beaute.length})</h3>
           {beaute.filter(b=>!adminSearch||(b.name+b.author+(b.type||"")).toLowerCase().includes(adminSearch.toLowerCase())).map(b=>(
             <div key={b.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
               <div style={{ display:"flex",gap:12,alignItems:"center" }}>
                 {b.photos&&b.photos.length>0&&<img src={b.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
-                <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} ┬À {b.type}</p></div>
+                <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"Ô£à Certifi├®":"Certifier"}</button>
-                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(b.id)?"­ƒÅå Vedette Ô£ô":"­ƒÅå Vedette"}</button>
-                {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>­ƒîƒ Sponsoriser</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>Ô£à Sponsoris├® ┬À Retirer</button>}
-                <button onClick={()=>{ openEditShop(b,"beaute", setBeaute); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Ô£Å´©Å Modifier</button>
+                <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"✅ Certifié":"Certifier"}</button>
+                <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(b.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+                {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
+                <button onClick={()=>{ openEditShop(b,"beaute", setBeaute); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                 <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
           ))}
 
-          {/* ÔöÇÔöÇ GESTION BANNI├êRES PUBLICITAIRES ÔöÇÔöÇ */}
-          <div id="admin-banni├¿res" style={{ marginTop:40 }}>
+          {/* ── GESTION BANNIÈRES PUBLICITAIRES ── */}
+          <div id="admin-bannières" style={{ marginTop:40 }}>
             <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text,display:"flex",alignItems:"center",gap:8 }}>
-              ­ƒôó Banni├¿res publicitaires
+              📢 Bannières publicitaires
               <span style={{ background:"rgba(108,99,255,0.15)",color:"#6C63FF",borderRadius:20,padding:"2px 10px",fontSize:12,fontWeight:600 }}>{ads.length} active{ads.length>1?"s":""}</span>
               {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
                 <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>
@@ -4332,7 +4332,7 @@ function AppContent() {
             </h3>
             {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
               <div style={{ marginBottom:24 }}>
-                <h4 style={{ fontWeight:700,fontSize:15,color:"#FF8C00",marginBottom:12 }}>ÔÅ│ Demandes en attente ({adRequests.filter(r=>r.status==="en_attente").length})</h4>
+                <h4 style={{ fontWeight:700,fontSize:15,color:"#FF8C00",marginBottom:12 }}>⏳ Demandes en attente ({adRequests.filter(r=>r.status==="en_attente").length})</h4>
                 {adRequests.filter(r=>r.status==="en_attente").map(req=>(
                   <div key={req.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,border:"1px solid rgba(255,140,0,0.3)" }}>
                     <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,flexWrap:"wrap" }}>
@@ -4340,10 +4340,10 @@ function AppContent() {
                         <p style={{ fontWeight:700,color:theme.text,fontSize:14,marginBottom:4 }}>{req.entreprise}</p>
                         {req.slogan && <p style={{ color:theme.sub,fontSize:12,marginBottom:4 }}>{req.slogan}</p>}
                         <div style={{ display:"flex",gap:8,flexWrap:"wrap",fontSize:12,color:theme.sub }}>
-                          <span>­ƒæñ {req.user_name}</span>
-                          <span>­ƒôà {req.duree} jours</span>
-                          <span>­ƒÆ░ {(req.prix||0).toLocaleString()} FCFA</span>
-                          <span>­ƒôå Expire le {req.expires_at}</span>
+                          <span>👤 {req.user_name}</span>
+                          <span>📅 {req.duree} jours</span>
+                          <span>💰 {(req.prix||0).toLocaleString()} FCFA</span>
+                          <span>📆 Expire le {req.expires_at}</span>
                         </div>
                       </div>
                       <div style={{ display:"flex",gap:8,flexShrink:0 }}>
@@ -4360,16 +4360,16 @@ function AppContent() {
                           const today = new Date().toISOString().slice(0,10);
                           const { data } = await supabase.from("ads").select("*").eq("actif",true).or(`fin.is.null,fin.gte.${today}`);
                           if (data) setAds(data);
-                          notify("Ô£à Banni├¿re activ├®e !");
+                          notify("✅ Bannière activée !");
                         }} style={{ background:"rgba(67,198,172,0.15)",border:"1px solid #43C6AC",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
-                          Ô£à Activer
+                          ✅ Activer
                         </button>
                         <button onClick={async()=>{
                           await supabase.from("ad_requests").update({status:"refuse"}).eq("id",req.id);
                           setAdRequests(prev=>prev.map(r=>r.id===req.id?{...r,status:"refuse"}:r));
-                          notify("Demande refus├®e");
+                          notify("Demande refusée");
                         }} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
-                          Ô£ò Refuser
+                          ✕ Refuser
                         </button>
                       </div>
                     </div>
@@ -4378,11 +4378,11 @@ function AppContent() {
               </div>
             )}
 
-            {/* Formulaire nouvelle pub ÔÇö repli├® par d├®faut */}
+            {/* Formulaire nouvelle pub — replié par défaut */}
             <div style={{ ...cardStyle,borderRadius:16,marginBottom:24,overflow:"hidden" }}>
                   <button onClick={()=>{ setShowAdForm(s=>!s); setAdEditing(null); setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" }); }}
                     style={{ width:"100%",padding:"16px 24px",background:"transparent",border:"none",color:theme.text,fontWeight:700,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",WebkitTapHighlightColor:"transparent" }}>
-                    <span>Ô×ò Ajouter une banni├¿re</span>
+                    <span>➕ Ajouter une bannière</span>
                     <span style={{ fontSize:18,transition:"transform 0.3s",transform:showAdForm?"rotate(45deg)":"rotate(0deg)" }}>+</span>
                   </button>
                   {(showAdForm || adEditing) && (
@@ -4390,7 +4390,7 @@ function AppContent() {
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12 }}>
                     <div>
                       <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Nom entreprise *</label>
-                      <input value={adForm.entreprise} onChange={e=>setAdForm(f=>({...f,entreprise:e.target.value}))} placeholder="Ex: Boulangerie Dor├®e" style={{ ...inputStyle,fontSize:13 }}/>
+                      <input value={adForm.entreprise} onChange={e=>setAdForm(f=>({...f,entreprise:e.target.value}))} placeholder="Ex: Boulangerie Dorée" style={{ ...inputStyle,fontSize:13 }}/>
                     </div>
                     <div>
                       <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Slogan</label>
@@ -4401,7 +4401,7 @@ function AppContent() {
                       <input value={adForm.logo_url} onChange={e=>setAdForm(f=>({...f,logo_url:e.target.value}))} placeholder="https://..." style={{ ...inputStyle,fontSize:13 }}/>
                     </div>
                     <div>
-                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Lien (clic sur banni├¿re)</label>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Lien (clic sur bannière)</label>
                       <input value={adForm.lien} onChange={e=>setAdForm(f=>({...f,lien:e.target.value}))} placeholder="https://..." style={{ ...inputStyle,fontSize:13 }}/>
                     </div>
                     <div>
@@ -4423,19 +4423,19 @@ function AppContent() {
                       <input type="date" value={adForm.fin} onChange={e=>setAdForm(f=>({...f,fin:e.target.value}))} style={{ ...inputStyle,fontSize:13 }}/>
                     </div>
                   </div>
-                  {/* Aper├ºu */}
+                  {/* Aperçu */}
                   {adForm.entreprise && (
                     <div style={{ borderRadius:12,overflow:"hidden",border:`1px solid ${theme.border}`,background:`linear-gradient(135deg,${adForm.couleur1}22,${adForm.couleur2}22)`,marginBottom:16 }}>
                       <div style={{ padding:"12px 16px",display:"flex",alignItems:"center",gap:12 }}>
                         {adForm.logo_url
                           ? <img src={adForm.logo_url} alt="" style={{ width:40,height:40,borderRadius:8,objectFit:"cover" }}/>
-                          : <div style={{ width:40,height:40,borderRadius:8,background:`linear-gradient(135deg,${adForm.couleur1},${adForm.couleur2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18 }}>­ƒÅó</div>
+                          : <div style={{ width:40,height:40,borderRadius:8,background:`linear-gradient(135deg,${adForm.couleur1},${adForm.couleur2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18 }}>🏢</div>
                         }
                         <div>
                           <p style={{ fontWeight:800,fontSize:14,color:theme.text }}>{adForm.entreprise}</p>
                           {adForm.slogan && <p style={{ color:theme.sub,fontSize:12 }}>{adForm.slogan}</p>}
                         </div>
-                        <div style={{ marginLeft:"auto",background:`linear-gradient(135deg,${adForm.couleur1},${adForm.couleur2})`,color:"#fff",padding:"6px 14px",borderRadius:8,fontWeight:700,fontSize:12 }}>Aper├ºu</div>
+                        <div style={{ marginLeft:"auto",background:`linear-gradient(135deg,${adForm.couleur1},${adForm.couleur2})`,color:"#fff",padding:"6px 14px",borderRadius:8,fontWeight:700,fontSize:12 }}>Aperçu</div>
                       </div>
                       <div style={{ height:3,background:`linear-gradient(90deg,${adForm.couleur1},${adForm.couleur2})`,opacity:0.6 }}/>
                     </div>
@@ -4444,7 +4444,7 @@ function AppContent() {
                     if (!adForm.entreprise) { notify("Le nom de l'entreprise est requis","error"); return; }
                     setAdSaving(true);
                     if (adEditing) {
-                      // Mise ├á jour
+                      // Mise à jour
                       const { error } = await supabase.from("ads").update({
                         entreprise: adForm.entreprise,
                         slogan: adForm.slogan || null,
@@ -4459,9 +4459,9 @@ function AppContent() {
                       setAds(prev => prev.map(a => a.id===adEditing ? {...a,...adForm} : a));
                       setAdEditing(null);
                       setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
-                      notify("Ô£à Banni├¿re mise ├á jour !");
+                      notify("✅ Bannière mise à jour !");
                     } else {
-                      // Nouvelle banni├¿re
+                      // Nouvelle bannière
                       const { data, error } = await supabase.from("ads").insert({
                         entreprise: adForm.entreprise,
                         slogan: adForm.slogan || null,
@@ -4477,10 +4477,10 @@ function AppContent() {
                       setAds(prev => [data, ...prev]);
                       setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
                       setShowAdForm(false);
-                      notify("Ô£à Banni├¿re publi├®e avec succ├¿s !");
+                      notify("✅ Bannière publiée avec succès !");
                     }
                   }} disabled={adSaving} style={{ width:"100%",padding:"13px",background:adSaving?"rgba(108,99,255,0.3)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:adSaving?"not-allowed":"pointer" }}>
-                    {adSaving ? "ÔÅ│ En cours..." : adEditing ? "Ô£Å´©Å Mettre ├á jour la banni├¿re" : "Ô£à Valider et publier la banni├¿re"}
+                    {adSaving ? "⏳ En cours..." : adEditing ? "✏️ Mettre à jour la bannière" : "✅ Valider et publier la bannière"}
                   </button>
                   {adEditing && (
                     <button onClick={()=>{ setAdEditing(null); setAdForm({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" }); setShowAdForm(false); }} style={{ width:"100%",marginTop:8,padding:"10px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,borderRadius:12,fontWeight:600,fontSize:14,cursor:"pointer" }}>
@@ -4492,35 +4492,35 @@ function AppContent() {
             </div>
 
             {/* Liste des pubs actives */}
-            {ads.length === 0 && <p style={{ color:theme.sub,fontSize:13,marginBottom:24 }}>Aucune banni├¿re active pour le moment.</p>}
+            {ads.length === 0 && <p style={{ color:theme.sub,fontSize:13,marginBottom:24 }}>Aucune bannière active pour le moment.</p>}
             {ads.map(ad=>(
               <div key={ad.id} style={{ ...cardStyle,borderRadius:14,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap" }}>
                 <div style={{ display:"flex",alignItems:"center",gap:12 }}>
                   {ad.logo_url
                     ? <img src={ad.logo_url} alt="" style={{ width:40,height:40,borderRadius:8,objectFit:"cover",flexShrink:0 }}/>
-                    : <div style={{ width:40,height:40,borderRadius:8,background:`linear-gradient(135deg,${ad.couleur1||"#6C63FF"},${ad.couleur2||"#8B84FF"})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0 }}>­ƒÅó</div>
+                    : <div style={{ width:40,height:40,borderRadius:8,background:`linear-gradient(135deg,${ad.couleur1||"#6C63FF"},${ad.couleur2||"#8B84FF"})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0 }}>🏢</div>
                   }
                   <div>
                     <p style={{ fontWeight:700,color:theme.text,fontSize:14 }}>{ad.entreprise}</p>
                     {ad.slogan && <p style={{ color:theme.sub,fontSize:12 }}>{ad.slogan}</p>}
-                    {ad.fin && <p style={{ color:"#FF8C00",fontSize:11,marginTop:2 }}>ÔÅ│ Expire le {ad.fin}</p>}
+                    {ad.fin && <p style={{ color:"#FF8C00",fontSize:11,marginTop:2 }}>⏳ Expire le {ad.fin}</p>}
                   </div>
                 </div>
                 <div style={{ display:"flex",gap:8,flexShrink:0,flexWrap:"wrap" }}>
-                  <button onClick={()=>{ setAdEditing(ad.id); setAdForm({ entreprise:ad.entreprise||"", slogan:ad.slogan||"", logo_url:ad.logo_url||"", lien:ad.lien||"", couleur1:ad.couleur1||"#6C63FF", couleur2:ad.couleur2||"#8B84FF", fin:ad.fin||"" }); setShowAdForm(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"7px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Ô£Å´©Å Modifier</button>
+                  <button onClick={()=>{ setAdEditing(ad.id); setAdForm({ entreprise:ad.entreprise||"", slogan:ad.slogan||"", logo_url:ad.logo_url||"", lien:ad.lien||"", couleur1:ad.couleur1||"#6C63FF", couleur2:ad.couleur2||"#8B84FF", fin:ad.fin||"" }); setShowAdForm(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"7px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                   <button onClick={async()=>{
                     await supabase.from("ads").update({actif:!ad.actif}).eq("id",ad.id);
                     setAds(prev=>prev.map(a=>a.id===ad.id?{...a,actif:!a.actif}:a));
-                    notify(ad.actif?"Banni├¿re d├®sactiv├®e":"Banni├¿re r├®activ├®e Ô£à");
+                    notify(ad.actif?"Bannière désactivée":"Bannière réactivée ✅");
                   }} style={{ background:ad.actif?"rgba(67,198,172,0.15)":"rgba(255,71,87,0.1)",border:"none",color:ad.actif?"#43C6AC":"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
-                    {ad.actif?"Ô£à Active":"ÔÅ© Inactive"}
+                    {ad.actif?"✅ Active":"⏸ Inactive"}
                   </button>
                   <button onClick={async()=>{
                     await supabase.from("ads").delete().eq("id",ad.id);
                     setAds(prev=>prev.filter(a=>a.id!==ad.id));
-                    notify("Banni├¿re supprim├®e.");
+                    notify("Bannière supprimée.");
                   }} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"7px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
-                    ­ƒùæ´©Å
+                    🗑️
                   </button>
                 </div>
               </div>
@@ -4535,14 +4535,14 @@ function AppContent() {
         <div style={{ maxWidth:420,margin:"60px auto",padding:"0 24px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ ...cardStyle,borderRadius:20,padding:36 }}>
             <h2 style={{ fontWeight:800,fontSize:26,marginBottom:6,color:theme.text }}>Connexion</h2>
-            <p style={{ color:theme.sub,fontSize:13,marginBottom:28 }}>Connectez-vous ├á votre compte</p>
+            <p style={{ color:theme.sub,fontSize:13,marginBottom:28 }}>Connectez-vous à votre compte</p>
             {[{label:"Email",key:"email",type:"email"},{label:"Mot de passe",key:"password",type:"password"}].map(f=>(
               <div key={f.key} style={{ marginBottom:16 }}>
                 <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
                 {f.key==="password" ? (
                   <div style={{ position:"relative" }}>
-                    <input type={showPassword?"text":"password"} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="ÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇó" maxLength={64} style={{ ...inputStyle,paddingRight:44 }}/>
-                    <button type="button" onClick={()=>setShowPassword(s=>!s)} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:18 }}>{showPassword?"­ƒÖê":"­ƒæü´©Å"}</button>
+                    <input type={showPassword?"text":"password"} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="••••••••" maxLength={64} style={{ ...inputStyle,paddingRight:44 }}/>
+                    <button type="button" onClick={()=>setShowPassword(s=>!s)} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:18 }}>{showPassword?"🙈":"👁️"}</button>
                   </div>
                 ) : (
                   <input type="email" value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,email:onlyEmail(e.target.value)}))} placeholder="contact@marcheduroi.com" maxLength={80} inputMode="email" style={inputStyle}/>
@@ -4552,7 +4552,7 @@ function AppContent() {
             <button onClick={login} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s" }}>Se connecter</button>
             <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:16 }}>
               <p style={{ color:theme.sub,fontSize:13 }}>Pas de compte ? <button onClick={()=>setView("register")} style={{ background:"none",border:"none",color:"#6C63FF",fontWeight:600,cursor:"pointer" }}>S'inscrire</button></p>
-              <button onClick={()=>setModal({type:"forgot"})} style={{ background:"none",border:"none",color:theme.sub,fontSize:13,cursor:"pointer",textDecoration:"underline" }}>Mot de passe oubli├® ?</button>
+              <button onClick={()=>setModal({type:"forgot"})} style={{ background:"none",border:"none",color:theme.sub,fontSize:13,cursor:"pointer",textDecoration:"underline" }}>Mot de passe oublié ?</button>
             </div>
           </div>
         </div>
@@ -4562,73 +4562,73 @@ function AppContent() {
       {view==="register"&&(
         <div style={{ maxWidth:420,margin:"60px auto",padding:"0 24px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ ...cardStyle,borderRadius:20,padding:36 }}>
-            <h2 style={{ fontWeight:800,fontSize:26,marginBottom:6,color:theme.text }}>Cr├®er un compte</h2>
+            <h2 style={{ fontWeight:800,fontSize:26,marginBottom:6,color:theme.text }}>Créer un compte</h2>
             <p style={{ color:theme.sub,fontSize:13,marginBottom:28 }}>Lecture toujours gratuite</p>
             {[{label:"Nom complet",key:"name",type:"text"},{label:"Email",key:"email",type:"email"},{label:"Mot de passe",key:"password",type:"password"}].map(f=>(
               <div key={f.key} style={{ marginBottom:16 }}>
                 <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
                 {f.key==="password" ? (
                   <div style={{ position:"relative" }}>
-                    <input type={showPassword?"text":"password"} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} placeholder="Min. 6 caract├¿res" maxLength={64} style={{ ...inputStyle,paddingRight:44 }}/>
-                    <button type="button" onClick={()=>setShowPassword(s=>!s)} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:18 }}>{showPassword?"­ƒÖê":"­ƒæü´©Å"}</button>
+                    <input type={showPassword?"text":"password"} value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,[f.key]:e.target.value}))} placeholder="Min. 6 caractères" maxLength={64} style={{ ...inputStyle,paddingRight:44 }}/>
+                    <button type="button" onClick={()=>setShowPassword(s=>!s)} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:18 }}>{showPassword?"🙈":"👁️"}</button>
                   </div>
                 ) : f.key==="email" ? (
                   <input type="email" value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,email:noSpaces(e.target.value).toLowerCase()}))} placeholder="contact@marcheduroi.com" maxLength={80} inputMode="email" style={inputStyle}/>
                 ) : (
-                  <input type="text" value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,name:cleanText(e.target.value,60)}))} placeholder="Votre pr├®nom et nom" maxLength={60} style={inputStyle}/>
+                  <input type="text" value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,name:cleanText(e.target.value,60)}))} placeholder="Votre prénom et nom" maxLength={60} style={inputStyle}/>
                 )}
               </div>
             ))}
             {/* Pays */}
             <div style={{ marginBottom:16 }}>
-              <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>­ƒîì Pays</label>
+              <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🌍 Pays</label>
               <select value={authForm.country} onChange={e=>setAuthForm(a=>({...a,country:e.target.value}))} style={inputStyle}>
                 {[
-                  {code:"BJ",name:"­ƒçº­ƒç» B├®nin"},{code:"TG",name:"­ƒç╣­ƒç¼ Togo"},{code:"CI",name:"­ƒç¿­ƒç« C├┤te d'Ivoire"},
-                  {code:"SN",name:"­ƒç©­ƒç│ S├®n├®gal"},{code:"ML",name:"­ƒç▓­ƒç▒ Mali"},{code:"BF",name:"­ƒçº­ƒç½ Burkina Faso"},
-                  {code:"NE",name:"­ƒç│­ƒç¬ Niger"},{code:"GN",name:"­ƒç¼­ƒç│ Guin├®e"},{code:"NG",name:"­ƒç│­ƒç¼ Nigeria"},
-                  {code:"CM",name:"­ƒç¿­ƒç▓ Cameroun"},{code:"CG",name:"­ƒç¿­ƒç¼ Congo"},{code:"CD",name:"­ƒç¿­ƒç® RD Congo"},
-                  {code:"GA",name:"­ƒç¼­ƒçª Gabon"},{code:"MG",name:"­ƒç▓­ƒç¼ Madagascar"},{code:"RW",name:"­ƒçÀ­ƒç╝ Rwanda"},
-                  {code:"BI",name:"­ƒçº­ƒç« Burundi"},{code:"TD",name:"­ƒç╣­ƒç® Tchad"},{code:"MR",name:"­ƒç▓­ƒçÀ Mauritanie"},
-                  {code:"FR",name:"­ƒç½­ƒçÀ France"},{code:"BE",name:"­ƒçº­ƒç¬ Belgique"},{code:"CH",name:"­ƒç¿­ƒç¡ Suisse"},
-                  {code:"CA",name:"­ƒç¿­ƒçª Canada"},{code:"OTHER",name:"­ƒîì Autre pays"},
+                  {code:"BJ",name:"🇧🇯 Bénin"},{code:"TG",name:"🇹🇬 Togo"},{code:"CI",name:"🇨🇮 Côte d'Ivoire"},
+                  {code:"SN",name:"🇸🇳 Sénégal"},{code:"ML",name:"🇲🇱 Mali"},{code:"BF",name:"🇧🇫 Burkina Faso"},
+                  {code:"NE",name:"🇳🇪 Niger"},{code:"GN",name:"🇬🇳 Guinée"},{code:"NG",name:"🇳🇬 Nigeria"},
+                  {code:"CM",name:"🇨🇲 Cameroun"},{code:"CG",name:"🇨🇬 Congo"},{code:"CD",name:"🇨🇩 RD Congo"},
+                  {code:"GA",name:"🇬🇦 Gabon"},{code:"MG",name:"🇲🇬 Madagascar"},{code:"RW",name:"🇷🇼 Rwanda"},
+                  {code:"BI",name:"🇧🇮 Burundi"},{code:"TD",name:"🇹🇩 Tchad"},{code:"MR",name:"🇲🇷 Mauritanie"},
+                  {code:"FR",name:"🇫🇷 France"},{code:"BE",name:"🇧🇪 Belgique"},{code:"CH",name:"🇨🇭 Suisse"},
+                  {code:"CA",name:"🇨🇦 Canada"},{code:"OTHER",name:"🌍 Autre pays"},
                 ].map(p=><option key={p.code} value={p.code}>{p.name}</option>)}
               </select>
             </div>
-            <button onClick={register} className="btn-glow" disabled={!authForm.name||!authForm.email||!authForm.password} style={{ width:"100%",padding:"14px",background:(!authForm.name||!authForm.email||!authForm.password)?"rgba(108,99,255,0.4)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s",cursor:(!authForm.name||!authForm.email||!authForm.password)?"not-allowed":"pointer" }}>Cr├®er mon compte</button>
+            <button onClick={register} className="btn-glow" disabled={!authForm.name||!authForm.email||!authForm.password} style={{ width:"100%",padding:"14px",background:(!authForm.name||!authForm.email||!authForm.password)?"rgba(108,99,255,0.4)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s",cursor:(!authForm.name||!authForm.email||!authForm.password)?"not-allowed":"pointer" }}>Créer mon compte</button>
             {/* Widget Turnstile */}
             <div style={{ marginTop:16,display:"flex",justifyContent:"center" }}>
               <div ref={turnstileRef} />
             </div>
-            <p style={{ textAlign:"center",marginTop:20,color:theme.sub,fontSize:13 }}>D├®j├á inscrit ? <button onClick={()=>setView("login")} style={{ background:"none",border:"none",color:"#6C63FF",fontWeight:600,cursor:"pointer" }}>Se connecter</button></p>
+            <p style={{ textAlign:"center",marginTop:20,color:theme.sub,fontSize:13 }}>Déjà inscrit ? <button onClick={()=>setView("login")} style={{ background:"none",border:"none",color:"#6C63FF",fontWeight:600,cursor:"pointer" }}>Se connecter</button></p>
           </div>
         </div>
       )}
 
-      {/* ├Ç PROPOS */}
+      {/* À PROPOS */}
       {view==="about"&&(
         <div style={{ width:"100%",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",padding:"80px 40px 48px",background:`linear-gradient(180deg,${theme.card},transparent)` }}>
             <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:120,height:120,borderRadius:20,boxShadow:"0 8px 32px rgba(108,99,255,0.4)",margin:"0 auto 20px",display:"block" }}/>
-            <h1 style={{ fontSize:windowWidth<=600?"clamp(28px,8vw,38px)":48,fontWeight:800,marginBottom:16,color:theme.text,textAlign:"center",wordBreak:"break-word" }}>├Ç propos de <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>March├®duRoi</span></h1>
-            <p style={{ color:theme.sub,fontSize:18,maxWidth:700,margin:"0 auto 12px",lineHeight:1.7 }}>La plateforme de petites annonces qui connecte commer├ºants, entreprises et particuliers au B├®nin et au-del├á des fronti├¿res.</p>
-            <p style={{ fontWeight:800,fontSize:20,color:"#FFD700",textAlign:"center",letterSpacing:0.5,fontStyle:"italic" }}>"Sur March├®duRoi, vous ├¬tes le Roi du March├®" ­ƒææ</p>
+            <h1 style={{ fontSize:windowWidth<=600?"clamp(28px,8vw,38px)":48,fontWeight:800,marginBottom:16,color:theme.text,textAlign:"center",wordBreak:"break-word" }}>À propos de <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span></h1>
+            <p style={{ color:theme.sub,fontSize:18,maxWidth:700,margin:"0 auto 12px",lineHeight:1.7 }}>La plateforme de petites annonces qui connecte commerçants, entreprises et particuliers au Bénin et au-delà des frontières.</p>
+            <p style={{ fontWeight:800,fontSize:20,color:"#FFD700",textAlign:"center",letterSpacing:0.5,fontStyle:"italic" }}>"Sur MarchéduRoi, vous êtes le Roi du Marché" 👑</p>
           </div>
 
           {/* Mission */}
           <div style={{ maxWidth:900,margin:"0 auto 48px",display:"flex",flexDirection:windowWidth<=600?"column":"row",gap:24 }}>
             <div style={{ ...{background:theme.card,border:`1px solid ${theme.border}`},borderRadius:20,padding:windowWidth<=600?20:32,flex:1 }}>
-              <div style={{ fontSize:40,marginBottom:16 }}>­ƒÄ»</div>
+              <div style={{ fontSize:40,marginBottom:16 }}>🎯</div>
               <h2 style={{ fontWeight:800,fontSize:22,marginBottom:16,color:theme.text }}>Notre Mission</h2>
               <p style={{ color:theme.sub,fontSize:15,lineHeight:1.8 }}>
-                Assister tous les commer├ºants formels et informels, ainsi que toutes personnes physiques et morales, ├á consulter et prendre des renseignements sur tous les produits, biens et services disponibles dans leur pays et au-del├á de leurs fronti├¿res.
+                Assister tous les commerçants formels et informels, ainsi que toutes personnes physiques et morales, à consulter et prendre des renseignements sur tous les produits, biens et services disponibles dans leur pays et au-delà de leurs frontières.
               </p>
             </div>
             <div style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:20,padding:windowWidth<=600?20:32,flex:1 }}>
-              <div style={{ fontSize:40,marginBottom:16 }}>­ƒîì</div>
+              <div style={{ fontSize:40,marginBottom:16 }}>🌍</div>
               <h2 style={{ fontWeight:800,fontSize:22,marginBottom:16,color:theme.text }}>Notre Vision</h2>
               <p style={{ color:theme.sub,fontSize:15,lineHeight:1.8 }}>
-                Permettre ├á toute personne int├®ress├®e de publier n'importe quel produit, bien ou service pour le bonheur du monde. Une plateforme ouverte, accessible et utile ├á tous, partout en Afrique et dans le monde.
+                Permettre à toute personne intéressée de publier n'importe quel produit, bien ou service pour le bonheur du monde. Une plateforme ouverte, accessible et utile à tous, partout en Afrique et dans le monde.
               </p>
             </div>
           </div>
@@ -4638,10 +4638,10 @@ function AppContent() {
             <h2 style={{ fontWeight:800,fontSize:28,marginBottom:24,color:theme.text,textAlign:"center" }}>Nos Valeurs</h2>
             <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16 }}>
               {[
-                { icon:"­ƒñØ", title:"Confiance", desc:"Des annonceurs v├®rifi├®s et des vendeurs respectables" },
-                { icon:"­ƒÆí", title:"Simplicit├®", desc:"Une interface claire et facile ├á utiliser pour tous" },
-                { icon:"­ƒÜÇ", title:"Innovation", desc:"Des fonctionnalit├®s modernes adapt├®es ├á l'Afrique" },
-                { icon:"ÔØñ´©Å", title:"Communaut├®", desc:"Relier les gens et favoriser les ├®changes locaux" },
+                { icon:"🤝", title:"Confiance", desc:"Des annonceurs vérifiés et des vendeurs respectables" },
+                { icon:"💡", title:"Simplicité", desc:"Une interface claire et facile à utiliser pour tous" },
+                { icon:"🚀", title:"Innovation", desc:"Des fonctionnalités modernes adaptées à l'Afrique" },
+                { icon:"❤️", title:"Communauté", desc:"Relier les gens et favoriser les échanges locaux" },
               ].map(v=>(
                 <div key={v.title} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:16,padding:24,textAlign:"center" }}>
                   <div style={{ fontSize:32,marginBottom:12 }}>{v.icon}</div>
@@ -4656,9 +4656,9 @@ function AppContent() {
           <div style={{ maxWidth:600,margin:"0 auto 48px" }}>
             <div style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:20,padding:32,textAlign:"center" }}>
               <div style={{ width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:32,fontWeight:800,color:"#fff" }}>M</div>
-              <h2 style={{ fontWeight:800,fontSize:22,marginBottom:4,color:theme.text }}>March├®duRoi</h2>
-              <p style={{ color:"#6C63FF",fontWeight:600,fontSize:14,marginBottom:16 }}>Ouidah, B├®nin</p>
-              <p style={{ color:theme.sub,fontSize:14,lineHeight:1.7,marginBottom:20 }}>March├®duRoi est une plateforme num├®rique multipolaire de petites annonces, cr├®├®e et exploit├®e par EDENPORTAIL, ├®tablissement sp├®cialis├® dans la cr├®ation et le r├®f├®rencement de sites internet, dont le si├¿ge social est ├®tabli ├á Ouidah, R├®publique du B├®nin.</p>
+              <h2 style={{ fontWeight:800,fontSize:22,marginBottom:4,color:theme.text }}>MarchéduRoi</h2>
+              <p style={{ color:"#6C63FF",fontWeight:600,fontSize:14,marginBottom:16 }}>Ouidah, Bénin</p>
+              <p style={{ color:theme.sub,fontSize:14,lineHeight:1.7,marginBottom:20 }}>MarchéduRoi est une plateforme numérique multipolaire de petites annonces, créée et exploitée par EDENPORTAIL, établissement spécialisé dans la création et le référencement de sites internet, dont le siège social est établi à Ouidah, République du Bénin.</p>
               <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                 <a href="mailto:contact@marcheduroi.com" style={{ textDecoration:"none",display:"flex",alignItems:"center",gap:10,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:10,padding:"10px 16px" }}>
                   <svg width="16" height="16" fill="none" stroke="#43C6AC" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -4674,32 +4674,32 @@ function AppContent() {
                 </a>
                 <div style={{ display:"flex",alignItems:"center",gap:10,background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:10,padding:"10px 16px" }}>
                   <svg width="16" height="16" fill="none" stroke={theme.sub} strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span style={{ color:theme.sub,fontSize:14 }}>Ouidah, B├®nin ­ƒçº­ƒç»</span>
+                  <span style={{ color:theme.sub,fontSize:14 }}>Ouidah, Bénin 🇧🇯</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Bloc l├®gal RCCM + IFU */}
+          {/* Bloc légal RCCM + IFU */}
           <div style={{ maxWidth:700,margin:"0 auto 48px",padding:"0 16px" }}>
             <div style={{ background:`linear-gradient(135deg,rgba(108,99,255,0.06),rgba(67,198,172,0.06))`,border:`2px solid rgba(108,99,255,0.25)`,borderRadius:20,padding:windowWidth<=600?24:36,position:"relative",overflow:"hidden" }}>
-              {/* Filigrane d├®coratif */}
+              {/* Filigrane décoratif */}
               <div style={{ position:"absolute",right:-20,top:-20,width:120,height:120,borderRadius:"50%",background:"rgba(108,99,255,0.06)",pointerEvents:"none" }}/>
               <div style={{ position:"absolute",left:-30,bottom:-30,width:160,height:160,borderRadius:"50%",background:"rgba(67,198,172,0.05)",pointerEvents:"none" }}/>
 
-              {/* En-t├¬te */}
+              {/* En-tête */}
               <div style={{ display:"flex",alignItems:"center",gap:14,marginBottom:24 }}>
-                <div style={{ width:52,height:52,borderRadius:14,background:"linear-gradient(135deg,#6C63FF,#43C6AC)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:24 }}>­ƒÅø´©Å</div>
+                <div style={{ width:52,height:52,borderRadius:14,background:"linear-gradient(135deg,#6C63FF,#43C6AC)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:24 }}>🏛️</div>
                 <div>
-                  <p style={{ fontWeight:800,fontSize:18,color:theme.text,marginBottom:2 }}>Entreprise l├®galement enregistr├®e</p>
-                  <p style={{ color:theme.sub,fontSize:13 }}>R├®publique du B├®nin ┬À Afrique de l'Ouest</p>
+                  <p style={{ fontWeight:800,fontSize:18,color:theme.text,marginBottom:2 }}>Entreprise légalement enregistrée</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>République du Bénin · Afrique de l'Ouest</p>
                 </div>
               </div>
 
-              {/* S├®parateur */}
+              {/* Séparateur */}
               <div style={{ height:1,background:`linear-gradient(to right,rgba(108,99,255,0.3),transparent)`,marginBottom:20 }}/>
 
-              {/* Informations l├®gales */}
+              {/* Informations légales */}
               <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
                 {/* Raison sociale */}
                 <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
@@ -4709,43 +4709,43 @@ function AppContent() {
 
                 {/* RCCM */}
                 <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>N┬░ RCCM</span>
+                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>N° RCCM</span>
                   <div style={{ display:"flex",alignItems:"center",gap:8 }}>
                     <span style={{ fontWeight:800,fontSize:15,color:"#6C63FF",fontFamily:"monospace",letterSpacing:0.5 }}>RB/ABC/26 A 139457</span>
-                    <span style={{ background:"rgba(67,198,172,0.15)",color:"#43C6AC",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700 }}>Ô£à V├®rifi├®</span>
+                    <span style={{ background:"rgba(67,198,172,0.15)",color:"#43C6AC",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700 }}>✅ Vérifié</span>
                   </div>
                 </div>
 
                 {/* IFU */}
                 <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>N┬░ IFU</span>
+                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>N° IFU</span>
                   <span style={{ fontWeight:800,fontSize:15,color:"#43C6AC",fontFamily:"monospace",letterSpacing:0.5 }}>0202656155829</span>
                 </div>
 
-                {/* Si├¿ge */}
+                {/* Siège */}
                 <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>Si├¿ge social</span>
-                  <span style={{ fontWeight:600,fontSize:14,color:theme.text }}>Ouidah, R├®publique du B├®nin ­ƒçº­ƒç»</span>
+                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>Siège social</span>
+                  <span style={{ fontWeight:600,fontSize:14,color:theme.text }}>Ouidah, République du Bénin 🇧🇯</span>
                 </div>
               </div>
 
-              {/* S├®parateur */}
+              {/* Séparateur */}
               <div style={{ height:1,background:`linear-gradient(to right,rgba(67,198,172,0.3),transparent)`,margin:"20px 0" }}/>
 
               {/* Mention de confiance */}
               <p style={{ color:theme.sub,fontSize:12,lineHeight:1.7,fontStyle:"italic" }}>
-                EDENPORTAIL est un ├®tablissement sp├®cialis├® dans la cr├®ation et le r├®f├®rencement de sites internet, 
-                l├®galement reconnu et enregistr├® aupr├¿s des autorit├®s commerciales de la R├®publique du B├®nin. 
-                March├®duRoi est exploit├®e conform├®ment aux lois et r├¿glements en vigueur au B├®nin et dans l'espace UEMOA.
+                EDENPORTAIL est un établissement spécialisé dans la création et le référencement de sites internet, 
+                légalement reconnu et enregistré auprès des autorités commerciales de la République du Bénin. 
+                MarchéduRoi est exploitée conformément aux lois et règlements en vigueur au Bénin et dans l'espace UEMOA.
               </p>
             </div>
           </div>
 
           {/* Footer about */}
           <div style={{ textAlign:"center",padding:"32px 0",borderTop:`1px solid ${theme.border}` }}>
-            <p style={{ color:theme.sub,fontSize:14,marginBottom:16 }}>┬® 2026 March├®duRoi ┬À Tous droits r├®serv├®s ┬À Ouidah, B├®nin</p>
+            <p style={{ color:theme.sub,fontSize:14,marginBottom:16 }}>© 2026 MarchéduRoi · Tous droits réservés · Ouidah, Bénin</p>
             <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 32px",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-              Voir les annonces ÔåÆ
+              Voir les annonces →
             </button>
           </div>
         </div>
@@ -4756,16 +4756,16 @@ function AppContent() {
       {view==="boutiques"&&(
         <div className="page-content" style={{ width:"100%",padding:"32px 24px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:40 }}>
-            <h1 className="section-title" style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>­ƒøì´©Å <span style={{ background:"linear-gradient(135deg,#FF6584,#FFB347)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Boutiques</span></h1>
-            <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>D├®couvrez les boutiques pr├¿s de chez vous ┬À Cliquez sur Publier ma boutique</p>
+            <h1 className="section-title" style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>🛍️ <span style={{ background:"linear-gradient(135deg,#FF6584,#FFB347)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Boutiques</span></h1>
+            <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Découvrez les boutiques près de chez vous · Cliquez sur Publier ma boutique</p>
             <div style={{ maxWidth:500,margin:"0 auto",position:"relative" }}>
               <div style={{ position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={16}/></div>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une boutique par nom, type, mots cl├®s..." style={{ width:"100%",padding:"14px 20px 14px 44px",background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,color:theme.text,fontSize:14,fontFamily:"inherit",outline:"none" }}/>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une boutique par nom, type, mots clés..." style={{ width:"100%",padding:"14px 20px 14px 44px",background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,color:theme.text,fontSize:14,fontFamily:"inherit",outline:"none" }}/>
             </div>
           </div>
           <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24,flexWrap:"wrap",gap:10 }}>
             <button onClick={getUserLocation} style={{ background:userLocation?"rgba(67,198,172,0.15)":"rgba(108,99,255,0.1)",border:`1px solid ${userLocation?"rgba(67,198,172,0.5)":"rgba(108,99,255,0.3)"}`,color:userLocation?"#43C6AC":"#6C63FF",padding:"8px 16px",borderRadius:24,fontWeight:600,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
-              {locationLoading?"ÔÅ│...":userLocation?"­ƒôì Position active":"­ƒôì Pr├¿s de moi"}
+              {locationLoading?"⏳...":userLocation?"📍 Position active":"📍 Près de moi"}
             </button>
             {canEdit ? (
               <button onClick={()=>{ setShopMode("boutique"); setShopForm({name:"",type:"",description:"",services:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addshop"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#FF6584,#FFB347)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
@@ -4773,7 +4773,7 @@ function AppContent() {
               </button>
             ) : (
               <button onClick={()=>setView("register")} style={{ ...cardStyle,border:"1px dashed #FF6584",color:"#FF6584",padding:"10px 20px",borderRadius:10,fontWeight:600,fontSize:14,display:"flex",alignItems:"center",gap:8 }}>
-                <Icon name="lock" size={14}/>Cr├®er un compte pour publier
+                <Icon name="lock" size={14}/>Créer un compte pour publier
               </button>
             )}
           </div>
@@ -4801,27 +4801,27 @@ function AppContent() {
                 </div>
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
-                    <span className="tag" style={{ background:"rgba(255,101,132,0.15)",color:"#FF6584" }}>­ƒøì´©Å {b.type}</span>
+                    <span className="tag" style={{ background:"rgba(255,101,132,0.15)",color:"#FF6584" }}>🛍️ {b.type}</span>
                   </div>
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
-                    {b.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>­ƒîƒ Sponsoris├®</span>}
-                    {featuredPosts.includes(b.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>­ƒÅå En vedette</span>}
+                    {b.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>🌟 Sponsorisé</span>}
+                    {featuredPosts.includes(b.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🏆 En vedette</span>}
                   </div>
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:6,color:theme.text }}>{b.name}</h3>
-                  {b.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>­ƒôì {formatDistance(b.distance)}</div>}
+                  {b.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(b.distance)}</div>}
                   {getAvgRating(b.id) && <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:8 }}><div style={{ display:"flex" }}>{renderStars(getAvgRating(b.id))}</div><span style={{ fontSize:12,color:"#FFD700",fontWeight:700 }}>{getAvgRating(b.id)}</span><span style={{ fontSize:11,color:theme.sub }}>({getRatingCount(b.id)} avis)</span></div>}
                   <p style={{ color:theme.sub,fontSize:13,lineHeight:1.5,marginBottom:12 }}>{b.description.length>100?b.description.slice(0,100)+"...":b.description}</p>
                   <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:12 }}>
                     <Icon name="pin" size={13}/>
-                    <p style={{ fontSize:12,color:theme.sub }}>{b.ville}{b.quartier?`, ${b.quartier}`:""}{b.von?` ┬À ${b.von}`:""}</p>
+                    <p style={{ fontSize:12,color:theme.sub }}>{b.ville}{b.quartier?`, ${b.quartier}`:""}{b.von?` · ${b.von}`:""}</p>
                   </div>
-                  {b.horaires && <p style={{ fontSize:12,color:"#43C6AC",marginBottom:12 }}>­ƒòÉ {b.horaires}</p>}
+                  {b.horaires && <p style={{ fontSize:12,color:"#43C6AC",marginBottom:12 }}>🕐 {b.horaires}</p>}
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",alignItems:"center" }}>
                     <button onClick={()=>likePost(b.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(b.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{b.likes}</button>
                     <button onClick={()=>setModal({type:"contact",data:{...b,title:b.name}})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
-                    {b.phone && <a href={"tel:"+b.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(67,198,172,0.1)",color:"#43C6AC",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">­ƒô×</div></a>}
-                    {b.lat && b.lng && <a href={"https://www.google.com/maps/dir/?api=1&destination="+b.lat+","+b.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}><div style={{ background:"rgba(66,133,244,0.1)",color:"#4285F4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Itin├®raire Google Maps">­ƒù║´©Å</div></a>}
-                    <button onClick={()=>{ navigator.clipboard.writeText("https://marcheduroi.com/boutique/"+b.id); notify("Lien copi├® ! ­ƒôï"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">­ƒöù</button>
+                    {b.phone && <a href={"tel:"+b.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(67,198,172,0.1)",color:"#43C6AC",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">📞</div></a>}
+                    {b.lat && b.lng && <a href={"https://www.google.com/maps/dir/?api=1&destination="+b.lat+","+b.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}><div style={{ background:"rgba(66,133,244,0.1)",color:"#4285F4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Itinéraire Google Maps">🗺️</div></a>}
+                    <button onClick={()=>{ navigator.clipboard.writeText("https://marcheduroi.com/boutique/"+b.id); notify("Lien copié ! 📋"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">🔗</button>
                     <a href={"https://wa.me/?text="+encodeURIComponent("*"+b.name+"*"+"\n"+"Type: "+b.type+"\n"+"Voir la boutique: https://marcheduroi.com/boutique/"+b.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }}>
                         <svg width="12" height="12" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
@@ -4832,12 +4832,12 @@ function AppContent() {
                         <svg width="13" height="13" fill="#1877F2" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                       </div>
                     </a>
-                    {user&&user.id!==b.authorId&&<button onClick={()=>{ setActiveConv({postId:b.id,postTitle:b.name,postPrice:b.tarifs||"",postPhoto:b.photos?.[0],receiverId:b.authorId,receiverName:b.author,messages:messages.filter(m=>(m.post_id===b.id)&&((m.sender_id===user.id&&m.receiver_id===b.authorId)||(m.receiver_id===user.id&&m.sender_id===b.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Message">­ƒÆ¼</button>}
-                    <button onClick={()=>setModal({type:"report",data:{...b,title:b.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">­ƒÜ®</button>
+                    {user&&user.id!==b.authorId&&<button onClick={()=>{ setActiveConv({postId:b.id,postTitle:b.name,postPrice:b.tarifs||"",postPhoto:b.photos?.[0],receiverId:b.authorId,receiverName:b.author,messages:messages.filter(m=>(m.post_id===b.id)&&((m.sender_id===user.id&&m.receiver_id===b.authorId)||(m.receiver_id===user.id&&m.sender_id===b.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Message">💬</button>}
+                    <button onClick={()=>setModal({type:"report",data:{...b,title:b.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===b.authorId||user.role==="admin")&&(
                       <>
-                        {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && !b.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"boutiques",shopSetter:"setBoutiques"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>­ƒöÑ</button>}
-                        {b.urgent&&new Date(b.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(b.id,"boutiques",setBoutiques)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>Ô£ò­ƒöÑ</button>}
+                        {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && !b.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"boutiques",shopSetter:"setBoutiques"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {b.urgent&&new Date(b.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(b.id,"boutiques",setBoutiques)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>openEditShop(b,"boutique",editShop)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -4847,7 +4847,7 @@ function AppContent() {
               </div>
             ))}
           </div>
-          {boutiques.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>­ƒøì´©Å</p><p>Aucune boutique pour le moment</p></div>}
+          {boutiques.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>🛍️</p><p>Aucune boutique pour le moment</p></div>}
           {boutiques.length > visibleBoutiques && <div style={{ textAlign:"center",marginTop:24 }}><button onClick={()=>setVisibleBoutiques(v=>v+12)} style={{ background:"rgba(255,101,132,0.1)",border:"1px solid rgba(255,101,132,0.3)",color:"#FF6584",padding:"10px 28px",borderRadius:20,fontWeight:700,fontSize:14,cursor:"pointer" }}>Voir plus ({boutiques.length - visibleBoutiques} restants)</button></div>}
         </div>
       )}
@@ -4856,8 +4856,8 @@ function AppContent() {
       {view==="ateliers"&&(
         <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:40 }}>
-            <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>­ƒöº <span style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Ateliers</span></h1>
-            <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Trouvez l'artisan qu'il vous faut ┬À Cliquez sur Publier mon atelier</p>
+            <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>🔧 <span style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Ateliers</span></h1>
+            <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Trouvez l'artisan qu'il vous faut · Cliquez sur Publier mon atelier</p>
             <div style={{ maxWidth:500,margin:"0 auto",position:"relative" }}>
               <div style={{ position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={16}/></div>
               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un atelier par nom, type, services..." style={{ width:"100%",padding:"14px 20px 14px 44px",background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,color:theme.text,fontSize:14,fontFamily:"inherit",outline:"none" }}/>
@@ -4870,7 +4870,7 @@ function AppContent() {
               </button>
             ) : (
               <button onClick={()=>setView("register")} style={{ ...cardStyle,border:"1px dashed #43C6AC",color:"#43C6AC",padding:"10px 20px",borderRadius:10,fontWeight:600,fontSize:14,display:"flex",alignItems:"center",gap:8 }}>
-                <Icon name="lock" size={14}/>Cr├®er un compte pour publier
+                <Icon name="lock" size={14}/>Créer un compte pour publier
               </button>
             )}
           </div>
@@ -4898,14 +4898,14 @@ function AppContent() {
                 </div>
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
-                    <span className="tag" style={{ background:"rgba(67,198,172,0.15)",color:"#43C6AC" }}>­ƒöº {a.type}</span>
+                    <span className="tag" style={{ background:"rgba(67,198,172,0.15)",color:"#43C6AC" }}>🔧 {a.type}</span>
                   </div>
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
-                    {a.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>­ƒîƒ Sponsoris├®</span>}
-                    {featuredPosts.includes(a.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>­ƒÅå En vedette</span>}
+                    {a.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>🌟 Sponsorisé</span>}
+                    {featuredPosts.includes(a.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🏆 En vedette</span>}
                   </div>
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:6,color:theme.text }}>{a.name}</h3>
-                  {a.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>­ƒôì {formatDistance(a.distance)}</div>}
+                  {a.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(a.distance)}</div>}
                   {getAvgRating(a.id) && <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:8 }}><div style={{ display:"flex" }}>{renderStars(getAvgRating(a.id))}</div><span style={{ fontSize:12,color:"#FFD700",fontWeight:700 }}>{getAvgRating(a.id)}</span><span style={{ fontSize:11,color:theme.sub }}>({getRatingCount(a.id)} avis)</span></div>}
                   <p style={{ color:theme.sub,fontSize:13,lineHeight:1.5,marginBottom:10 }}>{a.description.length>100?a.description.slice(0,100)+"...":a.description}</p>
                   {a.services && (
@@ -4916,15 +4916,15 @@ function AppContent() {
                   )}
                   <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:10 }}>
                     <Icon name="pin" size={13}/>
-                    <p style={{ fontSize:12,color:theme.sub }}>{a.ville}{a.quartier?`, ${a.quartier}`:""}{a.von?` ┬À ${a.von}`:""}</p>
+                    <p style={{ fontSize:12,color:theme.sub }}>{a.ville}{a.quartier?`, ${a.quartier}`:""}{a.von?` · ${a.von}`:""}</p>
                   </div>
-                  {a.horaires && <p style={{ fontSize:12,color:"#43C6AC",marginBottom:12 }}>­ƒòÉ {a.horaires}</p>}
+                  {a.horaires && <p style={{ fontSize:12,color:"#43C6AC",marginBottom:12 }}>🕐 {a.horaires}</p>}
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",alignItems:"center" }}>
                     <button onClick={()=>likePost(a.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(a.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{a.likes}</button>
                     <button onClick={()=>setModal({type:"contact",data:{...a,title:a.name}})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
-                    {a.phone && <a href={"tel:"+a.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(67,198,172,0.1)",color:"#43C6AC",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">­ƒô×</div></a>}
-                    {a.lat && a.lng && <a href={"https://www.google.com/maps/dir/?api=1&destination="+a.lat+","+a.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}><div style={{ background:"rgba(66,133,244,0.1)",color:"#4285F4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Itin├®raire Google Maps">­ƒù║´©Å</div></a>}
-                    <button onClick={()=>{ navigator.clipboard.writeText("https://marcheduroi.com/atelier/"+a.id); notify("Lien copi├® ! ­ƒôï"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">­ƒöù</button>
+                    {a.phone && <a href={"tel:"+a.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(67,198,172,0.1)",color:"#43C6AC",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">📞</div></a>}
+                    {a.lat && a.lng && <a href={"https://www.google.com/maps/dir/?api=1&destination="+a.lat+","+a.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}><div style={{ background:"rgba(66,133,244,0.1)",color:"#4285F4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Itinéraire Google Maps">🗺️</div></a>}
+                    <button onClick={()=>{ navigator.clipboard.writeText("https://marcheduroi.com/atelier/"+a.id); notify("Lien copié ! 📋"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">🔗</button>
                     <a href={"https://wa.me/?text="+encodeURIComponent("*"+a.name+"*"+"\n"+"Type: "+a.type+"\n"+"Voir l'atelier: https://marcheduroi.com/atelier/"+a.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}>
                         <svg width="12" height="12" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
@@ -4936,12 +4936,12 @@ function AppContent() {
                         <svg width="13" height="13" fill="#1877F2" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                       </div>
                     </a>
-                    {user&&user.id!==a.authorId&&<button onClick={()=>{ setActiveConv({postId:a.id,postTitle:a.name,postPrice:"",postPhoto:a.photos?.[0],receiverId:a.authorId,receiverName:a.author,messages:messages.filter(m=>(m.post_id===a.id)&&((m.sender_id===user.id&&m.receiver_id===a.authorId)||(m.receiver_id===user.id&&m.sender_id===a.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Envoyer un message">­ƒÆ¼</button>}
-                    <button onClick={()=>setModal({type:"report",data:{...a,title:a.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">­ƒÜ®</button>
+                    {user&&user.id!==a.authorId&&<button onClick={()=>{ setActiveConv({postId:a.id,postTitle:a.name,postPrice:"",postPhoto:a.photos?.[0],receiverId:a.authorId,receiverName:a.author,messages:messages.filter(m=>(m.post_id===a.id)&&((m.sender_id===user.id&&m.receiver_id===a.authorId)||(m.receiver_id===user.id&&m.sender_id===a.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Envoyer un message">💬</button>}
+                    <button onClick={()=>setModal({type:"report",data:{...a,title:a.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===a.authorId||user.role==="admin")&&(
                       <>
-                        {!(a.urgent&&new Date(a.urgentUntil)>new Date()) && !a.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...a,title:a.name},shopTable:"ateliers",shopSetter:"setAteliers"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>­ƒöÑ</button>}
-                        {a.urgent&&new Date(a.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(a.id,"ateliers",setAteliers)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>Ô£ò­ƒöÑ</button>}
+                        {!(a.urgent&&new Date(a.urgentUntil)>new Date()) && !a.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...a,title:a.name},shopTable:"ateliers",shopSetter:"setAteliers"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {a.urgent&&new Date(a.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(a.id,"ateliers",setAteliers)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>openEditShop(a,"atelier",editShop)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -4951,7 +4951,7 @@ function AppContent() {
               </div>
             ))}
           </div>
-          {ateliers.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>­ƒöº</p><p>Aucun atelier pour le moment</p></div>}
+          {ateliers.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>🔧</p><p>Aucun atelier pour le moment</p></div>}
           {ateliers.length > visibleAteliers && <div style={{ textAlign:"center",marginTop:24 }}><button onClick={()=>setVisibleAteliers(v=>v+12)} style={{ background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",color:"#43C6AC",padding:"10px 28px",borderRadius:20,fontWeight:700,fontSize:14,cursor:"pointer" }}>Voir plus ({ateliers.length - visibleAteliers} restants)</button></div>}
         </div>
       )}
@@ -4959,8 +4959,8 @@ function AppContent() {
       {view==="restos"&&(
         <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:40 }}>
-            <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>­ƒì¢´©Å <span style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Restaurants & Bars</span></h1>
-            <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Rendez votre ├®tablissement visible partout ┬À Cliquez sur Publier mon ├®tablissement</p>
+            <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>🍽️ <span style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Restaurants & Bars</span></h1>
+            <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Rendez votre établissement visible partout · Cliquez sur Publier mon établissement</p>
             <div style={{ maxWidth:500,margin:"0 auto",position:"relative" }}>
               <div style={{ position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={16}/></div>
               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un restaurant, bar, maquis..." style={{ width:"100%",padding:"14px 20px 14px 44px",background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,color:theme.text,fontSize:14,fontFamily:"inherit",outline:"none" }}/>
@@ -4970,11 +4970,11 @@ function AppContent() {
           <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:24 }}>
             {canEdit ? (
               <button onClick={()=>{ setShopMode("resto"); setShopForm({name:"",type:"",description:"",specialite:"",plats:"",prixMoyen:"",capacite:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addresto"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
-                <Icon name="plus" size={16}/>Publier mon ├®tablissement
+                <Icon name="plus" size={16}/>Publier mon établissement
               </button>
             ) : (
               <button onClick={()=>setView("register")} style={{ ...cardStyle,border:"1px dashed #FF8C00",color:"#FF8C00",padding:"10px 20px",borderRadius:10,fontWeight:600,fontSize:14,display:"flex",alignItems:"center",gap:8 }}>
-                <Icon name="lock" size={14}/>Cr├®er un compte pour publier
+                <Icon name="lock" size={14}/>Créer un compte pour publier
               </button>
             )}
           </div>
@@ -5003,18 +5003,18 @@ function AppContent() {
                 </div>
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
-                    <span className="tag" style={{ background:"rgba(255,140,0,0.15)",color:"#FF8C00" }}>­ƒì¢´©Å {r.type}</span>
+                    <span className="tag" style={{ background:"rgba(255,140,0,0.15)",color:"#FF8C00" }}>🍽️ {r.type}</span>
                     {r.prixMoyen && <span style={{ fontSize:12,color:theme.sub,fontWeight:600 }}>{r.prixMoyen}</span>}
                   </div>
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
-                    {r.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>­ƒîƒ Sponsoris├®</span>}
-                    {featuredPosts.includes(r.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>­ƒÅå En vedette</span>}
+                    {r.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>🌟 Sponsorisé</span>}
+                    {featuredPosts.includes(r.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🏆 En vedette</span>}
                   </div>
-                  {r.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>­ƒôì {formatDistance(r.distance)}</div>}
+                  {r.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(r.distance)}</div>}
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:4,color:theme.text }}>{r.name}</h3>
                   {getAvgRating(r.id) && <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:8 }}><div style={{ display:"flex" }}>{renderStars(getAvgRating(r.id))}</div><span style={{ fontSize:12,color:"#FFD700",fontWeight:700 }}>{getAvgRating(r.id)}</span><span style={{ fontSize:11,color:theme.sub }}>({getRatingCount(r.id)} avis)</span></div>}
-                  {r.specialite && <p style={{ fontSize:13,color:"#FF8C00",fontWeight:600,marginBottom:8 }}>Ô£¿ {r.specialite}</p>}
-                  {r.plats && <p style={{ fontSize:12,color:theme.sub,marginBottom:8 }}>­ƒì┤ {r.plats.length>60?r.plats.slice(0,60)+"...":r.plats}</p>}
+                  {r.specialite && <p style={{ fontSize:13,color:"#FF8C00",fontWeight:600,marginBottom:8 }}>✨ {r.specialite}</p>}
+                  {r.plats && <p style={{ fontSize:12,color:theme.sub,marginBottom:8 }}>🍴 {r.plats.length>60?r.plats.slice(0,60)+"...":r.plats}</p>}
                   {r.services && (
                     <div style={{ display:"flex",flexWrap:"wrap",gap:4,marginBottom:10 }}>
                       {r.services.split(",").map(s=>(
@@ -5024,16 +5024,16 @@ function AppContent() {
                   )}
                   <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:10 }}>
                     <Icon name="pin" size={13}/>
-                    <p style={{ fontSize:12,color:theme.sub }}>{r.ville}{r.quartier?`, ${r.quartier}`:""}{r.von?` ┬À ${r.von}`:""}</p>
+                    <p style={{ fontSize:12,color:theme.sub }}>{r.ville}{r.quartier?`, ${r.quartier}`:""}{r.von?` · ${r.von}`:""}</p>
                   </div>
-                  {r.horaires && <p style={{ fontSize:12,color:"#43C6AC",marginBottom:12 }}>­ƒòÉ {r.horaires}</p>}
+                  {r.horaires && <p style={{ fontSize:12,color:"#43C6AC",marginBottom:12 }}>🕐 {r.horaires}</p>}
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",alignItems:"center" }}>
                     <button onClick={()=>likePost(r.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(r.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{r.likes}</button>
                     <button onClick={()=>setModal({type:"contact",data:{...r,title:r.name}})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
-                    {r.phone && <a href={"tel:"+r.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(255,140,0,0.1)",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">­ƒô×</div></a>}
-                    {r.lat && r.lng && <a href={"https://www.google.com/maps/dir/?api=1&destination="+r.lat+","+r.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}><div style={{ background:"rgba(66,133,244,0.1)",color:"#4285F4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Itin├®raire Google Maps">­ƒù║´©Å</div></a>}
-                    <button onClick={()=>{ navigator.clipboard.writeText("https://marcheduroi.com/resto/"+r.id); notify("Lien copi├® ! ­ƒôï"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">­ƒöù</button>
-                    {user&&user.id!==r.authorId&&<button onClick={()=>{ setActiveConv({postId:r.id,postTitle:r.name,postPrice:"",postPhoto:r.photos?.[0],receiverId:r.authorId,receiverName:r.author,messages:messages.filter(m=>(m.post_id===r.id)&&((m.sender_id===user.id&&m.receiver_id===r.authorId)||(m.receiver_id===user.id&&m.sender_id===r.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Envoyer un message">­ƒÆ¼</button>}
+                    {r.phone && <a href={"tel:"+r.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(255,140,0,0.1)",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">📞</div></a>}
+                    {r.lat && r.lng && <a href={"https://www.google.com/maps/dir/?api=1&destination="+r.lat+","+r.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}><div style={{ background:"rgba(66,133,244,0.1)",color:"#4285F4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Itinéraire Google Maps">🗺️</div></a>}
+                    <button onClick={()=>{ navigator.clipboard.writeText("https://marcheduroi.com/resto/"+r.id); notify("Lien copié ! 📋"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">🔗</button>
+                    {user&&user.id!==r.authorId&&<button onClick={()=>{ setActiveConv({postId:r.id,postTitle:r.name,postPrice:"",postPhoto:r.photos?.[0],receiverId:r.authorId,receiverName:r.author,messages:messages.filter(m=>(m.post_id===r.id)&&((m.sender_id===user.id&&m.receiver_id===r.authorId)||(m.receiver_id===user.id&&m.sender_id===r.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Envoyer un message">💬</button>}
                     <a href={"https://wa.me/?text="+encodeURIComponent("*"+r.name+"*"+"\n"+"Type: "+r.type+"\n"+"Voir l'etablissement: https://marcheduroi.com/resto/"+r.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}>
                         <svg width="12" height="12" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
@@ -5045,11 +5045,11 @@ function AppContent() {
                         <svg width="13" height="13" fill="#1877F2" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                       </div>
                     </a>
-                    <button onClick={()=>setModal({type:"report",data:{...r,title:r.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">­ƒÜ®</button>
+                    <button onClick={()=>setModal({type:"report",data:{...r,title:r.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===r.authorId||user.role==="admin")&&(
                       <>
-                        {!(r.urgent&&new Date(r.urgentUntil)>new Date()) && !r.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...r,title:r.name},shopTable:"restos",shopSetter:"setRestos"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>­ƒöÑ</button>}
-                        {r.urgent&&new Date(r.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(r.id,"restos",setRestos)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>Ô£ò­ƒöÑ</button>}
+                        {!(r.urgent&&new Date(r.urgentUntil)>new Date()) && !r.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...r,title:r.name},shopTable:"restos",shopSetter:"setRestos"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {r.urgent&&new Date(r.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(r.id,"restos",setRestos)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>openEditShop(r,"resto",editResto)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -5059,16 +5059,16 @@ function AppContent() {
               </div>
             ))}
           </div>
-          {restos.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>­ƒì¢´©Å</p><p>Aucun ├®tablissement pour le moment</p></div>}
+          {restos.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>🍽️</p><p>Aucun établissement pour le moment</p></div>}
         </div>
       )}
 
-      {/* BEAUT├ë & COIFFURE */}
+      {/* BEAUTÉ & COIFFURE */}
       {view==="beaute"&&(
         <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:40 }}>
-            <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>­ƒÆç <span style={{ background:"linear-gradient(135deg,#FF69B4,#FF1493)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Beaut├® & Coiffure</span></h1>
-            <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Rendez votre salon visible partout ┬À Cliquez sur Publier mon salon</p>
+            <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>💇 <span style={{ background:"linear-gradient(135deg,#FF69B4,#FF1493)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Beauté & Coiffure</span></h1>
+            <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Rendez votre salon visible partout · Cliquez sur Publier mon salon</p>
             <div style={{ maxWidth:500,margin:"0 auto",position:"relative" }}>
               <div style={{ position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:theme.sub,pointerEvents:"none" }}><Icon name="search" size={16}/></div>
               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un salon, coiffeur, make-up..." style={{ width:"100%",padding:"14px 20px 14px 44px",background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,color:theme.text,fontSize:14,fontFamily:"inherit",outline:"none" }}/>
@@ -5082,7 +5082,7 @@ function AppContent() {
               </button>
             ) : (
               <button onClick={()=>setView("register")} style={{ ...cardStyle,border:"1px dashed #FF69B4",color:"#FF69B4",padding:"10px 20px",borderRadius:10,fontWeight:600,fontSize:14,display:"flex",alignItems:"center",gap:8 }}>
-                <Icon name="lock" size={14}/>Cr├®er un compte pour publier
+                <Icon name="lock" size={14}/>Créer un compte pour publier
               </button>
             )}
           </div>
@@ -5111,31 +5111,31 @@ function AppContent() {
                 </div>
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8 }}>
-                    <span className="tag" style={{ background:"rgba(255,105,180,0.15)",color:"#FF69B4" }}>­ƒÆç {b.type}</span>
+                    <span className="tag" style={{ background:"rgba(255,105,180,0.15)",color:"#FF69B4" }}>💇 {b.type}</span>
                     {b.tarifs && <span style={{ fontSize:12,color:theme.sub,fontWeight:600 }}>{b.tarifs}</span>}
                   </div>
                   <h3 style={{ fontWeight:800,fontSize:17,marginBottom:4,color:theme.text }}>{b.name}</h3>
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
-                    {b.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>­ƒîƒ Sponsoris├®</span>}
-                    {featuredPosts.includes(b.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>­ƒÅå En vedette</span>}
+                    {b.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>🌟 Sponsorisé</span>}
+                    {featuredPosts.includes(b.id) && <span style={{ background:"rgba(255,215,0,0.15)",border:"1px solid #FFD700",color:"#FFD700",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🏆 En vedette</span>}
                   </div>
-                  {b.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>­ƒôì {formatDistance(b.distance)}</div>}
+                  {b.distance!==null && <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>📍 {formatDistance(b.distance)}</div>}
                   {getAvgRating(b.id) && <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:8 }}><div style={{ display:"flex" }}>{renderStars(getAvgRating(b.id))}</div><span style={{ fontSize:12,color:"#FFD700",fontWeight:700 }}>{getAvgRating(b.id)}</span><span style={{ fontSize:11,color:theme.sub }}>({getRatingCount(b.id)} avis)</span></div>}
-                  {b.specialite && <p style={{ fontSize:13,color:"#FF69B4",fontWeight:600,marginBottom:6 }}>Ô£¿ {b.specialite}</p>}
-                  {b.services && <p style={{ fontSize:12,color:theme.sub,marginBottom:8,lineHeight:1.5 }}>Ô£é´©Å {b.services.length>80?b.services.slice(0,80)+"...":b.services}</p>}
-                  {b.rendezvous && <span className="tag" style={{ background:"rgba(255,105,180,0.1)",color:"#FF69B4",marginBottom:8,display:"inline-flex" }}>­ƒôà RDV: {b.rendezvous}</span>}
+                  {b.specialite && <p style={{ fontSize:13,color:"#FF69B4",fontWeight:600,marginBottom:6 }}>✨ {b.specialite}</p>}
+                  {b.services && <p style={{ fontSize:12,color:theme.sub,marginBottom:8,lineHeight:1.5 }}>✂️ {b.services.length>80?b.services.slice(0,80)+"...":b.services}</p>}
+                  {b.rendezvous && <span className="tag" style={{ background:"rgba(255,105,180,0.1)",color:"#FF69B4",marginBottom:8,display:"inline-flex" }}>📅 RDV: {b.rendezvous}</span>}
                   <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:10 }}>
                     <Icon name="pin" size={13}/>
-                    <p style={{ fontSize:12,color:theme.sub }}>{b.ville}{b.quartier?`, ${b.quartier}`:""}{b.von?` ┬À ${b.von}`:""}</p>
+                    <p style={{ fontSize:12,color:theme.sub }}>{b.ville}{b.quartier?`, ${b.quartier}`:""}{b.von?` · ${b.von}`:""}</p>
                   </div>
-                  {b.horaires && <p style={{ fontSize:12,color:"#43C6AC",marginBottom:12 }}>­ƒòÉ {b.horaires}</p>}
+                  {b.horaires && <p style={{ fontSize:12,color:"#43C6AC",marginBottom:12 }}>🕐 {b.horaires}</p>}
                   <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
                     <button onClick={()=>likePost(b.id)} style={{ background:"transparent",border:"none",color:likedPosts.includes(b.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{b.likes}</button>
                     <button onClick={()=>setModal({type:"contact",data:{...b,title:b.name}})} style={{ background:"rgba(255,105,180,0.1)",border:"none",color:"#FF69B4",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}><Icon name="phone" size={13}/>Contact</button>
-                    {b.phone && <a href={"tel:"+b.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(255,105,180,0.1)",color:"#FF69B4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">­ƒô×</div></a>}
-                    {b.lat && b.lng && <a href={"https://www.google.com/maps/dir/?api=1&destination="+b.lat+","+b.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}><div style={{ background:"rgba(66,133,244,0.1)",color:"#4285F4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Itin├®raire Google Maps">­ƒù║´©Å</div></a>}
-                    <button onClick={()=>{ navigator.clipboard.writeText("https://marcheduroi.com/beaute/"+b.id); notify("Lien copi├® ! ­ƒôï"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">­ƒöù</button>
-                    {user&&user.id!==b.authorId&&<button onClick={()=>{ setActiveConv({postId:b.id,postTitle:b.name,postPrice:b.tarifs||"",postPhoto:b.photos?.[0],receiverId:b.authorId,receiverName:b.author,messages:messages.filter(m=>(m.post_id===b.id)&&((m.sender_id===user.id&&m.receiver_id===b.authorId)||(m.receiver_id===user.id&&m.sender_id===b.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Envoyer un message">­ƒÆ¼</button>}
+                    {b.phone && <a href={"tel:"+b.phone} style={{ textDecoration:"none" }}><div style={{ background:"rgba(255,105,180,0.1)",color:"#FF69B4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Appeler">📞</div></a>}
+                    {b.lat && b.lng && <a href={"https://www.google.com/maps/dir/?api=1&destination="+b.lat+","+b.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}><div style={{ background:"rgba(66,133,244,0.1)",color:"#4285F4",padding:"6px 8px",borderRadius:8,fontSize:12,display:"flex",alignItems:"center",cursor:"pointer" }} title="Itinéraire Google Maps">🗺️</div></a>}
+                    <button onClick={()=>{ navigator.clipboard.writeText("https://marcheduroi.com/beaute/"+b.id); notify("Lien copié ! 📋"); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Copier le lien">🔗</button>
+                    {user&&user.id!==b.authorId&&<button onClick={()=>{ setActiveConv({postId:b.id,postTitle:b.name,postPrice:b.tarifs||"",postPhoto:b.photos?.[0],receiverId:b.authorId,receiverName:b.author,messages:messages.filter(m=>(m.post_id===b.id)&&((m.sender_id===user.id&&m.receiver_id===b.authorId)||(m.receiver_id===user.id&&m.sender_id===b.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Envoyer un message">💬</button>}
                     <a href={"https://wa.me/?text="+encodeURIComponent("*"+b.name+"*"+"\n"+"Type: "+b.type+"\n"+"Voir le salon: https://marcheduroi.com/beaute/"+b.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4 }}>
                         <svg width="12" height="12" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
@@ -5149,8 +5149,8 @@ function AppContent() {
                     </a>
                     {user&&(user.id===b.authorId||user.role==="admin")&&(
                       <>
-                        {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && !b.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"beaute",shopSetter:"setBeaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>­ƒöÑ</button>}
-                        {b.urgent&&new Date(b.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(b.id,"beaute",setBeaute)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>Ô£ò­ƒöÑ</button>}
+                        {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && !b.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"beaute",shopSetter:"setBeaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {b.urgent&&new Date(b.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(b.id,"beaute",setBeaute)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>openEditShop(b,"beaute",editBeaute)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -5160,7 +5160,7 @@ function AppContent() {
               </div>
             ))}
           </div>
-          {beaute.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>­ƒÆç</p><p>Aucun salon pour le moment</p></div>}
+          {beaute.length===0&&<div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}><p style={{ fontSize:40 }}>💇</p><p>Aucun salon pour le moment</p></div>}
           {beaute.length > visibleBeaute && <div style={{ textAlign:"center",marginTop:24 }}><button onClick={()=>setVisibleBeaute(v=>v+12)} style={{ background:"rgba(255,105,180,0.1)",border:"1px solid rgba(255,105,180,0.3)",color:"#FF69B4",padding:"10px 28px",borderRadius:20,fontWeight:700,fontSize:14,cursor:"pointer" }}>Voir plus ({beaute.length - visibleBeaute} restants)</button></div>}
         </div>
       )}
@@ -5169,19 +5169,19 @@ function AppContent() {
       {view==="stats"&&(
         <div style={{ width:"100%",maxWidth:900,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:48 }}>
-            <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>­ƒôè March├®duRoi en <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>chiffres</span></h1>
-            <p style={{ color:theme.sub,fontSize:16 }}>La plateforme qui grandit chaque jour au B├®nin et en Afrique</p>
+            <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>📊 MarchéduRoi en <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>chiffres</span></h1>
+            <p style={{ color:theme.sub,fontSize:16 }}>La plateforme qui grandit chaque jour au Bénin et en Afrique</p>
           </div>
           <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:20,marginBottom:40 }}>
             {[
-              { val:posts.length, label:"Annonces publi├®es", icon:"­ƒôï", color:"#6C63FF" },
-              { val:boutiques.length, label:"Boutiques", icon:"­ƒøì´©Å", color:"#FF6584" },
-              { val:ateliers.length, label:"Ateliers", icon:"­ƒöº", color:"#43C6AC" },
-              { val:restos.length, label:"Restaurants & Bars", icon:"­ƒì¢´©Å", color:"#FF8C00" },
-              { val:beaute.length, label:"Salons Beaut├®", icon:"­ƒÆç", color:"#FF69B4" },
-              { val:posts.reduce((a,p)=>a+p.likes,0), label:"Likes totaux", icon:"ÔØñ´©Å", color:"#FF6584" },
-              { val:CATEGORIES.length-1, label:"Cat├®gories", icon:"­ƒùé´©Å", color:"#FFD700" },
-              { val:"18 pays ­ƒîì", label:"Couverture Afrique", icon:"­ƒîÉ", color:"#43C6AC" },
+              { val:posts.length, label:"Annonces publiées", icon:"📋", color:"#6C63FF" },
+              { val:boutiques.length, label:"Boutiques", icon:"🛍️", color:"#FF6584" },
+              { val:ateliers.length, label:"Ateliers", icon:"🔧", color:"#43C6AC" },
+              { val:restos.length, label:"Restaurants & Bars", icon:"🍽️", color:"#FF8C00" },
+              { val:beaute.length, label:"Salons Beauté", icon:"💇", color:"#FF69B4" },
+              { val:posts.reduce((a,p)=>a+p.likes,0), label:"Likes totaux", icon:"❤️", color:"#FF6584" },
+              { val:CATEGORIES.length-1, label:"Catégories", icon:"🗂️", color:"#FFD700" },
+              { val:"18 pays 🌍", label:"Couverture Afrique", icon:"🌐", color:"#43C6AC" },
             ].map(s=>(
               <div key={s.label} className="card-hover" style={{ ...cardStyle,borderRadius:16,padding:28,textAlign:"center" }}>
                 <p style={{ fontSize:36,marginBottom:8 }}>{s.icon}</p>
@@ -5194,18 +5194,18 @@ function AppContent() {
           {/* Carte Google Maps des annonces */}
           <div style={{ ...cardStyle,borderRadius:16,marginBottom:24,overflow:"hidden" }}>
             <div style={{ padding:"16px 20px",borderBottom:`1px solid ${theme.border}`,display:"flex",alignItems:"center",gap:8 }}>
-              <span style={{ fontSize:20 }}>­ƒù║´©Å</span>
+              <span style={{ fontSize:20 }}>🗺️</span>
               <p style={{ fontWeight:700,fontSize:16,color:theme.text }}>Carte des annonces</p>
-              <span style={{ color:theme.sub,fontSize:13 }}>ÔÇö B├®nin & Afrique</span>
+              <span style={{ color:theme.sub,fontSize:13 }}>— Bénin & Afrique</span>
             </div>
             <div style={{ height:320,position:"relative" }}>
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1014574!2d2.3158!3d6.3654!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sfr!2sbj!4v1"
                 width="100%" height="320" style={{ border:0 }} allowFullScreen loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade" title="Carte March├®duRoi"/>
+                referrerPolicy="no-referrer-when-downgrade" title="Carte MarchéduRoi"/>
               <div style={{ position:"absolute",bottom:0,left:0,right:0,background:`linear-gradient(to top,${theme.bg}CC,transparent)`,padding:"16px 20px" }}>
                 <p style={{ color:theme.text,fontSize:13,fontWeight:600 }}>
-                  ­ƒôì {posts.filter(p=>p.lat&&p.lng).length} annonce{posts.filter(p=>p.lat&&p.lng).length>1?"s":""} g├®olocalis├®e{posts.filter(p=>p.lat&&p.lng).length>1?"s":""}
+                  📍 {posts.filter(p=>p.lat&&p.lng).length} annonce{posts.filter(p=>p.lat&&p.lng).length>1?"s":""} géolocalisée{posts.filter(p=>p.lat&&p.lng).length>1?"s":""}
                 </p>
               </div>
             </div>
@@ -5214,40 +5214,40 @@ function AppContent() {
           {/* Activer les notifications push */}
           {user && "Notification" in window && Notification.permission !== "granted" && (
             <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24,display:"flex",gap:16,alignItems:"center",flexWrap:"wrap" }}>
-              <span style={{ fontSize:36 }}>­ƒöö</span>
+              <span style={{ fontSize:36 }}>🔔</span>
               <div style={{ flex:1 }}>
                 <p style={{ fontWeight:700,fontSize:16,color:theme.text,marginBottom:4 }}>Activer les notifications</p>
-                <p style={{ color:theme.sub,fontSize:13 }}>Soyez alert├® en temps r├®el ÔÇö nouveaux messages, likes, expiration d'annonces.</p>
+                <p style={{ color:theme.sub,fontSize:13 }}>Soyez alerté en temps réel — nouveaux messages, likes, expiration d'annonces.</p>
               </div>
               <button onClick={()=>{
                 Notification.requestPermission().then(perm=>{
-                  if (perm==="granted") notify("­ƒöö Notifications activ├®es ! Vous serez alert├® en temps r├®el.");
-                  else notify("Notifications refus├®es ÔÇö vous pouvez les activer dans les param├¿tres du navigateur.","error");
+                  if (perm==="granted") notify("🔔 Notifications activées ! Vous serez alerté en temps réel.");
+                  else notify("Notifications refusées — vous pouvez les activer dans les paramètres du navigateur.","error");
                 });
               }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 24px",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer",flexShrink:0 }}>
-                ­ƒöö Activer
+                🔔 Activer
               </button>
             </div>
           )}
 
           <div style={{ ...cardStyle,borderRadius:16,padding:28,textAlign:"center" }}>
-            <p style={{ fontSize:18,fontWeight:700,color:theme.text,marginBottom:8 }}>­ƒÜÇ Rejoignez la communaut├® March├®duRoi</p>
-            <p style={{ color:theme.sub,marginBottom:20 }}>Publiez vos annonces et rejoignez des milliers de commer├ºants au B├®nin</p>
+            <p style={{ fontSize:18,fontWeight:700,color:theme.text,marginBottom:8 }}>🚀 Rejoignez la communauté MarchéduRoi</p>
+            <p style={{ color:theme.sub,marginBottom:20 }}>Publiez vos annonces et rejoignez des milliers de commerçants au Bénin</p>
             <button onClick={()=>user?setModal({type:"add"}):setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"14px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
-              {user?"Publier une annonce ÔåÆ":"Cr├®er mon compte gratuitement ÔåÆ"}
+              {user?"Publier une annonce →":"Créer mon compte gratuitement →"}
             </button>
           </div>
         </div>
       )}
 
-      {/* PAGE R├ëINITIALISATION MOT DE PASSE */}
+      {/* PAGE RÉINITIALISATION MOT DE PASSE */}
       {view==="reset-password"&&(
         <div style={{ maxWidth:420,margin:"80px auto",padding:"0 24px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ ...cardStyle,borderRadius:20,padding:36 }}>
             <div style={{ textAlign:"center",marginBottom:28 }}>
-              <p style={{ fontSize:48,marginBottom:12 }}>­ƒöæ</p>
+              <p style={{ fontSize:48,marginBottom:12 }}>🔑</p>
               <h2 style={{ fontWeight:800,fontSize:24,color:theme.text,marginBottom:8 }}>Nouveau mot de passe</h2>
-              <p style={{ color:theme.sub,fontSize:13 }}>Choisissez un nouveau mot de passe s├®curis├®</p>
+              <p style={{ color:theme.sub,fontSize:13 }}>Choisissez un nouveau mot de passe sécurisé</p>
             </div>
             <div style={{ marginBottom:20 }}>
               <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Nouveau mot de passe</label>
@@ -5257,11 +5257,11 @@ function AppContent() {
                   value={newPassword}
                   onChange={e=>setNewPassword(e.target.value)}
                   onKeyDown={e=>e.key==="Enter"&&updatePassword()}
-                  placeholder="Min. 6 caract├¿res"
+                  placeholder="Min. 6 caractères"
                   style={{ ...inputStyle,paddingRight:44 }}
                 />
                 <button type="button" onClick={()=>setShowPassword(s=>!s)} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:18 }}>
-                  {showPassword?"­ƒÖê":"­ƒæü´©Å"}
+                  {showPassword?"🙈":"👁️"}
                 </button>
               </div>
             </div>
@@ -5279,12 +5279,12 @@ function AppContent() {
                   ))}
                 </div>
                 <p style={{ fontSize:11,color:theme.sub }}>
-                  {newPassword.length < 6 ? "ÔØî Trop court" : newPassword.length < 8 ? "ÔÜá´©Å Faible" : newPassword.length < 10 ? "­ƒæì Moyen" : "Ô£à Fort"}
+                  {newPassword.length < 6 ? "❌ Trop court" : newPassword.length < 8 ? "⚠️ Faible" : newPassword.length < 10 ? "👍 Moyen" : "✅ Fort"}
                 </p>
               </div>
             )}
             <button onClick={updatePassword} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s",cursor:"pointer" }}>
-              Ô£à Confirmer le nouveau mot de passe
+              ✅ Confirmer le nouveau mot de passe
             </button>
             <button onClick={()=>{ setView("login"); setNewPassword(""); }} style={{ width:"100%",padding:"10px",background:"transparent",border:"none",color:theme.sub,fontSize:13,marginTop:10,cursor:"pointer" }}>
               Annuler
@@ -5293,25 +5293,25 @@ function AppContent() {
         </div>
       )}
 
-      {/* CONDITIONS G├ëN├ëRALES D'UTILISATION */}
+      {/* CONDITIONS GÉNÉRALES D'UTILISATION */}
       {view==="terms"&&(
         <div style={{ width:"100%",maxWidth:900,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
 
           {/* Header */}
           <div style={{ textAlign:"center",marginBottom:48 }}>
-            <div style={{ fontSize:56,marginBottom:16 }}>­ƒôï</div>
-            <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>Conditions G├®n├®rales <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>d'Utilisation</span></h1>
-            <p style={{ color:theme.sub,fontSize:15 }}>Derni├¿re mise ├á jour : Mars 2026 ┬À March├®duRoi, Ouidah, B├®nin</p>
-            <p style={{ color:theme.sub,fontSize:13,marginTop:6 }}>Version 2.0 ÔÇö Ces conditions remplacent toutes les versions ant├®rieures.</p>
+            <div style={{ fontSize:56,marginBottom:16 }}>📋</div>
+            <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>Conditions Générales <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>d'Utilisation</span></h1>
+            <p style={{ color:theme.sub,fontSize:15 }}>Dernière mise à jour : Mars 2026 · MarchéduRoi, Ouidah, Bénin</p>
+            <p style={{ color:theme.sub,fontSize:13,marginTop:6 }}>Version 2.0 — Ces conditions remplacent toutes les versions antérieures.</p>
           </div>
 
           {/* Avertissement */}
           <div style={{ background:"rgba(255,71,87,0.08)",border:"2px solid rgba(255,71,87,0.3)",borderRadius:16,padding:24,marginBottom:40,display:"flex",gap:16,alignItems:"flex-start" }}>
-            <span style={{ fontSize:28,flexShrink:0 }}>ÔÜá´©Å</span>
+            <span style={{ fontSize:28,flexShrink:0 }}>⚠️</span>
             <div>
               <p style={{ fontWeight:800,fontSize:16,color:"#FF4757",marginBottom:8 }}>Avertissement Important</p>
               <p style={{ color:theme.sub,fontSize:14,lineHeight:1.8 }}>
-                En utilisant March├®duRoi, vous acceptez pleinement et sans r├®serve les pr├®sentes conditions g├®n├®rales d'utilisation. Toute violation expose l'utilisateur ├á des poursuites judiciaires conform├®ment aux lois en vigueur au B├®nin et dans son pays de r├®sidence, ainsi qu'aux conventions et trait├®s internationaux applicables en mati├¿re de commerce ├®lectronique et de cybercriminalit├®.
+                En utilisant MarchéduRoi, vous acceptez pleinement et sans réserve les présentes conditions générales d'utilisation. Toute violation expose l'utilisateur à des poursuites judiciaires conformément aux lois en vigueur au Bénin et dans son pays de résidence, ainsi qu'aux conventions et traités internationaux applicables en matière de commerce électronique et de cybercriminalité.
               </p>
             </div>
           </div>
@@ -5319,93 +5319,93 @@ function AppContent() {
           {[
             {
               num:"1",
-              title:"Pr├®sentation de March├®duRoi",
-              icon:"­ƒÅó",
-              content:`March├®duRoi est une plateforme num├®rique multipolaire de petites annonces, cr├®├®e et exploit├®e par EDENPORTAIL, ├®tablissement sp├®cialis├® dans la cr├®ation et le r├®f├®rencement de sites internet, dont le si├¿ge social est ├®tabli ├á Ouidah, R├®publique du B├®nin. La plateforme permet ├á toute personne physique ou morale de consulter, publier et diffuser des annonces relatives ├á des produits, biens et services, au B├®nin et dans toute l'Afrique francophone. L'acc├¿s et l'utilisation de la plateforme impliquent l'acceptation sans r├®serve des pr├®sentes conditions g├®n├®rales d'utilisation (CGU).`
+              title:"Présentation de MarchéduRoi",
+              icon:"🏢",
+              content:`MarchéduRoi est une plateforme numérique multipolaire de petites annonces, créée et exploitée par EDENPORTAIL, établissement spécialisé dans la création et le référencement de sites internet, dont le siège social est établi à Ouidah, République du Bénin. La plateforme permet à toute personne physique ou morale de consulter, publier et diffuser des annonces relatives à des produits, biens et services, au Bénin et dans toute l'Afrique francophone. L'accès et l'utilisation de la plateforme impliquent l'acceptation sans réserve des présentes conditions générales d'utilisation (CGU).`
             },
             {
               num:"2",
-              title:"Conditions d'acc├¿s et d'inscription",
-              icon:"­ƒæñ",
-              content:`La consultation des annonces est enti├¿rement gratuite et accessible ├á tous sans inscription pr├®alable. La publication d'annonces est r├®serv├®e aux utilisateurs inscrits et ayant confirm├® leur adresse email. Pour s'inscrire, l'utilisateur doit fournir des informations exactes, compl├¿tes et ├á jour. Toute inscription effectu├®e avec de fausses informations entra├«ne la suspension imm├®diate du compte et peut faire l'objet de poursuites judiciaires. L'utilisateur est seul responsable de la confidentialit├® de ses identifiants de connexion et de toute activit├® effectu├®e depuis son compte.`
+              title:"Conditions d'accès et d'inscription",
+              icon:"👤",
+              content:`La consultation des annonces est entièrement gratuite et accessible à tous sans inscription préalable. La publication d'annonces est réservée aux utilisateurs inscrits et ayant confirmé leur adresse email. Pour s'inscrire, l'utilisateur doit fournir des informations exactes, complètes et à jour. Toute inscription effectuée avec de fausses informations entraîne la suspension immédiate du compte et peut faire l'objet de poursuites judiciaires. L'utilisateur est seul responsable de la confidentialité de ses identifiants de connexion et de toute activité effectuée depuis son compte.`
             },
             {
               num:"3",
               title:"Publication d'annonces et tarification",
-              icon:"­ƒÆ░",
-              content:`TARIFS DE PUBLICATION : Tous les inscrits b├®n├®ficient de 4 jours gratuits par mois pour tous types d'annonces. ANNONCES CLASSIQUES (toutes cat├®gories) : 1 000 FCFA pour 30 jours ┬À 2 500 FCFA pour 90 jours ┬À 4 500 FCFA pour 180 jours ┬À 8 000 FCFA pour 360 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUT├ë : 2 500 FCFA pour 30 jours ┬À 6 000 FCFA pour 90 jours ┬À 10 000 FCFA pour 180 jours ┬À 18 000 FCFA pour 360 jours. SPONSORING : 500 FCFA par semaine ┬À 1 500 FCFA par mois. BADGE URGENT : 500 FCFA pour 6 heures ┬À 1 000 FCFA pour 24 heures. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Apr├¿s 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'interm├®diaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est d├®finitif et non remboursable, sauf d├®faillance technique av├®r├®e et prouv├®e de la plateforme. En cas de r├®clamation, contacter support@marcheduroi.com dans un d├®lai de 7 jours ouvrables.`
+              icon:"💰",
+              content:`TARIFS DE PUBLICATION : Tous les inscrits bénéficient de 4 jours gratuits par mois pour tous types d'annonces. ANNONCES CLASSIQUES (toutes catégories) : 1 000 FCFA pour 30 jours · 2 500 FCFA pour 90 jours · 4 500 FCFA pour 180 jours · 8 000 FCFA pour 360 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. SPONSORING : 500 FCFA par semaine · 1 500 FCFA par mois. BADGE URGENT : 500 FCFA pour 6 heures · 1 000 FCFA pour 24 heures. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Après 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
             },
             {
               num:"4",
               title:"Contenus interdits",
-              icon:"­ƒÜ½",
-              content:`Il est formellement interdit de publier sur March├®duRoi : des armes, munitions ou mat├®riels militaires de toute nature ; des stup├®fiants, drogues ou substances illicites ; des contenus ├á caract├¿re pornographique, obsc├¿ne ou sexuellement explicite ; tout contenu impliquant des mineurs de mani├¿re inappropri├®e ; des animaux prot├®g├®s ou en voie de disparition ; des m├®dicaments sans autorisation officielle ; des produits contrefaits, vol├®s ou illicites ; des annonces frauduleuses, trompeuses ou mensong├¿res ; des contenus incitant ├á la haine raciale, ethnique, religieuse ou sexuelle ; des contenus portant atteinte aux droits de propri├®t├® intellectuelle ; tout contenu violant les lois et r├®glementations en vigueur. Toute annonce violant ces interdictions sera supprim├®e imm├®diatement et l'auteur signal├® aux autorit├®s comp├®tentes.`
+              icon:"🚫",
+              content:`Il est formellement interdit de publier sur MarchéduRoi : des armes, munitions ou matériels militaires de toute nature ; des stupéfiants, drogues ou substances illicites ; des contenus à caractère pornographique, obscène ou sexuellement explicite ; tout contenu impliquant des mineurs de manière inappropriée ; des animaux protégés ou en voie de disparition ; des médicaments sans autorisation officielle ; des produits contrefaits, volés ou illicites ; des annonces frauduleuses, trompeuses ou mensongères ; des contenus incitant à la haine raciale, ethnique, religieuse ou sexuelle ; des contenus portant atteinte aux droits de propriété intellectuelle ; tout contenu violant les lois et réglementations en vigueur. Toute annonce violant ces interdictions sera supprimée immédiatement et l'auteur signalé aux autorités compétentes.`
             },
             {
               num:"5",
-              title:"Responsabilit├® des utilisateurs",
-              icon:"ÔÜû´©Å",
-              content:`Chaque utilisateur est enti├¿rement et personnellement responsable du contenu qu'il publie sur March├®duRoi. L'utilisateur garantit que ses annonces sont conformes aux lois en vigueur au B├®nin et dans tout pays destinataire. March├®duRoi n'a pas l'obligation de v├®rifier l'exactitude des informations publi├®es et ne peut ├¬tre tenu responsable des transactions effectu├®es entre utilisateurs. En cas de litige entre un acheteur et un vendeur, March├®duRoi ne peut ├¬tre partie au litige et ne saurait voir sa responsabilit├® engag├®e ├á ce titre. L'utilisateur s'engage ├á utiliser la plateforme de mani├¿re loyale et ├á ne pas en perturber le fonctionnement technique.`
+              title:"Responsabilité des utilisateurs",
+              icon:"⚖️",
+              content:`Chaque utilisateur est entièrement et personnellement responsable du contenu qu'il publie sur MarchéduRoi. L'utilisateur garantit que ses annonces sont conformes aux lois en vigueur au Bénin et dans tout pays destinataire. MarchéduRoi n'a pas l'obligation de vérifier l'exactitude des informations publiées et ne peut être tenu responsable des transactions effectuées entre utilisateurs. En cas de litige entre un acheteur et un vendeur, MarchéduRoi ne peut être partie au litige et ne saurait voir sa responsabilité engagée à ce titre. L'utilisateur s'engage à utiliser la plateforme de manière loyale et à ne pas en perturber le fonctionnement technique.`
             },
             {
               num:"6",
-              title:"Limitation de responsabilit├® de March├®duRoi",
-              icon:"­ƒøí´©Å",
-              content:`March├®duRoi agit en qualit├® d'interm├®diaire technique h├®bergeant des contenus publi├®s par des tiers. March├®duRoi ne peut ├¬tre tenu responsable : des contenus publi├®s par les utilisateurs ; des transactions commerciales entre utilisateurs ; des pertes financi├¿res directes ou indirectes r├®sultant d'une utilisation de la plateforme ; des interruptions temporaires de service pour raisons de maintenance ou de force majeure ; des dommages indirects, cons├®cutifs ou impr├®vus li├®s ├á l'utilisation du site. March├®duRoi ne prend aucune commission sur les transactions effectu├®es entre acheteurs et vendeurs. Toute transaction se fait directement entre le vendeur et l'acheteur, sans intervention de March├®duRoi. March├®duRoi ne g├¿re ni les transactions financi├¿res entre particuliers, ni la livraison des produits ou services. Il est vivement recommand├® ├á chaque utilisateur de v├®rifier l'identit├® du vendeur et l'├®tat du produit ou service avant tout paiement. March├®duRoi s'engage cependant ├á d├®ployer tous les efforts raisonnables pour assurer la disponibilit├®, la s├®curit├® et la qualit├® de la plateforme.`
+              title:"Limitation de responsabilité de MarchéduRoi",
+              icon:"🛡️",
+              content:`MarchéduRoi agit en qualité d'intermédiaire technique hébergeant des contenus publiés par des tiers. MarchéduRoi ne peut être tenu responsable : des contenus publiés par les utilisateurs ; des transactions commerciales entre utilisateurs ; des pertes financières directes ou indirectes résultant d'une utilisation de la plateforme ; des interruptions temporaires de service pour raisons de maintenance ou de force majeure ; des dommages indirects, consécutifs ou imprévus liés à l'utilisation du site. MarchéduRoi ne prend aucune commission sur les transactions effectuées entre acheteurs et vendeurs. Toute transaction se fait directement entre le vendeur et l'acheteur, sans intervention de MarchéduRoi. MarchéduRoi ne gère ni les transactions financières entre particuliers, ni la livraison des produits ou services. Il est vivement recommandé à chaque utilisateur de vérifier l'identité du vendeur et l'état du produit ou service avant tout paiement. MarchéduRoi s'engage cependant à déployer tous les efforts raisonnables pour assurer la disponibilité, la sécurité et la qualité de la plateforme.`
             },
             {
               num:"7",
               title:"Force majeure",
-              icon:"­ƒî¬´©Å",
-              content:`March├®duRoi ne saurait ├¬tre tenu responsable de tout manquement ├á ses obligations contractuelles r├®sultant d'un ├®v├®nement de force majeure, entendu comme tout ├®v├®nement ext├®rieur, impr├®visible et irr├®sistible au sens du droit b├®ninois. Sont notamment consid├®r├®s comme cas de force majeure : les catastrophes naturelles, les coupures g├®n├®ralis├®es d'internet, les cyberattaques massives, les d├®cisions gouvernementales, les ├®pid├®mies ou pand├®mies, les conflits arm├®s. En cas de force majeure, March├®duRoi informera les utilisateurs dans les meilleurs d├®lais et prendra les mesures n├®cessaires pour r├®tablir le service le plus rapidement possible.`
+              icon:"🌪️",
+              content:`MarchéduRoi ne saurait être tenu responsable de tout manquement à ses obligations contractuelles résultant d'un événement de force majeure, entendu comme tout événement extérieur, imprévisible et irrésistible au sens du droit béninois. Sont notamment considérés comme cas de force majeure : les catastrophes naturelles, les coupures généralisées d'internet, les cyberattaques massives, les décisions gouvernementales, les épidémies ou pandémies, les conflits armés. En cas de force majeure, MarchéduRoi informera les utilisateurs dans les meilleurs délais et prendra les mesures nécessaires pour rétablir le service le plus rapidement possible.`
             },
             {
               num:"8",
-              title:"Protection des donn├®es personnelles",
-              icon:"­ƒöÆ",
-              content:`March├®duRoi collecte et traite les donn├®es personnelles des utilisateurs dans le strict respect de la vie priv├®e et conform├®ment aux lois applicables. DONN├ëES COLLECT├ëES : nom, adresse email, num├®ro de t├®l├®phone (optionnel), localisation (optionnelle), photos et contenus publi├®s. FINALIT├ë : ces donn├®es sont utilis├®es exclusivement pour le fonctionnement de la plateforme, la gestion des comptes, le traitement des paiements et la lutte contre la fraude. Elles ne sont jamais vendues ni c├®d├®es ├á des tiers ├á des fins commerciales. SOUS-TRAITANTS : March├®duRoi utilise Supabase (h├®bergement et base de donn├®es), FedaPay (paiements zone UEMOA) et Flutterwave (paiements panafricains) comme sous-traitants techniques op├®rant dans le respect des r├¿gles de protection des donn├®es. DUR├ëE DE CONSERVATION : les donn├®es sont conserv├®es pendant toute la dur├®e d'activit├® du compte, puis 3 ans apr├¿s sa suppression pour des obligations l├®gales. DROITS : tout utilisateur dispose d'un droit d'acc├¿s, de rectification, de suppression et de portabilit├® de ses donn├®es en contactant : contact@marcheduroi.com. Nous nous engageons ├á r├®pondre dans un d├®lai de 30 jours.`
+              title:"Protection des données personnelles",
+              icon:"🔒",
+              content:`MarchéduRoi collecte et traite les données personnelles des utilisateurs dans le strict respect de la vie privée et conformément aux lois applicables. DONNÉES COLLECTÉES : nom, adresse email, numéro de téléphone (optionnel), localisation (optionnelle), photos et contenus publiés. FINALITÉ : ces données sont utilisées exclusivement pour le fonctionnement de la plateforme, la gestion des comptes, le traitement des paiements et la lutte contre la fraude. Elles ne sont jamais vendues ni cédées à des tiers à des fins commerciales. SOUS-TRAITANTS : MarchéduRoi utilise Supabase (hébergement et base de données), FedaPay (paiements zone UEMOA) et Flutterwave (paiements panafricains) comme sous-traitants techniques opérant dans le respect des règles de protection des données. DURÉE DE CONSERVATION : les données sont conservées pendant toute la durée d'activité du compte, puis 3 ans après sa suppression pour des obligations légales. DROITS : tout utilisateur dispose d'un droit d'accès, de rectification, de suppression et de portabilité de ses données en contactant : contact@marcheduroi.com. Nous nous engageons à répondre dans un délai de 30 jours.`
             },
             {
               num:"9",
-              title:"Propri├®t├® intellectuelle",
-              icon:"┬®´©Å",
-              content:`La plateforme March├®duRoi, son logo, sa charte graphique, son design, son code source et l'ensemble de ses contenus originaux sont la propri├®t├® exclusive de EDENPORTAIL. Toute reproduction, modification, distribution, extraction ou utilisation commerciale, m├¬me partielle, sans autorisation ├®crite pr├®alable est strictement interdite et constitue une contrefa├ºon passible de sanctions p├®nales et civiles. Les utilisateurs conservent l'enti├¿re propri├®t├® des contenus qu'ils publient (textes, photos, vid├®os) et accordent ├á March├®duRoi une licence d'affichage non exclusive, mondiale et gratuite, limit├®e ├á la dur├®e de publication de l'annonce.`
+              title:"Propriété intellectuelle",
+              icon:"©️",
+              content:`La plateforme MarchéduRoi, son logo, sa charte graphique, son design, son code source et l'ensemble de ses contenus originaux sont la propriété exclusive de EDENPORTAIL. Toute reproduction, modification, distribution, extraction ou utilisation commerciale, même partielle, sans autorisation écrite préalable est strictement interdite et constitue une contrefaçon passible de sanctions pénales et civiles. Les utilisateurs conservent l'entière propriété des contenus qu'ils publient (textes, photos, vidéos) et accordent à MarchéduRoi une licence d'affichage non exclusive, mondiale et gratuite, limitée à la durée de publication de l'annonce.`
             },
             {
               num:"10",
               title:"Suspension et sanctions",
-              icon:"­ƒö┤",
-              content:`March├®duRoi se r├®serve le droit de suspendre ou supprimer tout compte, sans pr├®avis ni remboursement, en cas de : violation des pr├®sentes CGU ; publication de contenus illicites ou frauduleux ; comportement abusif envers d'autres utilisateurs ou envers l'├®quipe March├®duRoi ; usurpation d'identit├® ; tentative de piratage ou de perturbation technique de la plateforme ; utilisation de fausses informations lors de l'inscription. La suspension entra├«ne la d├®sactivation imm├®diate de toutes les annonces actives sans remboursement. L'utilisateur suspendu peut introduire un recours en ├®crivant ├á contact@marcheduroi.com dans un d├®lai de 15 jours. Ind├®pendamment des sanctions internes, March├®duRoi se r├®serve le droit d'engager toutes les proc├®dures judiciaires n├®cessaires ├á la protection de ses droits et de ceux de ses utilisateurs, conform├®ment aux lois b├®ninoises et aux conventions internationales applicables.`
+              icon:"🔴",
+              content:`MarchéduRoi se réserve le droit de suspendre ou supprimer tout compte, sans préavis ni remboursement, en cas de : violation des présentes CGU ; publication de contenus illicites ou frauduleux ; comportement abusif envers d'autres utilisateurs ou envers l'équipe MarchéduRoi ; usurpation d'identité ; tentative de piratage ou de perturbation technique de la plateforme ; utilisation de fausses informations lors de l'inscription. La suspension entraîne la désactivation immédiate de toutes les annonces actives sans remboursement. L'utilisateur suspendu peut introduire un recours en écrivant à contact@marcheduroi.com dans un délai de 15 jours. Indépendamment des sanctions internes, MarchéduRoi se réserve le droit d'engager toutes les procédures judiciaires nécessaires à la protection de ses droits et de ceux de ses utilisateurs, conformément aux lois béninoises et aux conventions internationales applicables.`
             },
             {
               num:"11",
               title:"Cookies et traceurs",
-              icon:"­ƒì¬",
-              content:`March├®duRoi utilise des technologies de stockage local (localStorage) pour m├®moriser vos pr├®f├®rences (th├¿me, langue, favoris) et am├®liorer votre exp├®rience de navigation. Ces donn├®es sont stock├®es uniquement sur votre appareil et ne sont pas transmises ├á des serveurs tiers. Aucun cookie publicitaire ou de tra├ºage commercial n'est utilis├® sur March├®duRoi. Les annonces publicitaires de tiers sont strictement interdites sur la plateforme.`
+              icon:"🍪",
+              content:`MarchéduRoi utilise des technologies de stockage local (localStorage) pour mémoriser vos préférences (thème, langue, favoris) et améliorer votre expérience de navigation. Ces données sont stockées uniquement sur votre appareil et ne sont pas transmises à des serveurs tiers. Aucun cookie publicitaire ou de traçage commercial n'est utilisé sur MarchéduRoi. Les annonces publicitaires de tiers sont strictement interdites sur la plateforme.`
             },
             {
               num:"12",
-              title:"Modification des conditions et pr├®avis",
-              icon:"­ƒôØ",
-              content:`March├®duRoi se r├®serve le droit de modifier les pr├®sentes CGU ├á tout moment. En cas de modification substantielle, les utilisateurs seront inform├®s par notification sur la plateforme et par email au moins 30 jours avant l'entr├®e en vigueur des nouvelles conditions. La poursuite de l'utilisation de March├®duRoi apr├¿s l'expiration du d├®lai de pr├®avis constitue une acceptation tacite des nouvelles conditions. En cas de d├®saccord, l'utilisateur peut supprimer son compte avant l'entr├®e en vigueur des nouvelles conditions.`
+              title:"Modification des conditions et préavis",
+              icon:"📝",
+              content:`MarchéduRoi se réserve le droit de modifier les présentes CGU à tout moment. En cas de modification substantielle, les utilisateurs seront informés par notification sur la plateforme et par email au moins 30 jours avant l'entrée en vigueur des nouvelles conditions. La poursuite de l'utilisation de MarchéduRoi après l'expiration du délai de préavis constitue une acceptation tacite des nouvelles conditions. En cas de désaccord, l'utilisateur peut supprimer son compte avant l'entrée en vigueur des nouvelles conditions.`
             },
             {
               num:"13",
               title:"Droit applicable et juridiction",
-              icon:"­ƒÅø´©Å",
-              content:`Les pr├®sentes CGU sont r├®gies par le droit b├®ninois. En cas de litige relatif ├á l'interpr├®tation, ├á la validit├® ou ├á l'ex├®cution des pr├®sentes conditions, les parties s'engagent ├á rechercher une solution amiable dans un premier temps. ├Ç d├®faut d'accord amiable dans un d├®lai de 30 jours, tout litige sera soumis ├á la comp├®tence exclusive des tribunaux comp├®tents de Cotonou, R├®publique du B├®nin, nonobstant pluralit├® de d├®fendeurs ou appel en garantie.`
+              icon:"🏛️",
+              content:`Les présentes CGU sont régies par le droit béninois. En cas de litige relatif à l'interprétation, à la validité ou à l'exécution des présentes conditions, les parties s'engagent à rechercher une solution amiable dans un premier temps. À défaut d'accord amiable dans un délai de 30 jours, tout litige sera soumis à la compétence exclusive des tribunaux compétents de Cotonou, République du Bénin, nonobstant pluralité de défendeurs ou appel en garantie.`
             },
             {
               num:"14",
               title:"Programme de Parrainage",
-              icon:"­ƒÄü",
-              content:`March├®duRoi propose un programme de parrainage. L'utilisateur doit parrainer 10 nouveaux inscrits via son lien unique pour obtenir 1 mois de publication gratuit (valeur 1 500 FCFA) pour une annonce simple uniquement. Non applicable aux boutiques, ateliers, restaurants, bars ou salons de beaut├®. Les cr├®dits obtenus ne sont ni remboursables ni ├®changeables contre de l'argent. Toute tentative de fraude (faux comptes, parrainages fictifs) entra├«ne la suppression imm├®diate du compte et l'annulation de tous les cr├®dits.`
+              icon:"🎁",
+              content:`MarchéduRoi propose un programme de parrainage. L'utilisateur doit parrainer 10 nouveaux inscrits via son lien unique pour obtenir 1 mois de publication gratuit (valeur 1 500 FCFA) pour une annonce simple uniquement. Non applicable aux boutiques, ateliers, restaurants, bars ou salons de beauté. Les crédits obtenus ne sont ni remboursables ni échangeables contre de l'argent. Toute tentative de fraude (faux comptes, parrainages fictifs) entraîne la suppression immédiate du compte et l'annulation de tous les crédits.`
             },
             {
               num:"15",
-              title:"Contact et r├®clamations",
-              icon:"­ƒô×",
-              content:`Pour toute question, r├®clamation ou signalement : Email g├®n├®ral : contact@marcheduroi.com ┬À Support technique : support@marcheduroi.com ┬À WhatsApp Support : +229 01 40 90 60 20 ┬À Adresse : EDENPORTAIL, Ouidah, R├®publique du B├®nin. D├®lai de r├®ponse garanti : 48 heures ouvrables pour les demandes g├®n├®rales, 24 heures pour les urgences techniques.`
+              title:"Contact et réclamations",
+              icon:"📞",
+              content:`Pour toute question, réclamation ou signalement : Email général : contact@marcheduroi.com · Support technique : support@marcheduroi.com · WhatsApp Support : +229 01 40 90 60 20 · Adresse : EDENPORTAIL, Ouidah, République du Bénin. Délai de réponse garanti : 48 heures ouvrables pour les demandes générales, 24 heures pour les urgences techniques.`
             },
           ].map(section=>(
             <div key={section.num} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:16,padding:28,marginBottom:16 }}>
@@ -5419,11 +5419,11 @@ function AppContent() {
 
           {/* Signature */}
           <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:16,padding:28,marginTop:32,textAlign:"center" }}>
-            <p style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:8 }}>En utilisant March├®duRoi, vous confirmez avoir lu, compris et accept├® l'int├®gralit├® des pr├®sentes conditions g├®n├®rales d'utilisation.</p>
-            <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>┬® 2026 March├®duRoi ┬À Ouidah, B├®nin ­ƒçº­ƒç» ┬À contact@marcheduroi.com</p>
-            <p style={{ color:theme.sub,fontSize:12,marginBottom:20 }}>Version 2.0 ÔÇö Mars 2026 ┬À 15 articles</p>
+            <p style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:8 }}>En utilisant MarchéduRoi, vous confirmez avoir lu, compris et accepté l'intégralité des présentes conditions générales d'utilisation.</p>
+            <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>© 2026 MarchéduRoi · Ouidah, Bénin 🇧🇯 · contact@marcheduroi.com</p>
+            <p style={{ color:theme.sub,fontSize:12,marginBottom:20 }}>Version 2.0 — Mars 2026 · 15 articles</p>
             <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 32px",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-              Retour aux annonces ÔåÆ
+              Retour aux annonces →
             </button>
           </div>
         </div>
@@ -5432,24 +5432,24 @@ function AppContent() {
       {view==="parrainage"&&(
         <div style={{ width:"100%",maxWidth:700,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",marginBottom:40 }}>
-            <p style={{ fontSize:48,marginBottom:12 }}>­ƒÄü</p>
+            <p style={{ fontSize:48,marginBottom:12 }}>🎁</p>
             <h1 style={{ fontSize:38,fontWeight:800,marginBottom:12,color:theme.text }}>Programme de <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Parrainage</span></h1>
-            <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez <strong style={{ color:"#FFD700" }}>10 amis</strong> sur March├®duRoi et gagnez <strong style={{ color:"#FFD700" }}>1 mois de publication gratuit</strong> !</p>
+            <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez <strong style={{ color:"#FFD700" }}>10 amis</strong> sur MarchéduRoi et gagnez <strong style={{ color:"#FFD700" }}>1 mois de publication gratuit</strong> !</p>
             <div style={{ background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:12,padding:"12px 20px",marginTop:12,display:"inline-block" }}>
-              <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>­ƒÄü 10 parrainages = 1 annonce simple gratuite (valeur 1 000 FCFA)</p>
-              <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>ÔÜá´©Å Valable uniquement pour les annonces simples ┬À Non applicable aux boutiques, ateliers, restos et salons</p>
+              <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>🎁 10 parrainages = 1 annonce simple gratuite (valeur 1 000 FCFA)</p>
+              <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>⚠️ Valable uniquement pour les annonces simples · Non applicable aux boutiques, ateliers, restos et salons</p>
             </div>
           </div>
-          {/* R├¿gles claires */}
+          {/* Règles claires */}
           <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24 }}>
-            <h3 style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:16 }}>­ƒôï Comment ├ºa marche ?</h3>
+            <h3 style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:16 }}>📋 Comment ça marche ?</h3>
             {[
-              { num:"1", text:"Partagez votre lien unique ├á vos amis et contacts" },
+              { num:"1", text:"Partagez votre lien unique à vos amis et contacts" },
               { num:"2", text:"Chaque ami qui s'inscrit via votre lien compte comme 1 parrainage" },
-              { num:"3", text:"Apr├¿s 10 parrainages confirm├®s, vous gagnez 1 annonce simple gratuite (30 jours)" },
+              { num:"3", text:"Après 10 parrainages confirmés, vous gagnez 1 annonce simple gratuite (30 jours)" },
               { num:"4", text:"Valable uniquement pour 1 annonce simple (valeur 1 000 FCFA)" },
-              { num:"5", text:"Non applicable aux boutiques, ateliers, restos et salons de beaut├®" },
-              { num:"6", text:"Les cr├®dits ne sont pas transf├®rables ni remboursables en argent" },
+              { num:"5", text:"Non applicable aux boutiques, ateliers, restos et salons de beauté" },
+              { num:"6", text:"Les crédits ne sont pas transférables ni remboursables en argent" },
             ].map(r=>(
               <div key={r.num} style={{ display:"flex",gap:12,marginBottom:12,alignItems:"flex-start" }}>
                 <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#FFD700,#FFA500)",display:"flex",alignItems:"center",justifyContent:"center",color:"#000",fontWeight:800,fontSize:13,flexShrink:0 }}>{r.num}</div>
@@ -5457,7 +5457,7 @@ function AppContent() {
               </div>
             ))}
             <div style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:10,padding:"12px 16px",marginTop:8,textAlign:"center" }}>
-              <p style={{ color:"#FFD700",fontWeight:800,fontSize:16 }}>­ƒÄ» 10 parrainages = 1 annonce gratuite (valeur 1 000 FCFA)</p>
+              <p style={{ color:"#FFD700",fontWeight:800,fontSize:16 }}>🎯 10 parrainages = 1 annonce gratuite (valeur 1 000 FCFA)</p>
             </div>
           </div>
           {user ? (
@@ -5465,7 +5465,7 @@ function AppContent() {
               <p style={{ fontWeight:700,fontSize:16,color:theme.text,marginBottom:8 }}>Votre lien de parrainage :</p>
               <div style={{ display:"flex",gap:8,marginBottom:20 }}>
                 <input readOnly value={`https://marcheduroi.com?ref=${user.id}`} style={{ ...inputStyle,flex:1,background:theme.bg }} onClick={e=>e.target.select()}/>
-                <button onClick={()=>{ navigator.clipboard.writeText(`https://marcheduroi.com?ref=${user.id}`); notify("Lien copi├® ! ­ƒôï"); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 16px",borderRadius:10,fontWeight:700,cursor:"pointer" }}>Copier</button>
+                <button onClick={()=>{ navigator.clipboard.writeText(`https://marcheduroi.com?ref=${user.id}`); notify("Lien copié ! 📋"); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 16px",borderRadius:10,fontWeight:700,cursor:"pointer" }}>Copier</button>
               </div>
               <a href={`https://wa.me/?text=${encodeURIComponent("Rejoins-moi sur MarcheduRoi, la plateforme de petites annonces au Benin ! https://marcheduroi.com?ref="+user.id)}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"block" }}>
                 <button style={{ width:"100%",padding:"14px",background:"#25D366",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
@@ -5475,9 +5475,9 @@ function AppContent() {
               </a>
               <div style={{ marginTop:24,display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,textAlign:"center" }}>
                 {[
-                  {icon:"­ƒæÑ", val:referralStats.count, label:"Filleuls"},
-                  {icon:"­ƒÄü", val:referralStats.credits, label:"Cr├®dits dispo"},
-                  {icon:"­ƒÆ░", val:referralStats.saved.toLocaleString()+" FCFA", label:"├ëconomis├®"},
+                  {icon:"👥", val:referralStats.count, label:"Filleuls"},
+                  {icon:"🎁", val:referralStats.credits, label:"Crédits dispo"},
+                  {icon:"💰", val:referralStats.saved.toLocaleString()+" FCFA", label:"Économisé"},
                 ].map(s=>(
                   <div key={s.label} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:12,padding:16 }}>
                     <p style={{ fontSize:24 }}>{s.icon}</p>
@@ -5489,15 +5489,15 @@ function AppContent() {
               {referralStats.count > 0 && (
                 <div style={{ marginTop:16,background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:10,padding:"10px 16px",textAlign:"center" }}>
                   <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>
-                    ­ƒÄ» Plus que {10 - (referralStats.count % 10)} parrainage{10-(referralStats.count%10)>1?"s":""} pour gagner 1 mois gratuit !
+                    🎯 Plus que {10 - (referralStats.count % 10)} parrainage{10-(referralStats.count%10)>1?"s":""} pour gagner 1 mois gratuit !
                   </p>
                 </div>
               )}
             </div>
           ) : (
             <div style={{ textAlign:"center" }}>
-              <p style={{ color:theme.sub,marginBottom:20 }}>Connectez-vous pour acc├®der ├á votre lien de parrainage</p>
-              <button onClick={()=>setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",padding:"14px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>Cr├®er un compte</button>
+              <p style={{ color:theme.sub,marginBottom:20 }}>Connectez-vous pour accéder à votre lien de parrainage</p>
+              <button onClick={()=>setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",padding:"14px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>Créer un compte</button>
             </div>
           )}
         </div>
@@ -5517,13 +5517,13 @@ function AppContent() {
                 </div>
                 {modal.type==="add" && (
                   <button onClick={()=>window.open("https://marcheduroi.com/exemples.html","_blank")} style={{ width:"100%",marginBottom:16,padding:"10px",background:"rgba(67,198,172,0.08)",border:"1px dashed rgba(67,198,172,0.4)",color:"#43C6AC",borderRadius:10,fontWeight:600,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6 }}>
-                    ­ƒôû Voir des exemples de publications avant de commencer
+                    📖 Voir des exemples de publications avant de commencer
                   </button>
                 )}
 
-                {/* Cat├®gorie en premier */}
+                {/* Catégorie en premier */}
                 <div style={{ marginBottom:16 }}>
-                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Cat├®gorie</label>
+                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Catégorie</label>
                   <select value={postForm.category} onChange={e=>setPostForm(p=>({...p,category:e.target.value}))} style={inputStyle}>
                     {CATEGORIES.filter(c=>c!=="Toutes").map(c=><option key={c}>{c}</option>)}
                   </select>
@@ -5531,14 +5531,14 @@ function AppContent() {
 
                 <PhotoUploader photos={postPhotos} setPhotos={setPostPhotos} theme={theme} folder="annonces"/>
 
-                {/* Lien vid├®o annonce classique */}
+                {/* Lien vidéo annonce classique */}
                 {(()=>{
                   const isYT = v => /youtube\.com|youtu\.be/.test(v||"");
                   const isCL = v => /cloudinary\.com/.test(v||"");
                   const getYTId = v => { const m = (v||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/); return m?m[1]:null; };
                   return (
                     <div style={{ marginBottom:16 }}>
-                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>­ƒÄ¼ Lien vid├®o (optionnel)</label>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎬 Lien vidéo (optionnel)</label>
                       <input
                         value={postVideo||""}
                         onChange={e=>setPostVideo(e.target.value.trim())}
@@ -5554,31 +5554,31 @@ function AppContent() {
                         <video src={postVideo} controls style={{ width:"100%",borderRadius:10,marginTop:8,maxHeight:180 }}/>
                       )}
                       <details style={{ marginTop:8 }}>
-                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>­ƒôï Comment ajouter ma vid├®o ?</summary>
+                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>📋 Comment ajouter ma vidéo ?</summary>
                         <div style={{ background:theme.bg,borderRadius:8,padding:10,marginTop:6,fontSize:12,color:theme.sub,lineHeight:1.6 }}>
-                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 ÔÇö YouTube (recommand├®)</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 — YouTube (recommandé)</p>
                           <p>1. Allez sur youtube.com et connectez-vous</p>
-                          <p>2. Cliquez "Cr├®er" ÔåÆ "Mettre en ligne une vid├®o"</p>
-                          <p>3. Choisissez "Non r├®pertori├®" pour la confidentialit├®</p>
+                          <p>2. Cliquez "Créer" → "Mettre en ligne une vidéo"</p>
+                          <p>3. Choisissez "Non répertorié" pour la confidentialité</p>
                           <p>4. Copiez le lien et collez-le ici</p>
-                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 ÔÇö Cloudinary</p>
-                          <p>1. Cr├®ez un compte gratuit sur cloudinary.com</p>
-                          <p>2. Uploadez votre vid├®o dans Media Library</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 — Cloudinary</p>
+                          <p>1. Créez un compte gratuit sur cloudinary.com</p>
+                          <p>2. Uploadez votre vidéo dans Media Library</p>
                           <p>3. Copiez l'URL et collez-la ici</p>
-                          <p style={{ marginTop:6,color:"#FF6584" }}>ÔÜá´©Å Dur├®e recommand├®e : max 60 secondes pour une annonce classique</p>
+                          <p style={{ marginTop:6,color:"#FF6584" }}>⚠️ Durée recommandée : max 60 secondes pour une annonce classique</p>
                         </div>
                       </details>
                     </div>
                   );
                 })()}
 
-                {/* Champs g├®n├®raux */}
+                {/* Champs généraux */}
                 {[
                   {label:"Titre *",       key:"title",   type:"input",    max:100, fn: v=>cleanText(v,100)},
                   {label:"Description *", key:"description",type:"textarea",max:1000,fn: v=>cleanLongText(v,1000)},
                   {label:"Prix",          key:"price",   type:"input",    max:30,  fn: formatThousands, hint:"Ex: 15 000",  mode:"numeric"},
                   {label:"Email de contact",key:"contact",type:"input",   max:80,  fn: noSpaces,         hint:"Ex: nom@email.com"},
-                  {label:"T├®l├®phone / WhatsApp",key:"phone",type:"input", max:20,  fn: onlyPhone,    hint:"Ex: +229 01 23 45 67"},
+                  {label:"Téléphone / WhatsApp",key:"phone",type:"input", max:20,  fn: onlyPhone,    hint:"Ex: +229 01 23 45 67"},
                 ].map(f=>(
                   <div key={f.key} style={{ marginBottom:16 }}>
                     <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
@@ -5593,8 +5593,8 @@ function AppContent() {
                 {postForm.category==="Immobilier"&&(
                   <div style={{ marginTop:8 }}>
                     <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:16,padding:"12px 16px",background:theme.bg,border:`1px solid #6C63FF44`,borderRadius:10 }}>
-                      <span style={{ fontSize:18 }}>­ƒÅá</span>
-                      <p style={{ fontWeight:700,color:"#6C63FF",fontSize:14 }}>Fiche immobili├¿re</p>
+                      <span style={{ fontSize:18 }}>🏠</span>
+                      <p style={{ fontWeight:700,color:"#6C63FF",fontSize:14 }}>Fiche immobilière</p>
                     </div>
                     {/* Transaction + Type */}
                     <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12 }}>
@@ -5616,16 +5616,16 @@ function AppContent() {
                         <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Superficie</label>
                         <div style={{ display:"flex",gap:6 }}>
                           <input value={immoForm.superficie} onChange={e=>setImmoForm(f=>({...f,superficie:onlyDigits(e.target.value)}))} placeholder="Ex: 200" inputMode="numeric" maxLength={8} style={{ ...inputStyle,padding:"10px 14px",fontSize:13,flex:1 }}/>
-                          <select value={immoForm.superficieUnit||"m┬▓"} onChange={e=>setImmoForm(f=>({...f,superficieUnit:e.target.value}))} style={{ ...inputStyle,padding:"10px 8px",fontSize:12,width:70,flexShrink:0 }}>
-                            <option>m┬▓</option>
+                          <select value={immoForm.superficieUnit||"m²"} onChange={e=>setImmoForm(f=>({...f,superficieUnit:e.target.value}))} style={{ ...inputStyle,padding:"10px 8px",fontSize:12,width:70,flexShrink:0 }}>
+                            <option>m²</option>
                             <option>ha</option>
-                            <option>km┬▓</option>
+                            <option>km²</option>
                             <option>ares</option>
                           </select>
                         </div>
                       </div>
                       <div>
-                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Nombre de pi├¿ces</label>
+                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Nombre de pièces</label>
                         <input value={immoForm.pieces} onChange={e=>setImmoForm(f=>({...f,pieces:onlyDigits(e.target.value)}))} placeholder="Ex: 5" inputMode="numeric" maxLength={3} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
                       </div>
                     </div>
@@ -5637,13 +5637,13 @@ function AppContent() {
                     </div>
                     <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12 }}>
                       <div>
-                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>├ëtat g├®n├®ral</label>
+                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>État général</label>
                         <select value={immoForm.etat} onChange={e=>setImmoForm(f=>({...f,etat:e.target.value}))} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}>
                           {IMMO_ETATS.map(t=><option key={t}>{t}</option>)}
                         </select>
                       </div>
                       <div>
-                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>R├®seau eau</label>
+                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Réseau eau</label>
                         <select value={immoForm.eau} onChange={e=>setImmoForm(f=>({...f,eau:e.target.value}))} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}>
                           <option>Oui</option><option>Non</option><option>En attente</option>
                         </select>
@@ -5651,7 +5651,7 @@ function AppContent() {
                     </div>
                     <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12 }}>
                       <div>
-                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>├ëlectricit├®</label>
+                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Électricité</label>
                         <select value={immoForm.electricite} onChange={e=>setImmoForm(f=>({...f,electricite:e.target.value}))} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}>
                           <option>Oui</option><option>Non</option><option>En attente</option>
                         </select>
@@ -5668,12 +5668,12 @@ function AppContent() {
                       </div>
                       <div>
                         <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Von de...</label>
-                        <input value={immoForm.von} onChange={e=>setImmoForm(f=>({...f,von:e.target.value}))} placeholder="Ex: Von du march├®" style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
+                        <input value={immoForm.von} onChange={e=>setImmoForm(f=>({...f,von:e.target.value}))} placeholder="Ex: Von du marché" style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
                       </div>
                     </div>
                     {immoForm.transaction==="Vente" && (
                       <div style={{ marginBottom:12 }}>
-                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:8 }}>Recas├®e ?</label>
+                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:8 }}>Recasée ?</label>
                         <div style={{ display:"flex",gap:10 }}>
                           {["Oui","Non"].map(v=>(
                             <button key={v} type="button" onClick={()=>setImmoForm(f=>({...f,recasee:v}))} style={{ flex:1,padding:"10px",borderRadius:10,border:`2px solid ${immoForm.recasee===v?"#43C6AC":theme.border}`,background:immoForm.recasee===v?"rgba(67,198,172,0.15)":theme.bg,color:immoForm.recasee===v?"#43C6AC":theme.sub,fontWeight:700,fontSize:14,cursor:"pointer",transition:"all 0.2s" }}>{v}</button>
@@ -5683,17 +5683,17 @@ function AppContent() {
                     )}
                     <div>
                       <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Autres renseignements</label>
-                      <textarea value={immoForm.autres} onChange={e=>setImmoForm(f=>({...f,autres:e.target.value}))} rows={2} placeholder="Cl├┤ture, puits, parking, gardien..." style={{ ...inputStyle,resize:"vertical",fontSize:13 }}/>
+                      <textarea value={immoForm.autres} onChange={e=>setImmoForm(f=>({...f,autres:e.target.value}))} rows={2} placeholder="Clôture, puits, parking, gardien..." style={{ ...inputStyle,resize:"vertical",fontSize:13 }}/>
                     </div>
                   </div>
                 )}
 
-                {/* Champs v├®hicule */}
+                {/* Champs véhicule */}
                 {isVehicle&&(
                   <div style={{ marginTop:8 }}>
                     <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:16,padding:"12px 16px",background:`${theme.bg}`,border:`1px solid #6C63FF44`,borderRadius:10 }}>
                       <span style={{ color:"#6C63FF" }}><Icon name="car" size={16}/></span>
-                      <p style={{ fontWeight:700,color:"#6C63FF",fontSize:14 }}>Fiche technique du v├®hicule</p>
+                      <p style={{ fontWeight:700,color:"#6C63FF",fontSize:14 }}>Fiche technique du véhicule</p>
                     </div>
                     <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
                       {VEHICLE_FIELDS.map(f=>(
@@ -5724,8 +5724,8 @@ function AppContent() {
                 {isMoto&&(
                   <div style={{ marginTop:8 }}>
                     <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:16,padding:"12px 16px",background:theme.bg,border:`1px solid #FF658444`,borderRadius:10 }}>
-                      <span style={{ fontSize:18 }}>­ƒÅì´©Å</span>
-                      <p style={{ fontWeight:700,color:"#FF6584",fontSize:14 }}>Fiche technique ÔÇö Moto / Tricycle</p>
+                      <span style={{ fontSize:18 }}>🏍️</span>
+                      <p style={{ fontWeight:700,color:"#FF6584",fontSize:14 }}>Fiche technique — Moto / Tricycle</p>
                     </div>
                     <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
                       {MOTO_FIELDS.map(f=>(
@@ -5753,15 +5753,15 @@ function AppContent() {
                 )}
                 {modal.type==="add" && user?.role !== "admin" && (
                   <div style={{ background:theme.bg,border:`1px solid #6C63FF44`,borderRadius:14,padding:20,marginTop:16 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4 }}>­ƒÆ░ Dur├®e de publication</p>
+                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4 }}>💰 Durée de publication</p>
 
                     {/* Option gratuite */}
                     {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)}
                         style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"12px 16px",marginBottom:8,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div>
-                          <p style={{ fontWeight:700,color:theme.text,fontSize:14 }}>­ƒÄü 4 jours gratuits</p>
-                          <p style={{ color:theme.sub,fontSize:12 }}>Votre cr├®dit mensuel gratuit</p>
+                          <p style={{ fontWeight:700,color:theme.text,fontSize:14 }}>🎁 4 jours gratuits</p>
+                          <p style={{ color:theme.sub,fontSize:12 }}>Votre crédit mensuel gratuit</p>
                         </div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:16 }}>GRATUIT</span>
                       </div>
@@ -5777,11 +5777,11 @@ function AppContent() {
                         </div>
                         <div style={{ textAlign:"right" }}>
                             <span style={{ fontWeight:800,color:"#6C63FF",fontSize:16,display:"block" }}>{t.price.toLocaleString()} FCFA</span>
-                            <span style={{ fontWeight:600,color:theme.sub,fontSize:11 }}>Ôëê {(t.price/610).toFixed(1)} USD</span>
+                            <span style={{ fontWeight:600,color:theme.sub,fontSize:11 }}>≈ {(t.price/610).toFixed(1)} USD</span>
                           </div>
                       </div>
                     ))}
-                    <p style={{ fontSize:11,color:"#43C6AC",textAlign:"center",fontWeight:600,marginTop:8 }}>­ƒÆ│ Paiement s├®curis├® MTN / Moov Money (FedaPay)</p>
+                    <p style={{ fontSize:11,color:"#43C6AC",textAlign:"center",fontWeight:600,marginTop:8 }}>💳 Paiement sécurisé MTN / Moov Money (FedaPay)</p>
                   </div>
                 )}
                 <button
@@ -5795,7 +5795,7 @@ function AppContent() {
                           addPost(exp.toISOString().slice(0,10));
                         } else {
                           const tarif = TARIFS_ANNONCE[selectedTarif] || TARIFS_ANNONCE[0];
-                          handlePayment(tarif.price, `Publication annonce ${tarif.label} sur March├®duRoi`, addPost);
+                          handlePayment(tarif.price, `Publication annonce ${tarif.label} sur MarchéduRoi`, addPost);
                         }
                       }
                     : editPost
@@ -5806,8 +5806,8 @@ function AppContent() {
                     ? user?.role==="admin"
                       ? "Publier l'annonce"
                       : selectedTarif===-1
-                        ? "­ƒÄü Publier gratuitement (4 jours)"
-                        : `­ƒÆ│ Payer & Publier ┬À ${(TARIFS_ANNONCE[selectedTarif]||TARIFS_ANNONCE[0]).price.toLocaleString()} FCFA`
+                        ? "🎁 Publier gratuitement (4 jours)"
+                        : `💳 Payer & Publier · ${(TARIFS_ANNONCE[selectedTarif]||TARIFS_ANNONCE[0]).price.toLocaleString()} FCFA`
                     : "Enregistrer"}
                 </button>
               </>
@@ -5817,9 +5817,9 @@ function AppContent() {
             {modal.type==="delete"&&(
               <>
                 <div style={{ textAlign:"center",marginBottom:24 }}>
-                  <div style={{ fontSize:48,marginBottom:12 }}>­ƒùæ´©Å</div>
+                  <div style={{ fontSize:48,marginBottom:12 }}>🗑️</div>
                   <h3 style={{ fontWeight:800,fontSize:20,marginBottom:8,color:theme.text }}>Supprimer cette annonce ?</h3>
-                  <p style={{ color:theme.sub,fontSize:14 }}>"{modal.data.title}" sera supprim├®e d├®finitivement.</p>
+                  <p style={{ color:theme.sub,fontSize:14 }}>"{modal.data.title}" sera supprimée définitivement.</p>
                 </div>
                 <div style={{ display:"flex",gap:12 }}>
                   <button onClick={()=>setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,borderRadius:12,fontWeight:600,fontSize:14 }}>Annuler</button>
@@ -5838,12 +5838,12 @@ function AppContent() {
                 {modal.data.photos&&modal.data.photos.length>0&&<div style={{ borderRadius:12,overflow:"hidden",marginBottom:16 }}><PhotoCarousel photos={modal.data.photos}/></div>}
                 <div style={{ background:theme.bg,borderRadius:12,padding:20,marginBottom:16 }}>
                   <p style={{ fontWeight:700,marginBottom:4,color:theme.text }}>{modal.data.title}</p>
-                  <p style={{ color:theme.sub,fontSize:13 }}>Publi├® par {modal.data.author}{modal.data.price?` ┬À ${modal.data.price}`:""}</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Publié par {modal.data.author}{modal.data.price?` · ${modal.data.price}`:""}</p>
                 </div>
 
-                {/* Fiche v├®hicule dans le contact */}
+                {/* Fiche véhicule dans le contact */}
                 {modal.data.vehicle&&<VehicleCard vehicle={modal.data.vehicle} theme={theme}/>}
-                {/* Fiche immobili├¿re dans le contact */}
+                {/* Fiche immobilière dans le contact */}
                 {modal.data.immo&&<ImmoCard immo={modal.data.immo} theme={theme}/>}
 
                 <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
@@ -5859,7 +5859,7 @@ function AppContent() {
                     <a href={`tel:${modal.data.phone}`} style={{ textDecoration:"none" }}>
                       <div style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:12,padding:16,display:"flex",alignItems:"center",gap:12,cursor:"pointer" }}>
                         <div style={{ width:40,height:40,borderRadius:"50%",background:"rgba(108,99,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",color:"#6C63FF",flexShrink:0 }}><Icon name="phone" size={18}/></div>
-                        <div><p style={{ fontWeight:700,fontSize:14,color:"#6C63FF" }}>Appel t├®l├®phonique</p><p style={{ color:theme.sub,fontSize:13 }}>{modal.data.phone}</p></div>
+                        <div><p style={{ fontWeight:700,fontSize:14,color:"#6C63FF" }}>Appel téléphonique</p><p style={{ color:theme.sub,fontSize:13 }}>{modal.data.phone}</p></div>
                       </div>
                     </a>
                   )}
@@ -5871,16 +5871,16 @@ function AppContent() {
                       </div>
                     </a>
                   )}
-                  {!modal.data.contact&&!modal.data.phone&&<p style={{ textAlign:"center",color:theme.sub,padding:20 }}>Aucun moyen de contact renseign├®</p>}
+                  {!modal.data.contact&&!modal.data.phone&&<p style={{ textAlign:"center",color:theme.sub,padding:20 }}>Aucun moyen de contact renseigné</p>}
                 </div>
 
-                {/* Syst├¿me de notation */}
+                {/* Système de notation */}
                 {user && user.id !== modal.data.authorId && (
                   <div style={{ marginTop:20,borderTop:`1px solid ${theme.border}`,paddingTop:20 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:12 }}>Ô¡É Noter cet ├®l├®ment</p>
+                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:12 }}>⭐ Noter cet élément</p>
                     {userRatings[user.id+"_"+modal.data.id] ? (
                       <div style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:10,padding:12,textAlign:"center" }}>
-                        <p style={{ color:"#FFD700",fontWeight:600,fontSize:13 }}>Ô£à Vous avez d├®j├á not├® cet ├®l├®ment</p>
+                        <p style={{ color:"#FFD700",fontWeight:600,fontSize:13 }}>✅ Vous avez déjà noté cet élément</p>
                         <div style={{ display:"flex",justifyContent:"center",marginTop:4 }}>{renderStars(userRatings[user.id+"_"+modal.data.id].stars,16)}</div>
                       </div>
                     ) : (
@@ -5904,18 +5904,18 @@ function AppContent() {
                   </div>
                 )}
 
-                {/* Annonces similaires am├®lior├®es */}
+                {/* Annonces similaires améliorées */}
                 {(() => {
                   const prixPost = parseInt((modal.data.price||"").replace(/[^0-9]/g,"")) || 0;
                   const villePost = modal.data.immo?.ville || modal.data.vehicle?.position || modal.data.ville || "";
                   // Cherche dans toutes les sections
-                  // Filtrer uniquement les annonces de m├¬me cat├®gorie
+                  // Filtrer uniquement les annonces de même catégorie
                   const allItems = posts
                     .filter(p => p.id !== modal.data.id && p.category === modal.data.category && !p.expired)
                     .map(p => ({...p, _section:"post"}));
                   const similaires = allItems
                     .map(p => {
-                      let score = 1; // m├¬me cat├®gorie garantie
+                      let score = 1; // même catégorie garantie
                       const prixP = parseInt((p.price||"").replace(/[^0-9]/g,"")) || 0;
                       const villeP = p.immo?.ville||p.vehicle?.position||p.ville||"";
                       if (villePost && normalizeText(villeP).includes(normalizeText(villePost))) score += 3;
@@ -5935,7 +5935,7 @@ function AppContent() {
                     const totalW = similaires.length * (CARD_W + GAP);
                     return (
                       <div style={{ marginTop:24,borderTop:`1px solid ${theme.border}`,paddingTop:16 }}>
-                        <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:12 }}>­ƒôï Annonces similaires</p>
+                        <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:12 }}>📋 Annonces similaires</p>
                         <div style={{ position:"relative",overflow:"hidden" }}>
                           <style>{`
                             @keyframes scrollCarousel {
@@ -5971,7 +5971,7 @@ function AppContent() {
                               el.ontouchmove = e => {
                                 if (!isDragging) return;
                                 const dx = e.touches[0].clientX - startX;
-                                // D├®placer visuellement via margin
+                                // Déplacer visuellement via margin
                                 el.style.marginLeft = (parseInt(el.style.marginLeft||0) + dx * 0.3) + 'px';
                                 startX = e.touches[0].clientX;
                               };
@@ -5985,11 +5985,11 @@ function AppContent() {
                                 style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:10,width:CARD_W,flexShrink:0,cursor:"pointer" }}>
                                 {p.photos&&p.photos.length>0
                                   ? <img src={p.photos[0]} alt="" style={{ width:"100%",height:90,borderRadius:8,objectFit:"cover",marginBottom:6 }}/>
-                                  : <div style={{ width:"100%",height:90,borderRadius:8,background:"rgba(108,99,255,0.1)",marginBottom:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24 }}>­ƒôª</div>
+                                  : <div style={{ width:"100%",height:90,borderRadius:8,background:"rgba(108,99,255,0.1)",marginBottom:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24 }}>📦</div>
                                 }
                                 <p style={{ fontWeight:700,fontSize:12,color:theme.text,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{p.title||p.name}</p>
-                                <p style={{ color:"#43C6AC",fontWeight:700,fontSize:12 }}>{p.price||"ÔÇö"}</p>
-                                {p.sponsored && <span style={{ fontSize:10,color:"#FFD700" }}>­ƒîƒ</span>}
+                                <p style={{ color:"#43C6AC",fontWeight:700,fontSize:12 }}>{p.price||"—"}</p>
+                                {p.sponsored && <span style={{ fontSize:10,color:"#FFD700" }}>🌟</span>}
                               </div>
                             ))}
                           </div>
@@ -5998,10 +5998,10 @@ function AppContent() {
                     );
                   }
 
-                  // Desktop ÔÇö liste verticale classique
+                  // Desktop — liste verticale classique
                   return (
                     <div style={{ marginTop:24,borderTop:`1px solid ${theme.border}`,paddingTop:20 }}>
-                      <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:14 }}>­ƒôï Annonces similaires</p>
+                      <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:14 }}>📋 Annonces similaires</p>
                       <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
                         {similaires.slice(0,3).map(p=>(
                           <div key={p.id} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:12,padding:12,display:"flex",gap:12,alignItems:"center" }}>
@@ -6010,11 +6010,11 @@ function AppContent() {
                               <p style={{ fontWeight:700,fontSize:13,color:theme.text,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{p.title}</p>
                               <div style={{ display:"flex",alignItems:"center",gap:6 }}>
                                 <p style={{ color:"#43C6AC",fontWeight:700,fontSize:13 }}>{p.price||""}</p>
-                                {p.sponsored && <span style={{ fontSize:10,color:"#FFD700" }}>­ƒîƒ</span>}
+                                {p.sponsored && <span style={{ fontSize:10,color:"#FFD700" }}>🌟</span>}
                               </div>
                             </div>
                             <button onClick={()=>setModal({type:"contact",data:p})} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,flexShrink:0,cursor:"pointer" }}>
-                              Voir ÔåÆ
+                              Voir →
                             </button>
                           </div>
                         ))}
@@ -6025,30 +6025,30 @@ function AppContent() {
               </>
             )}
 
-            {/* ADD BEAUT├ë / COIFFURE */}
+            {/* ADD BEAUTÉ / COIFFURE */}
             {modal.type==="addbeaute"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12 }}>
                   <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>
-                    {modal.data?.editing ? "Ô£Å´©Å Modifier le salon" : "­ƒÆç Publier mon salon"}
+                    {modal.data?.editing ? "✏️ Modifier le salon" : "💇 Publier mon salon"}
                   </h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 {!modal.data?.editing && (
                   <button onClick={()=>window.open("https://marcheduroi.com/exemples.html#beaute","_blank")} style={{ width:"100%",marginBottom:16,padding:"10px",background:"rgba(255,105,180,0.08)",border:"1px dashed rgba(255,105,180,0.4)",color:"#FF69B4",borderRadius:10,fontWeight:600,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6 }}>
-                    ­ƒôû Voir des exemples de salons beaut├®
+                    📖 Voir des exemples de salons beauté
                   </button>
                 )}
                 <PhotoUploader photos={shopPhotos} setPhotos={setShopPhotos} theme={theme} folder="beaute"/>
 
-                {/* Lien vid├®o salon beaut├® */}
+                {/* Lien vidéo salon beauté */}
                 {(()=>{
                   const isYT = v => /youtube\.com|youtu\.be/.test(v||"");
                   const isCL = v => /cloudinary\.com/.test(v||"");
                   const getYTId = v => { const m = (v||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/); return m?m[1]:null; };
                   return (
                     <div style={{ marginBottom:16 }}>
-                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>­ƒÄ¼ Lien vid├®o (optionnel)</label>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎬 Lien vidéo (optionnel)</label>
                       <input
                         value={shopVideo||""}
                         onChange={e=>setShopVideo(e.target.value.trim())}
@@ -6064,18 +6064,18 @@ function AppContent() {
                         <video src={shopVideo} controls style={{ width:"100%",borderRadius:10,marginTop:8,maxHeight:180 }}/>
                       )}
                       <details style={{ marginTop:8 }}>
-                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>­ƒôï Comment ajouter ma vid├®o ?</summary>
+                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>📋 Comment ajouter ma vidéo ?</summary>
                         <div style={{ background:theme.bg,borderRadius:8,padding:10,marginTop:6,fontSize:12,color:theme.sub,lineHeight:1.6 }}>
-                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 ÔÇö YouTube (recommand├®)</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 — YouTube (recommandé)</p>
                           <p>1. Allez sur youtube.com et connectez-vous</p>
-                          <p>2. Cliquez "Cr├®er" ÔåÆ "Mettre en ligne une vid├®o"</p>
-                          <p>3. Choisissez "Non r├®pertori├®" pour la confidentialit├®</p>
+                          <p>2. Cliquez "Créer" → "Mettre en ligne une vidéo"</p>
+                          <p>3. Choisissez "Non répertorié" pour la confidentialité</p>
                           <p>4. Copiez le lien et collez-le ici</p>
-                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 ÔÇö Cloudinary</p>
-                          <p>1. Cr├®ez un compte gratuit sur cloudinary.com</p>
-                          <p>2. Uploadez votre vid├®o dans Media Library</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 — Cloudinary</p>
+                          <p>1. Créez un compte gratuit sur cloudinary.com</p>
+                          <p>2. Uploadez votre vidéo dans Media Library</p>
                           <p>3. Copiez l'URL et collez-la ici</p>
-                          <p style={{ marginTop:6,color:"#FF6584" }}>ÔÜá´©Å Dur├®e recommand├®e : max 3 minutes</p>
+                          <p style={{ marginTop:6,color:"#FF6584" }}>⚠️ Durée recommandée : max 3 minutes</p>
                         </div>
                       </details>
                     </div>
@@ -6091,13 +6091,13 @@ function AppContent() {
                 {[
                   {label:"Nom du salon *",      key:"name",        fn:v=>cleanText(v,80),       max:80},
                   {label:"Description *",        key:"description", fn:v=>cleanLongText(v,800),  max:800, textarea:true},
-                  {label:"Sp├®cialit├®",           key:"specialite",  fn:v=>cleanText(v,100),      max:100, placeholder:"Ex: Tresses africaines, Maquillage mariage..."},
-                  {label:"Services propos├®s",    key:"services",    fn:v=>cleanLongText(v,500),  max:500, textarea:true, placeholder:"Ex: Coupe, Tresses, Coloration, Soins..."},
+                  {label:"Spécialité",           key:"specialite",  fn:v=>cleanText(v,100),      max:100, placeholder:"Ex: Tresses africaines, Maquillage mariage..."},
+                  {label:"Services proposés",    key:"services",    fn:v=>cleanLongText(v,500),  max:500, textarea:true, placeholder:"Ex: Coupe, Tresses, Coloration, Soins..."},
                   {label:"Tarifs",               key:"tarifs",      fn:v=>cleanText(v,100),      max:100, placeholder:"Ex: 2 000 - 25 000 FCFA"},
-                  {label:"Produits utilis├®s",    key:"produits",    fn:v=>cleanText(v,100),      max:100, placeholder:"Ex: L'Or├®al, MAC, Dark & Lovely..."},
-                  {label:"Mots cl├®s",            key:"keywords",    fn:v=>cleanText(v,100),      max:100, placeholder:"Ex: tresses, coiffure, mariage, africain..."},
+                  {label:"Produits utilisés",    key:"produits",    fn:v=>cleanText(v,100),      max:100, placeholder:"Ex: L'Oréal, MAC, Dark & Lovely..."},
+                  {label:"Mots clés",            key:"keywords",    fn:v=>cleanText(v,100),      max:100, placeholder:"Ex: tresses, coiffure, mariage, africain..."},
                   {label:"Horaires",             key:"horaires",    fn:v=>cleanText(v,60),       max:60,  placeholder:"Ex: Lun-Sam 8h-20h"},
-                  {label:"T├®l├®phone / WhatsApp", key:"phone",       fn:onlyPhone,               max:20,  placeholder:"+229 XX XX XX XX", mode:"tel"},
+                  {label:"Téléphone / WhatsApp", key:"phone",       fn:onlyPhone,               max:20,  placeholder:"+229 XX XX XX XX", mode:"tel"},
                   {label:"Email",                key:"contact",     fn:onlyEmail,               max:80},
                 ].map(f=>(
                   <div key={f.key} style={{ marginBottom:16 }}>
@@ -6118,8 +6118,8 @@ function AppContent() {
                 </div>
                 <div style={{ background:theme.bg,border:`1px solid #FF69B444`,borderRadius:12,padding:16,marginBottom:16 }}>
                   <p style={{ fontWeight:700,color:"#FF69B4",fontSize:13,marginBottom:12,display:"flex",alignItems:"center",gap:6 }}><Icon name="pin" size={13}/>Localisation</p>
-                  <button type="button" onClick={()=>{ navigator.geolocation.getCurrentPosition(pos=>{ setShopForm(s=>({...s,lat:pos.coords.latitude.toString(),lng:pos.coords.longitude.toString()})); notify("Position GPS captur├®e ! ­ƒôì"); },()=>notify("Impossible d'acc├®der au GPS","error")); }} style={{ width:"100%",padding:"10px",background:"rgba(255,105,180,0.1)",border:"1px solid rgba(255,105,180,0.3)",borderRadius:10,color:"#FF69B4",fontWeight:600,fontSize:13,cursor:"pointer",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-                    ­ƒôì {shopForm.lat ? "Position GPS captur├®e Ô£à" : "Capturer ma position GPS"}
+                  <button type="button" onClick={()=>{ navigator.geolocation.getCurrentPosition(pos=>{ setShopForm(s=>({...s,lat:pos.coords.latitude.toString(),lng:pos.coords.longitude.toString()})); notify("Position GPS capturée ! 📍"); },()=>notify("Impossible d'accéder au GPS","error")); }} style={{ width:"100%",padding:"10px",background:"rgba(255,105,180,0.1)",border:"1px solid rgba(255,105,180,0.3)",borderRadius:10,color:"#FF69B4",fontWeight:600,fontSize:13,cursor:"pointer",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+                    📍 {shopForm.lat ? "Position GPS capturée ✅" : "Capturer ma position GPS"}
                   </button>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
                     {[{label:"Ville *",key:"ville"},{label:"Quartier",key:"quartier"}].map(f=>(
@@ -6130,16 +6130,16 @@ function AppContent() {
                     ))}
                     <div style={{ gridColumn:"1/-1" }}>
                       <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Von de...</label>
-                      <input value={shopForm.von||""} onChange={e=>setShopForm(s=>({...s,von:cleanText(e.target.value,100)}))} placeholder="Ex: Von du march├®..." maxLength={100} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
+                      <input value={shopForm.von||""} onChange={e=>setShopForm(s=>({...s,von:cleanText(e.target.value,100)}))} placeholder="Ex: Von du marché..." maxLength={100} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
                     </div>
                   </div>
                 </div>
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF69B444`,borderRadius:14,padding:20,marginBottom:16 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>­ƒÆ░ Dur├®e de publication</p>
+                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
                     {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-                        <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>­ƒÄü 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Cr├®dit mensuel</p></div>
+                        <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
                       </div>
                     )}
@@ -6154,11 +6154,11 @@ function AppContent() {
                 <button
                   onClick={modal.data?.editing
                     ? editBeaute
-                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication salon beaut├® ${t.label} sur March├®duRoi`,addBeaute); }
+                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication salon beauté ${t.label} sur MarchéduRoi`,addBeaute); }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FF69B4,#FF1493)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-                  {modal.data?.editing ? "Ô£à Appliquer les modifications" : user?.role==="admin" ? "Publier le salon" : selectedTarif===-1 ? "­ƒÄü Publier gratuitement (4 jours)" : `­ƒÆ│ Payer & Publier ┬À ${(TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]).price.toLocaleString()} FCFA`}
+                  {modal.data?.editing ? "✅ Appliquer les modifications" : user?.role==="admin" ? "Publier le salon" : selectedTarif===-1 ? "🎁 Publier gratuitement (4 jours)" : `💳 Payer & Publier · ${(TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]).price.toLocaleString()} FCFA`}
                 </button>
               </>
             )}
@@ -6168,32 +6168,32 @@ function AppContent() {
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12 }}>
                   <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>
-                    {modal.data?.editing ? "Ô£Å´©Å Modifier l'├®tablissement" : "­ƒì¢´©Å Publier mon ├®tablissement"}
+                    {modal.data?.editing ? "✏️ Modifier l'établissement" : "🍽️ Publier mon établissement"}
                   </h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 {!modal.data?.editing && (
                   <button onClick={()=>window.open("https://marcheduroi.com/exemples.html#restos","_blank")} style={{ width:"100%",marginBottom:16,padding:"10px",background:"rgba(255,140,0,0.08)",border:"1px dashed rgba(255,140,0,0.4)",color:"#FF8C00",borderRadius:10,fontWeight:600,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6 }}>
-                    ­ƒôû Voir des exemples de restaurants & bars
+                    📖 Voir des exemples de restaurants & bars
                   </button>
                 )}
 
 
-                {/* Lien vid├®o ÔÇö YouTube ou Cloudinary */}
+                {/* Lien vidéo — YouTube ou Cloudinary */}
                 {(()=>{
                   const isYT = v => /youtube\.com|youtu\.be/.test(v||"");
                   const isCL = v => /cloudinary\.com/.test(v||"");
                   const getYTId = v => { const m = (v||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/); return m?m[1]:null; };
                   return (
                     <div style={{ marginBottom:16 }}>
-                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>­ƒÄ¼ Lien vid├®o (optionnel)</label>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎬 Lien vidéo (optionnel)</label>
                       <input
                         value={shopVideo||""}
                         onChange={e=>setShopVideo(e.target.value.trim())}
                         placeholder="https://youtu.be/... ou https://res.cloudinary.com/..."
                         style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}
                       />
-                      {/* Pr├®visualisation */}
+                      {/* Prévisualisation */}
                       {isYT(shopVideo) && getYTId(shopVideo) && (
                         <div style={{ marginTop:8,borderRadius:10,overflow:"hidden" }}>
                           <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${getYTId(shopVideo)}`} frameBorder="0" allowFullScreen style={{ display:"block",borderRadius:10 }}/>
@@ -6204,18 +6204,18 @@ function AppContent() {
                       )}
                       {/* Guide */}
                       <details style={{ marginTop:8 }}>
-                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>­ƒôï Comment ajouter ma vid├®o ?</summary>
+                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>📋 Comment ajouter ma vidéo ?</summary>
                         <div style={{ background:theme.bg,borderRadius:8,padding:10,marginTop:6,fontSize:12,color:theme.sub,lineHeight:1.6 }}>
-                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 ÔÇö YouTube (recommand├®)</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 — YouTube (recommandé)</p>
                           <p>1. Allez sur youtube.com et connectez-vous</p>
-                          <p>2. Cliquez "Cr├®er" ÔåÆ "Mettre en ligne une vid├®o"</p>
-                          <p>3. Choisissez "Non r├®pertori├®" pour la confidentialit├®</p>
+                          <p>2. Cliquez "Créer" → "Mettre en ligne une vidéo"</p>
+                          <p>3. Choisissez "Non répertorié" pour la confidentialité</p>
                           <p>4. Copiez le lien et collez-le ici</p>
-                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 ÔÇö Cloudinary</p>
-                          <p>1. Cr├®ez un compte gratuit sur cloudinary.com</p>
-                          <p>2. Uploadez votre vid├®o dans Media Library</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 — Cloudinary</p>
+                          <p>1. Créez un compte gratuit sur cloudinary.com</p>
+                          <p>2. Uploadez votre vidéo dans Media Library</p>
                           <p>3. Copiez l'URL et collez-la ici</p>
-                          <p style={{ marginTop:6,color:"#FF6584" }}>ÔÜá´©Å Dur├®e recommand├®e : max 60s pour annonces, max 3 min pour boutiques</p>
+                          <p style={{ marginTop:6,color:"#FF6584" }}>⚠️ Durée recommandée : max 60s pour annonces, max 3 min pour boutiques</p>
                         </div>
                       </details>
                     </div>
@@ -6224,7 +6224,7 @@ function AppContent() {
                 <PhotoUploader photos={shopPhotos} setPhotos={setShopPhotos} theme={theme} folder="restos"/>
 
                 <div style={{ marginBottom:16 }}>
-                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Type d'├®tablissement *</label>
+                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Type d'établissement *</label>
                   <select value={shopForm.type} onChange={e=>setShopForm(s=>({...s,type:e.target.value}))} style={inputStyle}>
                     <option value="">-- Choisir --</option>
                     {RESTO_TYPES.map(t=><option key={t}>{t}</option>)}
@@ -6232,16 +6232,16 @@ function AppContent() {
                 </div>
 
                 {[
-                  {label:"Nom de l'├®tablissement *",key:"name",       fn:v=>cleanText(v,80),      max:80},
+                  {label:"Nom de l'établissement *",key:"name",       fn:v=>cleanText(v,80),      max:80},
                   {label:"Description *",            key:"description",fn:v=>cleanLongText(v,800), max:800, textarea:true},
-                  {label:"Sp├®cialit├®",               key:"specialite", fn:v=>cleanText(v,100),     max:100, placeholder:"Ex: Cuisine b├®ninoise, Grillades..."},
+                  {label:"Spécialité",               key:"specialite", fn:v=>cleanText(v,100),     max:100, placeholder:"Ex: Cuisine béninoise, Grillades..."},
                   {label:"Plats / Menu phare",        key:"plats",      fn:v=>cleanLongText(v,500), max:500, textarea:true, placeholder:"Ex: Sauce arachide, Riz au gras..."},
                   {label:"Prix moyen par repas",      key:"prixMoyen",  fn:v=>onlyPrice(v),        max:40,  placeholder:"Ex: 1 500 - 5 000 FCFA"},
-                  {label:"Capacit├®",                  key:"capacite",   fn:v=>cleanText(v,30),      max:30,  placeholder:"Ex: 40 couverts"},
-                  {label:"Services propos├®s",         key:"services",   fn:v=>cleanText(v,150),     max:150, placeholder:"Sur place, ├Ç emporter, Livraison..."},
-                  {label:"Mots cl├®s",                 key:"keywords",   fn:v=>cleanText(v,100),     max:100, placeholder:"Ex: maquis, traditionnel, livraison..."},
+                  {label:"Capacité",                  key:"capacite",   fn:v=>cleanText(v,30),      max:30,  placeholder:"Ex: 40 couverts"},
+                  {label:"Services proposés",         key:"services",   fn:v=>cleanText(v,150),     max:150, placeholder:"Sur place, À emporter, Livraison..."},
+                  {label:"Mots clés",                 key:"keywords",   fn:v=>cleanText(v,100),     max:100, placeholder:"Ex: maquis, traditionnel, livraison..."},
                   {label:"Horaires",                  key:"horaires",   fn:v=>cleanText(v,60),      max:60,  placeholder:"Ex: Lun-Dim 7h-22h"},
-                  {label:"T├®l├®phone / WhatsApp",      key:"phone",      fn:onlyPhone,              max:20,  placeholder:"+229 XX XX XX XX", mode:"tel"},
+                  {label:"Téléphone / WhatsApp",      key:"phone",      fn:onlyPhone,              max:20,  placeholder:"+229 XX XX XX XX", mode:"tel"},
                   {label:"Email",                     key:"contact",    fn:onlyEmail,              max:80},
                 ].map(f=>(
                   <div key={f.key} style={{ marginBottom:16 }}>
@@ -6257,11 +6257,11 @@ function AppContent() {
                   <p style={{ fontWeight:700,color:"#FF8C00",fontSize:13,marginBottom:12,display:"flex",alignItems:"center",gap:6 }}><Icon name="pin" size={13}/>Localisation</p>
                   <button type="button" onClick={()=>{
                     navigator.geolocation.getCurrentPosition(
-                      pos=>{ setShopForm(s=>({...s,lat:pos.coords.latitude.toString(),lng:pos.coords.longitude.toString()})); notify("Position GPS captur├®e ! ­ƒôì"); },
-                      ()=>notify("Impossible d'acc├®der au GPS","error")
+                      pos=>{ setShopForm(s=>({...s,lat:pos.coords.latitude.toString(),lng:pos.coords.longitude.toString()})); notify("Position GPS capturée ! 📍"); },
+                      ()=>notify("Impossible d'accéder au GPS","error")
                     );
                   }} style={{ width:"100%",padding:"10px",background:"rgba(255,140,0,0.1)",border:"1px solid rgba(255,140,0,0.3)",borderRadius:10,color:"#FF8C00",fontWeight:600,fontSize:13,cursor:"pointer",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-                    ­ƒôì {shopForm.lat ? "Position GPS captur├®e Ô£à" : "Capturer ma position GPS"}
+                    📍 {shopForm.lat ? "Position GPS capturée ✅" : "Capturer ma position GPS"}
                   </button>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
                     {[{label:"Ville *",key:"ville"},{label:"Quartier",key:"quartier"}].map(f=>(
@@ -6272,17 +6272,17 @@ function AppContent() {
                     ))}
                     <div style={{ gridColumn:"1/-1" }}>
                       <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Von de...</label>
-                      <input value={shopForm.von||""} onChange={e=>setShopForm(s=>({...s,von:cleanText(e.target.value,100)}))} placeholder="Ex: Von du march├® central..." maxLength={100} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
+                      <input value={shopForm.von||""} onChange={e=>setShopForm(s=>({...s,von:cleanText(e.target.value,100)}))} placeholder="Ex: Von du marché central..." maxLength={100} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
                     </div>
                   </div>
                 </div>
 
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF8C0044`,borderRadius:14,padding:20,marginBottom:16 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>­ƒÆ░ Dur├®e de publication</p>
+                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
                     {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-                        <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>­ƒÄü 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Cr├®dit mensuel</p></div>
+                        <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
                       </div>
                     )}
@@ -6297,11 +6297,11 @@ function AppContent() {
                 <button
                   onClick={modal.data?.editing
                     ? editResto
-                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication restaurant/bar ${t.label} sur March├®duRoi`,addResto); }
+                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication restaurant/bar ${t.label} sur MarchéduRoi`,addResto); }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-                  {modal.data?.editing?"Ô£à Appliquer les modifications":user?.role==="admin"?"Publier l'├®tablissement":selectedTarif===-1?"­ƒÄü Publier gratuitement (4 jours)":`­ƒÆ│ Payer & Publier ┬À ${(TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]).price.toLocaleString()} FCFA`}
+                  {modal.data?.editing?"✅ Appliquer les modifications":user?.role==="admin"?"Publier l'établissement":selectedTarif===-1?"🎁 Publier gratuitement (4 jours)":`💳 Payer & Publier · ${(TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]).price.toLocaleString()} FCFA`}
                 </button>
               </>
             )}
@@ -6312,32 +6312,32 @@ function AppContent() {
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12 }}>
                   <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>
                     {modal.data?.editing
-                      ? (shopMode==="boutique"?"Ô£Å´©Å Modifier la boutique":"Ô£Å´©Å Modifier l'atelier")
-                      : (shopMode==="boutique"?"­ƒøì´©Å Publier ma boutique":"­ƒöº Publier mon atelier")}
+                      ? (shopMode==="boutique"?"✏️ Modifier la boutique":"✏️ Modifier l'atelier")
+                      : (shopMode==="boutique"?"🛍️ Publier ma boutique":"🔧 Publier mon atelier")}
                   </h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 {!modal.data?.editing && (
                   <button onClick={()=>window.open(`https://marcheduroi.com/exemples.html#${shopMode==="boutique"?"boutiques":"ateliers"}`,"_blank")} style={{ width:"100%",marginBottom:16,padding:"10px",background:shopMode==="boutique"?"rgba(255,101,132,0.08)":"rgba(67,198,172,0.08)",border:`1px dashed ${shopMode==="boutique"?"rgba(255,101,132,0.4)":"rgba(67,198,172,0.4)"}`,color:shopMode==="boutique"?"#FF6584":"#43C6AC",borderRadius:10,fontWeight:600,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6 }}>
-                    ­ƒôû Voir des exemples de {shopMode==="boutique"?"boutiques":"ateliers"}
+                    📖 Voir des exemples de {shopMode==="boutique"?"boutiques":"ateliers"}
                   </button>
                 )}
 
-                {/* Lien vid├®o ÔÇö YouTube ou Cloudinary */}
+                {/* Lien vidéo — YouTube ou Cloudinary */}
                 {(()=>{
                   const isYT = v => /youtube\.com|youtu\.be/.test(v||"");
                   const isCL = v => /cloudinary\.com/.test(v||"");
                   const getYTId = v => { const m = (v||"").match(/(?:v=|youtu\.be\/)([\w-]{11})/); return m?m[1]:null; };
                   return (
                     <div style={{ marginBottom:16 }}>
-                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>­ƒÄ¼ Lien vid├®o (optionnel)</label>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎬 Lien vidéo (optionnel)</label>
                       <input
                         value={shopVideo||""}
                         onChange={e=>setShopVideo(e.target.value.trim())}
                         placeholder="https://youtu.be/... ou https://res.cloudinary.com/..."
                         style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}
                       />
-                      {/* Pr├®visualisation */}
+                      {/* Prévisualisation */}
                       {isYT(shopVideo) && getYTId(shopVideo) && (
                         <div style={{ marginTop:8,borderRadius:10,overflow:"hidden" }}>
                           <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${getYTId(shopVideo)}`} frameBorder="0" allowFullScreen style={{ display:"block",borderRadius:10 }}/>
@@ -6348,18 +6348,18 @@ function AppContent() {
                       )}
                       {/* Guide */}
                       <details style={{ marginTop:8 }}>
-                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>­ƒôï Comment ajouter ma vid├®o ?</summary>
+                        <summary style={{ fontSize:12,color:"#6C63FF",cursor:"pointer",fontWeight:600 }}>📋 Comment ajouter ma vidéo ?</summary>
                         <div style={{ background:theme.bg,borderRadius:8,padding:10,marginTop:6,fontSize:12,color:theme.sub,lineHeight:1.6 }}>
-                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 ÔÇö YouTube (recommand├®)</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>Option 1 — YouTube (recommandé)</p>
                           <p>1. Allez sur youtube.com et connectez-vous</p>
-                          <p>2. Cliquez "Cr├®er" ÔåÆ "Mettre en ligne une vid├®o"</p>
-                          <p>3. Choisissez "Non r├®pertori├®" pour la confidentialit├®</p>
+                          <p>2. Cliquez "Créer" → "Mettre en ligne une vidéo"</p>
+                          <p>3. Choisissez "Non répertorié" pour la confidentialité</p>
                           <p>4. Copiez le lien et collez-le ici</p>
-                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 ÔÇö Cloudinary</p>
-                          <p>1. Cr├®ez un compte gratuit sur cloudinary.com</p>
-                          <p>2. Uploadez votre vid├®o dans Media Library</p>
+                          <p style={{ fontWeight:700,color:theme.text,marginTop:6,marginBottom:4 }}>Option 2 — Cloudinary</p>
+                          <p>1. Créez un compte gratuit sur cloudinary.com</p>
+                          <p>2. Uploadez votre vidéo dans Media Library</p>
                           <p>3. Copiez l'URL et collez-la ici</p>
-                          <p style={{ marginTop:6,color:"#FF6584" }}>ÔÜá´©Å Dur├®e recommand├®e : max 60s pour annonces, max 3 min pour boutiques</p>
+                          <p style={{ marginTop:6,color:"#FF6584" }}>⚠️ Durée recommandée : max 60s pour annonces, max 3 min pour boutiques</p>
                         </div>
                       </details>
                     </div>
@@ -6380,11 +6380,11 @@ function AppContent() {
                 {[
                   {label:`Nom ${shopMode==="boutique"?"de la boutique":"de l'atelier"} *`,key:"name",     fn:v=>cleanText(v,80),      max:80},
                   {label:"Description *",                                                   key:"description",fn:v=>cleanLongText(v,800), max:800, textarea:true},
-                  ...(shopMode==="atelier"?[{label:"Services propos├®s",key:"services",fn:v=>cleanLongText(v,500),max:500,textarea:true}]:[]),
+                  ...(shopMode==="atelier"?[{label:"Services proposés",key:"services",fn:v=>cleanLongText(v,500),max:500,textarea:true}]:[]),
                   {label:"Horaires d'ouverture",          key:"horaires",  fn:v=>cleanText(v,60),  max:60,  placeholder:"Ex: Lun-Sam 8h-18h"},
-                  {label:"Mots cl├®s (pour la recherche)", key:"keywords",  fn:v=>cleanText(v,100), max:100, placeholder:"Ex: cosm├®tiques, soins, beaut├®..."},
+                  {label:"Mots clés (pour la recherche)", key:"keywords",  fn:v=>cleanText(v,100), max:100, placeholder:"Ex: cosmétiques, soins, beauté..."},
                   {label:"Email de contact",               key:"contact",   fn:onlyEmail,           max:80},
-                  {label:"T├®l├®phone / WhatsApp",           key:"phone",     fn:onlyPhone,           max:20,  placeholder:"+229 XX XX XX XX", mode:"tel"},
+                  {label:"Téléphone / WhatsApp",           key:"phone",     fn:onlyPhone,           max:20,  placeholder:"+229 XX XX XX XX", mode:"tel"},
                 ].map(f=>(
                   <div key={f.key} style={{ marginBottom:16 }}>
                     <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
@@ -6400,13 +6400,13 @@ function AppContent() {
                   <p style={{ fontWeight:700,color:"#43C6AC",fontSize:13,marginBottom:12,display:"flex",alignItems:"center",gap:6 }}><Icon name="pin" size={13}/>Localisation</p>
                   <button type="button" onClick={()=>{
                     navigator.geolocation.getCurrentPosition(
-                      pos=>{ setShopForm(s=>({...s,lat:pos.coords.latitude.toString(),lng:pos.coords.longitude.toString()})); notify("Position GPS captur├®e ! ­ƒôì"); },
-                      ()=>notify("Impossible d'acc├®der au GPS","error")
+                      pos=>{ setShopForm(s=>({...s,lat:pos.coords.latitude.toString(),lng:pos.coords.longitude.toString()})); notify("Position GPS capturée ! 📍"); },
+                      ()=>notify("Impossible d'accéder au GPS","error")
                     );
                   }} style={{ width:"100%",padding:"10px",background:shopForm.lat?"rgba(67,198,172,0.15)":"rgba(255,140,0,0.15)",border:`1px solid ${shopForm.lat?"rgba(67,198,172,0.4)":"rgba(255,140,0,0.4)"}`,borderRadius:10,color:shopForm.lat?"#43C6AC":"#FF8C00",fontWeight:700,fontSize:13,cursor:"pointer",marginBottom:6,display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-                    {shopForm.lat ? "Ô£à Position GPS captur├®e" : "­ƒôì Capturer ma position GPS (fortement recommand├®)"}
+                    {shopForm.lat ? "✅ Position GPS capturée" : "📍 Capturer ma position GPS (fortement recommandé)"}
                   </button>
-                  {!shopForm.lat && <p style={{ color:"#FF8C00",fontSize:11,marginBottom:10,textAlign:"center" }}>ÔÜá´©Å Sans GPS votre publication n'appara├«tra pas dans le tri "Pr├¿s de moi"</p>}
+                  {!shopForm.lat && <p style={{ color:"#FF8C00",fontSize:11,marginBottom:10,textAlign:"center" }}>⚠️ Sans GPS votre publication n'apparaîtra pas dans le tri "Près de moi"</p>}
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
                     {[{label:"Ville *",key:"ville",placeholder:"Ex: Cotonou"},{label:"Quartier",key:"quartier",placeholder:"Ex: Akpakpa"}].map(f=>(
                       <div key={f.key}>
@@ -6416,18 +6416,18 @@ function AppContent() {
                     ))}
                     <div style={{ gridColumn:"1/-1" }}>
                       <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Von de...</label>
-                      <input value={shopForm.von||""} onChange={e=>setShopForm(s=>({...s,von:cleanText(e.target.value,100)}))} placeholder="Ex: Von du march├® central, Von de la pharmacie..." maxLength={100} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
+                      <input value={shopForm.von||""} onChange={e=>setShopForm(s=>({...s,von:cleanText(e.target.value,100)}))} placeholder="Ex: Von du marché central, Von de la pharmacie..." maxLength={100} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
                     </div>
                   </div>
                 </div>
 
-                {/* Dur├®e et paiement - seulement si pas en mode ├®dition */}
+                {/* Durée et paiement - seulement si pas en mode édition */}
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF658444`,borderRadius:14,padding:20,marginBottom:16 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>­ƒÆ░ Dur├®e de publication</p>
+                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
                     {canFree && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-                        <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>­ƒÄü 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Cr├®dit mensuel</p></div>
+                        <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
                       </div>
                     )}
@@ -6442,11 +6442,11 @@ function AppContent() {
                 <button
                   onClick={modal.data?.editing
                     ? editShop
-                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication ${shopMode==="boutique"?"boutique":"atelier"} ${t.label} sur March├®duRoi`,addShop); }
+                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication ${shopMode==="boutique"?"boutique":"atelier"} ${t.label} sur MarchéduRoi`,addShop); }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:shopMode==="boutique"?"linear-gradient(135deg,#FF6584,#FFB347)":"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-                  {modal.data?.editing?"Ô£à Appliquer les modifications":user?.role==="admin"?`Publier ${shopMode==="boutique"?"la boutique":"l'atelier"}`:selectedTarif===-1?"­ƒÄü Publier gratuitement (4 jours)":`­ƒÆ│ Payer & Publier ┬À ${(TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]).price.toLocaleString()} FCFA`}
+                  {modal.data?.editing?"✅ Appliquer les modifications":user?.role==="admin"?`Publier ${shopMode==="boutique"?"la boutique":"l'atelier"}`:selectedTarif===-1?"🎁 Publier gratuitement (4 jours)":`💳 Payer & Publier · ${(TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]).price.toLocaleString()} FCFA`}
                 </button>
               </>
             )}
@@ -6455,19 +6455,19 @@ function AppContent() {
             {modal.type==="report"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>­ƒÜ® Signaler cette annonce</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>🚩 Signaler cette annonce</h3>
                   <button onClick={()=>{ setModal(null); setReportOtp({phone:"",code:"",generated:"",verified:false,postData:null}); }} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <div style={{ background:theme.bg,borderRadius:12,padding:14,marginBottom:16 }}>
                   <p style={{ fontWeight:700,color:theme.text,marginBottom:2 }}>{modal.data.title||modal.data.name}</p>
-                  <p style={{ color:theme.sub,fontSize:13 }}>Publi├®e par {modal.data.author}</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Publiée par {modal.data.author}</p>
                 </div>
 
-                {/* ├ëtape 1 : T├®l├®phone */}
+                {/* Étape 1 : Téléphone */}
                 {!reportOtp.verified && (
                   <div style={{ marginBottom:16 }}>
-                    <p style={{ fontWeight:700,color:theme.text,fontSize:14,marginBottom:4 }}>­ƒô▒ ├ëtape 1 ÔÇö V├®rifiez votre num├®ro</p>
-                    <p style={{ color:theme.sub,fontSize:12,marginBottom:12 }}>Pour ├®viter les abus, un code vous sera envoy├® par SMS.</p>
+                    <p style={{ fontWeight:700,color:theme.text,fontSize:14,marginBottom:4 }}>📱 Étape 1 — Vérifiez votre numéro</p>
+                    <p style={{ color:theme.sub,fontSize:12,marginBottom:12 }}>Pour éviter les abus, un code vous sera envoyé par SMS.</p>
                     <div style={{ display:"flex",gap:8,marginBottom:10 }}>
                       <input value={reportOtp.phone} onChange={e=>setReportOtp(r=>({...r,phone:e.target.value}))} placeholder="+229 XX XX XX XX" style={{ ...inputStyle,flex:1 }}/>
                       <button onClick={()=>sendOtp(reportOtp.phone)} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",whiteSpace:"nowrap" }}>
@@ -6476,25 +6476,25 @@ function AppContent() {
                     </div>
                     {reportOtp.generated && (
                       <div style={{ marginTop:8 }}>
-                        <p style={{ color:theme.sub,fontSize:12,marginBottom:8 }}>Entrez le code re├ºu par SMS :</p>
+                        <p style={{ color:theme.sub,fontSize:12,marginBottom:8 }}>Entrez le code reçu par SMS :</p>
                         <div style={{ display:"flex",gap:8 }}>
-                          <input value={reportOtp.code} onChange={e=>setReportOtp(r=>({...r,code:e.target.value}))} placeholder="Code ├á 6 chiffres" maxLength={6} style={{ ...inputStyle,flex:1,letterSpacing:4,textAlign:"center",fontSize:18,fontWeight:700 }}/>
+                          <input value={reportOtp.code} onChange={e=>setReportOtp(r=>({...r,code:e.target.value}))} placeholder="Code à 6 chiffres" maxLength={6} style={{ ...inputStyle,flex:1,letterSpacing:4,textAlign:"center",fontSize:18,fontWeight:700 }}/>
                           <button onClick={()=>verifyOtp(reportOtp.code)} style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",padding:"12px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer" }}>
-                            V├®rifier
+                            Vérifier
                           </button>
                         </div>
-                        <p style={{ fontSize:11,color:"#FF8C00",marginTop:6 }}>ÔÜá´©Å Mode test ÔÇö SMS r├®el bient├┤t disponible</p>
+                        <p style={{ fontSize:11,color:"#FF8C00",marginTop:6 }}>⚠️ Mode test — SMS réel bientôt disponible</p>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* ├ëtape 2 : Motif */}
+                {/* Étape 2 : Motif */}
                 {reportOtp.verified && (
                   <div>
-                    <p style={{ fontWeight:700,color:"#43C6AC",fontSize:13,marginBottom:12 }}>Ô£à Num├®ro v├®rifi├® ┬À Choisissez le motif :</p>
+                    <p style={{ fontWeight:700,color:"#43C6AC",fontSize:13,marginBottom:12 }}>✅ Numéro vérifié · Choisissez le motif :</p>
                     <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:16 }}>
-                      {["Arnaque / Fraude","Contenu inappropri├®","Fausse information","Prix abusif","Annonce en double","Autre"].map(motif=>(
+                      {["Arnaque / Fraude","Contenu inapproprié","Fausse information","Prix abusif","Annonce en double","Autre"].map(motif=>(
                         <button key={motif} onClick={()=>submitReport(modal.data, motif)} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:"12px 16px",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",transition:"all 0.2s" }}>
                           {motif}
                         </button>
@@ -6503,7 +6503,7 @@ function AppContent() {
                   </div>
                 )}
                 <p style={{ fontSize:12,color:theme.sub,textAlign:"center" }}>
-                  Apr├¿s envoi, vous aurez <strong>5 minutes</strong> pour annuler votre signalement.
+                  Après envoi, vous aurez <strong>5 minutes</strong> pour annuler votre signalement.
                 </p>
               </>
             )}
@@ -6512,11 +6512,11 @@ function AppContent() {
             {modal.type==="newsletter"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>­ƒôº Newsletter March├®duRoi</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>📧 Newsletter MarchéduRoi</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <p style={{ color:theme.sub,fontSize:14,marginBottom:20,lineHeight:1.6 }}>
-                  Recevez chaque semaine les meilleures annonces, boutiques et bons plans directement dans votre bo├«te mail ! ­ƒÄë
+                  Recevez chaque semaine les meilleures annonces, boutiques et bons plans directement dans votre boîte mail ! 🎉
                 </p>
                 <div style={{ marginBottom:16 }}>
                   <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre email</label>
@@ -6528,29 +6528,29 @@ function AppContent() {
                   if(!emailRegex.test(authForm.email)){notify("Email invalide","error");return;}
                   const { error } = await supabase.from("newsletter").insert({ email: authForm.email.toLowerCase().trim() });
                   if (error) {
-                    if (error.code === "23505") { notify("Vous ├¬tes d├®j├á abonn├®(e) ! ­ƒÿè"); }
+                    if (error.code === "23505") { notify("Vous êtes déjà abonné(e) ! 😊"); }
                     else { notify("Erreur : "+error.message,"error"); return; }
                   } else {
-                    notify("Ô£à Abonnement confirm├® ! Merci de rejoindre March├®duRoi ­ƒÄë");
+                    notify("✅ Abonnement confirmé ! Merci de rejoindre MarchéduRoi 🎉");
                   }
                   setAuthForm(a=>({...a,email:""}));
                   setModal(null);
                 }} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
-                  S'abonner ├á la newsletter
+                  S'abonner à la newsletter
                 </button>
-                <p style={{ fontSize:11,color:theme.sub,textAlign:"center",marginTop:12 }}>D├®sabonnement possible ├á tout moment ┬À Pas de spam</p>
+                <p style={{ fontSize:11,color:theme.sub,textAlign:"center",marginTop:12 }}>Désabonnement possible à tout moment · Pas de spam</p>
               </>
             )}
 
-            {/* MOT DE PASSE OUBLI├ë */}
+            {/* MOT DE PASSE OUBLIÉ */}
             {modal.type==="forgot"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>­ƒöæ Mot de passe oubli├®</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>🔑 Mot de passe oublié</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <p style={{ color:theme.sub,fontSize:14,marginBottom:24,lineHeight:1.6 }}>
-                  Entrez votre adresse email. Nous vous enverrons un lien pour r├®initialiser votre mot de passe.
+                  Entrez votre adresse email. Nous vous enverrons un lien pour réinitialiser votre mot de passe.
                 </p>
                 <div style={{ marginBottom:20 }}>
                   <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre email</label>
@@ -6563,10 +6563,10 @@ function AppContent() {
                   />
                 </div>
                 <button onClick={()=>resetPassword(authForm.email)} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s",cursor:"pointer" }}>
-                  ­ƒôº Envoyer le lien de r├®initialisation
+                  📧 Envoyer le lien de réinitialisation
                 </button>
                 <p style={{ textAlign:"center",marginTop:16,color:theme.sub,fontSize:12 }}>
-                  V├®rifiez aussi vos spams si vous ne recevez pas l'email.
+                  Vérifiez aussi vos spams si vous ne recevez pas l'email.
                 </p>
               </>
             )}
@@ -6575,9 +6575,9 @@ function AppContent() {
             {modal.type==="deleteshop"&&(
               <>
                 <div style={{ textAlign:"center",marginBottom:24 }}>
-                  <div style={{ fontSize:48,marginBottom:12 }}>­ƒùæ´©Å</div>
+                  <div style={{ fontSize:48,marginBottom:12 }}>🗑️</div>
                   <h3 style={{ fontWeight:800,fontSize:20,marginBottom:8,color:theme.text }}>Supprimer ?</h3>
-                  <p style={{ color:theme.sub,fontSize:14 }}>"{modal.data.name}" sera supprim├® d├®finitivement.</p>
+                  <p style={{ color:theme.sub,fontSize:14 }}>"{modal.data.name}" sera supprimé définitivement.</p>
                 </div>
                 <div style={{ display:"flex",gap:12 }}>
                   <button onClick={()=>setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,borderRadius:12,fontWeight:600 }}>Annuler</button>
@@ -6592,7 +6592,7 @@ function AppContent() {
                     else if(modal.shopType==="atelier") setAteliers(a=>a.filter(x=>x.id!==modal.data.id));
                     else if(modal.shopType==="resto") setRestos(r=>r.filter(x=>x.id!==modal.data.id));
                     else if(modal.shopType==="beaute") setBeaute(b=>b.filter(x=>x.id!==modal.data.id));
-                    setModal(null); notify("Supprim├® avec succ├¿s !");
+                    setModal(null); notify("Supprimé avec succès !");
                   }} style={{ flex:1,padding:"12px",background:"linear-gradient(135deg,#FF4757,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700 }}>Supprimer</button>
                 </div>
               </>
@@ -6603,28 +6603,28 @@ function AppContent() {
             {modal.type==="confirmEditShop"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>Ô£Å´©Å Modification payante</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>✏️ Modification payante</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <div style={{ background:`rgba(108,99,255,0.08)`,borderRadius:12,padding:16,marginBottom:20 }}>
-                  <p style={{ fontWeight:700,color:theme.text,marginBottom:8 }}>­ƒôï {modal.data.name}</p>
-                  <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>La modification gratuite de 24h est expir├®e.</p>
-                  <p style={{ color:"#FF8C00",fontSize:13,fontWeight:600,marginBottom:4 }}>­ƒÆ░ Co├╗t : {modal.price} FCFA</p>
-                  <p style={{ color:theme.sub,fontSize:12 }}>­ƒôè {modal.count}/{MAX_MODIFS} modifications utilis├®es ce mois ┬À Il vous reste {MAX_MODIFS - modal.count} modification(s)</p>
+                  <p style={{ fontWeight:700,color:theme.text,marginBottom:8 }}>📋 {modal.data.name}</p>
+                  <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>La modification gratuite de 24h est expirée.</p>
+                  <p style={{ color:"#FF8C00",fontSize:13,fontWeight:600,marginBottom:4 }}>💰 Coût : {modal.price} FCFA</p>
+                  <p style={{ color:theme.sub,fontSize:12 }}>📊 {modal.count}/{MAX_MODIFS} modifications utilisées ce mois · Il vous reste {MAX_MODIFS - modal.count} modification(s)</p>
                 </div>
                 <div style={{ display:"flex",gap:12 }}>
                   <button onClick={()=>setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,borderRadius:10,fontWeight:600,fontSize:14 }}>Annuler</button>
                   <button onClick={()=>{
                     handleFedaPayment(
                       modal.price,
-                      `Modification "${modal.data.name}" sur March├®duRoi`,
+                      `Modification "${modal.data.name}" sur MarchéduRoi`,
                       () => {
                         recordModification(modal.data.id);
                         if(modal.doOpenModal) modal.doOpenModal();
                       }
                     );
                   }} className="btn-glow" style={{ flex:1,padding:"12px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:10,fontWeight:700,fontSize:14,transition:"box-shadow 0.2s" }}>
-                    ­ƒÆ│ Payer {modal.price} FCFA et modifier
+                    💳 Payer {modal.price} FCFA et modifier
                   </button>
                 </div>
               </>
@@ -6633,39 +6633,39 @@ function AppContent() {
             {modal.type==="confirmEdit"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>Ô£Å´©Å Modification payante</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>✏️ Modification payante</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
                   <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>{modal.data.title}</p>
-                  <p style={{ color:theme.sub,fontSize:13 }}>Publi├®e le {modal.data.date}</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Publiée le {modal.data.date}</p>
                 </div>
                 <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:12,padding:20,marginBottom:20,textAlign:"center" }}>
-                  <p style={{ color:theme.sub,fontSize:14,marginBottom:8 }}>Le d├®lai de 24h gratuit est ├®coul├®.</p>
+                  <p style={{ color:theme.sub,fontSize:14,marginBottom:8 }}>Le délai de 24h gratuit est écoulé.</p>
                   <p style={{ fontWeight:800,fontSize:28,color:"#6C63FF" }}>{modal.price} FCFA</p>
-                  <p style={{ color:theme.sub,fontSize:13,marginTop:4 }}>Ôëê ${(modal.price/600).toFixed(2)} USD par modification</p>
+                  <p style={{ color:theme.sub,fontSize:13,marginTop:4 }}>≈ ${(modal.price/600).toFixed(2)} USD par modification</p>
                   <p style={{ color:"#FFD700",fontSize:12,marginTop:6,fontWeight:600 }}>
-                    ­ƒôï {modal.count}/{MAX_MODIFS} modifications utilis├®es ce mois ┬À Il vous reste {MAX_MODIFS - modal.count} modification(s)
+                    📋 {modal.count}/{MAX_MODIFS} modifications utilisées ce mois · Il vous reste {MAX_MODIFS - modal.count} modification(s)
                   </p>
-                  <p style={{ fontSize:11,color:"#43C6AC",marginTop:8,fontWeight:600 }}>­ƒÆ│ Paiement s├®curis├® via MTN / Moov Money (FedaPay)</p>
+                  <p style={{ fontSize:11,color:"#43C6AC",marginTop:8,fontWeight:600 }}>💳 Paiement sécurisé via MTN / Moov Money (FedaPay)</p>
                 </div>
                 <div style={{ display:"flex",gap:12 }}>
                   <button onClick={()=>setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,borderRadius:12,fontWeight:600,cursor:"pointer" }}>Annuler</button>
                   <button onClick={()=>{
                     handleFedaPayment(
                       modal.price,
-                      `Modification annonce "${modal.data.title}" sur March├®duRoi`,
+                      `Modification annonce "${modal.data.title}" sur MarchéduRoi`,
                       () => {
                         recordModification(modal.data.id);
                         setPostForm({ title:modal.data.title, category:modal.data.category, description:modal.data.description, price:modal.data.price||"", contact:modal.data.contact||"", phone:modal.data.phone||"" });
                         setPostPhotos(modal.data.photos||[]);
                         setVehicleForm(modal.data.vehicle||{});
-                        setImmoForm(modal.data.immo||{ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon ├®tat",recasee:"",autres:"" });
+                        setImmoForm(modal.data.immo||{ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" });
                         setModal({ type:"edit", data:modal.data });
                       }
                     );
                   }} className="btn-glow" style={{ flex:2,padding:"12px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,cursor:"pointer",transition:"box-shadow 0.2s" }}>
-                    ­ƒÆ│ Payer {modal.price} FCFA et modifier
+                    💳 Payer {modal.price} FCFA et modifier
                   </button>
                 </div>
               </>
@@ -6675,15 +6675,15 @@ function AppContent() {
             {modal.type==="howto"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>­ƒÆí Comment publier une annonce ?</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>💡 Comment publier une annonce ?</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 {[
-                  { step:"1", icon:"­ƒæñ", title:"Cr├®ez un compte gratuit", desc:"Inscrivez-vous avec votre email et mot de passe. C'est gratuit et rapide !" },
-                  { step:"2", icon:"­ƒôØ", title:"R├®digez votre annonce", desc:"Remplissez le titre, la description, le prix et ajoutez jusqu'├á 3 photos (compress├®es automatiquement)." },
-                  { step:"3", icon:"­ƒÄü", title:"4 jours gratuits chaque mois", desc:"Chaque mois, publiez gratuitement pendant 4 jours. Aucun paiement requis pour commencer !" },
-                  { step:"4", icon:"­ƒÆ│", title:"Prolongez avec Mobile Money", desc:"Pour aller plus loin : 1 000 FCFA/30j ┬À 2 500 FCFA/90j ┬À 4 500 FCFA/180j ┬À 8 000 FCFA/360j. Paiement via MTN/Moov Money (FedaPay)." },
-                  { step:"5", icon:"­ƒÜÇ", title:"Votre annonce est en ligne !", desc:"Visible par tous les visiteurs jusqu'├á la date d'expiration. Prolongeable depuis votre tableau de bord." },
+                  { step:"1", icon:"👤", title:"Créez un compte gratuit", desc:"Inscrivez-vous avec votre email et mot de passe. C'est gratuit et rapide !" },
+                  { step:"2", icon:"📝", title:"Rédigez votre annonce", desc:"Remplissez le titre, la description, le prix et ajoutez jusqu'à 3 photos (compressées automatiquement)." },
+                  { step:"3", icon:"🎁", title:"4 jours gratuits chaque mois", desc:"Chaque mois, publiez gratuitement pendant 4 jours. Aucun paiement requis pour commencer !" },
+                  { step:"4", icon:"💳", title:"Prolongez avec Mobile Money", desc:"Pour aller plus loin : 1 000 FCFA/30j · 2 500 FCFA/90j · 4 500 FCFA/180j · 8 000 FCFA/360j. Paiement via MTN/Moov Money (FedaPay)." },
+                  { step:"5", icon:"🚀", title:"Votre annonce est en ligne !", desc:"Visible par tous les visiteurs jusqu'à la date d'expiration. Prolongeable depuis votre tableau de bord." },
                 ].map(s=>(
                   <div key={s.step} style={{ display:"flex",gap:14,marginBottom:16,alignItems:"flex-start" }}>
                     <div style={{ width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:14,flexShrink:0 }}>{s.step}</div>
@@ -6694,7 +6694,7 @@ function AppContent() {
                   </div>
                 ))}
                 <div style={{ background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:12,padding:16,marginTop:8 }}>
-                  <p style={{ fontWeight:700,color:"#43C6AC",fontSize:14,marginBottom:8 }}>­ƒôï Tarifs annonces classiques</p>
+                  <p style={{ fontWeight:700,color:"#43C6AC",fontSize:14,marginBottom:8 }}>📋 Tarifs annonces classiques</p>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:16 }}>
                     {[["4 jours","Gratuit"],["30 jours","1 000 F"],["90 jours","2 500 F"],["180 jours","4 500 F"],["360 jours","8 000 F"]].map(([d,p])=>(
                       <div key={d} style={{ background:theme.card,borderRadius:8,padding:"8px 10px",display:"flex",flexDirection:"column",gap:2 }}>
@@ -6703,7 +6703,7 @@ function AppContent() {
                       </div>
                     ))}
                   </div>
-                  <p style={{ fontWeight:700,color:"#FF6584",fontSize:14,marginBottom:8 }}>­ƒøì´©Å Boutiques ┬À Ateliers ┬À Restos ┬À Beaut├®</p>
+                  <p style={{ fontWeight:700,color:"#FF6584",fontSize:14,marginBottom:8 }}>🛍️ Boutiques · Ateliers · Restos · Beauté</p>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:6 }}>
                     {[["30 jours","2 500 F"],["90 jours","6 000 F"],["180 jours","10 000 F"],["360 jours","18 000 F"]].map(([d,p])=>(
                       <div key={d} style={{ background:theme.card,borderRadius:8,padding:"8px 10px",display:"flex",flexDirection:"column",gap:2 }}>
@@ -6714,9 +6714,9 @@ function AppContent() {
                   </div>
                 </div>
                 <button onClick={()=>window.open("https://marcheduroi.com/exemples.html","_blank")} style={{ width:"100%",marginTop:12,padding:"12px",background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.4)",color:"#43C6AC",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-                  ­ƒôû Voir des exemples de publications
+                  📖 Voir des exemples de publications
                 </button>
-                {!user && <button onClick={()=>{setModal(null);setView("register");}} className="btn-glow" style={{ width:"100%",marginTop:10,padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>Cr├®er mon compte gratuitement</button>}
+                {!user && <button onClick={()=>{setModal(null);setView("register");}} className="btn-glow" style={{ width:"100%",marginTop:10,padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>Créer mon compte gratuitement</button>}
               </>
             )}
 
@@ -6724,55 +6724,55 @@ function AppContent() {
             {modal.type==="sponsor"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>­ƒîƒ Sponsoriser l'annonce</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>🌟 Sponsoriser l'annonce</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
                   <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>{modal.data.title}</p>
-                  <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce appara├«tra en premier avec un badge ­ƒîƒ</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce apparaîtra en premier avec un badge 🌟</p>
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
                   {user?.role==="admin" ? (
                     <>
-                      <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>Choisissez la dur├®e du sponsoring :</p>
+                      <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>Choisissez la durée du sponsoring :</p>
                       <div style={{ display:"flex",gap:12 }}>
                         <button onClick={async()=>{
                           await sponsorPost(modal.data.id,"week");
                           setModal({type:"sponsor_success", data:modal.data, duration:"1 semaine"});
                         }} style={{ flex:1,padding:"14px",background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",borderRadius:12,fontWeight:800,fontSize:15,cursor:"pointer" }}>
-                          ­ƒîƒ 1 semaine
+                          🌟 1 semaine
                         </button>
                         <button onClick={async()=>{
                           await sponsorPost(modal.data.id,"month");
                           setModal({type:"sponsor_success", data:modal.data, duration:"1 mois"});
                         }} style={{ flex:1,padding:"14px",background:"linear-gradient(135deg,#FFA500,#FF8C00)",border:"none",color:"#000",borderRadius:12,fontWeight:800,fontSize:15,cursor:"pointer" }}>
-                          ­ƒîƒ 1 mois
+                          🌟 1 mois
                         </button>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div onClick={()=>handlePayment(500,"Sponsoring 1 semaine sur March├®duRoi",async()=>{
+                      <div onClick={()=>handlePayment(500,"Sponsoring 1 semaine sur MarchéduRoi",async()=>{
                         await sponsorPost(modal.data.id,"week");
                         setModal({type:"sponsor_success", data:modal.data, duration:"1 semaine"});
                       })} style={{ background:theme.card,border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer" }}>
                         <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                           <div>
-                            <p style={{ fontWeight:800,fontSize:16,color:"#FFD700",marginBottom:4 }}>­ƒîƒ Sponsoring 1 semaine</p>
-                            <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en t├¬te pendant 7 jours</p>
+                            <p style={{ fontWeight:800,fontSize:16,color:"#FFD700",marginBottom:4 }}>🌟 Sponsoring 1 semaine</p>
+                            <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en tête pendant 7 jours</p>
                           </div>
                           <span style={{ fontWeight:800,fontSize:20,color:"#FFD700" }}>500 FCFA</span>
                         </div>
                       </div>
-                      <div onClick={()=>handlePayment(1500,"Sponsoring 1 mois sur March├®duRoi",async()=>{
+                      <div onClick={()=>handlePayment(1500,"Sponsoring 1 mois sur MarchéduRoi",async()=>{
                         await sponsorPost(modal.data.id,"month");
                         setModal({type:"sponsor_success", data:modal.data, duration:"1 mois"});
                       })} style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFA500",borderRadius:14,padding:20,cursor:"pointer",position:"relative" }}>
                         <div style={{ position:"absolute",top:-12,right:16,background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:800 }}>POPULAIRE</div>
                         <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                           <div>
-                            <p style={{ fontWeight:800,fontSize:16,color:"#FFA500",marginBottom:4 }}>­ƒîƒ Sponsoring 1 mois</p>
-                            <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en t├¬te pendant 30 jours</p>
+                            <p style={{ fontWeight:800,fontSize:16,color:"#FFA500",marginBottom:4 }}>🌟 Sponsoring 1 mois</p>
+                            <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en tête pendant 30 jours</p>
                           </div>
                           <span style={{ fontWeight:800,fontSize:20,color:"#FFA500" }}>1 500 FCFA</span>
                         </div>
@@ -6780,22 +6780,22 @@ function AppContent() {
                     </>
                   )}
                 </div>
-                <p style={{ fontSize:11,color:theme.sub,textAlign:"center" }}>­ƒÆ│ Paiement s├®curis├® MTN/Moov Money ┬À Apr├¿s expiration, l'annonce reste visible normalement</p>
+                <p style={{ fontSize:11,color:theme.sub,textAlign:"center" }}>💳 Paiement sécurisé MTN/Moov Money · Après expiration, l'annonce reste visible normalement</p>
               </>
             )}
 
             {/* CONFIRMATION SPONSORING */}
             {modal.type==="sponsor_success"&&(
               <div style={{ textAlign:"center",padding:"16px 0" }}>
-                <div style={{ fontSize:64,marginBottom:16,animation:"pulse 1s ease" }}>­ƒîƒ</div>
-                <h3 style={{ fontWeight:800,fontSize:22,color:"#FFD700",marginBottom:8 }}>Sponsoring activ├® !</h3>
+                <div style={{ fontSize:64,marginBottom:16,animation:"pulse 1s ease" }}>🌟</div>
+                <h3 style={{ fontWeight:800,fontSize:22,color:"#FFD700",marginBottom:8 }}>Sponsoring activé !</h3>
                 <div style={{ background:"rgba(255,215,0,0.1)",border:"2px solid #FFD700",borderRadius:14,padding:20,marginBottom:20 }}>
                   <p style={{ fontWeight:700,color:theme.text,fontSize:16,marginBottom:6 }}>{modal.data.title}</p>
-                  <p style={{ color:"#FFD700",fontWeight:700,fontSize:18 }}>Ô£à Sponsoris├® pour {modal.duration}</p>
-                  <p style={{ color:theme.sub,fontSize:13,marginTop:6 }}>L'annonce appara├«t maintenant en t├¬te des r├®sultats avec le badge ­ƒîƒ</p>
+                  <p style={{ color:"#FFD700",fontWeight:700,fontSize:18 }}>✅ Sponsorisé pour {modal.duration}</p>
+                  <p style={{ color:theme.sub,fontSize:13,marginTop:6 }}>L'annonce apparaît maintenant en tête des résultats avec le badge 🌟</p>
                 </div>
                 <button onClick={()=>setModal(null)} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",borderRadius:12,fontWeight:800,fontSize:15,cursor:"pointer" }}>
-                  Parfait ! Ô£ô
+                  Parfait ! ✓
                 </button>
               </div>
             )}
@@ -6804,27 +6804,27 @@ function AppContent() {
             {modal.type==="urgent"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>­ƒöÑ Badge Urgent</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>🔥 Badge Urgent</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
                   <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>{modal.data.title}</p>
-                  <p style={{ color:theme.sub,fontSize:13 }}>Un badge ­ƒöÑ URGENT rouge anim├® s'affiche sur votre annonce ÔÇö visible par tous.</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Un badge 🔥 URGENT rouge animé s'affiche sur votre annonce — visible par tous.</p>
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
                   {[{dur:"6 heures",price:500,hours:6},{dur:"24 heures",price:1000,hours:24}].map(opt=>(
-                    <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Badge Urgent ${opt.dur} sur March├®duRoi`,async()=>{
+                    <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Badge Urgent ${opt.dur} sur MarchéduRoi`,async()=>{
                       const until = new Date(); until.setHours(until.getHours()+opt.hours);
                       const urgent_until = until.toISOString();
                       const urgent_activated_at = new Date().toISOString();
                       const {error} = await supabase.from("posts").update({urgent:true, urgent_until, urgent_activated_at}).eq("id",modal.data.id);
                       if (error) { notify("Erreur activation badge urgent","error"); return; }
                       setPosts(p=>p.map(x=>x.id===modal.data.id?{...x,urgent:true,urgentUntil:urgent_until,urgentActivatedAt:urgent_activated_at}:x));
-                      setModal(null); notify("­ƒöÑ Badge Urgent activ├® pour "+opt.dur+" !");
+                      setModal(null); notify("🔥 Badge Urgent activé pour "+opt.dur+" !");
                     })} style={{ background:theme.card,border:"2px solid #FF4757",borderRadius:14,padding:20,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                       <div>
-                        <p style={{ fontWeight:800,fontSize:15,color:"#FF4757",marginBottom:4 }}>­ƒöÑ Urgent {opt.dur}</p>
-                        <p style={{ color:theme.sub,fontSize:13 }}>1├¿re position + badge anim├® rouge pendant {opt.dur}</p>
+                        <p style={{ fontWeight:800,fontSize:15,color:"#FF4757",marginBottom:4 }}>🔥 Urgent {opt.dur}</p>
+                        <p style={{ color:theme.sub,fontSize:13 }}>1ère position + badge animé rouge pendant {opt.dur}</p>
                       </div>
                       <span style={{ fontWeight:800,fontSize:20,color:"#FF4757" }}>{opt.price} FCFA</span>
                     </div>
@@ -6834,20 +6834,20 @@ function AppContent() {
             )}
 
 
-            {/* URGENT SHOP ÔÇö boutiques/ateliers/restos/beaut├® */}
+            {/* URGENT SHOP — boutiques/ateliers/restos/beauté */}
             {modal.type==="urgentShop"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>­ƒöÑ Badge Urgent</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>🔥 Badge Urgent</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
                   <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>{modal.data.title}</p>
-                  <p style={{ color:theme.sub,fontSize:13 }}>Votre ├®tablissement appara├«t dans le bandeau ­ƒöÑ EN CE MOMENT ÔÇö visible en t├¬te de page par tous les visiteurs.</p>
+                  <p style={{ color:theme.sub,fontSize:13 }}>Votre établissement apparaît dans le bandeau 🔥 EN CE MOMENT — visible en tête de page par tous les visiteurs.</p>
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
                   {[{dur:"6 heures",price:500,hours:6},{dur:"24 heures",price:1000,hours:24}].map(opt=>(
-                    <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Badge Urgent ${opt.dur} sur March├®duRoi`,async()=>{
+                    <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Badge Urgent ${opt.dur} sur MarchéduRoi`,async()=>{
                       const until = new Date(); until.setHours(until.getHours()+opt.hours);
                       const urgent_until = until.toISOString();
                       const urgent_activated_at = new Date().toISOString();
@@ -6856,10 +6856,10 @@ function AppContent() {
                       const {error} = await supabase.from(modal.shopTable).update({urgent:true, urgent_until, urgent_activated_at}).eq("id",modal.data.id);
                       if (error) { notify("Erreur activation badge urgent","error"); return; }
                       if (setter) setter(prev=>prev.map(x=>x.id===modal.data.id?{...x,urgent:true,urgentUntil:urgent_until,urgentActivatedAt:urgent_activated_at}:x));
-                      setModal(null); notify("­ƒöÑ Badge Urgent activ├® pour "+opt.dur+" !");
+                      setModal(null); notify("🔥 Badge Urgent activé pour "+opt.dur+" !");
                     })} style={{ background:theme.card,border:"2px solid #FF4757",borderRadius:14,padding:20,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                       <div>
-                        <p style={{ fontWeight:800,fontSize:15,color:"#FF4757",marginBottom:4 }}>­ƒöÑ Urgent {opt.dur}</p>
+                        <p style={{ fontWeight:800,fontSize:15,color:"#FF4757",marginBottom:4 }}>🔥 Urgent {opt.dur}</p>
                         <p style={{ color:theme.sub,fontSize:13 }}>Bandeau EN CE MOMENT pendant {opt.dur}</p>
                       </div>
                       <span style={{ fontWeight:800,fontSize:20,color:"#FF4757" }}>{opt.price} FCFA</span>
@@ -6873,7 +6873,7 @@ function AppContent() {
             {modal.type==="prolong"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>ÔÅ│ Prolonger l'annonce</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>⏳ Prolonger l'annonce</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
                 <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
@@ -6886,8 +6886,8 @@ function AppContent() {
                   <div onClick={()=>setSelectedTarif(-1)}
                     style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"12px 16px",marginBottom:8,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                     <div>
-                      <p style={{ fontWeight:700,color:theme.text,fontSize:14 }}>­ƒÄü 4 jours gratuits</p>
-                      <p style={{ color:theme.sub,fontSize:12 }}>Votre cr├®dit mensuel gratuit</p>
+                      <p style={{ fontWeight:700,color:theme.text,fontSize:14 }}>🎁 4 jours gratuits</p>
+                      <p style={{ color:theme.sub,fontSize:12 }}>Votre crédit mensuel gratuit</p>
                     </div>
                     <span style={{ fontWeight:800,color:"#43C6AC",fontSize:16 }}>GRATUIT</span>
                   </div>
@@ -6911,20 +6911,20 @@ function AppContent() {
                     const newExp = new Date(modal.data.expiresAt||new Date());
                     newExp.setDate(newExp.getDate()+4);
                     setPosts(p=>p.map(post=>post.id===modal.data.id?{...post,expiresAt:newExp.toISOString().slice(0,10),expired:false,expiringSoon:false}:post));
-                    setModal(null); notify("­ƒÄü Annonce prolong├®e de 4 jours gratuitement !");
+                    setModal(null); notify("🎁 Annonce prolongée de 4 jours gratuitement !");
                   } else {
                     const tarif = TARIFS_ANNONCE[selectedTarif]||TARIFS_ANNONCE[0];
-                    handlePayment(tarif.price, `Prolongation annonce ${tarif.label} sur March├®duRoi`, ()=>{
+                    handlePayment(tarif.price, `Prolongation annonce ${tarif.label} sur MarchéduRoi`, ()=>{
                       const newExp = new Date(modal.data.expiresAt||new Date());
                       newExp.setDate(newExp.getDate()+tarif.days);
                       setPosts(p=>p.map(post=>post.id===modal.data.id?{...post,expiresAt:newExp.toISOString().slice(0,10),expired:false,expiringSoon:false}:post));
-                      setModal(null); notify(`Annonce prolong├®e de ${tarif.label} !`);
+                      setModal(null); notify(`Annonce prolongée de ${tarif.label} !`);
                     });
                   }
                 }} className="btn-glow" style={{ width:"100%",marginTop:8,padding:"14px",background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
                   {selectedTarif===-1
-                    ? "­ƒÄü Prolonger gratuitement (4 jours)"
-                    : `Prolonger ┬À ${(TARIFS_ANNONCE[selectedTarif]||TARIFS_ANNONCE[0]).price.toLocaleString()} FCFA`}
+                    ? "🎁 Prolonger gratuitement (4 jours)"
+                    : `Prolonger · ${(TARIFS_ANNONCE[selectedTarif]||TARIFS_ANNONCE[0]).price.toLocaleString()} FCFA`}
                 </button>
               </>
             )}
@@ -6934,10 +6934,10 @@ function AppContent() {
             {modal.type==="showFaster"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>ÔÜí Show Faster</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>⚡ Show Faster</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
-                <p style={{ color:theme.sub,fontSize:13,marginBottom:20,lineHeight:1.6 }}>Votre banni├¿re publicitaire vue par tous les visiteurs de March├®duRoi. Choisissez votre dur├®e et payez en ligne.</p>
+                <p style={{ color:theme.sub,fontSize:13,marginBottom:20,lineHeight:1.6 }}>Votre bannière publicitaire vue par tous les visiteurs de MarchéduRoi. Choisissez votre durée et payez en ligne.</p>
                 <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:20 }}>
                   {[{label:"7 jours",prix:5000,days:7},{label:"30 jours",prix:15000,days:30},{label:"90 jours",prix:35000,days:90}].map(t=>(
                     <div key={t.label} onClick={()=>setModal(m=>({...m,adTarif:t}))}
@@ -6949,7 +6949,7 @@ function AppContent() {
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
                   {[
-                    {label:"Nom de l'entreprise *",key:"adEntreprise",placeholder:"Ex: Boulangerie Dor├®e"},
+                    {label:"Nom de l'entreprise *",key:"adEntreprise",placeholder:"Ex: Boulangerie Dorée"},
                     {label:"Slogan",key:"adSlogan",placeholder:"Ex: Les meilleurs pains de Cotonou"},
                     {label:"URL du logo",key:"adLogo",placeholder:"https://..."},
                     {label:"Lien de destination",key:"adLien",placeholder:"https://votre-site.com"},
@@ -6960,7 +6960,7 @@ function AppContent() {
                     </div>
                   ))}
                   <div>
-                    <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Couleurs de la banni├¿re</label>
+                    <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Couleurs de la bannière</label>
                     <div style={{ display:"flex",gap:10 }}>
                       <input type="color" value={modal.adCouleur1||"#6C63FF"} onChange={e=>setModal(m=>({...m,adCouleur1:e.target.value}))} style={{ width:44,height:40,border:"none",borderRadius:8,cursor:"pointer" }}/>
                       <input type="color" value={modal.adCouleur2||"#8B84FF"} onChange={e=>setModal(m=>({...m,adCouleur2:e.target.value}))} style={{ width:44,height:40,border:"none",borderRadius:8,cursor:"pointer" }}/>
@@ -6969,10 +6969,10 @@ function AppContent() {
                   </div>
                 </div>
                 <button onClick={async()=>{
-                  if (!modal.adTarif) { notify("Choisissez une dur├®e","error"); return; }
+                  if (!modal.adTarif) { notify("Choisissez une durée","error"); return; }
                   if (!modal.adEntreprise?.trim()) { notify("Nom de l'entreprise requis","error"); return; }
                   const tarif = modal.adTarif;
-                  handlePayment(tarif.prix, `Banni├¿re publicitaire ${tarif.label} ÔÇö March├®duRoi`, async()=>{
+                  handlePayment(tarif.prix, `Bannière publicitaire ${tarif.label} — MarchéduRoi`, async()=>{
                     const expDate = new Date();
                     expDate.setDate(expDate.getDate() + tarif.days);
                     const req = {
@@ -6986,12 +6986,12 @@ function AppContent() {
                     const { error } = await supabase.from("ad_requests").insert(req);
                     if (error) { notify("Erreur lors de la demande","error"); return; }
                     setModal(null);
-                    notify("Ô£à Demande envoy├®e ! Votre banni├¿re sera activ├®e apr├¿s validation.");
+                    notify("✅ Demande envoyée ! Votre bannière sera activée après validation.");
                   });
                 }} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
-                  ÔÜí Payer et soumettre ma banni├¿re
+                  ⚡ Payer et soumettre ma bannière
                 </button>
-                <p style={{ textAlign:"center",color:theme.sub,fontSize:11,marginTop:10 }}>Validation manuelle sous 24h ┬À Paiement s├®curis├® MTN/Moov Money</p>
+                <p style={{ textAlign:"center",color:theme.sub,fontSize:11,marginTop:10 }}>Validation manuelle sous 24h · Paiement sécurisé MTN/Moov Money</p>
               </>
             )}
 
@@ -6999,33 +6999,33 @@ function AppContent() {
             {modal.type==="emailConfirmation"&&(
               <>
                 <div style={{ textAlign:"center",marginBottom:24 }}>
-                  <div style={{ fontSize:64,marginBottom:16 }}>­ƒôº</div>
+                  <div style={{ fontSize:64,marginBottom:16 }}>📧</div>
                   <h3 style={{ fontWeight:800,fontSize:22,color:theme.text,marginBottom:8 }}>Confirmez votre adresse email</h3>
                   <p style={{ color:"#6C63FF",fontWeight:600,fontSize:14,marginBottom:4 }}>{modal.email}</p>
                 </div>
                 <div style={{ background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:14,padding:20,marginBottom:20 }}>
                   <p style={{ color:theme.text,fontSize:14,lineHeight:1.8,marginBottom:12 }}>
-                    Ô£à Votre compte a ├®t├® cr├®├® avec succ├¿s !
+                    ✅ Votre compte a été créé avec succès !
                   </p>
                   <p style={{ color:theme.text,fontSize:14,lineHeight:1.8,marginBottom:12 }}>
-                    Un email de confirmation vient d'├¬tre envoy├® ├á votre adresse. 
+                    Un email de confirmation vient d'être envoyé à votre adresse. 
                     Cliquez sur le lien dans cet email pour activer votre compte.
                   </p>
                   <p style={{ color:"#FF8C00",fontWeight:700,fontSize:13,lineHeight:1.7 }}>
-                    ÔÜá´©Å Vous ne trouvez pas l'email ? V├®rifiez votre dossier <strong>SPAM</strong> ou <strong>Courrier ind├®sirable</strong> ÔÇö il s'y trouve parfois automatiquement.
+                    ⚠️ Vous ne trouvez pas l'email ? Vérifiez votre dossier <strong>SPAM</strong> ou <strong>Courrier indésirable</strong> — il s'y trouve parfois automatiquement.
                   </p>
                 </div>
                 <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:12,padding:14,marginBottom:20,fontSize:13,color:theme.sub,lineHeight:1.7 }}>
-                  <p>­ƒôî <strong style={{ color:theme.text }}>├ëtapes ├á suivre :</strong></p>
-                  <p>1. Ouvrez votre bo├«te email</p>
+                  <p>📌 <strong style={{ color:theme.text }}>Étapes à suivre :</strong></p>
+                  <p>1. Ouvrez votre boîte email</p>
                   <p>2. Cherchez un email de <strong style={{ color:"#6C63FF" }}>noreply@marcheduroi.com</strong></p>
-                  <p>3. V├®rifiez le dossier SPAM si vous ne le voyez pas</p>
+                  <p>3. Vérifiez le dossier SPAM si vous ne le voyez pas</p>
                   <p>4. Cliquez sur le lien de confirmation</p>
-                  <p>5. Revenez sur March├®duRoi et connectez-vous</p>
+                  <p>5. Revenez sur MarchéduRoi et connectez-vous</p>
                 </div>
                 <button onClick={()=>setModal(null)} className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
-                  Ô£à J'ai compris ÔÇö Aller v├®rifier mes emails
+                  ✅ J'ai compris — Aller vérifier mes emails
                 </button>
               </>
             )}
@@ -7033,17 +7033,17 @@ function AppContent() {
             {modal.type==="suggestion"&&(
               <>
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>­ƒÆí Envoyer une suggestion</h3>
+                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>💡 Envoyer une suggestion</h3>
                   <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
                 </div>
-                <p style={{ color:theme.sub,fontSize:14,marginBottom:24,lineHeight:1.5 }}>Partagez vos id├®es pour am├®liorer March├®duRoi ! Toutes les suggestions sont lues par l'├®quipe.</p>
+                <p style={{ color:theme.sub,fontSize:14,marginBottom:24,lineHeight:1.5 }}>Partagez vos idées pour améliorer MarchéduRoi ! Toutes les suggestions sont lues par l'équipe.</p>
                 <div style={{ marginBottom:16 }}>
                   <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre nom (optionnel)</label>
                   <input value={suggestionName} onChange={e=>setSuggestionName(e.target.value)} placeholder="Visiteur anonyme" style={inputStyle}/>
                 </div>
                 <div style={{ marginBottom:24 }}>
                   <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre suggestion *</label>
-                  <textarea value={suggestionText} onChange={e=>setSuggestionText(e.target.value)} rows={4} placeholder="D├®crivez votre id├®e..." style={{ ...inputStyle,resize:"vertical" }}/>
+                  <textarea value={suggestionText} onChange={e=>setSuggestionText(e.target.value)} rows={4} placeholder="Décrivez votre idée..." style={{ ...inputStyle,resize:"vertical" }}/>
                 </div>
                 <button onClick={submitSuggestion} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
                   Envoyer ma suggestion
@@ -7057,7 +7057,7 @@ function AppContent() {
   );
 }
 
-// Page d├®tail universelle
+// Page détail universelle
 function AnnonceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -7066,7 +7066,7 @@ function AnnonceDetail() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  // D├®terminer le type selon l'URL
+  // Déterminer le type selon l'URL
   const type = pathname.startsWith("/boutique/") ? "boutique"
              : pathname.startsWith("/atelier/")  ? "atelier"
              : pathname.startsWith("/resto/")    ? "resto"
@@ -7081,7 +7081,7 @@ function AnnonceDetail() {
       const table = tableMap[type];
       const { data, error } = await supabase.from(table).select("*").eq("id", id).single();
       if (error || !data) {
-        // Fallback sur donn├®es statiques
+        // Fallback sur données statiques
         let fallback = null;
         if (type === "boutique") fallback = INITIAL_BOUTIQUES.find(b => String(b.id) === String(id));
         else if (type === "atelier") fallback = INITIAL_ATELIERS.find(a => String(a.id) === String(id));
@@ -7099,18 +7099,18 @@ function AnnonceDetail() {
   }, [id, type]);
 
   const colorMap = { annonce:"#6C63FF", boutique:"#FF6584", atelier:"#43C6AC", resto:"#FF8C00", beaute:"#FF69B4" };
-  const labelMap = { annonce:"Annonce", boutique:"Boutique", atelier:"Atelier", resto:"Restaurant & Bar", beaute:"Beaut├® & Coiffure" };
+  const labelMap = { annonce:"Annonce", boutique:"Boutique", atelier:"Atelier", resto:"Restaurant & Bar", beaute:"Beauté & Coiffure" };
   const color = colorMap[type];
 
   // Partage Web Share API
   const handleShare = () => {
     const url = window.location.href;
-    const title = item?.title || item?.name || "March├®duRoi";
+    const title = item?.title || item?.name || "MarchéduRoi";
     if (navigator.share) {
-      navigator.share({ title, text:title+" ÔÇö March├®duRoi", url });
+      navigator.share({ title, text:title+" — MarchéduRoi", url });
     } else {
       navigator.clipboard.writeText(url);
-      alert("Lien copi├® !");
+      alert("Lien copié !");
     }
   };
 
@@ -7119,18 +7119,18 @@ function AnnonceDetail() {
       <div style={{ textAlign:"center" }}>
         <div style={{ width:48,height:48,border:"4px solid #2A2D45",borderTop:"4px solid #6C63FF",borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 16px" }}/>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-        <p style={{ color:"#9A9AB0",fontSize:14 }}>ChargementÔÇª</p>
+        <p style={{ color:"#9A9AB0",fontSize:14 }}>Chargement…</p>
       </div>
     </div>
   );
 
   if (notFound) return (
     <div style={{ textAlign:"center",padding:"80px 24px",fontFamily:"Sora,sans-serif",background:"#0D0F1A",minHeight:"100vh",color:"#E8E8F0" }}>
-      <p style={{ fontSize:48,marginBottom:16 }}>­ƒÿò</p>
+      <p style={{ fontSize:48,marginBottom:16 }}>😕</p>
       <h2 style={{ fontSize:24,fontWeight:700,marginBottom:12 }}>Contenu introuvable</h2>
-      <p style={{ color:"#9A9AB0",marginBottom:24 }}>Ce lien n'est plus disponible ou a expir├®.</p>
+      <p style={{ color:"#9A9AB0",marginBottom:24 }}>Ce lien n'est plus disponible ou a expiré.</p>
       <button onClick={()=>navigate("/")} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
-        Retour ├á l'accueil
+        Retour à l'accueil
       </button>
     </div>
   );
@@ -7147,17 +7147,17 @@ function AnnonceDetail() {
         </div>
         <div style={{ display:"flex",gap:8 }}>
           <button onClick={handleShare} style={{ background:"rgba(108,99,255,0.15)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
-            ­ƒöù Partager
+            🔗 Partager
           </button>
           <button onClick={()=>{ if(window.history.length>1){ navigate(-1); } else { navigate("/"); }}} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
-            ÔåÉ Retour
+            ← Retour
           </button>
         </div>
       </div>
 
       <div style={{ maxWidth:750,margin:"0 auto",padding:"24px" }}>
 
-        {/* Photos / Vid├®o */}
+        {/* Photos / Vidéo */}
         {item.video && (
           <div style={{ borderRadius:16,overflow:"hidden",marginBottom:20 }}>
             <VideoCardPlayer video={item.video?.url||item.video} photos={photos} maxSeconds={type==="annonce"?60:120}/>
@@ -7178,12 +7178,12 @@ function AnnonceDetail() {
 
         {/* Badge + titre */}
         <span style={{ background:`${color}22`,color,padding:"4px 14px",borderRadius:20,fontSize:12,fontWeight:700 }}>
-          {labelMap[type]}{item.type?` ┬À ${item.type}`:""}{item.category?` ┬À ${item.category}`:""}
+          {labelMap[type]}{item.type?` · ${item.type}`:""}{item.category?` · ${item.category}`:""}
         </span>
         {(item.sponsored || item.urgent) && (
           <div style={{ display:"inline-flex",gap:8,marginLeft:8 }}>
-            {item.sponsored && <span style={{ background:"rgba(255,215,0,0.2)",color:"#FFD700",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>­ƒîƒ Sponsoris├®</span>}
-            {item.urgent && <span style={{ background:"rgba(255,71,87,0.2)",color:"#FF4757",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>­ƒöÑ URGENT</span>}
+            {item.sponsored && <span style={{ background:"rgba(255,215,0,0.2)",color:"#FFD700",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🌟 Sponsorisé</span>}
+            {item.urgent && <span style={{ background:"rgba(255,71,87,0.2)",color:"#FF4757",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🔥 URGENT</span>}
           </div>
         )}
 
@@ -7192,42 +7192,42 @@ function AnnonceDetail() {
         {item.prixMoyen && <p style={{ fontSize:16,color:"#FF8C00",fontWeight:600,marginBottom:8 }}>Prix moyen : {item.prixMoyen}</p>}
         <p style={{ color:"#9A9AB0",lineHeight:1.8,marginBottom:20,fontSize:15 }}>{item.description}</p>
 
-        {/* Infos suppl├®mentaires */}
-        {item.specialite && <p style={{ color:"#FF8C00",fontWeight:600,marginBottom:8 }}>Ô£¿ Sp├®cialit├® : {item.specialite}</p>}
-        {item.plats && <p style={{ color:"#9A9AB0",marginBottom:8 }}>­ƒì┤ {item.plats}</p>}
-        {item.services && <p style={{ color:"#9A9AB0",marginBottom:16 }}>Ô£à Services : {item.services}</p>}
-        {item.tarifs && <p style={{ color:"#43C6AC",fontWeight:600,marginBottom:12 }}>­ƒÆ░ Tarifs : {item.tarifs}</p>}
+        {/* Infos supplémentaires */}
+        {item.specialite && <p style={{ color:"#FF8C00",fontWeight:600,marginBottom:8 }}>✨ Spécialité : {item.specialite}</p>}
+        {item.plats && <p style={{ color:"#9A9AB0",marginBottom:8 }}>🍴 {item.plats}</p>}
+        {item.services && <p style={{ color:"#9A9AB0",marginBottom:16 }}>✅ Services : {item.services}</p>}
+        {item.tarifs && <p style={{ color:"#43C6AC",fontWeight:600,marginBottom:12 }}>💰 Tarifs : {item.tarifs}</p>}
 
         {/* Localisation */}
         {(item.ville||item.quartier||item.position) && (
           <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:12,padding:16,marginBottom:16 }}>
-            <p style={{ fontWeight:700,marginBottom:6,color:"#E8E8F0" }}>­ƒôì Localisation</p>
+            <p style={{ fontWeight:700,marginBottom:6,color:"#E8E8F0" }}>📍 Localisation</p>
             <p style={{ color:"#9A9AB0" }}>{[item.ville,item.quartier,item.position].filter(Boolean).join(", ")}</p>
             {item.lat && item.lng && (
               <a href={`https://www.google.com/maps?q=${item.lat},${item.lng}`} target="_blank" rel="noopener noreferrer"
                 style={{ display:"inline-block",marginTop:8,color:"#4285F4",fontWeight:600,fontSize:13,textDecoration:"none" }}>
-                ­ƒù║´©Å Voir sur Google Maps ÔåÆ
+                🗺️ Voir sur Google Maps →
               </a>
             )}
           </div>
         )}
-        {item.horaires && <p style={{ color:"#43C6AC",fontWeight:600,marginBottom:16 }}>­ƒòÉ {item.horaires}</p>}
+        {item.horaires && <p style={{ color:"#43C6AC",fontWeight:600,marginBottom:16 }}>🕐 {item.horaires}</p>}
 
         {/* Contacts */}
         <div style={{ display:"flex",flexDirection:"column",gap:10,marginBottom:24 }}>
           {item.contact && (
             <a href={"mailto:"+item.contact} style={{ display:"flex",alignItems:"center",gap:12,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:12,padding:16,color:"#43C6AC",textDecoration:"none",fontWeight:600 }}>
-              ­ƒôº {item.contact}
+              📧 {item.contact}
             </a>
           )}
           {item.phone && (
             <>
               <a href={"tel:"+item.phone} style={{ display:"flex",alignItems:"center",gap:12,background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:12,padding:16,color:"#6C63FF",textDecoration:"none",fontWeight:600 }}>
-                ­ƒô× Appeler : {item.phone}
+                📞 Appeler : {item.phone}
               </a>
               <a href={"https://wa.me/"+item.phone.replace(/[\s+\-()]/g,"")} target="_blank" rel="noopener noreferrer"
                 style={{ display:"flex",alignItems:"center",gap:12,background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:12,padding:16,color:"#25D366",textDecoration:"none",fontWeight:600 }}>
-                ­ƒÆ¼ WhatsApp : {item.phone}
+                💬 WhatsApp : {item.phone}
               </a>
             </>
           )}
@@ -7235,7 +7235,7 @@ function AnnonceDetail() {
 
         {/* Partage */}
         <div style={{ display:"flex",gap:10,marginBottom:20,flexWrap:"wrap" }}>
-          <a href={"https://wa.me/?text="+encodeURIComponent(title+" ÔÇö March├®duRoi\n"+window.location.href)} target="_blank" rel="noopener noreferrer"
+          <a href={"https://wa.me/?text="+encodeURIComponent(title+" — MarchéduRoi\n"+window.location.href)} target="_blank" rel="noopener noreferrer"
             style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:12,padding:"12px",color:"#25D366",textDecoration:"none",fontWeight:700,fontSize:14,minWidth:120 }}>
             <svg width="16" height="16" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
             WhatsApp
@@ -7253,7 +7253,7 @@ function AnnonceDetail() {
         </div>
 
         <button onClick={()=>navigate("/")} style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
-          ÔåÉ Voir toutes les annonces sur March├®duRoi
+          ← Voir toutes les annonces sur MarchéduRoi
         </button>
       </div>
     </div>
