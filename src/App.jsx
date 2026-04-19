@@ -7104,15 +7104,15 @@ function AnnonceDetail() {
 
   // Partage Web Share API
   const handleShare = () => {
-    const url = window.location.href;
+    const pageUrl = window.location.href.split('?')[0];
     const title = item?.title || item?.name || "MarchéduRoi";
     const price = item?.price ? " — " + item.price + (String(item.price).includes("FCFA") ? "" : " FCFA") : "";
-    const slogan = "Sur MarchéduRoi, vous êtes le Roi du Marché";
-    const shareText = title + price + ". " + url + " " + slogan;
+    const slogan = "Sur MarchéduRoi, vous êtes le Roi du Marché 👑";
+    const shareText = title + price + "\n" + pageUrl + "\n" + slogan;
     if (navigator.share) {
-      navigator.share({ title, text:shareText, url });
+      navigator.share({ title: title + price, text: shareText });
     } else {
-      navigator.clipboard.writeText(url);
+      navigator.clipboard.writeText(pageUrl);
       alert("Lien copié !");
     }
   };
