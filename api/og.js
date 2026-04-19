@@ -1,6 +1,6 @@
 // api/og.js — Vercel Edge Function
 // Génère des meta OG dynamiques pour chaque annonce
-// avec logo MarchéduRoi en filigrane sur la photo
+// avec logo MarchéduRoi en coin haut-gauche sur la photo
 
 export const config = { runtime: 'edge' };
 
@@ -10,9 +10,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const LOGO_URL = 'https://marcheduroi.com/marcheduRoi-icon.svg';
 const SITE_URL = 'https://marcheduroi.com';
 const DEFAULT_IMAGE = 'https://marcheduroi.com/icons/icon-512x512.png';
-const SLOGAN = 'Sur MarchéduRoi, vous êtes le Roi du Marché 👑';
+const SLOGAN = 'Sur MarchéduRoi, vous êtes le Roi du Marché';
 
-// Déterminer la table selon le type d'URL
 function getTableAndId(pathname) {
   const patterns = [
     { regex: /^\/annonce\/(.+)$/, table: 'posts', titleField: 'title' },
@@ -28,81 +27,62 @@ function getTableAndId(pathname) {
   return null;
 }
 
-// Générer l'URL d'image avec logo en overlay via SVG
-function generateOgImageUrl(photoUrl, title, price) {
-  // On utilise un SVG data URI qui combine photo + logo
-  // Retourne directement l'URL de la photo Supabase si pas de canvas disponible
-  return photoUrl || DEFAULT_IMAGE;
+function formatPrice(rawPrice) {
+  if (!rawPrice) return null;
+  const digits = String(rawPrice).replace(/[^0-9]/g, '');
+  if (!digits) return null;
+  const num = parseInt(digits);
+  return num.toLocaleString('fr-FR').replace(/\u202f|\s/g, ' ') + ' FCFA';
 }
 
-// HTML avec meta OG pour l'annonce
-function buildHtml({ title, description, image, url, price, category }) {
-  const fullTitle = price
-    ? `${title} — ${price} FCFA | MarchéduRoi`
-    : `${title} | MarchéduRoi`;
-  const fullDesc = description
-    ? `${description.slice(0, 160)} | ${SLOGAN}`
-    : `${SLOGAN} — marcheduroi.com`;
+function buildHtml({ title, description, image, url, price }) {
+  const priceStr = price || '';
+  const fullTitle = priceStr
+    ? title + ' — ' + priceStr + ' | MarchéduRoi'
+    : title + ' | MarchéduRoi';
+  const fullDesc = title + (priceStr ? ' — ' + priceStr : '') + '. ' + SLOGAN + ' - marcheduroi.com';
+  const ogImage = image || DEFAULT_IMAGE;
 
-  return `<!DOCTYPE html>
-<html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${fullTitle}</title>
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="${fullTitle}" />
-    <meta property="og:description" content="${fullDesc}" />
-    <meta property="og:image" content="${image}" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:url" content="${url}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="MarchéduRoi" />
-    <meta property="og:locale" content="fr_BJ" />
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${fullTitle}" />
-    <meta name="twitter:description" content="${fullDesc}" />
-    <meta name="twitter:image" content="${image}" />
-
-    <!-- WhatsApp / Telegram -->
-    <meta name="description" content="${fullDesc}" />
-
-    <!-- Rediriger vers la SPA React après que les crawlers ont lu les meta -->
-    <script>
-      // Si c'est un vrai navigateur (pas un crawler), rediriger vers la SPA
-      if (typeof window !== 'undefined') {
-        window.location.replace('${url}#loaded');
-      }
-    </script>
-    <noscript>
-      <meta http-equiv="refresh" content="0; url=${url}" />
-    </noscript>
-  </head>
-  <body style="background:#0D0F1A;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;flex-direction:column;gap:16px;padding:20px;text-align:center;">
-    <img src="${LOGO_URL}" alt="MarchéduRoi" style="width:80px;height:auto;" />
-    <h1 style="font-size:24px;margin:0;">${title}</h1>
-    ${price ? `<p style="color:#43C6AC;font-size:20px;font-weight:700;margin:0;">${price} FCFA</p>` : ''}
-    <p style="color:#FFD700;font-style:italic;margin:0;">"${SLOGAN}"</p>
-    <a href="${url}" style="background:#6C63FF;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;">Voir l'annonce →</a>
-  </body>
-</html>`;
+  return '<!DOCTYPE html>\n<html lang="fr">\n<head>\n' +
+    '<meta charset="UTF-8" />\n' +
+    '<title>' + fullTitle + '</title>\n' +
+    '<meta name="description" content="' + fullDesc + '" />\n' +
+    '<meta property="og:title" content="' + fullTitle + '" />\n' +
+    '<meta property="og:description" content="' + fullDesc + '" />\n' +
+    '<meta property="og:image" content="' + ogImage + '" />\n' +
+    '<meta property="og:image:width" content="1200" />\n' +
+    '<meta property="og:image:height" content="630" />\n' +
+    '<meta property="og:url" content="' + url + '" />\n' +
+    '<meta property="og:type" content="website" />\n' +
+    '<meta property="og:site_name" content="MarchéduRoi" />\n' +
+    '<meta name="twitter:card" content="summary_large_image" />\n' +
+    '<meta name="twitter:title" content="' + fullTitle + '" />\n' +
+    '<meta name="twitter:description" content="' + fullDesc + '" />\n' +
+    '<meta name="twitter:image" content="' + ogImage + '" />\n' +
+    '<script>if(typeof window!=="undefined"&&!window.location.search.includes("from=og")){window.location.replace("' + url + '?from=og");}</script>\n' +
+    '</head>\n<body style="background:#0D0F1A;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;">\n' +
+    '<div style="max-width:480px;width:100%;text-align:center;">\n' +
+    '<img src="' + LOGO_URL + '" style="width:72px;margin-bottom:16px;" />\n' +
+    '<div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:20px;">\n' +
+    '<img src="' + ogImage + '" style="width:100%;max-height:300px;object-fit:cover;display:block;" />\n' +
+    '<div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.65);border-radius:8px;padding:4px 8px;display:flex;align-items:center;gap:6px;">\n' +
+    '<img src="' + LOGO_URL + '" style="width:20px;" />\n' +
+    '<span style="color:#FFD700;font-size:11px;font-weight:700;">MarchéduRoi</span>\n' +
+    '</div></div>\n' +
+    '<h1 style="font-size:22px;font-weight:800;margin:0 0 8px;">' + title + '</h1>\n' +
+    (priceStr ? '<p style="font-size:24px;font-weight:800;color:#43C6AC;margin:0 0 8px;">' + priceStr + '</p>\n' : '') +
+    '<p style="color:#FFD700;font-style:italic;font-weight:700;margin:0 0 20px;">&ldquo;' + SLOGAN + ' &#128081;&rdquo;</p>\n' +
+    '<a href="' + url + '" style="background:linear-gradient(135deg,#6C63FF,#FF6584);color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:800;">Voir l'annonce &rarr;</a>\n' +
+    '</div></body></html>';
 }
 
 export default async function handler(req) {
   const url = new URL(req.url);
   const pathname = url.pathname;
-
-  // Vérifier si c'est un crawler (User-Agent)
   const ua = req.headers.get('user-agent') || '';
-  const isCrawler = /facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|LinkedInBot|Slackbot|Googlebot|bingbot|Applebot|Discordbot/i.test(ua);
-
+  const isCrawler = /facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|LinkedInBot|Slackbot|Googlebot|bingbot|Applebot|Discordbot|vk|pinterest/i.test(ua);
   const match = getTableAndId(pathname);
 
-  // Si ce n'est pas une URL d'annonce ou pas un crawler → retourner index.html normal
   if (!match || !isCrawler) {
     return new Response(null, {
       status: 302,
@@ -111,70 +91,29 @@ export default async function handler(req) {
   }
 
   try {
-    // Récupérer l'annonce depuis Supabase
-    const apiUrl = `${SUPABASE_URL}/rest/v1/${match.table}?id=eq.${match.id}&select=*&limit=1`;
+    const apiUrl = SUPABASE_URL + '/rest/v1/' + match.table + '?id=eq.' + match.id + '&select=*&limit=1';
     const resp = await fetch(apiUrl, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-      }
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
-
     const data = await resp.json();
     const item = data?.[0];
 
     if (!item) {
-      // Annonce non trouvée → retourner page générique
-      return new Response(buildHtml({
-        title: 'MarchéduRoi — Le Marché des Rois',
-        description: SLOGAN,
-        image: DEFAULT_IMAGE,
-        url: SITE_URL,
-        price: null,
-        category: null,
-      }), {
-        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 's-maxage=300' }
-      });
+      return new Response(buildHtml({ title: 'MarchéduRoi', description: SLOGAN, image: DEFAULT_IMAGE, url: SITE_URL, price: null }),
+        { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
 
-    // Extraire les données
-    const title = item[match.titleField] || item.title || item.name || 'Annonce MarchéduRoi';
+    const title = item[match.titleField] || item.title || item.name || 'MarchéduRoi';
     const description = item.description || '';
-    const price = item.price ? String(item.price).replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : null;
-    const photos = item.photos || [];
-    const photo = photos[0] || null;
-    const pageUrl = `${SITE_URL}${pathname}`;
+    const price = formatPrice(item.price);
+    const photo = (item.photos || [])[0] || null;
+    const pageUrl = SITE_URL + pathname;
 
-    // Image avec logo en overlay
-    // On utilise l'image directe de Supabase (la plus simple et fiable)
-    const ogImage = photo || DEFAULT_IMAGE;
+    return new Response(buildHtml({ title, description, image: photo || DEFAULT_IMAGE, url: pageUrl, price }),
+      { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 's-maxage=300' } });
 
-    const html = buildHtml({
-      title,
-      description,
-      image: ogImage,
-      url: pageUrl,
-      price,
-      category: item.category || item.type || '',
-    });
-
-    return new Response(html, {
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 's-maxage=300, stale-while-revalidate=600',
-      }
-    });
-
-  } catch (err) {
-    // En cas d'erreur → page générique
-    return new Response(buildHtml({
-      title: 'MarchéduRoi — Le Marché des Rois',
-      description: SLOGAN,
-      image: DEFAULT_IMAGE,
-      url: SITE_URL,
-      price: null,
-    }), {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' }
-    });
+  } catch (e) {
+    return new Response(buildHtml({ title: 'MarchéduRoi', description: SLOGAN, image: DEFAULT_IMAGE, url: SITE_URL, price: null }),
+      { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 }
