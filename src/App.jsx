@@ -3331,13 +3331,12 @@ function AppContent() {
                 {[
                   {label:"Immobilier",icon:"🏠",color:"#6C63FF"},
                   {label:"Véhicules",icon:"🚗",color:"#FF6584"},
-                  {label:"Agro-alimentaire",icon:"🌾",color:"#16A34A"},
+                  {label:"Location de véhicules",icon:"🔑",color:"#FF9F43"},
                   {label:"Motos & Tricycles",icon:"🏍️",color:"#FF8C42"},
                   {label:"Électronique",icon:"📱",color:"#43C6AC"},
                   {label:"Services",icon:"🔧",color:"#FFD700"},
-                  {label:"Sport",icon:"⚽",color:"#FF6584"},
-                  {label:"Mode",icon:"👗",color:"#9A78CF"},
-                  {label:"Autre",icon:"🍳",color:"#43C6AC"},
+                  {label:"Sport",icon:"⚽",color:"#22C55E"},
+                  {label:"Autre",icon:"📦",color:"#9CA3AF"},
                 ].map(c=>(
                   <button key={c.label} onClick={()=>{ setCategory(c.label); setView("home"); }}
                     style={{ background:`${c.color}15`,border:`1px solid ${c.color}44`,color:c.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
@@ -3358,10 +3357,12 @@ function AppContent() {
                   {label:"🔧 Ateliers",color:"#43C6AC",bg:"rgba(67,198,172,0.1)",border:"rgba(67,198,172,0.3)",count:ateliers.length,action:()=>setView("ateliers")},
                   {label:"🍽️ Restos & Bars",color:"#FF8C00",bg:"rgba(255,140,0,0.1)",border:"rgba(255,140,0,0.3)",count:restos.length,action:()=>setView("restos")},
                   {label:"💇 Beauté & Coiffure",color:"#FF69B4",bg:"rgba(255,105,180,0.1)",border:"rgba(255,105,180,0.3)",count:beaute.length,action:()=>setView("beaute")},
+                  {label:"👗 Mode",color:"#9A78CF",bg:"rgba(154,120,207,0.1)",border:"rgba(154,120,207,0.3)",count:null,action:()=>{ setCategory("Mode"); setView("home"); }},
+                  {label:"🌾 Agro-alimentaire",color:"#16A34A",bg:"rgba(22,163,74,0.1)",border:"rgba(22,163,74,0.3)",count:null,action:()=>{ setCategory("Agro-alimentaire"); setView("home"); }},
                 ].map(s=>(
                   <button key={s.label} onClick={s.action}
                     style={{ background:s.bg,border:`1px solid ${s.border}`,color:s.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
-                    {s.label} <span style={{ background:s.border,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>
+                    {s.label} {s.count!==null&&<span style={{ background:s.border,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>}
                   </button>
                 ))}
               </div>
