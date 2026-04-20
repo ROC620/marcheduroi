@@ -328,7 +328,7 @@ const TARIFS_DEMANDES = { 7: 1000, 14: 1800, 30: 3000 };
 const FEDAPAY_KEY = 'pk_live_VRRSKEE4sTXASEpdIWD9GyP6';
 
 function updatePrice(duree) {
-  const prix = TARIFS_DEMANDES[parseInt(duree)] || 200;
+  const prix = TARIFS_DEMANDES[parseInt(duree)] || 1000;
   document.getElementById('prix-display').textContent = prix.toLocaleString('fr-FR') + ' FCFA';
 }
 
@@ -379,15 +379,22 @@ async function publishDemande() {
   } catch(e) {
     alert('Erreur de connexion. Vérifiez votre internet.');
   } finally {
-    btn.textContent = '💳 Payer & Publier ma demande';
+    btn.textContent = localStorage.getItem('mdr_user_role') === 'admin' ? '✅ Publier la demande (Admin — Gratuit)' : '💳 Payer & Publier ma demande';
     btn.disabled = false;
   }
 }
 
 function submitDemande() {
   if (!validateForm()) return;
+
+  // Admin publie gratuitement — bypass FedaPay
+  if (localStorage.getItem('mdr_user_role') === 'admin') {
+    publishDemande();
+    return;
+  }
+
   const duree = parseInt(document.getElementById('f-duree').value);
-  const montant = TARIFS_DEMANDES[duree] || 200;
+  const montant = TARIFS_DEMANDES[duree] || 1000;
   FedaPay.init({
     public_key: FEDAPAY_KEY,
     transaction: { amount: montant, description: 'Publication demande ' + duree + ' jours sur MarchéduRoi' },
