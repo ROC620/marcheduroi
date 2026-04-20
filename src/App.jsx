@@ -11,6 +11,7 @@ import RatingForm from "./components/RatingForm";
 import {
   CATEGORIES, CATEGORY_COLORS, BACKGROUNDS, VEHICLE_FIELDS, MOTO_FIELDS,
   RESTO_TYPES, BEAUTE_TYPES, MAX_MODIFS,
+  AGRO_SOUS_CATEGORIES, AGRO_UNITES, AGRO_DISPONIBILITE, AGRO_QUALITE,
   SPONSOR_PRICES, MODIF_PRICES, PRICE_PER_MONTH,
   COUNTRIES_FLAGS
 } from "./constants";
@@ -107,6 +108,24 @@ const INITIAL_POSTS = [
     ],
     vehicle: { marque:"Toyota", modele:"RAV4", annee:"2021", transmission:"Automatique", puissance:"203 ch", carburant:"Essence", garniture:"Cuir", capacite:"5 places", climatisation:"Automatique", docs:"Assurance tous risques, Carte grise", position:"Cotonou, Bénin", autre:"Chauffeur en option · 150 000 FCFA caution · Kilométrage illimité dans Cotonou" }
   },
+  // AGRO-ALIMENTAIRE
+  {
+    id: 18, title: "Gari blanc qualité supérieure — Bohicon", category: "Agro-alimentaire",
+    description: "Gari blanc produit artisanalement à Bohicon. Séché au soleil, sans additifs. Idéal pour revendeurs, restaurants et particuliers. Minimum 5 sacs.",
+    author: "Admin MarchéduRoi", authorId: "admin", price: "12 000 FCFA/sac 50kg", date: "2026-04-01", likes: 8,
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
+    photos: ["https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&q=80"],
+    agro: { sousCategorie:"Tubercules transformés (gari, tapioca, farine de manioc)", quantite:"200", unite:"sac de 50 kg", prixUnitaire:"12 000", qualite:"Premium / Grade A", disponibilite:"Toute l'année", lieuEnlevement:"Bohicon, Zou", saisonRecolte:"" }
+  },
+  {
+    id: 19, title: "Maïs blanc local en gros — Parakou", category: "Agro-alimentaire",
+    description: "Maïs blanc local de la région de Parakou. Récolte fraîche, propre et bien séché. Vendu en sacs de 100 kg. Disponible pour grossistes et transformateurs.",
+    author: "Admin MarchéduRoi", authorId: "admin", price: "18 000 FCFA/sac 100kg", date: "2026-04-05", likes: 11,
+    contact: "contact@marcheduroi.com", phone: "+2290147562640",
+    photos: ["https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=600&q=80"],
+    agro: { sousCategorie:"Céréales (riz, maïs, mil, sorgho)", quantite:"500", unite:"sac de 100 kg", prixUnitaire:"18 000", qualite:"Standard / Grade B", disponibilite:"Stock limité disponible maintenant", lieuEnlevement:"Parakou, Borgou", saisonRecolte:"Septembre - Novembre" }
+  },
+
   // SERVICES
   {
     id: 7, title: "Cours particuliers Maths & Physique", category: "Services",
@@ -1251,6 +1270,7 @@ function AppContent() {
     localStorage.setItem("mf_modifs", JSON.stringify(updated));
   };
   const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:"",lat:"",lng:"" });
+  const [agroForm, setAgroForm] = useState({ sousCategorie:"", quantite:"", unite:"sac de 50 kg", prixUnitaire:"", qualite:"Standard / Grade B", disponibilite:"Toute l'année", lieuEnlevement:"", saisonRecolte:"" });
   const [postPhotos, setPostPhotos] = useState([]);
   const [postVideo, setPostVideo] = useState("");
   const [vehicleForm, setVehicleForm] = useState({});
@@ -1900,6 +1920,7 @@ function AppContent() {
   };
   const canEdit = user !== null;
   const isVehicle = (postForm.category === "Véhicules" || postForm.category === "Location de véhicules");
+  const isAgro = postForm.category === "Agro-alimentaire";
   const isMoto    = postForm.category === "Motos & Tricycles";
 
   // ─── GRILLE TARIFAIRE ────────────────────────────────────────────────────────
@@ -2198,6 +2219,7 @@ function AppContent() {
     const isAdmin = user.role === "admin";
     const postId = "post_" + Date.now();
     const isLocation = postForm.category === "Location de véhicules";
+    const isAgroPost = postForm.category === "Agro-alimentaire";
     const newPost = {
       ...postForm,
       id: postId,
@@ -2209,6 +2231,7 @@ function AppContent() {
       video: postVideo||null,
       vehicle: isVehicle ? vehicleForm : isMoto ? { ...vehicleForm, _isMoto: true } : null,
       immo: postForm.category==="Immobilier" ? immoForm : null,
+      agro: isAgroPost ? {...agroForm} : null,
       expiresAt: isAdmin ? null : (expiresAt || null),
       price: isLocation ? (postForm.priceDay ? postForm.priceDay+" FCFA/jour" : postForm.price||"") : postForm.price||"",
     };
@@ -2233,11 +2256,13 @@ function AppContent() {
       price_day: postForm.priceDay || null,
       price_week: postForm.priceWeek || null,
       price_month: postForm.priceMonth || null,
+      agro: isAgroPost ? {...agroForm} : null,
     });
     if (error) { console.error("Supabase error:", error); notify("Erreur de sauvegarde","error"); return; }
     setPosts(p=>[newPost,...p]);
     setModal(null);
     setPostForm({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:"",lat:"",lng:"" });
+    setAgroForm({ sousCategorie:"", quantite:"", unite:"sac de 50 kg", prixUnitaire:"", qualite:"Standard / Grade B", disponibilite:"Toute l'année", lieuEnlevement:"", saisonRecolte:"" });
     setPostPhotos([]); setPostVideo(""); setVehicleForm({}); setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" }); setMonths(1); setSelectedTarif(0);
     notify(isAdmin ? "✅ Annonce publiée !" : expiresAt ? `✅ Annonce publiée jusqu'au ${expiresAt} !` : "✅ Annonce publiée !");
   };
@@ -3306,6 +3331,7 @@ function AppContent() {
                 {[
                   {label:"Immobilier",icon:"🏠",color:"#6C63FF"},
                   {label:"Véhicules",icon:"🚗",color:"#FF6584"},
+                  {label:"Agro-alimentaire",icon:"🌾",color:"#16A34A"},
                   {label:"Motos & Tricycles",icon:"🏍️",color:"#FF8C42"},
                   {label:"Électronique",icon:"📱",color:"#43C6AC"},
                   {label:"Services",icon:"🔧",color:"#FFD700"},
@@ -3745,6 +3771,23 @@ function AppContent() {
                           ))}
                         </div>
                       )}
+                      {/* Mini fiche agro */}
+                      {post.agro&&(
+                        <div style={{ marginBottom:10 }}>
+                          <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:6 }}>
+                            {post.agro.sousCategorie&&<span className="tag" style={{ background:"rgba(22,163,74,0.1)",border:"1px solid rgba(22,163,74,0.3)",color:"#16A34A",fontWeight:600 }}>🌾 {post.agro.sousCategorie.split("(")[0].trim()}</span>}
+                            {post.agro.qualite&&<span className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{post.agro.qualite}</span>}
+                            {post.agro.disponibilite&&<span className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{post.agro.disponibilite}</span>}
+                          </div>
+                          <div style={{ display:"flex",gap:12,flexWrap:"wrap",fontSize:13,padding:"8px 12px",background:theme.bg,borderRadius:8,border:`1px solid rgba(22,163,74,0.2)` }}>
+                            {post.agro.quantite&&<span style={{ color:theme.sub }}>📦 <b style={{ color:theme.text }}>{post.agro.quantite} {post.agro.unite}</b></span>}
+                            {post.agro.prixUnitaire&&<span style={{ color:theme.sub }}>💰 <b style={{ color:"#16A34A" }}>{post.agro.prixUnitaire} FCFA</b>/{post.agro.unite}</span>}
+                            {post.agro.lieuEnlevement&&<span style={{ color:theme.sub }}>📍 {post.agro.lieuEnlevement}</span>}
+                            {post.agro.saisonRecolte&&<span style={{ color:theme.sub }}>🗓️ {post.agro.saisonRecolte}</span>}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Mini fiche véhicule */}
                       {post.vehicle&&(
                         <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:10 }}>
@@ -5712,6 +5755,62 @@ function AppContent() {
                           <span style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:theme.sub,fontSize:12,fontWeight:600 }}>FCFA/mois</span>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Champs Agro-alimentaire */}
+                {isAgro&&(
+                  <div style={{ marginTop:8 }}>
+                    <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:16,padding:"12px 16px",background:theme.bg,border:"1px solid rgba(22,163,74,0.4)",borderRadius:10 }}>
+                      <span style={{ fontSize:18 }}>🌾</span>
+                      <p style={{ fontWeight:700,color:"#16A34A",fontSize:14 }}>Fiche Agro-alimentaire</p>
+                    </div>
+                    <div style={{ marginBottom:12 }}>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Sous-catégorie *</label>
+                      <select value={agroForm.sousCategorie} onChange={e=>setAgroForm(f=>({...f,sousCategorie:e.target.value}))} style={inputStyle}>
+                        <option value="">-- Choisir --</option>
+                        {AGRO_SOUS_CATEGORIES.map(s=><option key={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12 }}>
+                      <div>
+                        <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Quantité disponible *</label>
+                        <input value={agroForm.quantite} onChange={e=>setAgroForm(f=>({...f,quantite:e.target.value}))} placeholder="Ex: 50" inputMode="numeric" maxLength={10} style={inputStyle}/>
+                      </div>
+                      <div>
+                        <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Unité</label>
+                        <select value={agroForm.unite} onChange={e=>setAgroForm(f=>({...f,unite:e.target.value}))} style={inputStyle}>
+                          {AGRO_UNITES.map(u=><option key={u}>{u}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom:12 }}>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Prix par unité (FCFA) *</label>
+                      <div style={{ position:"relative" }}>
+                        <input value={agroForm.prixUnitaire} onChange={e=>setAgroForm(f=>({...f,prixUnitaire:e.target.value}))} placeholder="Ex: 25 000" inputMode="numeric" maxLength={15} style={inputStyle}/>
+                        <span style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:theme.sub,fontSize:12,fontWeight:600 }}>FCFA</span>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom:12 }}>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Qualité / Grade</label>
+                      <select value={agroForm.qualite} onChange={e=>setAgroForm(f=>({...f,qualite:e.target.value}))} style={inputStyle}>
+                        {AGRO_QUALITE.map(q=><option key={q}>{q}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ marginBottom:12 }}>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Disponibilité</label>
+                      <select value={agroForm.disponibilite} onChange={e=>setAgroForm(f=>({...f,disponibilite:e.target.value}))} style={inputStyle}>
+                        {AGRO_DISPONIBILITE.map(d=><option key={d}>{d}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ marginBottom:12 }}>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Lieu d'enlèvement / Production *</label>
+                      <input value={agroForm.lieuEnlevement} onChange={e=>setAgroForm(f=>({...f,lieuEnlevement:e.target.value}))} placeholder="Ex: Bohicon, Parakou, Glazoué..." maxLength={80} style={inputStyle}/>
+                    </div>
+                    <div style={{ marginBottom:12 }}>
+                      <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Saison de récolte (optionnel)</label>
+                      <input value={agroForm.saisonRecolte} onChange={e=>setAgroForm(f=>({...f,saisonRecolte:e.target.value}))} placeholder="Ex: Novembre - Janvier" maxLength={50} style={inputStyle}/>
                     </div>
                   </div>
                 )}

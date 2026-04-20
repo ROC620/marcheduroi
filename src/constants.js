@@ -1,6 +1,6 @@
 // ─── CONSTANTES GLOBALES MarchéduRoi ───────────────────────────────────────
 
-export const CATEGORIES = ["Toutes", "Immobilier", "Électronique", "Véhicules", "Location de véhicules", "Motos & Tricycles", "Services", "Sport", "Mode", "Autre"];
+export const CATEGORIES = ["Toutes", "Immobilier", "Électronique", "Véhicules", "Location de véhicules", "Motos & Tricycles", "Agro-alimentaire", "Services", "Sport", "Mode", "Autre"];
 
 // Couleurs associées à chaque catégorie
 export const CATEGORY_COLORS = {
@@ -13,6 +13,7 @@ export const CATEGORY_COLORS = {
   "Services":              { bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.35)", text: "#A855F7", icon: "🛠️" },
   "Sport":                 { bg: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.35)",  text: "#22C55E", icon: "⚽" },
   "Mode":                  { bg: "rgba(236,72,153,0.12)", border: "rgba(236,72,153,0.35)", text: "#EC4899", icon: "👗" },
+  "Agro-alimentaire":      { bg: "rgba(22,163,74,0.12)",  border: "rgba(22,163,74,0.35)",  text: "#16A34A", icon: "🌾" },
   "Autre":                 { bg: "rgba(156,163,175,0.12)",border: "rgba(156,163,175,0.35)",text: "#9CA3AF", icon: "📦" },
 };
 
@@ -71,6 +72,39 @@ export const MOTO_FIELDS = [
   { key: "docs",        label: "Documents",             placeholder: "Carte grise, Assurance...",      type: "text",     max: 100 },
   { key: "position",    label: "Localisation *",        placeholder: "Ex: Cotonou, Porto-Novo...",     type: "text",     max: 80  },
   { key: "autre",       label: "Autre information",     placeholder: "Kilométrage, options...",        type: "text",     max: 200 },
+];
+
+export const AGRO_SOUS_CATEGORIES = [
+  "Céréales (riz, maïs, mil, sorgho)",
+  "Légumineuses (haricot, niébé, soja)",
+  "Tubercules frais (manioc, igname, patate douce)",
+  "Tubercules transformés (gari, tapioca, farine de manioc)",
+  "Oléagineux (arachide, palmiste, sésame, noix de cajou)",
+  "Maraîchage (tomates, piments, oignons, légumes)",
+  "Fruits tropicaux (ananas, mangue, banane, papaye)",
+  "Produits séchés (poisson fumé, viande séchée, crevettes)",
+  "Épices et condiments (gingembre, poivre, ail)",
+  "Autre produit agricole",
+];
+
+export const AGRO_UNITES = [
+  "kg", "sac de 25 kg", "sac de 50 kg", "sac de 100 kg",
+  "tonne", "cuvette", "bassine", "carton", "litre", "bouteille",
+];
+
+export const AGRO_DISPONIBILITE = [
+  "Toute l'année",
+  "Saison sèche uniquement",
+  "Saison des pluies uniquement",
+  "Stock limité disponible maintenant",
+  "Sur commande / précommande",
+];
+
+export const AGRO_QUALITE = [
+  "Premium / Grade A",
+  "Standard / Grade B",
+  "Ordinaire",
+  "Biologique / Sans traitement",
 ];
 
 export const SPONSOR_PRICES = { week: 500, month: 1500 };
