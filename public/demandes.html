@@ -73,6 +73,7 @@
     .footer a{color:#6C63FF;text-decoration:none;}
     @media(max-width:600px){.form-row{grid-template-columns:1fr;}}
   </style>
+<script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
 </head>
 <body>
 
@@ -177,10 +178,10 @@
       </div>
       <div class="form-group">
         <label>Validité de la demande</label>
-        <select id="f-duree">
-          <option value="7">7 jours</option>
-          <option value="15">15 jours</option>
-          <option value="30">30 jours</option>
+        <select id="f-duree" onchange="updatePrice(this.value)">
+          <option value="7">7 jours — 200 FCFA</option>
+          <option value="15">15 jours — 350 FCFA</option>
+          <option value="30">30 jours — 600 FCFA</option>
         </select>
       </div>
     </div>
@@ -196,7 +197,11 @@
       </div>
     </div>
 
-    <button class="btn-submit" onclick="submitDemande()">📢 Publier la demande — Gratuit</button>
+    <div style="background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.3);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="color:#9A9AB0;font-size:13px;">💳 Montant à payer</span>
+      <span id="prix-display" style="color:#FF8C00;font-weight:800;font-size:18px;">200 FCFA</span>
+    </div>
+    <button class="btn-submit" onclick="submitDemande()">💳 Payer & Publier ma demande</button>
     <button class="btn-cancel" onclick="closeForm()">Annuler</button>
   </div>
 </div>
@@ -297,7 +302,29 @@ function formatBudget(el) {
   el.value = v;
 }
 
-async function submitDemande() {
+const TARIFS_DEMANDES = { 7: 200, 15: 350, 30: 600 };
+const FEDAPAY_KEY = 'pk_live_VRRSKEE4sTXASEpdIWD9GyP6';
+
+function updatePrice(duree) {
+  const prix = TARIFS_DEMANDES[parseInt(duree)] || 200;
+  document.getElementById('prix-display').textContent = prix.toLocaleString('fr-FR') + ' FCFA';
+}
+
+function validateForm() {
+  const title = document.getElementById('f-title').value.trim();
+  const ville = document.getElementById('f-ville').value.trim();
+  const description = document.getElementById('f-description').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  if (!title) { alert('Le titre de la demande est requis'); document.getElementById('f-title').focus(); return false; }
+  if (title.length < 10) { alert('Le titre doit faire au moins 10 caractères'); document.getElementById('f-title').focus(); return false; }
+  if (!ville) { alert('La ville est requise'); document.getElementById('f-ville').focus(); return false; }
+  if (!description) { alert('La description est requise'); document.getElementById('f-description').focus(); return false; }
+  if (description.length < 20) { alert('La description doit faire au moins 20 caractères'); document.getElementById('f-description').focus(); return false; }
+  if (!phone) { alert('Le WhatsApp / Téléphone est requis'); document.getElementById('f-phone').focus(); return false; }
+  return true;
+}
+
+async function publishDemande() {
   const title = document.getElementById('f-title').value.trim();
   const category = document.getElementById('f-category').value;
   const ville = document.getElementById('f-ville').value.trim();
@@ -308,11 +335,6 @@ async function submitDemande() {
   const duree = parseInt(document.getElementById('f-duree').value);
   const phone = document.getElementById('f-phone').value.trim();
   const contact = document.getElementById('f-contact').value.trim();
-
-  if (!title) { alert('Le titre est requis'); return; }
-  if (!ville) { alert('La ville est requise'); return; }
-  if (!description) { alert('La description est requise'); return; }
-  if (!phone) { alert('Le téléphone / WhatsApp est requis'); return; }
 
   const expires = new Date();
   expires.setDate(expires.getDate() + duree);
@@ -340,20 +362,60 @@ async function submitDemande() {
 
     if (res.ok || res.status === 201) {
       closeForm();
-      // Reset form
       ['f-title','f-ville','f-description','f-budget','f-phone','f-contact'].forEach(id => document.getElementById(id).value = '');
       await loadDemandes();
-      alert('✅ Votre demande a été publiée ! Les vendeurs peuvent maintenant vous contacter.');
+      alert('✅ Votre demande a été publiée ! Les vendeurs peuvent maintenant vous contacter. 👑');
     } else {
       const err = await res.text();
-      alert('Erreur: ' + err);
+      alert('Erreur de sauvegarde: ' + err);
     }
   } catch(e) {
     alert('Erreur de connexion. Vérifiez votre internet.');
   } finally {
-    btn.textContent = '📢 Publier la demande — Gratuit';
+    btn.textContent = '💳 Payer & Publier ma demande';
     btn.disabled = false;
   }
+}
+
+function submitDemande() {
+  // 1. Valider le formulaire AVANT d'ouvrir FedaPay
+  if (!validateForm()) return;
+
+  const duree = parseInt(document.getElementById('f-duree').value);
+  const montant = TARIFS_DEMANDES[duree] || 200;
+  const label = duree === 7 ? '7 jours' : duree === 15 ? '15 jours' : '30 jours';
+  const phone = document.getElementById('f-phone').value.trim();
+
+  // 2. Formulaire valide — ouvrir FedaPay
+  FedaPay.init({
+    public_key: FEDAPAY_KEY,
+    transaction: {
+      amount: montant,
+      description: 'Publication demande ' + label + ' sur MarchéduRoi',
+    },
+    currency: { iso: 'XOF' },
+    customer: {
+      email: document.getElementById('f-contact').value.trim() || 'client@marcheduroi.com',
+      lastname: 'Client MarchéduRoi',
+    },
+    onComplete(resp) {
+      const reason = resp.reason || '';
+      const isApproved = reason === FedaPay.TRANSACTION_APPROVED
+        || reason === 'approved'
+        || reason === 'CHECKOUT COMPLETE'
+        || reason === 'checkout_complete'
+        || (resp.transaction && resp.transaction.status === 'approved');
+
+      if (reason === FedaPay.DIALOG_DISMISSED || reason === 'dialog_dismissed') {
+        // Annulé — ne rien faire
+      } else if (isApproved) {
+        // 3. Paiement confirmé — publier la demande
+        publishDemande();
+      } else {
+        alert('Paiement non confirmé. Réessayez ou contactez le support.');
+      }
+    }
+  }).open();
 }
 
 function copyLink(id) {
