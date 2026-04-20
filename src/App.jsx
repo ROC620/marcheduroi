@@ -2135,6 +2135,8 @@ function AppContent() {
         const isApproved = reason === FedaPay.TRANSACTION_APPROVED
           || reason === "approved"
           || reason === "transaction_approved"
+          || reason === "CHECKOUT COMPLETE"
+          || reason === "checkout_complete"
           || (resp.transaction && (resp.transaction.status === "approved" || resp.transaction.status === "Approved"));
         if (isDismissed) {
           notify("Paiement annulé — votre annonce n'a pas été publiée.", "error");
@@ -2176,14 +2178,23 @@ function AppContent() {
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   };
 
-  const addPost = async (expiresAt) => {
-    if (!postForm.title||!postForm.description) { notify("Titre et description requis","error"); return; }
-    if (isVehicle && !vehicleForm.marque) { notify("La marque du véhicule est requise","error"); return; }
-    if (isMoto && !vehicleForm.marque) { notify("La marque de la moto est requise","error"); return; }
+  // Valider le formulaire AVANT de lancer le paiement
+  const validatePostForm = () => {
+    if (!postForm.title?.trim()) { notify("Le titre est requis","error"); return false; }
+    if (!postForm.description?.trim()) { notify("La description est requise","error"); return false; }
+    if (isVehicle && !vehicleForm.marque) { notify("La marque du véhicule est requise","error"); return false; }
+    if (isMoto && !vehicleForm.marque) { notify("La marque de la moto est requise","error"); return false; }
+    if (postForm.category === "Location de véhicules" && !postForm.priceDay) { notify("Le prix par jour est requis pour la location","error"); return false; }
     if (checkBlacklist(postForm.title) || checkBlacklist(postForm.description)) {
-      notify("⚠️ Votre annonce contient des termes non autorisés. Veuillez modifier le contenu.", "error"); return;
+      notify("⚠️ Votre annonce contient des termes non autorisés.","error"); return false;
     }
-    if (!checkRateLimit()) return;
+    if (!checkRateLimit()) return false;
+    return true;
+  };
+
+  const addPost = async (expiresAt) => {
+    // Validation déjà faite avant le paiement — on garde juste une vérif de sécurité
+    if (!postForm.title?.trim()||!postForm.description?.trim()) { notify("Titre et description requis","error"); return; }
     const isAdmin = user.role === "admin";
     const postId = "post_" + Date.now();
     const isLocation = postForm.category === "Location de véhicules";
@@ -5903,9 +5914,9 @@ function AppContent() {
                 <button
                   onClick={modal.type==="add"
                     ? () => {
+                        if (!validatePostForm()) return;
                         if (selectedTarif === -1) {
                           useFreeDay();
-                          // Publication gratuite 4 jours
                           const exp = new Date();
                           exp.setDate(exp.getDate() + 4);
                           addPost(exp.toISOString().slice(0,10));
