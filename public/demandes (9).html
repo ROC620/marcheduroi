@@ -74,6 +74,8 @@
     .card-footer{display:flex;gap:8px;flex-wrap:wrap;}
     .btn-wa{background:#25D366;border:none;color:#fff;padding:10px 18px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;flex:1;justify-content:center;}
     .btn-copy{background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);color:#6C63FF;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;}
+    .btn-edit{background:rgba(67,198,172,0.15);border:1px solid rgba(67,198,172,0.3);color:#43C6AC;padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;}
+    .btn-delete{background:rgba(255,71,87,0.15);border:1px solid rgba(255,71,87,0.3);color:#FF4757;padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;}
     .empty{text-align:center;padding:60px 16px;color:var(--sub);}
     .empty p:first-child{font-size:48px;margin-bottom:12px;}
     .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
@@ -207,7 +209,7 @@
       </div>
     </div>
 
-    <div style="background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.3);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+    <div class="prix-box" style="background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.3);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
       <span style="color:var(--sub);font-size:13px;">💳 Montant à payer</span>
       <span id="prix-display" style="color:#FF8C00;font-weight:800;font-size:18px;">1 000 FCFA</span>
     </div>
@@ -249,6 +251,7 @@ function getDaysLeft(expiresAt) {
 }
 
 function renderDemandes() {
+  const isAdmin = localStorage.getItem('mdr_user_role') === 'admin';
   const list = currentFilter === 'Toutes' ? allDemandes : allDemandes.filter(d => d.category === currentFilter);
   const el = document.getElementById('demandes-list');
   if (!list.length) {
@@ -283,6 +286,10 @@ function renderDemandes() {
           Répondre sur WhatsApp
         </a>` : ''}
         <button class="btn-copy" onclick="copyLink('${d.id}')">🔗</button>
+        ${isAdmin ? `
+        <button class="btn-edit" onclick="editDemande('${d.id}')">✏️ Modifier</button>
+        <button class="btn-delete" onclick="deleteDemande('${d.id}', '${d.title.replace(/'/g,"\'")}')">🗑️ Supprimer</button>
+        ` : ''}
       </div>
     </div>`;
   }).join('');
@@ -389,8 +396,16 @@ async function publishDemande() {
 function submitDemande() {
   if (!validateForm()) return;
   const duree = parseInt(document.getElementById('f-duree').value);
-  const montant = TARIFS_DEMANDES[duree] || 200;
+  const montant = TARIFS_DEMANDES[duree] || 1000;
   const label = duree === 7 ? '1 semaine' : duree === 14 ? '2 semaines' : '1 mois';
+
+  // Admin publie gratuitement sans FedaPay
+  const userRole = localStorage.getItem('mdr_user_role');
+  if (userRole === 'admin') {
+    publishDemande();
+    return;
+  }
+
   FedaPay.init({
     public_key: FEDAPAY_KEY,
     transaction: { amount: montant, description: 'Publication demande ' + label + ' sur MarchéduRoi' },
@@ -408,6 +423,100 @@ function submitDemande() {
 function copyLink(id) {
   navigator.clipboard.writeText(`https://marcheduroi.com/demandes#${id}`);
   alert('Lien copié !');
+}
+
+async function deleteDemande(id, title) {
+  if (!confirm(`Supprimer la demande "${title}" ?`)) return;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/demandes?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    if (res.ok) {
+      await loadDemandes();
+      alert('✅ Demande supprimée.');
+    } else {
+      alert('Erreur lors de la suppression.');
+    }
+  } catch(e) {
+    alert('Erreur de connexion.');
+  }
+}
+
+function editDemande(id) {
+  const d = allDemandes.find(x => x.id === id);
+  if (!d) return;
+
+  // Pre-fill the form with existing data
+  document.getElementById('f-title').value = d.title || '';
+  document.getElementById('f-category').value = d.category || 'Autre';
+  document.getElementById('f-ville').value = d.ville || '';
+  document.getElementById('f-description').value = d.description || '';
+  document.getElementById('f-budget').value = d.budget || '';
+  document.getElementById('f-delai').value = d.delai || 'Cette semaine';
+  document.getElementById('f-mode').value = d.mode || 'Enlèvement sur place';
+  document.getElementById('f-phone').value = d.phone || '';
+  document.getElementById('f-contact').value = d.contact || '';
+
+  // Change submit button to update mode
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = '✏️ Mettre à jour la demande';
+  btn.onclick = () => updateDemande(id);
+
+  // Show price box as hidden for admin edit
+  document.querySelector('.prix-box') && (document.querySelector('.prix-box').style.display = 'none');
+
+  openForm();
+}
+
+async function updateDemande(id) {
+  if (!validateForm()) return;
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = '⏳ Mise à jour...';
+  btn.disabled = true;
+
+  const duree = parseInt(document.getElementById('f-duree').value);
+  const expires = new Date();
+  expires.setDate(expires.getDate() + duree);
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/demandes?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        title: document.getElementById('f-title').value.trim(),
+        category: document.getElementById('f-category').value,
+        ville: document.getElementById('f-ville').value.trim(),
+        description: document.getElementById('f-description').value.trim(),
+        budget: document.getElementById('f-budget').value.trim(),
+        delai: document.getElementById('f-delai').value,
+        mode: document.getElementById('f-mode').value,
+        phone: document.getElementById('f-phone').value.trim(),
+        contact: document.getElementById('f-contact').value.trim(),
+        expires_at: expires.toISOString(),
+      })
+    });
+    if (res.ok) {
+      closeForm();
+      // Reset button
+      const btn2 = document.querySelector('.btn-submit');
+      btn2.textContent = '💳 Payer & Publier ma demande';
+      btn2.onclick = submitDemande;
+      await loadDemandes();
+      alert('✅ Demande mise à jour !');
+    } else {
+      alert('Erreur lors de la mise à jour.');
+    }
+  } catch(e) {
+    alert('Erreur de connexion.');
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // Fermer modal en cliquant dehors

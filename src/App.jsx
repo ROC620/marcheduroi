@@ -1677,12 +1677,15 @@ function AppContent() {
       if (session) {
         supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
           .then(({ data }) => {
-            if (data) setUser({ id:session.user.id, name:data.name, role:data.role||"user" });
+            if (data) {
+            setUser({ id:session.user.id, name:data.name, role:data.role||"user" });
+            localStorage.setItem("mdr_user_role", data.role||"user");
+          }
           });
       }
     });
     supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) { setUser(null); return; }
+      if (!session) { setUser(null); localStorage.removeItem("mdr_user_role"); return; }
       if (event === "PASSWORD_RECOVERY") {
         setViewState("reset-password");
         recoverySessionRef.current = session;
@@ -1695,6 +1698,7 @@ function AppContent() {
             .then(({ data }) => {
               if (data) {
                 setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
+                localStorage.setItem("mdr_user_role", data.role||"user");
                 setView("home");
                 if (event === "USER_UPDATED") notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
               }
