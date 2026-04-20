@@ -10,6 +10,7 @@
     { "source": "/atelier/:id", "destination": "/api/og?id=:id&source=ateliers" },
     { "source": "/resto/:id", "destination": "/api/og?id=:id&source=restos" },
     { "source": "/beaute/:id", "destination": "/api/og?id=:id&source=beaute" },
+    { "source": "/demandes", "destination": "/demandes.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
