@@ -189,9 +189,9 @@
       <div class="form-group">
         <label>Validité de la demande</label>
         <select id="f-duree" onchange="updatePrice(this.value)">
-          <option value="7">7 jours — 200 FCFA</option>
-          <option value="15">15 jours — 350 FCFA</option>
-          <option value="30">30 jours — 600 FCFA</option>
+          <option value="7">1 semaine — 1 000 FCFA</option>
+          <option value="14">2 semaines — 1 800 FCFA</option>
+          <option value="30">1 mois — 3 000 FCFA</option>
         </select>
       </div>
     </div>
@@ -207,11 +207,11 @@
       </div>
     </div>
 
-    <div style="background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.3);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+    <div id="prix-box" style="background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.3);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
       <span style="color:var(--sub);font-size:13px;">💳 Montant à payer</span>
-      <span id="prix-display" style="color:#FF8C00;font-weight:800;font-size:18px;">200 FCFA</span>
+      <span id="prix-display" style="color:#FF8C00;font-weight:800;font-size:18px;">1 000 FCFA</span>
     </div>
-    <button class="btn-submit" onclick="submitDemande()">💳 Payer & Publier ma demande</button>
+    <button id="btn-submit" class="btn-submit" onclick="submitDemande()">💳 Payer & Publier ma demande</button>
     <button class="btn-cancel" onclick="closeForm()">Annuler</button>
   </div>
 </div>
@@ -305,13 +305,12 @@ function filterBy(cat, btn) {
 
 function openForm() {
   document.getElementById('form-modal').classList.add('open');
-  // Adapter l'UI selon le rôle
   const isAdmin = localStorage.getItem('mdr_user_role') === 'admin';
-  const prixBox = document.querySelector('.prix-box');
-  const btn = document.querySelector('.btn-submit');
+  const prixBox = document.getElementById('prix-box');
+  const btn = document.getElementById('btn-submit') || document.querySelector('.btn-submit');
   if (isAdmin) {
     if (prixBox) prixBox.style.display = 'none';
-    if (btn) { btn.textContent = '✅ Publier la demande (Admin)'; btn.onclick = submitDemande; }
+    if (btn) { btn.textContent = '✅ Publier la demande (Admin — Gratuit)'; btn.onclick = submitDemande; }
   } else {
     if (prixBox) prixBox.style.display = 'flex';
     if (btn) { btn.textContent = '💳 Payer & Publier ma demande'; btn.onclick = submitDemande; }
@@ -325,7 +324,7 @@ function formatBudget(el) {
   el.value = v;
 }
 
-const TARIFS_DEMANDES = { 7: 200, 15: 350, 30: 600 };
+const TARIFS_DEMANDES = { 7: 1000, 14: 1800, 30: 3000 };
 const FEDAPAY_KEY = 'pk_live_VRRSKEE4sTXASEpdIWD9GyP6';
 
 function updatePrice(duree) {
