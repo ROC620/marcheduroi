@@ -10,8 +10,18 @@
   <link rel="icon" href="/marcheduRoi-icon.svg"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{background:#0D0F1A;color:#E8E8F0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;}
-    .navbar{background:rgba(13,15,26,0.95);border-bottom:1px solid #2A2D45;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+    :root {
+      --bg: #0D0F1A;
+      --card: #1A1D30;
+      --border: #2A2D45;
+      --text: #E8E8F0;
+      --sub: #9A9AB0;
+      --input-bg: #0D0F1A;
+      --filter-bg: rgba(42,45,69,0.8);
+      --navbar-bg: rgba(13,15,26,0.95);
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;}
+    .navbar{background:var(--navbar-bg);border-bottom:1px solid var(--border);padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
     .logo{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
     .logo img{height:48px;}
     .logo span{font-weight:800;font-size:18px;background:linear-gradient(135deg,#6C63FF,#FF6584);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
@@ -25,55 +35,54 @@
     .btn-primary{background:linear-gradient(135deg,#FF8C00,#FFD700);border:none;color:#0D0F1A;padding:13px 28px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:opacity 0.2s;}
     .btn-primary:hover{opacity:0.9;}
     .stats-bar{display:flex;gap:16px;justify-content:center;margin-bottom:24px;flex-wrap:wrap;}
-    .stat{background:#1A1D30;border:1px solid #2A2D45;border-radius:10px;padding:10px 20px;text-align:center;}
+    .stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 20px;text-align:center;}
     .stat-num{font-size:22px;font-weight:800;color:#FF8C00;}
-    .stat-label{font-size:11px;color:#9A9AB0;margin-top:2px;}
+    .stat-label{font-size:11px;color:var(--sub);margin-top:2px;}
 
     /* Formulaire */
     .form-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:16px;}
     .form-modal.open{display:flex;}
-    .form-box{background:#1A1D30;border:1px solid #2A2D45;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:24px;}
-    .form-box h2{font-size:20px;font-weight:800;margin-bottom:20px;color:#E8E8F0;}
+    .form-box{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:24px;}
+    .form-box h2{font-size:20px;font-weight:800;margin-bottom:20px;color:var(--text);}
     .form-group{margin-bottom:14px;}
-    .form-group label{font-size:13px;font-weight:600;color:#9A9AB0;display:block;margin-bottom:6px;}
-    .form-group input,.form-group select,.form-group textarea{width:100%;background:#0D0F1A;border:1px solid #2A2D45;color:#E8E8F0;padding:11px 14px;border-radius:10px;font-size:14px;outline:none;font-family:inherit;}
+    .form-group label{font-size:13px;font-weight:600;color:var(--sub);display:block;margin-bottom:6px;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:10px;font-size:14px;outline:none;font-family:inherit;}
     .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#6C63FF;}
     .form-group textarea{resize:vertical;min-height:80px;}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
     .required{color:#FF6584;}
     .btn-submit{width:100%;background:linear-gradient(135deg,#FF8C00,#FFD700);border:none;color:#0D0F1A;padding:13px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;margin-top:8px;}
-    .btn-cancel{width:100%;background:transparent;border:1px solid #2A2D45;color:#9A9AB0;padding:11px;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;margin-top:8px;}
+    .btn-cancel{width:100%;background:transparent;border:1px solid var(--border);color:var(--sub);padding:11px;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;margin-top:8px;}
 
     /* Cards demandes */
     .demandes-list{display:flex;flex-direction:column;gap:16px;margin-top:8px;}
-    .demande-card{background:#1A1D30;border:1px solid #2A2D45;border-radius:14px;padding:18px;transition:border-color 0.2s;}
+    .demande-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:border-color 0.2s;}
     .demande-card:hover{border-color:rgba(255,140,0,0.4);}
     .card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;}
-    .card-title{font-size:16px;font-weight:800;color:#E8E8F0;line-height:1.3;}
+    .card-title{font-size:16px;font-weight:800;color:var(--text);line-height:1.3;}
     .card-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
     .badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;}
     .badge-cat{background:rgba(255,140,0,0.15);border:1px solid rgba(255,140,0,0.3);color:#FF8C00;}
     .badge-delai{background:rgba(67,198,172,0.15);border:1px solid rgba(67,198,172,0.3);color:#43C6AC;}
     .badge-mode{background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);color:#8B84FF;}
     .badge-expire{background:rgba(156,163,175,0.15);border:1px solid rgba(156,163,175,0.3);color:#9CA3AF;}
-    .card-desc{font-size:13px;color:#9A9AB0;line-height:1.6;margin-bottom:12px;}
+    .card-desc{font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:12px;}
     .card-infos{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px;font-size:13px;}
-    .card-info{display:flex;align-items:center;gap:5px;color:#9A9AB0;}
-    .card-info strong{color:#E8E8F0;}
+    .card-info{display:flex;align-items:center;gap:5px;color:var(--sub);}
+    .card-info strong{color:var(--text);}
     .budget-tag{font-size:18px;font-weight:800;color:#FFD700;}
     .card-footer{display:flex;gap:8px;flex-wrap:wrap;}
     .btn-wa{background:#25D366;border:none;color:#fff;padding:10px 18px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;flex:1;justify-content:center;}
     .btn-copy{background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);color:#6C63FF;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;}
-    .empty{text-align:center;padding:60px 16px;color:#9A9AB0;}
+    .empty{text-align:center;padding:60px 16px;color:var(--sub);}
     .empty p:first-child{font-size:48px;margin-bottom:12px;}
     .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
-    .filter-btn{background:rgba(42,45,69,0.8);border:1px solid #2A2D45;color:#9A9AB0;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;}
+    .filter-btn{background:var(--filter-bg);border:1px solid var(--border);color:var(--sub);padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;}
     .filter-btn.active{background:rgba(255,140,0,0.15);border-color:rgba(255,140,0,0.4);color:#FF8C00;}
-    .footer{text-align:center;padding:40px 16px 24px;color:#9A9AB0;font-size:12px;border-top:1px solid #2A2D45;margin-top:40px;}
+    .footer{text-align:center;padding:40px 16px 24px;color:var(--sub);font-size:12px;border-top:1px solid var(--border);margin-top:40px;}
     .footer a{color:#6C63FF;text-decoration:none;}
     @media(max-width:600px){.form-row{grid-template-columns:1fr;}}
   </style>
-<script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
 </head>
 <body>
 
@@ -178,10 +187,10 @@
       </div>
       <div class="form-group">
         <label>Validité de la demande</label>
-        <select id="f-duree" onchange="updatePrice(this.value)">
-          <option value="7">7 jours — 200 FCFA</option>
-          <option value="15">15 jours — 350 FCFA</option>
-          <option value="30">30 jours — 600 FCFA</option>
+        <select id="f-duree">
+          <option value="7">7 jours</option>
+          <option value="15">15 jours</option>
+          <option value="30">30 jours</option>
         </select>
       </div>
     </div>
@@ -197,11 +206,7 @@
       </div>
     </div>
 
-    <div style="background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.3);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="color:#9A9AB0;font-size:13px;">💳 Montant à payer</span>
-      <span id="prix-display" style="color:#FF8C00;font-weight:800;font-size:18px;">200 FCFA</span>
-    </div>
-    <button class="btn-submit" onclick="submitDemande()">💳 Payer & Publier ma demande</button>
+    <button class="btn-submit" onclick="submitDemande()">📢 Publier la demande — Gratuit</button>
     <button class="btn-cancel" onclick="closeForm()">Annuler</button>
   </div>
 </div>
@@ -302,29 +307,7 @@ function formatBudget(el) {
   el.value = v;
 }
 
-const TARIFS_DEMANDES = { 7: 200, 15: 350, 30: 600 };
-const FEDAPAY_KEY = 'pk_live_VRRSKEE4sTXASEpdIWD9GyP6';
-
-function updatePrice(duree) {
-  const prix = TARIFS_DEMANDES[parseInt(duree)] || 200;
-  document.getElementById('prix-display').textContent = prix.toLocaleString('fr-FR') + ' FCFA';
-}
-
-function validateForm() {
-  const title = document.getElementById('f-title').value.trim();
-  const ville = document.getElementById('f-ville').value.trim();
-  const description = document.getElementById('f-description').value.trim();
-  const phone = document.getElementById('f-phone').value.trim();
-  if (!title) { alert('Le titre de la demande est requis'); document.getElementById('f-title').focus(); return false; }
-  if (title.length < 10) { alert('Le titre doit faire au moins 10 caractères'); document.getElementById('f-title').focus(); return false; }
-  if (!ville) { alert('La ville est requise'); document.getElementById('f-ville').focus(); return false; }
-  if (!description) { alert('La description est requise'); document.getElementById('f-description').focus(); return false; }
-  if (description.length < 20) { alert('La description doit faire au moins 20 caractères'); document.getElementById('f-description').focus(); return false; }
-  if (!phone) { alert('Le WhatsApp / Téléphone est requis'); document.getElementById('f-phone').focus(); return false; }
-  return true;
-}
-
-async function publishDemande() {
+async function submitDemande() {
   const title = document.getElementById('f-title').value.trim();
   const category = document.getElementById('f-category').value;
   const ville = document.getElementById('f-ville').value.trim();
@@ -335,6 +318,11 @@ async function publishDemande() {
   const duree = parseInt(document.getElementById('f-duree').value);
   const phone = document.getElementById('f-phone').value.trim();
   const contact = document.getElementById('f-contact').value.trim();
+
+  if (!title) { alert('Le titre est requis'); return; }
+  if (!ville) { alert('La ville est requise'); return; }
+  if (!description) { alert('La description est requise'); return; }
+  if (!phone) { alert('Le téléphone / WhatsApp est requis'); return; }
 
   const expires = new Date();
   expires.setDate(expires.getDate() + duree);
@@ -362,60 +350,20 @@ async function publishDemande() {
 
     if (res.ok || res.status === 201) {
       closeForm();
+      // Reset form
       ['f-title','f-ville','f-description','f-budget','f-phone','f-contact'].forEach(id => document.getElementById(id).value = '');
       await loadDemandes();
-      alert('✅ Votre demande a été publiée ! Les vendeurs peuvent maintenant vous contacter. 👑');
+      alert('✅ Votre demande a été publiée ! Les vendeurs peuvent maintenant vous contacter.');
     } else {
       const err = await res.text();
-      alert('Erreur de sauvegarde: ' + err);
+      alert('Erreur: ' + err);
     }
   } catch(e) {
     alert('Erreur de connexion. Vérifiez votre internet.');
   } finally {
-    btn.textContent = '💳 Payer & Publier ma demande';
+    btn.textContent = '📢 Publier la demande — Gratuit';
     btn.disabled = false;
   }
-}
-
-function submitDemande() {
-  // 1. Valider le formulaire AVANT d'ouvrir FedaPay
-  if (!validateForm()) return;
-
-  const duree = parseInt(document.getElementById('f-duree').value);
-  const montant = TARIFS_DEMANDES[duree] || 200;
-  const label = duree === 7 ? '7 jours' : duree === 15 ? '15 jours' : '30 jours';
-  const phone = document.getElementById('f-phone').value.trim();
-
-  // 2. Formulaire valide — ouvrir FedaPay
-  FedaPay.init({
-    public_key: FEDAPAY_KEY,
-    transaction: {
-      amount: montant,
-      description: 'Publication demande ' + label + ' sur MarchéduRoi',
-    },
-    currency: { iso: 'XOF' },
-    customer: {
-      email: document.getElementById('f-contact').value.trim() || 'client@marcheduroi.com',
-      lastname: 'Client MarchéduRoi',
-    },
-    onComplete(resp) {
-      const reason = resp.reason || '';
-      const isApproved = reason === FedaPay.TRANSACTION_APPROVED
-        || reason === 'approved'
-        || reason === 'CHECKOUT COMPLETE'
-        || reason === 'checkout_complete'
-        || (resp.transaction && resp.transaction.status === 'approved');
-
-      if (reason === FedaPay.DIALOG_DISMISSED || reason === 'dialog_dismissed') {
-        // Annulé — ne rien faire
-      } else if (isApproved) {
-        // 3. Paiement confirmé — publier la demande
-        publishDemande();
-      } else {
-        alert('Paiement non confirmé. Réessayez ou contactez le support.');
-      }
-    }
-  }).open();
 }
 
 function copyLink(id) {
@@ -429,6 +377,42 @@ document.getElementById('form-modal').addEventListener('click', function(e) {
 });
 
 loadDemandes();
+
+// Lire le thème depuis localStorage (synchronisé avec MarchéduRoi)
+const THEMES = {
+  dark:   { bg:'#0D0F1A', card:'#1A1D30', border:'#2A2D45', text:'#E8E8F0', sub:'#9A9AB0', inputBg:'#0D0F1A', filterBg:'rgba(42,45,69,0.8)', navbarBg:'rgba(13,15,26,0.95)' },
+  blue:   { bg:'#050E1F', card:'#0D1E38', border:'#1A3258', text:'#D8E8FF', sub:'#6A9ACF', inputBg:'#050E1F', filterBg:'rgba(13,30,56,0.8)', navbarBg:'rgba(5,14,31,0.95)' },
+  purple: { bg:'#0E0818', card:'#1A1030', border:'#2E1A50', text:'#EAD8FF', sub:'#9A78CF', inputBg:'#0E0818', filterBg:'rgba(14,8,24,0.8)', navbarBg:'rgba(14,8,24,0.95)' },
+  light:  { bg:'#F4F6FB', card:'#FFFFFF', border:'#E0E4F0', text:'#1A1D30', sub:'#6B7280', inputBg:'#F4F6FB', filterBg:'rgba(224,228,240,0.8)', navbarBg:'rgba(244,246,251,0.95)' },
+  cream:  { bg:'#FDF8F0', card:'#FFFFFF', border:'#E8DDD0', text:'#2C1810', sub:'#8B7355', inputBg:'#FDF8F0', filterBg:'rgba(232,221,208,0.8)', navbarBg:'rgba(253,248,240,0.95)' },
+  mint:   { bg:'#F0FAF6', card:'#FFFFFF', border:'#C8EAD8', text:'#1A3028', sub:'#4A8A6A', inputBg:'#F0FAF6', filterBg:'rgba(200,234,216,0.8)', navbarBg:'rgba(240,250,246,0.95)' },
+  lavande:{ bg:'#F5F0FF', card:'#FFFFFF', border:'#DDD0F0', text:'#2A1850', sub:'#7A60A8', inputBg:'#F5F0FF', filterBg:'rgba(221,208,240,0.8)', navbarBg:'rgba(245,240,255,0.95)' },
+  peche:  { bg:'#FFF5EE', card:'#FFFFFF', border:'#F0D8C0', text:'#3A1A08', sub:'#C07040', inputBg:'#FFF5EE', filterBg:'rgba(240,216,192,0.8)', navbarBg:'rgba(255,245,238,0.95)' },
+  ciel:   { bg:'#EFF6FF', card:'#FFFFFF', border:'#BFDBFE', text:'#1E3A5F', sub:'#5A8AB0', inputBg:'#EFF6FF', filterBg:'rgba(191,219,254,0.8)', navbarBg:'rgba(239,246,255,0.95)' },
+};
+
+function applyTheme() {
+  const savedId = localStorage.getItem('mf_bg') || 'dark';
+  const t = THEMES[savedId] || THEMES.dark;
+  const r = document.documentElement.style;
+  r.setProperty('--bg', t.bg);
+  r.setProperty('--card', t.card);
+  r.setProperty('--border', t.border);
+  r.setProperty('--text', t.text);
+  r.setProperty('--sub', t.sub);
+  r.setProperty('--input-bg', t.inputBg);
+  r.setProperty('--filter-bg', t.filterBg);
+  r.setProperty('--navbar-bg', t.navbarBg);
+  // Adapter couleur bouton primaire selon thème clair/sombre
+  const isLight = ['light','cream','mint','lavande','peche','ciel'].includes(savedId);
+  document.querySelectorAll('.btn-primary').forEach(b => {
+    b.style.color = isLight ? '#fff' : '#0D0F1A';
+  });
+}
+
+applyTheme();
+// Écouter les changements de thème depuis d'autres onglets
+window.addEventListener('storage', e => { if (e.key === 'mf_bg') applyTheme(); });
 </script>
 </body>
 </html>
