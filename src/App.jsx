@@ -1551,7 +1551,9 @@ function AppContent() {
   const nextId = useRef(100);
 
   useEffect(() => {
-    const handleClickOutside = () => {
+    const handleClickOutside = (e) => {
+      // Ne pas fermer si on clique sur la cloche elle-même
+      if (e.target.closest && e.target.closest('[data-notif-btn]')) return;
       setShowNotifs(false);
       setExpandedContacts({});
     };
@@ -3208,7 +3210,7 @@ function AppContent() {
               </div>
               {/* Cloche notifications */}
               <div style={{ position:"relative" }}>
-                <button onClick={()=>{ setShowNotifs(true); markAllRead(); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px",position:"relative",cursor:"pointer",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>
+                <button data-notif-btn onClick={()=>{ setShowNotifs(true); markAllRead(); }} style={{ background:"transparent",border:"none",color:theme.sub,padding:"8px",position:"relative",cursor:"pointer",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>
                   <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                   {notifications.filter(n=>!n.read).length > 0 && (
                     <span style={{ position:"absolute",top:4,right:4,background:"#FF4757",color:"#fff",borderRadius:"50%",width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800 }}>
