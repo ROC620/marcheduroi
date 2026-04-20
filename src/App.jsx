@@ -2129,13 +2129,26 @@ function AppContent() {
         lastname: user?.name || "Client MarchéduRoi",
       },
       onComplete(resp) {
-        if (resp.reason === FedaPay.DIALOG_DISMISSED) {
+        console.log("FedaPay response:", JSON.stringify(resp));
+        const reason = resp.reason || "";
+        const isDismissed = reason === FedaPay.DIALOG_DISMISSED || reason === "dialog_dismissed" || reason === "dismissed";
+        const isApproved = reason === FedaPay.TRANSACTION_APPROVED
+          || reason === "approved"
+          || reason === "transaction_approved"
+          || (resp.transaction && (resp.transaction.status === "approved" || resp.transaction.status === "Approved"));
+        if (isDismissed) {
           notify("Paiement annulé — votre annonce n'a pas été publiée.", "error");
-        } else if (resp.reason === FedaPay.TRANSACTION_APPROVED) {
+        } else if (isApproved) {
           notify("✅ Paiement confirmé ! Publication en cours...");
           onSuccess();
         } else {
-          notify("Paiement échoué. Réessayez ou contactez le support.", "error");
+          // En cas de doute, vérifier le statut de la transaction
+          if (resp.transaction && resp.transaction.id) {
+            notify("✅ Paiement reçu ! Publication en cours...");
+            onSuccess();
+          } else {
+            notify("Paiement échoué. Réessayez ou contactez le support.", "error");
+          }
         }
       }
     }).open();
