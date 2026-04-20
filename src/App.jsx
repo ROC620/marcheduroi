@@ -1283,6 +1283,9 @@ function AppContent() {
   const [suggestionName, setSuggestionName] = useState("");
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [demandes, setDemandes] = useState([]);
+  const [demandeForm, setDemandeForm] = useState({ title:"", category:"Autre", description:"", budget:"", ville:"", delai:"Cette semaine", mode:"Enlèvement sur place", phone:"", contact:"", duree:7 });
+  const [showDemandeForm, setShowDemandeForm] = useState(false);
 
   // Fermer le menu Plus en cliquant/touchant ailleurs — délai 50ms pour éviter fermeture immédiate
   useEffect(() => {
@@ -2868,6 +2871,7 @@ function AppContent() {
                 { label:lang==="fr"?"🇬🇧 English":"🇫🇷 Français", action:()=>{ const newLang=lang==="fr"?"en":"fr"; setLang(newLang); localStorage.setItem("mf_lang",newLang); setShowMoreMenu(false); } },
                 { label:"🎨 "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
               ] : []),
+              { label:"📢 Tableau de demandes", action:()=>{ window.open("https://marcheduroi.com/demandes","_blank"); setShowMoreMenu(false); } },
               { label:"📖 Exemples de publications", action:()=>{ window.open("https://marcheduroi.com/exemples.html","_blank"); setShowMoreMenu(false); } },
               { label:"📞 Support WhatsApp", action:()=>{ window.open("https://wa.me/2290140906020","_blank"); setShowMoreMenu(false); } },
               { label:t.stats, action:()=>{setView("stats");setShowMoreMenu(false);} },
@@ -3127,6 +3131,9 @@ function AppContent() {
           {windowWidth > 600 && <>
             <button onClick={()=>setView("home")} style={{ background:view==="home"?"rgba(108,99,255,0.2)":"transparent",border:"none",color:view==="home"?"#6C63FF":theme.sub,padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
               {t.annonces}
+            </button>
+            <button onClick={()=>window.open("https://marcheduroi.com/demandes","_blank")} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
+              📢 Demandes
             </button>
             <button onClick={()=>setModal({type:"howto"})} style={{ background:"rgba(67,198,172,0.1)",border:"none",color:"#43C6AC",padding:"8px 12px",borderRadius:8,fontWeight:600,fontSize:13 }}>
               {t.publierAnnonce}
