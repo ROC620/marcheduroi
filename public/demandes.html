@@ -189,9 +189,9 @@
       <div class="form-group">
         <label>Validité de la demande</label>
         <select id="f-duree" onchange="updatePrice(this.value)">
-          <option value="7">7 jours — 200 FCFA</option>
-          <option value="15">15 jours — 350 FCFA</option>
-          <option value="30">30 jours — 600 FCFA</option>
+          <option value="7">1 semaine — 1 000 FCFA</option>
+          <option value="14">2 semaines — 1 800 FCFA</option>
+          <option value="30">1 mois — 3 000 FCFA</option>
         </select>
       </div>
     </div>
@@ -209,7 +209,7 @@
 
     <div style="background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.3);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
       <span style="color:var(--sub);font-size:13px;">💳 Montant à payer</span>
-      <span id="prix-display" style="color:#FF8C00;font-weight:800;font-size:18px;">200 FCFA</span>
+      <span id="prix-display" style="color:#FF8C00;font-weight:800;font-size:18px;">1 000 FCFA</span>
     </div>
     <button class="btn-submit" onclick="submitDemande()">💳 Payer & Publier ma demande</button>
     <button class="btn-cancel" onclick="closeForm()">Annuler</button>
@@ -312,7 +312,7 @@ function formatBudget(el) {
   el.value = v;
 }
 
-const TARIFS_DEMANDES = { 7: 200, 15: 350, 30: 600 };
+const TARIFS_DEMANDES = { 7: 1000, 14: 1800, 30: 3000 };
 const FEDAPAY_KEY = 'pk_live_VRRSKEE4sTXASEpdIWD9GyP6';
 
 function updatePrice(duree) {
@@ -360,7 +360,21 @@ async function publishDemande() {
       closeForm();
       ['f-title','f-ville','f-description','f-budget','f-phone','f-contact'].forEach(id => document.getElementById(id).value = '');
       await loadDemandes();
-      alert('✅ Votre demande publiée ! Les vendeurs peuvent maintenant vous contacter. 👑');
+      alert('✅ Votre demande publiée ! Les vendeurs de votre catégorie seront notifiés. 👑');
+      // Notifier les vendeurs via Supabase (insert notification)
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({
+            type: 'demande',
+            msg: '📢 Nouvelle demande : ' + title + ' — ' + ville,
+            category: category,
+            created_at: new Date().toISOString(),
+            read: false
+          })
+        });
+      } catch(e) {}
     } else {
       alert('Erreur: ' + await res.text());
     }
@@ -376,9 +390,10 @@ function submitDemande() {
   if (!validateForm()) return;
   const duree = parseInt(document.getElementById('f-duree').value);
   const montant = TARIFS_DEMANDES[duree] || 200;
+  const label = duree === 7 ? '1 semaine' : duree === 14 ? '2 semaines' : '1 mois';
   FedaPay.init({
     public_key: FEDAPAY_KEY,
-    transaction: { amount: montant, description: 'Publication demande ' + duree + ' jours sur MarchéduRoi' },
+    transaction: { amount: montant, description: 'Publication demande ' + label + ' sur MarchéduRoi' },
     currency: { iso: 'XOF' },
     customer: { email: document.getElementById('f-contact').value.trim() || 'client@marcheduroi.com', lastname: 'Client MarchéduRoi' },
     onComplete(resp) {

@@ -2191,11 +2191,17 @@ function AppContent() {
       try {
         const lastVisit = localStorage.getItem('mdr_demandes_last_visit') || new Date(0).toISOString();
         const res = await fetch(
-          `https://mvkcgrextvxlzkqsyscm.supabase.co/rest/v1/demandes?created_at=gt.${lastVisit}&select=id&limit=1`,
+          `https://mvkcgrextvxlzkqsyscm.supabase.co/rest/v1/demandes?created_at=gt.${encodeURIComponent(lastVisit)}&select=id,title,category,ville&order=created_at.desc&limit=3`,
           { headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12a2NncmV4dHZ4bHprcXN5c2NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMjIwNDcsImV4cCI6MjA4ODc5ODA0N30.dvVbB0E5F-vhZMYlzIl4r-N1jOrRgrNZsp4xbDI_Nho' } }
         );
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) setHasNewDemandes(true);
+        if (Array.isArray(data) && data.length > 0) {
+          setHasNewDemandes(true);
+          // Créer une notification locale pour chaque nouvelle demande
+          data.forEach(d => {
+            addNotification(`📢 Nouvelle demande : ${d.title} — ${d.ville}`, "demande");
+          });
+        }
       } catch(e) {}
     };
     checkNewDemandes();
@@ -2732,6 +2738,9 @@ function AppContent() {
           .modal-inner{width:96vw!important;max-width:96vw!important;padding:16px!important;}
           .hero-title{font-size:26px!important;line-height:1.2!important;}
       @keyframes demandePulse{0%,100%{box-shadow:0 0 0 0 rgba(255,140,0,0.7)}50%{box-shadow:0 0 0 8px rgba(255,140,0,0)}}
+      .btn-tooltip{position:relative;}
+      .btn-tooltip::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+      .btn-tooltip:hover::after{opacity:1;}
       .demande-pulse{animation:demandePulse 1.5s ease-in-out infinite;}
           .section-title{font-size:28px!important;}
           nav{padding:0 8px!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}
@@ -2932,9 +2941,9 @@ function AppContent() {
                   <p style={{ fontSize:14 }}>Aucune notification</p>
                 </div>
               ) : notifications.map(n=>(
-                <div key={n.id} style={{ padding:"14px 20px",borderBottom:`1px solid ${theme.border}`,background:n.read?theme.card:theme.bg,cursor:"pointer" }} onClick={()=>setShowNotifs(false)}>
+                <div key={n.id} style={{ padding:"14px 20px",borderBottom:`1px solid ${theme.border}`,background:n.read?theme.card:theme.bg,cursor:"pointer" }} onClick={()=>{ setShowNotifs(false); if(n.type==="demande") window.open("https://marcheduroi.com/demandes","_blank"); }}>
                   <div style={{ display:"flex",gap:10,alignItems:"flex-start" }}>
-                    <span style={{ fontSize:20,flexShrink:0 }}>{n.type==="contact"?"💬":n.type==="view"?"👁️":"🔔"}</span>
+                    <span style={{ fontSize:20,flexShrink:0 }}>{n.type==="contact"?"💬":n.type==="view"?"👁️":n.type==="demande"?"📢":"🔔"}</span>
                     <div>
                       <p style={{ fontSize:14,color:theme.text,lineHeight:1.4,marginBottom:2 }}>{n.msg}</p>
                       <p style={{ fontSize:12,color:theme.sub }}>{n.date}</p>
@@ -3331,12 +3340,12 @@ function AppContent() {
             {/* Mobile: "Annonces" + "Demandes" côte à côte */}
             {windowWidth <= 600 ? (
               <div style={{ display:"flex",gap:8 }}>
-                <button onClick={()=>setShowCategories(s=>!s)} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 20px",borderRadius:14,fontWeight:800,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
+                <button onClick={()=>setShowCategories(s=>!s)} className="btn-glow btn-tooltip" data-tooltip="Je vends" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 20px",borderRadius:14,fontWeight:800,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
                   {showCategories ? "Masquer ▲" : "Annonces ▾"}
                 </button>
                 <button
                   onClick={()=>{ localStorage.setItem('mdr_demandes_last_visit', new Date().toISOString()); setHasNewDemandes(false); window.open("https://marcheduroi.com/demandes","_blank"); }}
-                  className={hasNewDemandes ? "demande-pulse" : ""}
+                  className={`btn-tooltip${hasNewDemandes ? " demande-pulse" : ""}`} data-tooltip="Je cherche"
                   style={{ background:"linear-gradient(135deg,#FF8C00,#FFD700)",border:"none",color:"#0D0F1A",padding:"13px 20px",borderRadius:14,fontWeight:800,fontSize:15,cursor:"pointer",position:"relative" }}>
                   📢 Demandes
                   {hasNewDemandes && <span style={{ position:"absolute",top:-4,right:-4,background:"#FF4757",color:"#fff",borderRadius:"50%",width:16,height:16,fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center" }}>!</span>}
@@ -3344,7 +3353,7 @@ function AppContent() {
               </div>
             ) : (
               /* Desktop: bouton annonces normal */
-              <button onClick={()=>setShowCategories(s=>!s)} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
+              <button onClick={()=>setShowCategories(s=>!s)} className="btn-glow btn-tooltip" data-tooltip="Je vends" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
                 {showCategories ? "Masquer ▲" : "Voir les annonces ▾"}
               </button>
             )}
@@ -3353,7 +3362,7 @@ function AppContent() {
             {windowWidth > 600 && (
               <button
                 onClick={()=>{ localStorage.setItem('mdr_demandes_last_visit', new Date().toISOString()); setHasNewDemandes(false); window.open("https://marcheduroi.com/demandes","_blank"); }}
-                className={hasNewDemandes ? "demande-pulse" : ""}
+                className={`btn-tooltip${hasNewDemandes ? " demande-pulse" : ""}`} data-tooltip="Je cherche"
                 style={{ background:"linear-gradient(135deg,#FF8C00,#FFD700)",border:"none",color:"#0D0F1A",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",position:"relative",display:"flex",alignItems:"center",gap:8 }}>
                 📢 Demandes récentes
                 {hasNewDemandes && <span style={{ background:"#FF4757",color:"#fff",borderRadius:10,padding:"2px 7px",fontSize:11,fontWeight:800 }}>Nouveau !</span>}
