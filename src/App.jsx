@@ -3600,6 +3600,8 @@ function AppContent() {
                   { label:`🔧 ${t.ateliers}`,   count:ateliers.length,  bg:"linear-gradient(135deg,#43C6AC,#6C63FF)", action:()=>setView("ateliers") },
                   { label:`🍽️ ${t.restos}`,     count:restos.length,    bg:"linear-gradient(135deg,#FF8C00,#FF6584)", action:()=>setView("restos") },
                   { label:`💇 ${t.beaute}`,     count:beaute.length,    bg:"linear-gradient(135deg,#FF69B4,#FF1493)", action:()=>setView("beaute") },
+                  { label:"👗 Mode",            count:null, bg:"linear-gradient(135deg,#9A78CF,#6C63FF)", action:()=>setCategory("Mode") },
+                  { label:"🌾 Agro-alimentaire",count:null, bg:"linear-gradient(135deg,#16A34A,#43C6AC)", action:()=>setCategory("Agro-alimentaire") },
                 ].map(s=>(
                   <button key={s.label} onClick={s.action}
                     style={{ background:s.bg,border:"none",color:"#fff",padding:"6px 14px",borderRadius:18,fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap" }}>
