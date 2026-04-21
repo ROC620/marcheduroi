@@ -115,7 +115,7 @@ const INITIAL_POSTS = [
     author: "Admin MarchéduRoi", authorId: "admin", price: "12 000 FCFA/sac 50kg", date: "2026-04-01", likes: 8,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: ["https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&q=80"],
-    agro: { sousCategorie:"Tubercules transformés (gari, tapioca, farine de manioc)", quantite:"200", unite:"sac de 50 kg", prixUnitaire:"12 000", qualite:"Premium / Grade A", disponibilite:"Toute l'année", lieuEnlevement:"Bohicon, Zou", saisonRecolte:"" }
+    agro: { sousCategorie:"Tubercules transformés (gari, tapioca, farine de manioc, agbéliman)", quantite:"200", unite:"sac de 50 kg", prixUnitaire:"12 000", qualite:"Premium / Grade A", disponibilite:"Toute l'année", lieuEnlevement:"Bohicon, Zou", saisonRecolte:"" }
   },
   {
     id: 19, title: "Maïs blanc local en gros — Parakou", category: "Agro-alimentaire",
@@ -1184,7 +1184,7 @@ function AppContent() {
       return updated;
     });
   };
-  const [authForm, setAuthForm] = useState({ email:"",password:"",name:"",country:"BJ" });
+  const [authForm, setAuthForm] = useState({ email:"",password:"",name:"",country:"BJ",phone:"" });
   const [turnstileToken, setTurnstileToken] = useState("");
   const turnstileRef = React.useRef(null);
 
@@ -1774,7 +1774,7 @@ function AppContent() {
     if (!data.user) { notify("Erreur lors de la création du compte","error"); return; }
 
     // Créer le profil
-    await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ" });
+    await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ", phone:authForm.phone||null });
 
     // NE PAS connecter l'utilisateur — attendre confirmation email
     setTurnstileToken("");
@@ -4767,7 +4767,7 @@ function AppContent() {
       )}
 
       {/* REGISTER */}
-      {view==="register"&&(
+      {view==="register"&&(()=>{ const PHONE_CODES={"BJ":"+229 ","TG":"+228 ","CI":"+225 ","SN":"+221 ","ML":"+223 ","BF":"+226 ","NE":"+227 ","GN":"+224 ","NG":"+234 ","CM":"+237 ","CG":"+242 ","CD":"+243 ","GA":"+241 ","MG":"+261 ","RW":"+250 ","BI":"+257 ","TD":"+235 ","MR":"+222 ","FR":"+33 ","BE":"+32 ","CH":"+41 ","CA":"+1 "}; if(!authForm.phone&&detectedCountry&&PHONE_CODES[detectedCountry]){ setAuthForm(a=>({...a,phone:PHONE_CODES[detectedCountry],country:detectedCountry})); } return true; })()&&(
         <div style={{ maxWidth:420,margin:"60px auto",padding:"0 24px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ ...cardStyle,borderRadius:20,padding:36 }}>
             <h2 style={{ fontWeight:800,fontSize:26,marginBottom:6,color:theme.text }}>Créer un compte</h2>
@@ -4790,7 +4790,10 @@ function AppContent() {
             {/* Pays */}
             <div style={{ marginBottom:16 }}>
               <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🌍 Pays</label>
-              <select value={authForm.country} onChange={e=>setAuthForm(a=>({...a,country:e.target.value}))} style={inputStyle}>
+              <select value={authForm.country} onChange={e=>{
+                const PHONE_CODES={"BJ":"+229 ","TG":"+228 ","CI":"+225 ","SN":"+221 ","ML":"+223 ","BF":"+226 ","NE":"+227 ","GN":"+224 ","NG":"+234 ","CM":"+237 ","CG":"+242 ","CD":"+243 ","GA":"+241 ","MG":"+261 ","RW":"+250 ","BI":"+257 ","TD":"+235 ","MR":"+222 ","FR":"+33 ","BE":"+32 ","CH":"+41 ","CA":"+1 ","OTHER":"+"}; 
+                setAuthForm(a=>({...a,country:e.target.value,phone:PHONE_CODES[e.target.value]||""}));
+              }} style={inputStyle}>
                 {[
                   {code:"BJ",name:"🇧🇯 Bénin"},{code:"TG",name:"🇹🇬 Togo"},{code:"CI",name:"🇨🇮 Côte d'Ivoire"},
                   {code:"SN",name:"🇸🇳 Sénégal"},{code:"ML",name:"🇲🇱 Mali"},{code:"BF",name:"🇧🇫 Burkina Faso"},
@@ -4803,6 +4806,20 @@ function AppContent() {
                 ].map(p=><option key={p.code} value={p.code}>{p.name}</option>)}
               </select>
             </div>
+            {/* Téléphone / WhatsApp */}
+            <div style={{ marginBottom:16 }}>
+              <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>📱 Téléphone / WhatsApp <span style={{ color:theme.sub,fontSize:11 }}>(optionnel)</span></label>
+              <input
+                type="tel"
+                value={authForm.phone}
+                onChange={e=>setAuthForm(a=>({...a,phone:e.target.value}))}
+                placeholder="Ex: +229 01 23 45 67"
+                maxLength={25}
+                inputMode="tel"
+                style={inputStyle}
+              />
+            </div>
+
             <button onClick={register} className="btn-glow" disabled={!authForm.name||!authForm.email||!authForm.password} style={{ width:"100%",padding:"14px",background:(!authForm.name||!authForm.email||!authForm.password)?"rgba(108,99,255,0.4)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s",cursor:(!authForm.name||!authForm.email||!authForm.password)?"not-allowed":"pointer" }}>Créer mon compte</button>
             {/* Widget Turnstile */}
             <div style={{ marginTop:16,display:"flex",justifyContent:"center" }}>

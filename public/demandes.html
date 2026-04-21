@@ -435,7 +435,7 @@ const THEMES = {
 };
 
 function applyTheme() {
-  const savedId = localStorage.getItem('mf_bg') || 'dark';
+  const savedId = localStorage.getItem('mf_theme') || 'dark';
   const t = THEMES[savedId] || THEMES.dark;
   const r = document.documentElement.style;
   r.setProperty('--bg', t.bg);
@@ -453,9 +453,14 @@ function applyTheme() {
   });
 }
 
-applyTheme();
+// Appliquer le thème dès que le DOM est prêt
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', applyTheme);
+} else {
+  applyTheme();
+}
 // Écouter les changements de thème depuis d'autres onglets
-window.addEventListener('storage', e => { if (e.key === 'mf_bg') applyTheme(); });
+window.addEventListener('storage', e => { if (e.key === 'mf_theme') applyTheme(); });
 </script>
 </body>
 </html>

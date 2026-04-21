@@ -77,7 +77,7 @@ export const MOTO_FIELDS = [
 export const AGRO_SOUS_CATEGORIES = [
   "Céréales (riz, maïs, mil, sorgho)",
   "Légumineuses (haricot, niébé, soja)",
-  "Tubercules frais (manioc, igname, patate douce)",
+  "Tubercules frais (manioc, igname, patate douce, taro)",
   "Tubercules transformés (gari, tapioca, farine de manioc)",
   "Oléagineux (arachide, palmiste, sésame, noix de cajou)",
   "Maraîchage (tomates, piments, oignons, légumes)",
