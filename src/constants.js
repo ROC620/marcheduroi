@@ -78,18 +78,18 @@ export const AGRO_SOUS_CATEGORIES = [
   "Céréales (riz, maïs, mil, sorgho)",
   "Légumineuses (haricot, niébé, soja)",
   "Tubercules frais (manioc, igname, patate douce, taro)",
-  "Tubercules transformés (gari, tapioca, farine de manioc)",
+  "Tubercules transformés (agbéliman, gari, tapioca)",
   "Oléagineux (arachide, palmiste, sésame, noix de cajou)",
   "Maraîchage (tomates, piments, oignons, légumes)",
   "Fruits tropicaux (ananas, mangue, banane, papaye)",
   "Produits séchés (poisson fumé, viande séchée, crevettes)",
-  "Épices et condiments (gingembre, poivre, ail)",
+  "Épices et condiments (gingembre, poivre, ail, curcuma)",
   "Autre produit agricole",
 ];
 
 export const AGRO_UNITES = [
   "kg", "sac de 25 kg", "sac de 50 kg", "sac de 100 kg",
-  "tonne", "cuvette", "bassine", "carton", "litre", "bouteille",
+  "tonne", "cuvette (tohounglo)", "bassine", "carton", "litre", "bouteille",
 ];
 
 export const AGRO_DISPONIBILITE = [

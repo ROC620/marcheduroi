@@ -115,7 +115,7 @@ const INITIAL_POSTS = [
     author: "Admin MarchéduRoi", authorId: "admin", price: "12 000 FCFA/sac 50kg", date: "2026-04-01", likes: 8,
     contact: "contact@marcheduroi.com", phone: "+2290147562640",
     photos: ["https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&q=80"],
-    agro: { sousCategorie:"Tubercules transformés (gari, tapioca, farine de manioc, agbéliman)", quantite:"200", unite:"sac de 50 kg", prixUnitaire:"12 000", qualite:"Premium / Grade A", disponibilite:"Toute l'année", lieuEnlevement:"Bohicon, Zou", saisonRecolte:"" }
+    agro: { sousCategorie:"Tubercules transformés (gari, tapioca, farine de manioc)", quantite:"200", unite:"sac de 50 kg", prixUnitaire:"12 000", qualite:"Premium / Grade A", disponibilite:"Toute l'année", lieuEnlevement:"Bohicon, Zou", saisonRecolte:"" }
   },
   {
     id: 19, title: "Maïs blanc local en gros — Parakou", category: "Agro-alimentaire",
