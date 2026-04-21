@@ -1729,7 +1729,23 @@ function AppContent() {
 
   const login = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });
-    if (error) { notify("Email ou mot de passe incorrect","error"); return; }
+    if (error) {
+      const msg = error.message||"";
+      if (msg.includes("Invalid login") || msg.includes("user not found") || msg.includes("Email not confirmed")) {
+        // Vérifier si l'email existe dans profiles
+        const { data: exists } = await supabase.from("profiles").select("id").eq("id","00000000-0000-0000-0000-000000000000").maybeSingle();
+        const { count } = await supabase.from("profiles").select("id",{count:"exact",head:true}).ilike("id","%%");
+        // Tenter de distinguer email inexistant vs mauvais mdp
+        if (msg.includes("Invalid login credentials")) {
+          notify("Email ou mot de passe incorrect — Si vous n'avez pas de compte, inscrivez-vous gratuitement !", "error");
+        } else {
+          notify("Email ou mot de passe incorrect","error");
+        }
+      } else {
+        notify("Email ou mot de passe incorrect","error");
+      }
+      return;
+    }
 
     // Bloquer si email non confirmé
     if (!data.user.email_confirmed_at) {
@@ -1754,10 +1770,49 @@ function AppContent() {
     addNotification("Bienvenue sur MarchéduRoi ! Vos notifications apparaissent ici.", "info");
   };
 
+const PHONE_REGEX = {
+  BJ: /^\+229\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  TG: /^\+228\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  CI: /^\+225\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  SN: /^\+221\s?[0-9]{2}\s?[0-9]{3}\s?[0-9]{2}\s?[0-9]{2}$/,
+  ML: /^\+223\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  BF: /^\+226\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  NE: /^\+227\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  GN: /^\+224\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/,
+  NG: /^\+234\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{4}$/,
+  CM: /^\+237\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/,
+  CG: /^\+242\s?[0-9]{2}\s?[0-9]{3}\s?[0-9]{4}$/,
+  CD: /^\+243\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/,
+  GA: /^\+241\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  MG: /^\+261\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{3}\s?[0-9]{2}$/,
+  RW: /^\+250\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/,
+  BI: /^\+257\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{4}$/,
+  TD: /^\+235\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  MR: /^\+222\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  FR: /^\+33\s?[0-9]\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  BE: /^\+32\s?[0-9]{3}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  CH: /^\+41\s?[0-9]{2}\s?[0-9]{3}\s?[0-9]{2}\s?[0-9]{2}$/,
+  CA: /^\+1\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{4}$/,
+};
+const PHONE_EXAMPLE = {
+  BJ:"+229 01 23 45 67",TG:"+228 90 12 34 56",CI:"+225 01 23 45 67 89",
+  SN:"+221 77 123 45 67",ML:"+223 76 12 34 56",BF:"+226 70 12 34 56",
+  NE:"+227 96 12 34 56",GN:"+224 622 123 456",NG:"+234 801 234 5678",
+  CM:"+237 677 123 456",CG:"+242 06 123 4567",CD:"+243 812 345 678",
+  GA:"+241 07 12 34 56",MG:"+261 32 123 45 67",RW:"+250 788 123 456",
+  BI:"+257 79 123456",TD:"+235 66 12 34 56",MR:"+222 22 12 34 56",
+  FR:"+33 6 12 34 56 78",BE:"+32 470 12 34 56",CH:"+41 76 123 45 67",
+  CA:"+1 514 123 4567",
+};
+
   const register = async () => {
-    if (!authForm.name||!authForm.email||!authForm.password) { notify("Remplissez tous les champs","error"); return; }
+    if (!authForm.name||!authForm.email||!authForm.password||!authForm.phone) { notify("Tous les champs sont obligatoires","error"); return; }
     if (!turnstileToken) { notify("Veuillez compléter la vérification de sécurité","error"); return; }
     if (authForm.password.length < 6) { notify("Le mot de passe doit faire au moins 6 caractères","error"); return; }
+    const phoneRx = PHONE_REGEX[authForm.country];
+    if (phoneRx && !phoneRx.test(authForm.phone.trim())) {
+      notify("Numéro invalide pour ce pays — ex: "+(PHONE_EXAMPLE[authForm.country]||"+XXX XX XX XX XX"), "error"); return;
+    }
 
     const refFromUrl = new URLSearchParams(window.location.search).get("ref");
     if (refFromUrl) localStorage.setItem("mdr_ref", refFromUrl);
@@ -3739,21 +3794,29 @@ function AppContent() {
                   )}
                   </div>
                   {/* Badge expiration */}
-                  {post.expiresAt && (() => { const d = getDaysLeft(post.expiresAt); const isOwner = user && user.id === post.authorId; return d !== null && d <= 7 ? (
-                    isOwner
-                      ? <button onClick={()=>setView("dashboard")} style={{ width:"100%",background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6,cursor:"pointer",textAlign:"left" }}>
-                          <span style={{ fontSize:12 }}>⚠️</span>
-                          <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""} · Prolongez depuis votre tableau de bord →</p>
-                        </button>
-                      : <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6 }}>
-                          <span style={{ fontSize:12 }}>⚠️</span>
-                          <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""}</p>
-                        </div>
-                  ) : d !== null && d <= 30 ? (
-                    <div style={{ background:"rgba(255,165,0,0.1)",border:"1px solid rgba(255,165,0,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8 }}>
-                      <p style={{ fontSize:12,color:"#FFA500",fontWeight:600 }}>⏳ Expire le {post.expiresAt}</p>
-                    </div>
-                  ) : null; })()}
+                  {post.expiresAt && (() => {
+                    const d = getDaysLeft(post.expiresAt);
+                    const isOwner = user && user.id === post.authorId;
+                    const isAdmin = user && user.role === "admin";
+                    const canSee = isOwner || isAdmin;
+                    if (!canSee) return null;
+                    if (d !== null && d <= 7) return (
+                      isOwner
+                        ? <button onClick={()=>setView("dashboard")} style={{ width:"100%",background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6,cursor:"pointer",textAlign:"left" }}>
+                            <span style={{ fontSize:12 }}>⚠️</span>
+                            <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""} · Prolongez →</p>
+                          </button>
+                        : <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6 }}>
+                            <span>⚠️</span>
+                            <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""} — {post.expiresAt}</p>
+                          </div>
+                    );
+                    return (
+                      <div style={{ background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.25)",borderRadius:8,padding:"5px 10px",marginBottom:8 }}>
+                        <p style={{ fontSize:12,color:"#43C6AC",fontWeight:600 }}>⏳ Expire le {post.expiresAt} ({d} j restants)</p>
+                      </div>
+                    );
+                  })()}
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6,alignItems:"center" }}>
 
                     {post.sponsored && !isUrgentActive(post) && (
@@ -4808,7 +4871,7 @@ function AppContent() {
             </div>
             {/* Téléphone / WhatsApp */}
             <div style={{ marginBottom:16 }}>
-              <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>📱 Téléphone / WhatsApp <span style={{ color:theme.sub,fontSize:11 }}>(optionnel)</span></label>
+              <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>📱 Téléphone / WhatsApp <span style={{ color:"#FF4757",fontSize:13 }}>*</span></label>
               <input
                 type="tel"
                 value={authForm.phone}
@@ -4820,7 +4883,7 @@ function AppContent() {
               />
             </div>
 
-            <button onClick={register} className="btn-glow" disabled={!authForm.name||!authForm.email||!authForm.password} style={{ width:"100%",padding:"14px",background:(!authForm.name||!authForm.email||!authForm.password)?"rgba(108,99,255,0.4)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s",cursor:(!authForm.name||!authForm.email||!authForm.password)?"not-allowed":"pointer" }}>Créer mon compte</button>
+            <button onClick={register} className="btn-glow" disabled={!authForm.name||!authForm.email||!authForm.password||!authForm.phone} style={{ width:"100%",padding:"14px",background:(!authForm.name||!authForm.email||!authForm.password||!authForm.phone)?"rgba(108,99,255,0.4)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s",cursor:(!authForm.name||!authForm.email||!authForm.password||!authForm.phone)?"not-allowed":"pointer" }}>Créer mon compte</button>
             {/* Widget Turnstile */}
             <div style={{ marginTop:16,display:"flex",justifyContent:"center" }}>
               <div ref={turnstileRef} />
