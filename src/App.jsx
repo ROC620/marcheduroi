@@ -1686,6 +1686,17 @@ function AppContent() {
           });
       }
     });
+
+    // Ouvrir l'annonce partagée via lien (?post=ID&src=posts)
+    const postFromUrl = new URLSearchParams(window.location.search).get("post");
+    const srcFromUrl = new URLSearchParams(window.location.search).get("src") || "posts";
+    if (postFromUrl) {
+      const tableMap = { posts:"posts", boutiques:"boutiques", ateliers:"ateliers", restos:"restos", beaute:"beaute" };
+      const table = tableMap[srcFromUrl] || "posts";
+      supabase.from(table).select("*").eq("id", postFromUrl).maybeSingle().then(({ data: postData }) => {
+        if (postData) setModal({ type:"contact", data: postData });
+      });
+    }
     supabase.auth.onAuthStateChange((event, session) => {
       if (!session) { setUser(null); localStorage.removeItem("mdr_user_role"); return; }
       if (event === "PASSWORD_RECOVERY") {
@@ -1818,17 +1829,6 @@ const PHONE_EXAMPLE = {
 
     const refFromUrl = new URLSearchParams(window.location.search).get("ref");
     if (refFromUrl) localStorage.setItem("mdr_ref", refFromUrl);
-
-    // Ouvrir l'annonce partagée via lien (?post=ID&src=posts)
-    const postFromUrl = new URLSearchParams(window.location.search).get("post");
-    const srcFromUrl = new URLSearchParams(window.location.search).get("src") || "posts";
-    if (postFromUrl) {
-      const tableMap = { posts:"posts", boutiques:"boutiques", ateliers:"ateliers", restos:"restos", beaute:"beaute" };
-      const table = tableMap[srcFromUrl] || "posts";
-      supabase.from(table).select("*").eq("id", postFromUrl).maybeSingle().then(({ data }) => {
-        if (data) setModal({ type:"contact", data });
-      });
-    }
 
     const { data, error } = await supabase.auth.signUp({
       email: authForm.email,
