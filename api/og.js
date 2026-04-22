@@ -62,10 +62,8 @@ export default async function handler(req) {
     const isCrawler = /facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|LinkedInBot|Slackbot|Googlebot|bingbot|Applebot|Discordbot|vk|pinterest/i.test(ua);
 
     if (!isCrawler) {
-      // Rediriger vers la bonne URL de l'annonce sur la SPA
-      const sourceToPath = { posts:'annonce', boutiques:'boutique', ateliers:'atelier', restos:'resto', beaute:'beaute' };
-      const path = sourceToPath[source] || 'annonce';
-      const dest = id ? (SITE_URL + '/' + path + '/' + id) : SITE_URL;
+      // Rediriger vers la SPA avec l'ID en query param pour éviter la boucle
+      const dest = id ? (SITE_URL + '?post=' + id + '&src=' + source) : SITE_URL;
       return new Response(null, { status: 302, headers: { 'Location': dest } });
     }
 
