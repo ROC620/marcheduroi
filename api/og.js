@@ -72,7 +72,9 @@ function buildUserHtml(id, source, title, price, image) {
 
 export default async function handler(req) {
   const url = new URL(req.url);
-  const id = url.searchParams.get('id');
+  const rawId = url.searchParams.get('id') || '';
+  // Nettoyer un ID malformé contenant un chemin dupliqué (ex: "post_123/post_123")
+  const id = rawId.includes('/') ? rawId.split('/')[0] : rawId;
   const source = url.searchParams.get('source') || 'posts';
   const pathname = url.pathname;
 

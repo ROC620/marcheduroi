@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { BrowserRouter, Routes, Route, useNavigate, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "./supabase";
 import Icon from "./components/Icon";
 import PhotoCarousel from "./components/PhotoCarousel";
@@ -1693,14 +1693,11 @@ function AppContent() {
     if (postFromSession) {
       sessionStorage.removeItem("mdr_open_post");
       sessionStorage.removeItem("mdr_open_src");
-      // Aller sur la page annonces et ouvrir l'annonce en mode étendu
-      setView("home");
-      setExpandedContacts({ [postFromSession]: true });
-      // Scroll vers l'annonce après chargement
-      setTimeout(() => {
-        const el = document.getElementById("post-" + postFromSession);
-        if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
-      }, 800);
+      // Mapper la source vers le chemin de route
+      const srcPathMap = { posts:"annonce", boutiques:"boutique", ateliers:"atelier", restos:"resto", beaute:"beaute" };
+      const routePath = srcPathMap[srcFromSession] || "annonce";
+      // Naviguer directement sur la page dédiée de l'annonce
+      navigate("/" + routePath + "/" + postFromSession, { replace: true });
     }
     supabase.auth.onAuthStateChange((event, session) => {
       if (!session) { setUser(null); localStorage.removeItem("mdr_user_role"); return; }
@@ -7677,6 +7674,7 @@ export default function App() {
         <Route path="/resto/:id" element={<AnnonceDetail/>}/>
         <Route path="/beaute/:id" element={<AnnonceDetail/>}/>
         <Route path="/reset-password" element={<AppContent/>}/>
+        <Route path="*" element={<Navigate to="/" replace />}/>
       </Routes>
     </BrowserRouter>
   );
