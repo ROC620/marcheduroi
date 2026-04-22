@@ -1758,8 +1758,10 @@ function AppContent() {
     if (profile) {
       setUser({ id:data.user.id, name:profile.name, role:profile.role||"user", emailConfirmed:true });
     } else {
-      await supabase.from("profiles").insert({ id:data.user.id, name:data.user.email.split("@")[0], role:"user", country:"BJ" });
-      setUser({ id:data.user.id, name:data.user.email.split("@")[0], role:"user" });
+      // Récupérer le vrai nom depuis les métadonnées Supabase Auth si disponible
+      const realName = data.user.user_metadata?.name || data.user.email.split("@")[0];
+      await supabase.from("profiles").insert({ id:data.user.id, name:realName, role:"user", country:"BJ" });
+      setUser({ id:data.user.id, name:realName, role:"user" });
     }
     const pendingRef = localStorage.getItem("mdr_ref");
     if (pendingRef && pendingRef !== data.user.id) {
@@ -1771,7 +1773,7 @@ function AppContent() {
   };
 
 const PHONE_REGEX = {
-  BJ: /^\+229\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  BJ: /^\+229\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
   TG: /^\+228\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
   CI: /^\+225\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
   SN: /^\+221\s?[0-9]{2}\s?[0-9]{3}\s?[0-9]{2}\s?[0-9]{2}$/,
@@ -1795,7 +1797,7 @@ const PHONE_REGEX = {
   CA: /^\+1\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{4}$/,
 };
 const PHONE_EXAMPLE = {
-  BJ:"+229 01 23 45 67",TG:"+228 90 12 34 56",CI:"+225 01 23 45 67 89",
+  BJ:"+229 01 23 45 67 89",TG:"+228 90 12 34 56",CI:"+225 01 23 45 67 89",
   SN:"+221 77 123 45 67",ML:"+223 76 12 34 56",BF:"+226 70 12 34 56",
   NE:"+227 96 12 34 56",GN:"+224 622 123 456",NG:"+234 801 234 5678",
   CM:"+237 677 123 456",CG:"+242 06 123 4567",CD:"+243 812 345 678",
@@ -1816,6 +1818,17 @@ const PHONE_EXAMPLE = {
 
     const refFromUrl = new URLSearchParams(window.location.search).get("ref");
     if (refFromUrl) localStorage.setItem("mdr_ref", refFromUrl);
+
+    // Ouvrir l'annonce partagée via lien (?post=ID&src=posts)
+    const postFromUrl = new URLSearchParams(window.location.search).get("post");
+    const srcFromUrl = new URLSearchParams(window.location.search).get("src") || "posts";
+    if (postFromUrl) {
+      const tableMap = { posts:"posts", boutiques:"boutiques", ateliers:"ateliers", restos:"restos", beaute:"beaute" };
+      const table = tableMap[srcFromUrl] || "posts";
+      supabase.from(table).select("*").eq("id", postFromUrl).maybeSingle().then(({ data }) => {
+        if (data) setModal({ type:"contact", data });
+      });
+    }
 
     const { data, error } = await supabase.auth.signUp({
       email: authForm.email,
@@ -1865,6 +1878,9 @@ const PHONE_EXAMPLE = {
       .eq("confirmed", true);
 
     const count = refs?.length || 0;
+
+    // Mettre à jour le compteur en temps réel
+    setReferralStats(s => ({ ...s, count }));
 
     // Récompense tous les 10 parrainages
     if (count % 10 === 0) {
@@ -2755,7 +2771,7 @@ const PHONE_EXAMPLE = {
   const cardStyle = { background:theme.card, border:`1px solid ${theme.border}` };
 
   return (
-    <div onContextMenu={e=>e.preventDefault()} style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box",position:"relative" }}>
+    <div onContextMenu={e=>{ if(["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName)) return; e.preventDefault(); }} style={{ minHeight:"100vh",width:"100%",maxWidth:"100vw",background:theme.bg,color:theme.text,fontFamily:"'Sora','Segoe UI',sans-serif",overflowX:"hidden",boxSizing:"border-box",position:"relative" }}>
 
       {/* Filigrane MarchéduRoi */}
       <div aria-hidden="true" style={{ position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden" }}>
