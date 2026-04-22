@@ -1687,17 +1687,28 @@ function AppContent() {
       }
     });
 
-    // Ouvrir l'annonce partagée — stockée dans sessionStorage par og.js
-    const postFromSession = sessionStorage.getItem("mdr_open_post");
-    const srcFromSession = sessionStorage.getItem("mdr_open_src") || "posts";
-    if (postFromSession) {
-      sessionStorage.removeItem("mdr_open_post");
-      sessionStorage.removeItem("mdr_open_src");
+    // Ouvrir l'annonce partagée — via paramètres URL injectés par og.js
+    const urlParams = new URLSearchParams(window.location.search);
+    const mdrPost = urlParams.get("mdr_post");
+    const mdrSrc  = urlParams.get("mdr_src") || "posts";
+    if (mdrPost) {
+      // Nettoyer l'URL sans recharger la page
+      window.history.replaceState({}, "", "/");
       // Mapper la source vers le chemin de route
       const srcPathMap = { posts:"annonce", boutiques:"boutique", ateliers:"atelier", restos:"resto", beaute:"beaute" };
-      const routePath = srcPathMap[srcFromSession] || "annonce";
-      // Naviguer directement sur la page dédiée de l'annonce
-      navigate("/" + routePath + "/" + postFromSession, { replace: true });
+      const routePath = srcPathMap[mdrSrc] || "annonce";
+      // Laisser React finir de monter, puis naviguer vers la page dédiée
+      setTimeout(() => { navigate("/" + routePath + "/" + mdrPost, { replace: true }); }, 0);
+    }
+    // Compatibilité sessionStorage (anciens liens circulant encore)
+    const postFromSession = sessionStorage.getItem("mdr_open_post");
+    const srcFromSession = sessionStorage.getItem("mdr_open_src") || "posts";
+    if (postFromSession && !mdrPost) {
+      sessionStorage.removeItem("mdr_open_post");
+      sessionStorage.removeItem("mdr_open_src");
+      const srcPathMap2 = { posts:"annonce", boutiques:"boutique", ateliers:"atelier", restos:"resto", beaute:"beaute" };
+      const routePath2 = srcPathMap2[srcFromSession] || "annonce";
+      setTimeout(() => { navigate("/" + routePath2 + "/" + postFromSession, { replace: true }); }, 0);
     }
     supabase.auth.onAuthStateChange((event, session) => {
       if (!session) { setUser(null); localStorage.removeItem("mdr_user_role"); return; }

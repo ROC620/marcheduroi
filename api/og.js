@@ -52,7 +52,8 @@ function buildUserHtml(id, source, title, price, image) {
   const fullTitle = priceStr ? title + ' — ' + priceStr + ' | MarchéduRoi' : title + ' | MarchéduRoi';
   const ogImg = image || DEFAULT_IMAGE;
 
-  // Page HTML qui charge l'app React et ouvre l'annonce via postMessage ou hash
+  // Redirige vers la racine avec l'ID en paramètre URL (évite boucle Vercel + conflits sessionStorage)
+  const destUrl = SITE_URL + '/?mdr_post=' + id + '&mdr_src=' + source;
   return '<!DOCTYPE html><html lang="fr"><head>'
     + '<meta charset="UTF-8"/>'
     + '<meta name="viewport" content="width=device-width,initial-scale=1"/>'
@@ -62,11 +63,7 @@ function buildUserHtml(id, source, title, price, image) {
     + '</head><body>'
     + '<p style="font-size:20px">⏳</p>'
     + '<p style="color:#9A9AB0;font-size:14px">Chargement de l\'annonce...</p>'
-    + '<script>'
-    + 'sessionStorage.setItem("mdr_open_post","' + id + '");'
-    + 'sessionStorage.setItem("mdr_open_src","' + source + '");'
-    + 'window.location.replace("' + SITE_URL + '");'
-    + '</script>'
+    + '<script>window.location.replace("' + destUrl + '");</script>'
     + '</body></html>';
 }
 
