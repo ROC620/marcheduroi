@@ -52,8 +52,7 @@ function buildUserHtml(id, source, title, price, image) {
   const fullTitle = priceStr ? title + ' — ' + priceStr + ' | MarchéduRoi' : title + ' | MarchéduRoi';
   const ogImg = image || DEFAULT_IMAGE;
 
-  // Redirige vers la racine avec l'ID en paramètre URL (évite boucle Vercel + conflits sessionStorage)
-  const destUrl = SITE_URL + '/?mdr_post=' + id + '&mdr_src=' + source;
+  // Page HTML qui charge l'app React et ouvre l'annonce via postMessage ou hash
   return '<!DOCTYPE html><html lang="fr"><head>'
     + '<meta charset="UTF-8"/>'
     + '<meta name="viewport" content="width=device-width,initial-scale=1"/>'
@@ -63,15 +62,17 @@ function buildUserHtml(id, source, title, price, image) {
     + '</head><body>'
     + '<p style="font-size:20px">⏳</p>'
     + '<p style="color:#9A9AB0;font-size:14px">Chargement de l\'annonce...</p>'
-    + '<script>window.location.replace("' + destUrl + '");</script>'
+    + '<script>'
+    + 'sessionStorage.setItem("mdr_open_post","' + id + '");'
+    + 'sessionStorage.setItem("mdr_open_src","' + source + '");'
+    + 'window.location.replace("' + SITE_URL + '");'
+    + '</script>'
     + '</body></html>';
 }
 
 export default async function handler(req) {
   const url = new URL(req.url);
-  const rawId = url.searchParams.get('id') || '';
-  // Nettoyer un ID malformé contenant un chemin dupliqué (ex: "post_123/post_123")
-  const id = rawId.includes('/') ? rawId.split('/')[0] : rawId;
+  const id = url.searchParams.get('id');
   const source = url.searchParams.get('source') || 'posts';
   const pathname = url.pathname;
 
