@@ -8,11 +8,11 @@ const DEFAULT_IMAGE = 'https://marcheduroi.com/icons/icon-512x512.png';
 const SLOGAN = 'Sur MarchéduRoi, vous êtes le Roi du Marché';
 
 const TABLE_MAP = {
-  posts: { table: 'posts', titleField: 'title' },
-  boutiques: { table: 'boutiques', titleField: 'name' },
-  ateliers: { table: 'ateliers', titleField: 'name' },
-  restos: { table: 'restos', titleField: 'name' },
-  beaute: { table: 'beaute', titleField: 'name' },
+  posts:     { table: 'posts',     titleField: 'title' },
+  boutiques: { table: 'boutiques', titleField: 'name'  },
+  ateliers:  { table: 'ateliers',  titleField: 'name'  },
+  restos:    { table: 'restos',    titleField: 'name'  },
+  beaute:    { table: 'beaute',    titleField: 'name'  },
 };
 
 function formatPrice(rawPrice) {
@@ -22,13 +22,14 @@ function formatPrice(rawPrice) {
   return parseInt(digits).toLocaleString('fr-FR').replace(/\u202f|\s/g, ' ') + ' FCFA';
 }
 
-function buildHtml(title, price, image, pageUrl) {
+function buildCrawlerHtml(title, price, image, pageUrl) {
   const priceStr = price || '';
   const fullTitle = priceStr ? title + ' — ' + priceStr + ' | MarchéduRoi' : title + ' | MarchéduRoi';
   const fullDesc = title + (priceStr ? ' — ' + priceStr : '') + '. ' + SLOGAN + ' - marcheduroi.com';
   const ogImg = image || DEFAULT_IMAGE;
 
-  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/>'
+  return '<!DOCTYPE html><html lang="fr"><head>'
+    + '<meta charset="UTF-8"/>'
     + '<title>' + fullTitle + '</title>'
     + '<meta name="description" content="' + fullDesc + '"/>'
     + '<meta property="og:title" content="' + fullTitle + '"/>'
@@ -43,70 +44,72 @@ function buildHtml(title, price, image, pageUrl) {
     + '<meta name="twitter:title" content="' + fullTitle + '"/>'
     + '<meta name="twitter:description" content="' + fullDesc + '"/>'
     + '<meta name="twitter:image" content="' + ogImg + '"/>'
-    + '<script>window.location.replace("' + pageUrl + '?from=og");</script>'
-    + '</head><body style="background:#0D0F1A;color:#fff;font-family:sans-serif;text-align:center;padding:40px;">'
-    + '<h1>' + fullTitle + '</h1>'
-    + '<p style="color:#FFD700">' + SLOGAN + ' 👑</p>'
-    + '<a href="' + pageUrl + '" style="color:#6C63FF">Voir sur MarchéduRoi</a>'
+    + '</head><body></body></html>';
+}
+
+function buildUserHtml(id, source, title, price, image) {
+  const priceStr = price || '';
+  const fullTitle = priceStr ? title + ' — ' + priceStr + ' | MarchéduRoi' : title + ' | MarchéduRoi';
+  const ogImg = image || DEFAULT_IMAGE;
+
+  // Page HTML qui charge l'app React et ouvre l'annonce via postMessage ou hash
+  return '<!DOCTYPE html><html lang="fr"><head>'
+    + '<meta charset="UTF-8"/>'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1"/>'
+    + '<title>' + fullTitle + '</title>'
+    + '<meta property="og:image" content="' + ogImg + '"/>'
+    + '<style>body{margin:0;background:#0D0F1A;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#fff;flex-direction:column;gap:12px;}</style>'
+    + '</head><body>'
+    + '<p style="font-size:20px">⏳</p>'
+    + '<p style="color:#9A9AB0;font-size:14px">Chargement de l\'annonce...</p>'
+    + '<script>'
+    + 'sessionStorage.setItem("mdr_open_post","' + id + '");'
+    + 'sessionStorage.setItem("mdr_open_src","' + source + '");'
+    + 'window.location.replace("' + SITE_URL + '");'
+    + '</script>'
     + '</body></html>';
 }
 
 export default async function handler(req) {
+  const url = new URL(req.url);
+  const id = url.searchParams.get('id');
+  const source = url.searchParams.get('source') || 'posts';
+  const pathname = url.pathname;
+
+  const ua = req.headers.get('user-agent') || '';
+  const isCrawler = /facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|LinkedInBot|Slackbot|Googlebot|bingbot|Applebot|Discordbot|vk|pinterest/i.test(ua);
+
+  if (!id) {
+    return new Response(null, { status: 302, headers: { 'Location': SITE_URL } });
+  }
+
   try {
-    const url = new URL(req.url);
-    const id = url.searchParams.get('id');
-    const source = url.searchParams.get('source') || 'posts';
-    const pathname = url.pathname;
-
-    const ua = req.headers.get('user-agent') || '';
-    const isCrawler = /facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|LinkedInBot|Slackbot|Googlebot|bingbot|Applebot|Discordbot|vk|pinterest/i.test(ua);
-
-    if (!isCrawler) {
-      // Rediriger vers la SPA avec l'ID en query param pour éviter la boucle
-      const dest = id ? (SITE_URL + '?post=' + id + '&src=' + source) : SITE_URL;
-      return new Response(null, { status: 302, headers: { 'Location': dest } });
-    }
-
-    if (!id) {
-      return new Response(buildHtml('MarchéduRoi', null, DEFAULT_IMAGE, SITE_URL),
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
-    }
-
     const conf = TABLE_MAP[source] || TABLE_MAP.posts;
     const apiUrl = SUPABASE_URL + '/rest/v1/' + conf.table + '?id=eq.' + id + '&select=*&limit=1';
-
     const resp = await fetch(apiUrl, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
-
     const data = await resp.json();
     const item = Array.isArray(data) ? data[0] : null;
 
-    if (!item) {
-      return new Response(buildHtml('MarchéduRoi', null, DEFAULT_IMAGE, SITE_URL),
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    const title = item ? (item[conf.titleField] || item.title || item.name || 'MarchéduRoi') : 'MarchéduRoi';
+    const price = item ? formatPrice(item.price) : null;
+    const photo = item ? ((item.photos || [])[0] || null) : null;
+    const pageUrl = SITE_URL + '/' + source.replace('posts','annonce').replace('boutiques','boutique').replace('ateliers','atelier').replace('restos','resto') + '/' + id;
+
+    if (isCrawler) {
+      // Crawlers → HTML avec meta OG
+      return new Response(buildCrawlerHtml(title, price, photo || DEFAULT_IMAGE, pageUrl), {
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 's-maxage=300' }
+      });
+    } else {
+      // Vrais navigateurs → page intermédiaire qui stocke l'ID et redirige vers la SPA
+      return new Response(buildUserHtml(id, source, title, price, photo), {
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+      });
     }
 
-    const title = String(item[conf.titleField] || item.title || item.name || 'MarchéduRoi');
-    const price = formatPrice(item.price);
-    const photo = Array.isArray(item.photos) ? (item.photos[0] || null) : null;
-    const pageUrl = SITE_URL + '/' + source.replace('posts', 'annonce').replace('boutiques', 'boutique').replace('ateliers', 'atelier').replace('restos', 'resto') + '/' + id;
-    const ogImg = photo || DEFAULT_IMAGE;
-
-    return new Response(buildHtml(title, price, ogImg, pageUrl), {
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 's-maxage=300',
-      }
-    });
-
-  } catch (err) {
-    return new Response(
-      '<!DOCTYPE html><html><head>'
-      + '<meta property="og:title" content="MarchéduRoi"/>'
-      + '<meta property="og:image" content="' + DEFAULT_IMAGE + '"/>'
-      + '</head><body>Error</body></html>',
-      { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-    );
+  } catch (e) {
+    return new Response(null, { status: 302, headers: { 'Location': SITE_URL } });
   }
 }

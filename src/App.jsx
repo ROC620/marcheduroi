@@ -1687,13 +1687,15 @@ function AppContent() {
       }
     });
 
-    // Ouvrir l'annonce partagée via lien (?post=ID&src=posts)
-    const postFromUrl = new URLSearchParams(window.location.search).get("post");
-    const srcFromUrl = new URLSearchParams(window.location.search).get("src") || "posts";
-    if (postFromUrl) {
+    // Ouvrir l'annonce partagée — stockée dans sessionStorage par og.js
+    const postFromSession = sessionStorage.getItem("mdr_open_post");
+    const srcFromSession = sessionStorage.getItem("mdr_open_src") || "posts";
+    if (postFromSession) {
+      sessionStorage.removeItem("mdr_open_post");
+      sessionStorage.removeItem("mdr_open_src");
       const tableMap = { posts:"posts", boutiques:"boutiques", ateliers:"ateliers", restos:"restos", beaute:"beaute" };
-      const table = tableMap[srcFromUrl] || "posts";
-      supabase.from(table).select("*").eq("id", postFromUrl).maybeSingle().then(({ data: postData }) => {
+      const table = tableMap[srcFromSession] || "posts";
+      supabase.from(table).select("*").eq("id", postFromSession).maybeSingle().then(({ data: postData }) => {
         if (postData) setModal({ type:"contact", data: postData });
       });
     }
