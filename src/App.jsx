@@ -2370,7 +2370,7 @@ const PHONE_EXAMPLE = {
       vehicle: updatedPost.vehicle || null,
       lat: updatedPost.lat || null,
       lng: updatedPost.lng || null,
-      immo: updatedPost.immo || null,
+      immo: updatedPost.category==="Immobilier" ? immoForm : (updatedPost.immo || null),
     }).eq("id", modal.data.id).select();
     if (error) {
       console.error("Erreur modification:", error);
@@ -2553,6 +2553,7 @@ const PHONE_EXAMPLE = {
       setPostPhotos(post.photos||[]);
       setPostVideo(post.video||"");
       setVehicleForm(post.vehicle||{});
+      if (post.immo) setImmoForm({...{ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" },...post.immo});
       setModal({ type:"edit", data:post });
       return;
     }
@@ -2571,6 +2572,7 @@ const PHONE_EXAMPLE = {
     setPostPhotos(post.photos||[]);
     setPostVideo(post.video||"");
     setVehicleForm(post.vehicle||{});
+    if (post.immo) setImmoForm({...{ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" },...post.immo});
     setModal({ type:"edit", data:post });
   };
 
