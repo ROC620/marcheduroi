@@ -1693,11 +1693,14 @@ function AppContent() {
     if (postFromSession) {
       sessionStorage.removeItem("mdr_open_post");
       sessionStorage.removeItem("mdr_open_src");
-      const tableMap = { posts:"posts", boutiques:"boutiques", ateliers:"ateliers", restos:"restos", beaute:"beaute" };
-      const table = tableMap[srcFromSession] || "posts";
-      supabase.from(table).select("*").eq("id", postFromSession).maybeSingle().then(({ data: postData }) => {
-        if (postData) setModal({ type:"contact", data: postData });
-      });
+      // Aller sur la page annonces et ouvrir l'annonce en mode étendu
+      setView("home");
+      setExpandedContacts({ [postFromSession]: true });
+      // Scroll vers l'annonce après chargement
+      setTimeout(() => {
+        const el = document.getElementById("post-" + postFromSession);
+        if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
+      }, 800);
     }
     supabase.auth.onAuthStateChange((event, session) => {
       if (!session) { setUser(null); localStorage.removeItem("mdr_user_role"); return; }
@@ -3786,7 +3789,7 @@ const PHONE_EXAMPLE = {
 
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
             {filtered.slice(0, visibleCount).map(post=>(
-              <div key={post.id} className={`card-hover${post.sponsored&&!isUrgentActive(post)?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:post.sponsored&&!isUrgentActive(post)?"2px solid #FFD700":`1px solid ${theme.border}` }}>
+              <div key={post.id} id={"post-"+post.id} className={`card-hover${post.sponsored&&!isUrgentActive(post)?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:post.sponsored&&!isUrgentActive(post)?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 {post.video
                   ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60}/>
                   : post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
