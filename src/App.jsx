@@ -387,32 +387,10 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false
 // ─────────────────────────────────────────────────────────────────────────────
 
 function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed }) {
-  const [paused, setPaused] = React.useState(false);
-  const stripRef = React.useRef(null);
-  const resumeTimer = React.useRef(null);
-
-  const navigate_urg = (dir) => {
-    if (!stripRef.current) return;
-    const el = stripRef.current;
-    // Capturer la position CSS courante via la matrice de transform
-    const matrix = window.getComputedStyle(el).transform;
-    const currentX = matrix && matrix !== "none"
-      ? parseFloat(matrix.split(",")[4]) : 0;
-    const step = (cardW + GAP) * dir;
-    // Geler l'animation et appliquer un décalage avec transition
-    el.style.animationPlayState = "paused";
-    el.style.transition = "transform 0.35s ease";
-    el.style.transform = `translateX(${currentX - step}px)`;
-    setPaused(true);
-    // Reprendre après 3s
-    clearTimeout(resumeTimer.current);
-    resumeTimer.current = setTimeout(() => {
-      el.style.transition = "";
-      el.style.transform = "";
-      el.style.animationPlayState = "";
-      setPaused(false);
-    }, 3000);
-  };
+  const scrollRef  = React.useRef(null);
+  const dirRef     = React.useRef(-1);   // -1 = droite→gauche (normal)
+  const rafRef     = React.useRef(null);
+  const initDone   = React.useRef(false);
 
   const allUrgents = [
     ...posts.filter(p => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date()).map(p => ({...p, _urgentType:"annonce", _urgentIcon:"📋", _urgentLabel:"Annonce"})),
@@ -420,104 +398,98 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
     ...ateliers.filter(a => a.urgent && a.urgentUntil && new Date(a.urgentUntil) > new Date()).map(a => ({...a, title:a.name, _urgentType:"atelier", _urgentIcon:"🔧", _urgentLabel:"Atelier"})),
     ...restos.filter(r => r.urgent && r.urgentUntil && new Date(r.urgentUntil) > new Date()).map(r => ({...r, title:r.name, _urgentType:"resto", _urgentIcon:"🍽️", _urgentLabel:"Restaurant"})),
     ...beaute.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"beaute", _urgentIcon:"💇", _urgentLabel:"Beauté"})),
-  ].sort((a, b) => new Date(b.urgentActivatedAt || b.urgentUntil) - new Date(a.urgentActivatedAt || a.urgentUntil));
+  ].sort((a,b) => new Date(b.urgentActivatedAt||b.urgentUntil) - new Date(a.urgentActivatedAt||a.urgentUntil));
 
   const getTimeLeft = (until) => {
     const diff = new Date(until) - new Date();
     if (diff <= 0) return "Expiré";
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    if (h > 0) return `⏳ ${h}h${m > 0 ? m + "m" : ""} restant${h > 1 ? "s" : ""}`;
-    return `⏳ ${m} min restantes`;
+    const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000);
+    return h > 0 ? `⏳ ${h}h${m>0?m+"m":""} restant${h>1?"s":""}` : `⏳ ${m} min restantes`;
   };
-
   const [times, setTimes] = React.useState(() => allUrgents.map(p => getTimeLeft(p.urgentUntil)));
   React.useEffect(() => {
-    const timer = setInterval(() => setTimes(allUrgents.map(p => getTimeLeft(p.urgentUntil))), 60000);
-    return () => clearInterval(timer);
+    const t = setInterval(() => setTimes(allUrgents.map(p => getTimeLeft(p.urgentUntil))), 60000);
+    return () => clearInterval(t);
   }, [allUrgents.length]);
+
+  const cardW = windowWidth<=500 ? 160 : windowWidth<=800 ? 190 : 220;
+  const GAP   = 12;
+  const loopItems = [...allUrgents, ...allUrgents, ...allUrgents];
+
+  // Position de départ au milieu du triple bloc
+  React.useEffect(() => {
+    if (!scrollRef.current || initDone.current || allUrgents.length === 0) return;
+    initDone.current = true;
+    const offset = Math.floor(sessionSeed * allUrgents.length) * (cardW + GAP);
+    scrollRef.current.scrollLeft = allUrgents.length * (cardW + GAP) + offset;
+  }, [allUrgents.length, cardW, sessionSeed]);
+
+  // rAF — boucle seamless robuste
+  React.useEffect(() => {
+    if (allUrgents.length === 0) return;
+    const tick = () => {
+      const el = scrollRef.current;
+      if (el) {
+        const totalW = allUrgents.length * (cardW + GAP);
+        el.scrollLeft += dirRef.current * 1.5;
+        if (el.scrollLeft <= 2)            el.scrollLeft += totalW;
+        if (el.scrollLeft >= totalW*2 - 2) el.scrollLeft -= totalW;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [allUrgents.length, cardW]);
 
   if (allUrgents.length === 0) return null;
 
-  const cardW = windowWidth <= 500 ? 160 : windowWidth <= 800 ? 190 : 220;
-  const GAP = 12;
-  // Dupliquer pour boucle seamless CSS
-  const loopItems = allUrgents.length > 1 ? [...allUrgents, ...allUrgents] : [...allUrgents, ...allUrgents];
-  // Vitesse proportionnelle au nombre de cartes
-  const duration = Math.max(15, allUrgents.length * 4);
-
   const UrgentCard = ({ post, idx }) => (
-    <div onClick={() => navigate(`/${post._urgentType === "annonce" ? "annonce" : post._urgentType}/${post.id}`)}
-      style={{ flexShrink:0, width:cardW, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FF4757", background:theme.card, position:"relative", margin:`0 ${GAP/2}px` }}>
+    <div onClick={() => navigate(`/${post._urgentType==="annonce"?"annonce":post._urgentType}/${post.id}`)}
+      style={{ flexShrink:0, width:cardW, marginRight:GAP, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FF4757", background:theme.card, position:"relative" }}>
       <div style={{ width:"100%", height:windowWidth<=500?100:130, background:"linear-gradient(135deg,#1a1d30,#2a2d45)", position:"relative", overflow:"hidden" }}>
-        {post.photos && post.photos[0]
-          ? <img src={post.photos[0]} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
-          : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:32 }}>📦</div>
-        }
-        <div style={{ position:"absolute", top:8, left:8, background:"#FF4757", color:"#fff", borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:800 }}>🔥 URGENT</div>
-        {post._urgentType !== "annonce" && (
-          <div style={{ position:"absolute", top:8, right:8, background:"rgba(0,0,0,0.55)", color:"#fff", borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:700 }}>
-            {post._urgentIcon} {post._urgentLabel}
-          </div>
-        )}
+        {post.photos&&post.photos[0] ? <img src={post.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/> : <div style={{ width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32 }}>📦</div>}
+        <div style={{ position:"absolute",top:8,left:8,background:"#FF4757",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800 }}>🔥 URGENT</div>
+        {post._urgentType!=="annonce"&&<div style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700 }}>{post._urgentIcon} {post._urgentLabel}</div>}
       </div>
       <div style={{ padding:"10px 12px" }}>
-        <p style={{ fontWeight:700, fontSize:13, color:theme.text, marginBottom:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{post.title}</p>
-        {post.price && <p style={{ fontWeight:700, fontSize:13, color:"#43C6AC", marginBottom:2 }}>{post.price} FCFA</p>}
-        <p style={{ fontSize:11, color:"#FF4757", fontWeight:600 }}>{times[idx % allUrgents.length] || getTimeLeft(post.urgentUntil)}</p>
+        <p style={{ fontWeight:700,fontSize:13,color:theme.text,marginBottom:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{post.title}</p>
+        {post.price&&<p style={{ fontWeight:700,fontSize:13,color:"#43C6AC",marginBottom:2 }}>{post.price} FCFA</p>}
+        <p style={{ fontSize:11,color:"#FF4757",fontWeight:600 }}>{times[idx%allUrgents.length]||getTimeLeft(post.urgentUntil)}</p>
       </div>
     </div>
   );
 
   return (
     <div style={{ marginBottom:24, width:"100%" }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+      <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12 }}>
+        <div style={{ display:"flex",alignItems:"center",gap:8 }}>
           <span style={{ fontSize:windowWidth<=500?16:20 }}>🔥</span>
-          <p style={{ fontWeight:800, fontSize:windowWidth<=500?14:16, color:"#FF4757", letterSpacing:0.5 }}>EN CE MOMENT</p>
-          <span style={{ background:"rgba(255,71,87,0.15)", color:"#FF4757", borderRadius:20, padding:"2px 10px", fontSize:11, fontWeight:700 }}>{allUrgents.length}</span>
+          <p style={{ fontWeight:800,fontSize:windowWidth<=500?14:16,color:"#FF4757",letterSpacing:0.5 }}>EN CE MOMENT</p>
+          <span style={{ background:"rgba(255,71,87,0.15)",color:"#FF4757",borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700 }}>{allUrgents.length}</span>
         </div>
-        <div style={{ display:"flex", gap:6, alignItems:"center" }}>
-          <button onClick={() => navigate_urg(-1)} style={{ background:"rgba(255,71,87,0.1)", border:"1px solid rgba(255,71,87,0.3)", color:"#FF4757", width:28, height:28, borderRadius:"50%", fontSize:15, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>‹</button>
-          <button onClick={() => navigate_urg(1)}  style={{ background:"rgba(255,71,87,0.1)", border:"1px solid rgba(255,71,87,0.3)", color:"#FF4757", width:28, height:28, borderRadius:"50%", fontSize:15, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>›</button>
-        </div>
+        <button
+          onMouseDown={() => { dirRef.current = 1; }}
+          onMouseUp={() => { dirRef.current = -1; }}
+          onMouseLeave={() => { dirRef.current = -1; }}
+          onTouchStart={e => { e.preventDefault(); dirRef.current = 1; }}
+          onTouchEnd={() => { dirRef.current = -1; }}
+          style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"5px 12px",borderRadius:20,fontSize:11,fontWeight:700,cursor:"pointer",userSelect:"none" }}>
+          ‹ Reculer
+        </button>
       </div>
-      <div style={{ overflow:"hidden", width:"100%" }}
-        onTouchStart={() => setPaused(true)} onTouchEnd={() => setTimeout(() => setPaused(false), 2000)}>
-        <div ref={stripRef} className={`carousel-rtl${paused ? " carousel-paused" : ""}`}
-          style={{ display:"flex", width:"max-content", animationDuration:`${duration}s` }}>
-          {loopItems.map((post, i) => <UrgentCard key={post.id + "-urg-" + i} post={post} idx={i} />)}
-        </div>
+      <div ref={scrollRef} style={{ display:"flex",overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",paddingBottom:4 }}>
+        {loopItems.map((post,i) => <UrgentCard key={post.id+"-urg-"+i} post={post} idx={i}/>)}
       </div>
-      <div style={{ borderBottom:`1px solid ${theme.border}`, marginTop:16 }} />
+      <div style={{ borderBottom:`1px solid ${theme.border}`,marginTop:16 }}/>
     </div>
   );
 }
 
 function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed }) {
-  const [paused, setPaused] = React.useState(false);
-  const stripRef = React.useRef(null);
-  const resumeTimer = React.useRef(null);
-
-  const navigate_sp = (dir) => {
-    if (!stripRef.current) return;
-    const el = stripRef.current;
-    const matrix = window.getComputedStyle(el).transform;
-    const currentX = matrix && matrix !== "none"
-      ? parseFloat(matrix.split(",")[4]) : 0;
-    const step = (cardW + GAP) * dir;
-    el.style.animationPlayState = "paused";
-    el.style.transition = "transform 0.35s ease";
-    el.style.transform = `translateX(${currentX - step}px)`;
-    setPaused(true);
-    clearTimeout(resumeTimer.current);
-    resumeTimer.current = setTimeout(() => {
-      el.style.transition = "";
-      el.style.transform = "";
-      el.style.animationPlayState = "";
-      setPaused(false);
-    }, 3000);
-  };
+  const scrollRef  = React.useRef(null);
+  const dirRef     = React.useRef(1);    // 1 = gauche→droite (normal)
+  const rafRef     = React.useRef(null);
+  const initDone   = React.useRef(false);
 
   const allSponsored = [
     ...posts.filter(p => p.sponsored && p.sponsoredUntil && new Date(p.sponsoredUntil) > new Date()).map(p => ({...p, _type:"annonce", _icon:"📋", _label:"Annonce"})),
@@ -525,59 +497,75 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
     ...ateliers.filter(a => a.sponsored && a.sponsoredUntil && new Date(a.sponsoredUntil) > new Date()).map(a => ({...a, title:a.name, _type:"atelier", _icon:"🔧", _label:"Atelier"})),
     ...restos.filter(r => r.sponsored && r.sponsoredUntil && new Date(r.sponsoredUntil) > new Date()).map(r => ({...r, title:r.name, _type:"resto", _icon:"🍽️", _label:"Restaurant"})),
     ...beaute.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"beaute", _icon:"💇", _label:"Beauté"})),
-  ].sort((a, b) => new Date(b.sponsoredUntil) - new Date(a.sponsoredUntil));
+  ].sort((a,b) => new Date(b.sponsoredUntil) - new Date(a.sponsoredUntil));
+
+  const cardW = windowWidth<=500 ? 160 : windowWidth<=800 ? 190 : 220;
+  const GAP   = 12;
+  const loopItems = [...allSponsored, ...allSponsored, ...allSponsored];
+
+  React.useEffect(() => {
+    if (!scrollRef.current || initDone.current || allSponsored.length === 0) return;
+    initDone.current = true;
+    const offset = Math.floor(sessionSeed * allSponsored.length) * (cardW + GAP);
+    scrollRef.current.scrollLeft = allSponsored.length * (cardW + GAP) + offset;
+  }, [allSponsored.length, cardW, sessionSeed]);
+
+  React.useEffect(() => {
+    if (allSponsored.length === 0) return;
+    const tick = () => {
+      const el = scrollRef.current;
+      if (el) {
+        const totalW = allSponsored.length * (cardW + GAP);
+        el.scrollLeft += dirRef.current * 1.5;
+        if (el.scrollLeft <= 2)            el.scrollLeft += totalW;
+        if (el.scrollLeft >= totalW*2 - 2) el.scrollLeft -= totalW;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [allSponsored.length, cardW]);
 
   if (allSponsored.length === 0) return null;
 
-  const cardW = windowWidth <= 500 ? 160 : windowWidth <= 800 ? 190 : 220;
-  const GAP = 12;
-  const loopItems = allSponsored.length > 1 ? [...allSponsored, ...allSponsored] : [...allSponsored, ...allSponsored];
-  const duration = Math.max(15, allSponsored.length * 4);
-
   const SponsoredCard = ({ item }) => (
-    <div onClick={() => navigate(`/${item._type === "annonce" ? "annonce" : item._type}/${item.id}`)}
-      style={{ flexShrink:0, width:cardW, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative", margin:`0 ${GAP/2}px` }}>
-      <div style={{ width:"100%", height:windowWidth<=500?100:130, background:"linear-gradient(135deg,#1a1d30,#2a2d45)", position:"relative", overflow:"hidden" }}>
-        {item.photos && item.photos[0]
-          ? <img src={item.photos[0]} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
-          : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:32 }}>📦</div>
-        }
-        <div style={{ position:"absolute", top:8, left:8, background:"#FFD700", color:"#000", borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:800 }}>🌟 SPONSORISÉ</div>
-        {item._type !== "annonce" && (
-          <div style={{ position:"absolute", top:8, right:8, background:"rgba(0,0,0,0.55)", color:"#fff", borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:700 }}>
-            {item._icon} {item._label}
-          </div>
-        )}
+    <div onClick={() => navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`)}
+      style={{ flexShrink:0, width:cardW, marginRight:GAP, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
+      <div style={{ width:"100%",height:windowWidth<=500?100:130,background:"linear-gradient(135deg,#1a1d30,#2a2d45)",position:"relative",overflow:"hidden" }}>
+        {item.photos&&item.photos[0] ? <img src={item.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/> : <div style={{ width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32 }}>📦</div>}
+        <div style={{ position:"absolute",top:8,left:8,background:"#FFD700",color:"#000",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800 }}>🌟 SPONSORISÉ</div>
+        {item._type!=="annonce"&&<div style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700 }}>{item._icon} {item._label}</div>}
       </div>
       <div style={{ padding:"10px 12px" }}>
-        <p style={{ fontWeight:700, fontSize:13, color:theme.text, marginBottom:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{item.title}</p>
-        {item.price && <p style={{ fontWeight:700, fontSize:13, color:"#43C6AC", marginBottom:2 }}>{item.price} FCFA</p>}
-        {item.ville && <p style={{ fontSize:11, color:theme.sub }}>{item.ville}{item.quartier ? ` · ${item.quartier}` : ""}</p>}
+        <p style={{ fontWeight:700,fontSize:13,color:theme.text,marginBottom:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{item.title}</p>
+        {item.price&&<p style={{ fontWeight:700,fontSize:13,color:"#43C6AC",marginBottom:2 }}>{item.price} FCFA</p>}
+        {item.ville&&<p style={{ fontSize:11,color:theme.sub }}>{item.ville}{item.quartier?` · ${item.quartier}`:""}</p>}
       </div>
     </div>
   );
 
   return (
     <div style={{ marginBottom:24, width:"100%" }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+      <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12 }}>
+        <div style={{ display:"flex",alignItems:"center",gap:8 }}>
           <span style={{ fontSize:windowWidth<=500?16:20 }}>🌟</span>
-          <p style={{ fontWeight:800, fontSize:windowWidth<=500?14:16, color:"#FFD700", letterSpacing:0.5 }}>SPONSORISÉES</p>
-          <span style={{ background:"rgba(255,215,0,0.15)", color:"#FFD700", borderRadius:20, padding:"2px 10px", fontSize:11, fontWeight:700 }}>{allSponsored.length}</span>
+          <p style={{ fontWeight:800,fontSize:windowWidth<=500?14:16,color:"#FFD700",letterSpacing:0.5 }}>SPONSORISÉES</p>
+          <span style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700",borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700 }}>{allSponsored.length}</span>
         </div>
-        <div style={{ display:"flex", gap:6, alignItems:"center" }}>
-          <button onClick={() => navigate_sp(-1)} style={{ background:"rgba(255,215,0,0.1)", border:"1px solid rgba(255,215,0,0.3)", color:"#FFD700", width:28, height:28, borderRadius:"50%", fontSize:15, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>‹</button>
-          <button onClick={() => navigate_sp(1)}  style={{ background:"rgba(255,215,0,0.1)", border:"1px solid rgba(255,215,0,0.3)", color:"#FFD700", width:28, height:28, borderRadius:"50%", fontSize:15, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>›</button>
-        </div>
+        <button
+          onMouseDown={() => { dirRef.current = -1; }}
+          onMouseUp={() => { dirRef.current = 1; }}
+          onMouseLeave={() => { dirRef.current = 1; }}
+          onTouchStart={e => { e.preventDefault(); dirRef.current = -1; }}
+          onTouchEnd={() => { dirRef.current = 1; }}
+          style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"5px 12px",borderRadius:20,fontSize:11,fontWeight:700,cursor:"pointer",userSelect:"none" }}>
+          ‹ Reculer
+        </button>
       </div>
-      <div style={{ overflow:"hidden", width:"100%" }}
-        onTouchStart={() => setPaused(true)} onTouchEnd={() => setTimeout(() => setPaused(false), 2000)}>
-        <div ref={stripRef} className={`carousel-ltr${paused ? " carousel-paused" : ""}`}
-          style={{ display:"flex", width:"max-content", animationDuration:`${duration}s` }}>
-          {loopItems.map((item, i) => <SponsoredCard key={item.id + "-sp-" + i} item={item} />)}
-        </div>
+      <div ref={scrollRef} style={{ display:"flex",overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",paddingBottom:4 }}>
+        {loopItems.map((item,i) => <SponsoredCard key={item.id+"-sp-"+i} item={item}/>)}
       </div>
-      <div style={{ borderBottom:`1px solid ${theme.border}`, marginTop:16 }} />
+      <div style={{ borderBottom:`1px solid ${theme.border}`,marginTop:16 }}/>
     </div>
   );
 }
