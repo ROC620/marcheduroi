@@ -387,10 +387,7 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false
 // ─────────────────────────────────────────────────────────────────────────────
 
 function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed }) {
-  const scrollRef = React.useRef(null);
-  const autoScrollRef = React.useRef(null);
-  const pausedRef = React.useRef(false);
-  const startSet = React.useRef(false);
+  const [paused, setPaused] = React.useState(false);
 
   const allUrgents = [
     ...posts.filter(p => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date()).map(p => ({...p, _urgentType:"annonce", _urgentIcon:"📋", _urgentLabel:"Annonce"})),
@@ -399,8 +396,6 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
     ...restos.filter(r => r.urgent && r.urgentUntil && new Date(r.urgentUntil) > new Date()).map(r => ({...r, title:r.name, _urgentType:"resto", _urgentIcon:"🍽️", _urgentLabel:"Restaurant"})),
     ...beaute.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"beaute", _urgentIcon:"💇", _urgentLabel:"Beauté"})),
   ].sort((a, b) => new Date(b.urgentActivatedAt || b.urgentUntil) - new Date(a.urgentActivatedAt || a.urgentUntil));
-
-  const loopItems = allUrgents.length > 1 ? [...allUrgents, ...allUrgents, ...allUrgents] : allUrgents;
 
   const getTimeLeft = (until) => {
     const diff = new Date(until) - new Date();
@@ -417,108 +412,64 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
     return () => clearInterval(timer);
   }, [allUrgents.length]);
 
-  const cardW = windowWidth <= 500 ? 160 : windowWidth <= 800 ? 190 : 220;
-  const GAP = 12;
-
-  // Position de départ unique par session — dans le sens droite→gauche
-  React.useEffect(() => {
-    if (!scrollRef.current || startSet.current || allUrgents.length === 0) return;
-    startSet.current = true;
-    const totalW = allUrgents.length * (cardW + GAP);
-    const offset = Math.floor(sessionSeed * allUrgents.length) * (cardW + GAP);
-    // Commencer dans le 2e bloc + offset, puis défilement vers la gauche
-    scrollRef.current.scrollLeft = totalW + offset;
-  }, [allUrgents.length, sessionSeed, cardW]);
-
-  // Auto-scroll droite→gauche en boucle seamless robuste
-  React.useEffect(() => {
-    if (allUrgents.length <= 1) return;
-    autoScrollRef.current = setInterval(() => {
-      if (pausedRef.current || !scrollRef.current) return;
-      const el = scrollRef.current;
-      const totalW = allUrgents.length * (cardW + GAP);
-      // Rebouclage robuste — marge de 4px pour gérer les arrondis desktop
-      if (el.scrollLeft <= 4) {
-        el.scrollLeft = totalW;
-        return;
-      }
-      if (el.scrollLeft >= totalW * 2 - 4) {
-        el.scrollLeft = totalW;
-        return;
-      }
-      el.scrollLeft -= 1.5;
-    }, 20);
-    return () => clearInterval(autoScrollRef.current);
-  }, [allUrgents.length, cardW]);
-
-  // Pause seulement au clic/touch — pas au simple survol souris
-  const pause = () => { pausedRef.current = true; };
-  const resume = () => { pausedRef.current = false; };
-
   if (allUrgents.length === 0) return null;
 
-  const scrollTo = (dir) => {
-    if (!scrollRef.current) return;
-    pause();
-    scrollRef.current.scrollBy({ left: dir * (cardW + GAP), behavior: "smooth" });
-    setTimeout(resume, 2000);
-  };
+  const cardW = windowWidth <= 500 ? 160 : windowWidth <= 800 ? 190 : 220;
+  const GAP = 12;
+  // Dupliquer pour boucle seamless CSS
+  const loopItems = allUrgents.length > 1 ? [...allUrgents, ...allUrgents] : [...allUrgents, ...allUrgents];
+  // Vitesse proportionnelle au nombre de cartes
+  const duration = Math.max(15, allUrgents.length * 4);
 
   const UrgentCard = ({ post, idx }) => (
     <div onClick={() => navigate(`/${post._urgentType === "annonce" ? "annonce" : post._urgentType}/${post.id}`)}
-      className="card-urgent"
-      style={{ flexShrink: 0, width: cardW, borderRadius: 14, overflow: "hidden", cursor: "pointer", border: "2px solid #FF4757", background: theme.card, position: "relative" }}>
-      <div style={{ width: "100%", height: windowWidth <= 500 ? 100 : 130, background: "linear-gradient(135deg,#1a1d30,#2a2d45)", position: "relative", overflow: "hidden" }}>
+      style={{ flexShrink:0, width:cardW, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FF4757", background:theme.card, position:"relative", margin:`0 ${GAP/2}px` }}>
+      <div style={{ width:"100%", height:windowWidth<=500?100:130, background:"linear-gradient(135deg,#1a1d30,#2a2d45)", position:"relative", overflow:"hidden" }}>
         {post.photos && post.photos[0]
-          ? <img src={post.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>📦</div>
+          ? <img src={post.photos[0]} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+          : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:32 }}>📦</div>
         }
-        <div style={{ position: "absolute", top: 8, left: 8, background: "#FF4757", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 800, letterSpacing: 0.5 }}>🔥 URGENT</div>
-        {post._urgentIcon && post._urgentType !== "annonce" && (
-          <div style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.55)", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>
+        <div style={{ position:"absolute", top:8, left:8, background:"#FF4757", color:"#fff", borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:800 }}>🔥 URGENT</div>
+        {post._urgentType !== "annonce" && (
+          <div style={{ position:"absolute", top:8, right:8, background:"rgba(0,0,0,0.55)", color:"#fff", borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:700 }}>
             {post._urgentIcon} {post._urgentLabel}
           </div>
         )}
       </div>
-      <div style={{ padding: "10px 12px" }}>
-        <p style={{ fontWeight: 700, fontSize: 13, color: theme.text, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{post.title}</p>
-        {post.price && <p style={{ fontWeight: 700, fontSize: 13, color: "#43C6AC", marginBottom: 2 }}>{post.price} FCFA</p>}
-        <p style={{ fontSize: 11, color: "#FF4757", fontWeight: 600 }}>{times[idx % allUrgents.length] || getTimeLeft(post.urgentUntil)}</p>
+      <div style={{ padding:"10px 12px" }}>
+        <p style={{ fontWeight:700, fontSize:13, color:theme.text, marginBottom:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{post.title}</p>
+        {post.price && <p style={{ fontWeight:700, fontSize:13, color:"#43C6AC", marginBottom:2 }}>{post.price} FCFA</p>}
+        <p style={{ fontSize:11, color:"#FF4757", fontWeight:600 }}>{times[idx % allUrgents.length] || getTimeLeft(post.urgentUntil)}</p>
       </div>
     </div>
   );
 
   return (
-    <div style={{ marginBottom: 24, width: "100%" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: windowWidth <= 500 ? 16 : 20 }}>🔥</span>
-          <p style={{ fontWeight: 800, fontSize: windowWidth <= 500 ? 14 : 16, color: "#FF4757", letterSpacing: 0.5 }}>EN CE MOMENT</p>
-          <span style={{ background: "rgba(255,71,87,0.15)", color: "#FF4757", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>{allUrgents.length}</span>
+    <div style={{ marginBottom:24, width:"100%" }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          <span style={{ fontSize:windowWidth<=500?16:20 }}>🔥</span>
+          <p style={{ fontWeight:800, fontSize:windowWidth<=500?14:16, color:"#FF4757", letterSpacing:0.5 }}>EN CE MOMENT</p>
+          <span style={{ background:"rgba(255,71,87,0.15)", color:"#FF4757", borderRadius:20, padding:"2px 10px", fontSize:11, fontWeight:700 }}>{allUrgents.length}</span>
         </div>
-        {allUrgents.length > 1 && (
-          <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={() => scrollTo(-1)} style={{ background: "rgba(255,71,87,0.1)", border: "1px solid rgba(255,71,87,0.3)", color: "#FF4757", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-            <button onClick={() => scrollTo(1)} style={{ background: "rgba(255,71,87,0.1)", border: "1px solid rgba(255,71,87,0.3)", color: "#FF4757", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
-          </div>
-        )}
+        <button onClick={() => setPaused(p => !p)} style={{ background:"rgba(255,71,87,0.1)", border:"1px solid rgba(255,71,87,0.3)", color:"#FF4757", padding:"4px 10px", borderRadius:20, fontSize:11, fontWeight:700, cursor:"pointer" }}>
+          {paused ? "▶ Reprendre" : "⏸ Pause"}
+        </button>
       </div>
-      <div ref={scrollRef}
-        onTouchStart={pause} onTouchEnd={() => setTimeout(resume, 2000)}
-        style={{ display: "flex", gap: GAP, overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", paddingBottom: 4 }}>
-        {loopItems.map((post, i) => <UrgentCard key={post.id + "-urg-" + i} post={post} idx={i} />)}
+      <div style={{ overflow:"hidden", width:"100%" }}
+        onTouchStart={() => setPaused(true)} onTouchEnd={() => setTimeout(() => setPaused(false), 2000)}>
+        <div className={`carousel-rtl${paused ? " carousel-paused" : ""}`}
+          style={{ display:"flex", width:"max-content", animationDuration:`${duration}s` }}>
+          {loopItems.map((post, i) => <UrgentCard key={post.id + "-urg-" + i} post={post} idx={i} />)}
+        </div>
       </div>
-      <div style={{ borderBottom: `1px solid ${theme.border}`, marginTop: 16 }} />
+      <div style={{ borderBottom:`1px solid ${theme.border}`, marginTop:16 }} />
     </div>
   );
 }
 
-
 function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed }) {
-  const scrollRef = React.useRef(null);
-  const autoScrollRef = React.useRef(null);
-  const pausedRef = React.useRef(false);
-  const startSet = React.useRef(false);
+  const [paused, setPaused] = React.useState(false);
 
   const allSponsored = [
     ...posts.filter(p => p.sponsored && p.sponsoredUntil && new Date(p.sponsoredUntil) > new Date()).map(p => ({...p, _type:"annonce", _icon:"📋", _label:"Annonce"})),
@@ -528,100 +479,56 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
     ...beaute.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"beaute", _icon:"💇", _label:"Beauté"})),
   ].sort((a, b) => new Date(b.sponsoredUntil) - new Date(a.sponsoredUntil));
 
-  // Tripler les items pour boucle seamless
-  const loopItems = allSponsored.length > 1 ? [...allSponsored, ...allSponsored, ...allSponsored] : allSponsored;
+  if (allSponsored.length === 0) return null;
 
   const cardW = windowWidth <= 500 ? 160 : windowWidth <= 800 ? 190 : 220;
   const GAP = 12;
-
-  // Position de départ unique par session (chaque utilisateur voit une pub différente en premier)
-  React.useEffect(() => {
-    if (!scrollRef.current || startSet.current || allSponsored.length === 0) return;
-    startSet.current = true;
-    const totalW = allSponsored.length * (cardW + GAP);
-    // Commencer dans le 2e bloc (milieu) + offset aléatoire basé sur sessionSeed
-    const offset = Math.floor(sessionSeed * allSponsored.length) * (cardW + GAP);
-    scrollRef.current.scrollLeft = totalW + offset;
-  }, [allSponsored.length, sessionSeed, cardW]);
-
-  // Auto-scroll gauche→droite en boucle seamless robuste
-  React.useEffect(() => {
-    if (allSponsored.length <= 1) return;
-    autoScrollRef.current = setInterval(() => {
-      if (pausedRef.current || !scrollRef.current) return;
-      const el = scrollRef.current;
-      const totalW = allSponsored.length * (cardW + GAP);
-      // Rebouclage robuste — marge de 4px pour gérer les arrondis desktop
-      if (el.scrollLeft >= totalW * 2 - 4) {
-        el.scrollLeft = totalW;
-        return;
-      }
-      if (el.scrollLeft <= 4) {
-        el.scrollLeft = totalW;
-        return;
-      }
-      el.scrollLeft += 1.5;
-    }, 20);
-    return () => clearInterval(autoScrollRef.current);
-  }, [allSponsored.length, cardW]);
-
-  // Pause seulement au touch — pas au simple survol souris
-  const pause = () => { pausedRef.current = true; };
-  const resume = () => { pausedRef.current = false; };
-
-  if (allSponsored.length === 0) return null;
-
-  const scrollTo = (dir) => {
-    if (!scrollRef.current) return;
-    pause();
-    scrollRef.current.scrollBy({ left: dir * (cardW + GAP), behavior: "smooth" });
-    setTimeout(resume, 2000);
-  };
+  const loopItems = allSponsored.length > 1 ? [...allSponsored, ...allSponsored] : [...allSponsored, ...allSponsored];
+  const duration = Math.max(15, allSponsored.length * 4);
 
   const SponsoredCard = ({ item }) => (
     <div onClick={() => navigate(`/${item._type === "annonce" ? "annonce" : item._type}/${item.id}`)}
-      style={{ flexShrink: 0, width: cardW, borderRadius: 14, overflow: "hidden", cursor: "pointer", border: "2px solid #FFD700", background: theme.card, position: "relative" }}>
-      <div style={{ width: "100%", height: windowWidth <= 500 ? 100 : 130, background: "linear-gradient(135deg,#1a1d30,#2a2d45)", position: "relative", overflow: "hidden" }}>
+      style={{ flexShrink:0, width:cardW, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative", margin:`0 ${GAP/2}px` }}>
+      <div style={{ width:"100%", height:windowWidth<=500?100:130, background:"linear-gradient(135deg,#1a1d30,#2a2d45)", position:"relative", overflow:"hidden" }}>
         {item.photos && item.photos[0]
-          ? <img src={item.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>📦</div>
+          ? <img src={item.photos[0]} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+          : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:32 }}>📦</div>
         }
-        <div style={{ position: "absolute", top: 8, left: 8, background: "#FFD700", color: "#000", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 800 }}>🌟 SPONSORISÉ</div>
+        <div style={{ position:"absolute", top:8, left:8, background:"#FFD700", color:"#000", borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:800 }}>🌟 SPONSORISÉ</div>
         {item._type !== "annonce" && (
-          <div style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.55)", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>
+          <div style={{ position:"absolute", top:8, right:8, background:"rgba(0,0,0,0.55)", color:"#fff", borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:700 }}>
             {item._icon} {item._label}
           </div>
         )}
       </div>
-      <div style={{ padding: "10px 12px" }}>
-        <p style={{ fontWeight: 700, fontSize: 13, color: theme.text, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</p>
-        {item.price && <p style={{ fontWeight: 700, fontSize: 13, color: "#43C6AC", marginBottom: 2 }}>{item.price} FCFA</p>}
-        {item.ville && <p style={{ fontSize: 11, color: theme.sub }}>{item.ville}{item.quartier ? ` · ${item.quartier}` : ""}</p>}
+      <div style={{ padding:"10px 12px" }}>
+        <p style={{ fontWeight:700, fontSize:13, color:theme.text, marginBottom:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{item.title}</p>
+        {item.price && <p style={{ fontWeight:700, fontSize:13, color:"#43C6AC", marginBottom:2 }}>{item.price} FCFA</p>}
+        {item.ville && <p style={{ fontSize:11, color:theme.sub }}>{item.ville}{item.quartier ? ` · ${item.quartier}` : ""}</p>}
       </div>
     </div>
   );
 
   return (
-    <div style={{ marginBottom: 24, width: "100%" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: windowWidth <= 500 ? 16 : 20 }}>🌟</span>
-          <p style={{ fontWeight: 800, fontSize: windowWidth <= 500 ? 14 : 16, color: "#FFD700", letterSpacing: 0.5 }}>SPONSORISÉES</p>
-          <span style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>{allSponsored.length}</span>
+    <div style={{ marginBottom:24, width:"100%" }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          <span style={{ fontSize:windowWidth<=500?16:20 }}>🌟</span>
+          <p style={{ fontWeight:800, fontSize:windowWidth<=500?14:16, color:"#FFD700", letterSpacing:0.5 }}>SPONSORISÉES</p>
+          <span style={{ background:"rgba(255,215,0,0.15)", color:"#FFD700", borderRadius:20, padding:"2px 10px", fontSize:11, fontWeight:700 }}>{allSponsored.length}</span>
         </div>
-        {allSponsored.length > 1 && (
-          <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={() => scrollTo(-1)} style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.3)", color: "#FFD700", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-            <button onClick={() => scrollTo(1)} style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.3)", color: "#FFD700", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
-          </div>
-        )}
+        <button onClick={() => setPaused(p => !p)} style={{ background:"rgba(255,215,0,0.1)", border:"1px solid rgba(255,215,0,0.3)", color:"#FFD700", padding:"4px 10px", borderRadius:20, fontSize:11, fontWeight:700, cursor:"pointer" }}>
+          {paused ? "▶ Reprendre" : "⏸ Pause"}
+        </button>
       </div>
-      <div ref={scrollRef}
-        onTouchStart={pause} onTouchEnd={() => setTimeout(resume, 2000)}
-        style={{ display: "flex", gap: GAP, overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", paddingBottom: 4 }}>
-        {loopItems.map((item, i) => <SponsoredCard key={item.id + "-sp-" + i} item={item} />)}
+      <div style={{ overflow:"hidden", width:"100%" }}
+        onTouchStart={() => setPaused(true)} onTouchEnd={() => setTimeout(() => setPaused(false), 2000)}>
+        <div className={`carousel-ltr${paused ? " carousel-paused" : ""}`}
+          style={{ display:"flex", width:"max-content", animationDuration:`${duration}s` }}>
+          {loopItems.map((item, i) => <SponsoredCard key={item.id + "-sp-" + i} item={item} />)}
+        </div>
       </div>
-      <div style={{ borderBottom: `1px solid ${theme.border}`, marginTop: 16 }} />
+      <div style={{ borderBottom:`1px solid ${theme.border}`, marginTop:16 }} />
     </div>
   );
 }
@@ -2900,6 +2807,11 @@ const PHONE_EXAMPLE = {
         @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.85;transform:scale(1.05)}}
         @keyframes goldGlow{0%,100%{box-shadow:0 0 8px rgba(255,215,0,0.6),0 0 20px rgba(255,215,0,0.3),0 4px 24px rgba(255,215,0,0.25)}50%{box-shadow:0 0 16px rgba(255,215,0,0.9),0 0 36px rgba(255,215,0,0.5),0 4px 32px rgba(255,215,0,0.4)}}
         @keyframes urgentGlow{0%,100%{box-shadow:0 0 8px rgba(255,71,87,0.6),0 0 20px rgba(255,71,87,0.3),0 4px 24px rgba(255,71,87,0.2)}50%{box-shadow:0 0 18px rgba(255,71,87,0.9),0 0 40px rgba(255,71,87,0.5),0 4px 32px rgba(255,71,87,0.35)}}
+        @keyframes carouselRTL{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        @keyframes carouselLTR{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
+        .carousel-rtl{animation:carouselRTL 30s linear infinite;}
+        .carousel-ltr{animation:carouselLTR 30s linear infinite;}
+        .carousel-paused{animation-play-state:paused!important;}
         .card-sponsored{animation:goldGlow 2.5s ease-in-out infinite!important;border:2px solid #FFD700!important;}
         .card-urgent{animation:urgentGlow 1.8s ease-in-out infinite!important;border:2px solid #FF4757!important;}
         @keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
