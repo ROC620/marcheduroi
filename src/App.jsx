@@ -6384,8 +6384,8 @@ const PHONE_EXAMPLE = {
                           >
                             {[...similaires, ...similaires].map((p, i)=>(
                               <div key={p.id+"-"+i}
-                                onClick={e=>{ e.stopPropagation(); setModal(null); navigate("/annonce/"+p.id); }}
-                                onTouchEnd={e=>{ e.stopPropagation(); setModal(null); navigate("/annonce/"+p.id); }}
+                                onClick={e=>{ e.stopPropagation(); navigate("/annonce/"+modal.data.id,{replace:true}); setTimeout(()=>navigate("/annonce/"+p.id),0); }}
+                                onTouchEnd={e=>{ e.stopPropagation(); navigate("/annonce/"+modal.data.id,{replace:true}); setTimeout(()=>navigate("/annonce/"+p.id),0); }}
                                 style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:10,width:CARD_W,flexShrink:0,cursor:"pointer" }}>
                                 {p.photos&&p.photos.length>0
                                   ? <img src={p.photos[0]} alt="" style={{ width:"100%",height:90,borderRadius:8,objectFit:"cover",marginBottom:6 }}/>
@@ -6417,7 +6417,7 @@ const PHONE_EXAMPLE = {
                                 {p.sponsored && <span style={{ fontSize:10,color:"#FFD700" }}>🌟</span>}
                               </div>
                             </div>
-                            <button onClick={()=>{ setModal(null); navigate("/annonce/"+p.id); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,flexShrink:0,cursor:"pointer" }}>
+                            <button onClick={()=>{ navigate("/annonce/"+modal.data.id,{replace:true}); setTimeout(()=>navigate("/annonce/"+p.id),0); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,flexShrink:0,cursor:"pointer" }}>
                               Voir →
                             </button>
                           </div>
