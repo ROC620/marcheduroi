@@ -2835,16 +2835,19 @@ const PHONE_EXAMPLE = {
     distance: userLocation && p.lat && p.lng ? getDistance(userLocation.lat, userLocation.lng, parseFloat(p.lat), parseFloat(p.lng)) : null
   }));
 
-  // Urgent actif = dans le bandeau seulement — exclu du tri principal
+  // Urgent actif = dans le carousel ET dans le fil principal (avec bordure rouge)
   const isUrgentActive = (p) => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date();
   const filtered = (() => {
-    const sponsored = filteredBase.filter(p => p.sponsored && !isUrgentActive(p));
-    const normal = filteredBase.filter(p => !p.sponsored && !isUrgentActive(p));
+    // Ordre : urgent+sponsorisé > sponsorisé > urgent > normal
+    const urgentSponsored = filteredBase.filter(p => isUrgentActive(p) && p.sponsored);
+    const sponsoredOnly   = filteredBase.filter(p => p.sponsored && !isUrgentActive(p));
+    const urgentOnly      = filteredBase.filter(p => isUrgentActive(p) && !p.sponsored);
+    const normal          = filteredBase.filter(p => !p.sponsored && !isUrgentActive(p));
     if (sortByDistance) {
-      const all = [...sponsored, ...normal];
+      const all = [...urgentSponsored, ...sponsoredOnly, ...urgentOnly, ...normal];
       return [...all.filter(p=>p.distance!==null).sort((a,b)=>a.distance-b.distance), ...all.filter(p=>p.distance===null)];
     }
-    return [...shufflePosts(sponsored), ...shufflePosts(normal)];
+    return [...shufflePosts(urgentSponsored), ...shufflePosts(sponsoredOnly), ...shufflePosts(urgentOnly), ...shufflePosts(normal)];
   })();
 
   // Recherche globale — toutes les sections (boutiques, ateliers, restos, beauté)
@@ -3875,7 +3878,7 @@ const PHONE_EXAMPLE = {
 
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
             {filtered.slice(0, visibleCount).map(post=>(
-              <div key={post.id} id={"post-"+post.id} className={`card-hover${post.sponsored&&!isUrgentActive(post)?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:post.sponsored&&!isUrgentActive(post)?"2px solid #FFD700":`1px solid ${theme.border}` }}>
+              <div key={post.id} id={"post-"+post.id} className={`card-hover${isUrgentActive(post)?" card-urgent":post.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:isUrgentActive(post)?"2px solid #FF4757":post.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 {post.video
                   ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60}/>
                   : post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
