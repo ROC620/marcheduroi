@@ -430,24 +430,28 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
     scrollRef.current.scrollLeft = totalW + offset;
   }, [allUrgents.length, sessionSeed, cardW]);
 
-  // Auto-scroll droite→gauche en boucle seamless
+  // Auto-scroll droite→gauche en boucle seamless robuste
   React.useEffect(() => {
     if (allUrgents.length <= 1) return;
     autoScrollRef.current = setInterval(() => {
       if (pausedRef.current || !scrollRef.current) return;
       const el = scrollRef.current;
       const totalW = allUrgents.length * (cardW + GAP);
-      // Boucle seamless — rebondir silencieusement
-      if (el.scrollLeft <= 0) {
-        el.scrollLeft += totalW;
-      } else if (el.scrollLeft >= totalW * 2) {
-        el.scrollLeft -= totalW;
+      // Rebouclage robuste — marge de 4px pour gérer les arrondis desktop
+      if (el.scrollLeft <= 4) {
+        el.scrollLeft = totalW;
+        return;
+      }
+      if (el.scrollLeft >= totalW * 2 - 4) {
+        el.scrollLeft = totalW;
+        return;
       }
       el.scrollLeft -= 1.5;
     }, 20);
     return () => clearInterval(autoScrollRef.current);
   }, [allUrgents.length, cardW]);
 
+  // Pause seulement au clic/touch — pas au simple survol souris
   const pause = () => { pausedRef.current = true; };
   const resume = () => { pausedRef.current = false; };
 
@@ -500,7 +504,6 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
         )}
       </div>
       <div ref={scrollRef}
-        onMouseEnter={pause} onMouseLeave={resume}
         onTouchStart={pause} onTouchEnd={() => setTimeout(resume, 2000)}
         style={{ display: "flex", gap: GAP, overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", paddingBottom: 4 }}>
         {loopItems.map((post, i) => <UrgentCard key={post.id + "-urg-" + i} post={post} idx={i} />)}
@@ -541,24 +544,28 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
     scrollRef.current.scrollLeft = totalW + offset;
   }, [allSponsored.length, sessionSeed, cardW]);
 
-  // Auto-scroll gauche→droite en boucle seamless
+  // Auto-scroll gauche→droite en boucle seamless robuste
   React.useEffect(() => {
     if (allSponsored.length <= 1) return;
     autoScrollRef.current = setInterval(() => {
       if (pausedRef.current || !scrollRef.current) return;
       const el = scrollRef.current;
       const totalW = allSponsored.length * (cardW + GAP);
-      // Boucle seamless : quand on dépasse le 2e bloc, revenir silencieusement au même endroit dans le 1er bloc
-      if (el.scrollLeft >= totalW * 2) {
-        el.scrollLeft -= totalW;
-      } else if (el.scrollLeft <= 0) {
-        el.scrollLeft += totalW;
+      // Rebouclage robuste — marge de 4px pour gérer les arrondis desktop
+      if (el.scrollLeft >= totalW * 2 - 4) {
+        el.scrollLeft = totalW;
+        return;
+      }
+      if (el.scrollLeft <= 4) {
+        el.scrollLeft = totalW;
+        return;
       }
       el.scrollLeft += 1.5;
     }, 20);
     return () => clearInterval(autoScrollRef.current);
   }, [allSponsored.length, cardW]);
 
+  // Pause seulement au touch — pas au simple survol souris
   const pause = () => { pausedRef.current = true; };
   const resume = () => { pausedRef.current = false; };
 
@@ -610,7 +617,6 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
         )}
       </div>
       <div ref={scrollRef}
-        onMouseEnter={pause} onMouseLeave={resume}
         onTouchStart={pause} onTouchEnd={() => setTimeout(resume, 2000)}
         style={{ display: "flex", gap: GAP, overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", paddingBottom: 4 }}>
         {loopItems.map((item, i) => <SponsoredCard key={item.id + "-sp-" + i} item={item} />)}
@@ -5740,7 +5746,7 @@ const PHONE_EXAMPLE = {
               num:"3",
               title:"Publication d'annonces et tarification",
               icon:"💰",
-              content:`TARIFS DE PUBLICATION : ANNONCES CLASSIQUES : publication gratuite et illimitée pour tous. SPONSORING ANNONCES : 500 FCFA pour 7 jours · 1 500 FCFA pour 30 jours · 3 500 FCFA pour 90 jours · 6 000 FCFA pour 180 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 4 jours gratuits par mois puis 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. BADGE URGENT : 500 FCFA pour 3 jours · 1 000 FCFA pour 7 jours. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Après 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
+              content:`TARIFS DE PUBLICATION : ANNONCES CLASSIQUES : publication gratuite et illimitée pour tous. SPONSORING ANNONCES : 500 FCFA pour 7 jours · 1 500 FCFA pour 30 jours · 3 500 FCFA pour 90 jours · 6 000 FCFA pour 180 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 4 jours gratuits par mois puis 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. BADGE URGENT : 500 FCFA pour 3 jours · 1 000 FCFA pour 7 jours. MODIFICATION : Gratuite et illimitée pour les annonces classiques. Pour les boutiques, ateliers, restaurants et salons beauté, les modifications sont incluses dans l'abonnement actif. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
             },
             {
               num:"4",
