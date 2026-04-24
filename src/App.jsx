@@ -508,6 +508,109 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
   );
 }
 
+
+function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth }) {
+  const scrollRef = React.useRef(null);
+  const autoScrollRef = React.useRef(null);
+  const pausedRef = React.useRef(false);
+
+  const allSponsored = [
+    ...posts.filter(p => p.sponsored && p.sponsoredUntil && new Date(p.sponsoredUntil) > new Date()).map(p => ({...p, _type:"annonce", _icon:"📋", _label:"Annonce"})),
+    ...boutiques.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"boutique", _icon:"🛍️", _label:"Boutique"})),
+    ...ateliers.filter(a => a.sponsored && a.sponsoredUntil && new Date(a.sponsoredUntil) > new Date()).map(a => ({...a, title:a.name, _type:"atelier", _icon:"🔧", _label:"Atelier"})),
+    ...restos.filter(r => r.sponsored && r.sponsoredUntil && new Date(r.sponsoredUntil) > new Date()).map(r => ({...r, title:r.name, _type:"resto", _icon:"🍽️", _label:"Restaurant"})),
+    ...beaute.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"beaute", _icon:"💇", _label:"Beauté"})),
+  ].sort((a, b) => new Date(b.sponsoredUntil) - new Date(a.sponsoredUntil));
+
+  // Auto-scroll gauche→droite (direction inverse de urgent)
+  React.useEffect(() => {
+    if (allSponsored.length <= 1) return;
+    autoScrollRef.current = setInterval(() => {
+      if (pausedRef.current || !scrollRef.current) return;
+      const el = scrollRef.current;
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 2) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollLeft += 2;
+      }
+    }, 30);
+    return () => clearInterval(autoScrollRef.current);
+  }, [allSponsored.length]);
+
+  const pause = () => { pausedRef.current = true; };
+  const resume = () => { pausedRef.current = false; };
+
+  if (allSponsored.length === 0) return null;
+
+  const cardW = windowWidth <= 500 ? 160 : windowWidth <= 800 ? 190 : 220;
+
+  const scrollTo = (dir) => {
+    if (!scrollRef.current) return;
+    pause();
+    scrollRef.current.scrollBy({ left: dir * (cardW + 12), behavior: "smooth" });
+    setTimeout(resume, 2000);
+  };
+
+  return (
+    <div style={{ marginBottom: 24, width: "100%" }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: windowWidth <= 500 ? 16 : 20 }}>🌟</span>
+          <p style={{ fontWeight: 800, fontSize: windowWidth <= 500 ? 14 : 16, color: "#FFD700", letterSpacing: 0.5 }}>
+            SPONSORISÉES
+          </p>
+          <span style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>
+            {allSponsored.length}
+          </span>
+        </div>
+        {allSponsored.length > 2 && (
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={() => scrollTo(-1)} style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.3)", color: "#FFD700", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
+            <button onClick={() => scrollTo(1)} style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.3)", color: "#FFD700", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
+          </div>
+        )}
+      </div>
+
+      {/* Scrollable cards — défile gauche→droite */}
+      <div ref={scrollRef}
+        onMouseEnter={pause} onMouseLeave={resume}
+        onTouchStart={pause} onTouchEnd={() => setTimeout(resume, 2000)}
+        style={{ display: "flex", gap: 12, overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", paddingBottom: 4, direction: "ltr" }}>
+        {allSponsored.map((item) => (
+          <div key={item.id + "-sp"} onClick={() => navigate(`/${item._type === "annonce" ? "annonce" : item._type}/${item.id}`)}
+            style={{ flexShrink: 0, width: cardW, borderRadius: 14, overflow: "hidden", cursor: "pointer", border: "2px solid #FFD700", background: theme.card, position: "relative" }}>
+            {/* Photo */}
+            <div style={{ width: "100%", height: windowWidth <= 500 ? 100 : 130, background: "linear-gradient(135deg,#1a1d30,#2a2d45)", position: "relative", overflow: "hidden" }}>
+              {item.photos && item.photos[0]
+                ? <img src={item.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>📦</div>
+              }
+              <div style={{ position: "absolute", top: 8, left: 8, background: "#FFD700", color: "#000", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 800, letterSpacing: 0.5 }}>
+                🌟 SPONSORISÉ
+              </div>
+              {item._type !== "annonce" && (
+                <div style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.55)", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>
+                  {item._icon} {item._label}
+                </div>
+              )}
+            </div>
+            {/* Content */}
+            <div style={{ padding: "10px 12px" }}>
+              <p style={{ fontWeight: 700, fontSize: 13, color: theme.text, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</p>
+              {item.price && <p style={{ fontWeight: 700, fontSize: 13, color: "#43C6AC", marginBottom: 2 }}>{item.price} FCFA</p>}
+              {item.ville && <p style={{ fontSize: 11, color: theme.sub }}>{item.ville}{item.quartier ? ` · ${item.quartier}` : ""}</p>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Separator */}
+      <div style={{ borderBottom: `1px solid ${theme.border}`, marginTop: 16 }} />
+    </div>
+  );
+}
+
 function FlagCylinder({ theme }) {
   const [angle, setAngle] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -3726,6 +3829,7 @@ const PHONE_EXAMPLE = {
           
 
           {/* Bandeau Urgent — EN CE MOMENT */}
+          <SponsoredBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth}/>
           <UrgentBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth}/>
 
           {/* Résultats de recherche globale — boutiques, ateliers, restos, beauté */}
