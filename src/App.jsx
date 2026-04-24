@@ -3836,8 +3836,8 @@ const PHONE_EXAMPLE = {
           
 
           {/* Bandeau Urgent — EN CE MOMENT */}
-          <SponsoredBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed}/>
           <UrgentBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth}/>
+          <SponsoredBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed}/>
 
           {/* Résultats de recherche globale — boutiques, ateliers, restos, beauté */}
           {globalSearch.length > 0 && (
