@@ -4904,12 +4904,6 @@ const PHONE_EXAMPLE = {
                 inputMode="tel"
                 style={inputStyle}
               />
-              <div style={{ display:"flex",alignItems:"flex-start",gap:6,marginTop:7,padding:"8px 10px",background:"rgba(108,99,255,0.07)",borderRadius:8,border:"1px solid rgba(108,99,255,0.18)" }}>
-                <span style={{ fontSize:14,marginTop:1 }}>ℹ️</span>
-                <span style={{ fontSize:12,color:theme.sub,lineHeight:1.5 }}>
-                  Ce numéro sera visible sur vos annonces pour que les acheteurs puissent vous contacter directement. Assurez-vous qu'il est correct et actif sur WhatsApp.
-                </span>
-              </div>
             </div>
 
             <button onClick={register} className="btn-glow" disabled={!authForm.name||!authForm.email||!authForm.password||!authForm.phone} style={{ width:"100%",padding:"14px",background:(!authForm.name||!authForm.email||!authForm.password||!authForm.phone)?"rgba(108,99,255,0.4)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s",cursor:(!authForm.name||!authForm.email||!authForm.password||!authForm.phone)?"not-allowed":"pointer" }}>Créer mon compte</button>
@@ -6390,7 +6384,8 @@ const PHONE_EXAMPLE = {
                           >
                             {[...similaires, ...similaires].map((p, i)=>(
                               <div key={p.id+"-"+i}
-                                onTouchEnd={e=>{ e.stopPropagation(); setModal({type:"contact",data:p}); }}
+                                onClick={e=>{ e.stopPropagation(); setModal(null); navigate("/annonce/"+p.id); }}
+                                onTouchEnd={e=>{ e.stopPropagation(); setModal(null); navigate("/annonce/"+p.id); }}
                                 style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:10,width:CARD_W,flexShrink:0,cursor:"pointer" }}>
                                 {p.photos&&p.photos.length>0
                                   ? <img src={p.photos[0]} alt="" style={{ width:"100%",height:90,borderRadius:8,objectFit:"cover",marginBottom:6 }}/>
@@ -6422,7 +6417,7 @@ const PHONE_EXAMPLE = {
                                 {p.sponsored && <span style={{ fontSize:10,color:"#FFD700" }}>🌟</span>}
                               </div>
                             </div>
-                            <button onClick={()=>setModal({type:"contact",data:p})} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,flexShrink:0,cursor:"pointer" }}>
+                            <button onClick={()=>{ setModal(null); navigate("/annonce/"+p.id); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,flexShrink:0,cursor:"pointer" }}>
                               Voir →
                             </button>
                           </div>
