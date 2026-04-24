@@ -3971,7 +3971,14 @@ const PHONE_EXAMPLE = {
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                         </button>
                         {user&&(user.id===post.authorId||user.role==="admin")&&(
-                          <><button onClick={()=>openEdit(post)} style={{ background:"transparent",border:"none",color:"#6C63FF",padding:6,borderRadius:6 }}><Icon name="edit" size={14}/></button><button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"transparent",border:"none",color:"#FF4757",padding:6,borderRadius:6 }}><Icon name="trash" size={14}/></button></>
+                          <div style={{ display:"flex",gap:4,alignItems:"center",flexWrap:"wrap" }}>
+                            <button onClick={()=>openEdit(post)} style={{ background:"transparent",border:"none",color:"#6C63FF",padding:6,borderRadius:6 }}><Icon name="edit" size={14}/></button>
+                            <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"transparent",border:"none",color:"#FF4757",padding:6,borderRadius:6 }}><Icon name="trash" size={14}/></button>
+                            {!post.sponsored&&user.role!=="admin"&&<button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.12)",border:"1px solid rgba(255,215,0,0.4)",color:"#FFD700",padding:"4px 8px",borderRadius:6,fontWeight:700,fontSize:11,cursor:"pointer" }}>🌟 Sponsoriser</button>}
+                            {post.sponsored&&<span style={{ color:"#FFD700",fontSize:11,fontWeight:700,padding:"4px 6px" }}>🌟 Sponsorisé</span>}
+                            {!isUrgentActive(post)&&user.role!=="admin"&&<button onClick={()=>setModal({type:"urgent",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"4px 8px",borderRadius:6,fontWeight:700,fontSize:11,cursor:"pointer" }}>🔥 Urgent</button>}
+                            {isUrgentActive(post)&&<span style={{ color:"#FF4757",fontSize:11,fontWeight:700,padding:"4px 6px" }}>🔥 En cours</span>}
+                          </div>
                         )}
                       </div>
 
