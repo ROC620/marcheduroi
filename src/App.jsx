@@ -284,7 +284,7 @@ const INITIAL_ATELIERS = [
 
 const BOUTIQUE_TYPES = ["Cosmétiques & Beauté","Alimentation & Restauration","Électronique & Informatique","Mode & Vêtements","Pharmacie & Santé","Matériaux & Construction","Agriculture & Élevage","Librairie & Papeterie","Sport & Loisirs","Autre"];
 const ATELIER_TYPES = ["Couture/Mode","Mécanique","Menuiserie/Soudure","Artistique (peinture, musique...)","Électricité & Plomberie","Coiffure & Beauté","Imprimerie & Communication","Autre"];
-const IMMO_TYPES = ["Maison","Appartement","Parcelle","Domaine / Terrain","Local commercial","Villa"];
+const IMMO_TYPES = ["Maison","Appartement","Duplex","Villa","Magasin","Local commercial","Parcelle","Domaine / Terrain","Sanitaire 3 chambres 1 salon","Sanitaire 2 chambres 1 salon","Sanitaire chambre salon","Sanitaire entrée-couchée","Ordinaire 3 chambres 1 salon","Ordinaire 2 chambres 1 salon","Ordinaire chambre salon","Entrée-couchée ordinaire"];
 const IMMO_ETATS = ["Neuf","Bon état","À rénover","En construction"];
 const IMMO_TITRES = ["Oui - Titre foncier disponible","Non - Sans titre","En cours d'obtention","Lettre d'attribution"];
 
@@ -6384,8 +6384,7 @@ const PHONE_EXAMPLE = {
                           >
                             {[...similaires, ...similaires].map((p, i)=>(
                               <div key={p.id+"-"+i}
-                                onClick={e=>{ e.stopPropagation(); navigate("/annonce/"+modal.data.id,{replace:true}); setTimeout(()=>navigate("/annonce/"+p.id),0); }}
-                                onTouchEnd={e=>{ e.stopPropagation(); navigate("/annonce/"+modal.data.id,{replace:true}); setTimeout(()=>navigate("/annonce/"+p.id),0); }}
+                                onTouchEnd={e=>{ e.stopPropagation(); setModal({type:"contact",data:p}); }}
                                 style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:10,width:CARD_W,flexShrink:0,cursor:"pointer" }}>
                                 {p.photos&&p.photos.length>0
                                   ? <img src={p.photos[0]} alt="" style={{ width:"100%",height:90,borderRadius:8,objectFit:"cover",marginBottom:6 }}/>
@@ -6417,7 +6416,7 @@ const PHONE_EXAMPLE = {
                                 {p.sponsored && <span style={{ fontSize:10,color:"#FFD700" }}>🌟</span>}
                               </div>
                             </div>
-                            <button onClick={()=>{ navigate("/annonce/"+modal.data.id,{replace:true}); setTimeout(()=>navigate("/annonce/"+p.id),0); }} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,flexShrink:0,cursor:"pointer" }}>
+                            <button onClick={()=>setModal({type:"contact",data:p})} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 12px",borderRadius:8,fontWeight:600,fontSize:12,flexShrink:0,cursor:"pointer" }}>
                               Voir →
                             </button>
                           </div>
