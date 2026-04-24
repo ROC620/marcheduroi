@@ -5740,7 +5740,7 @@ const PHONE_EXAMPLE = {
               num:"3",
               title:"Publication d'annonces et tarification",
               icon:"💰",
-              content:`TARIFS DE PUBLICATION : ANNONCES CLASSIQUES : publication gratuite et illimitée pour tous. SPONSORING ANNONCES : 500 FCFA pour 7 jours · 1 500 FCFA pour 30 jours · 3 500 FCFA pour 90 jours · 6 000 FCFA pour 180 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 4 jours gratuits par mois puis 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. BADGE URGENT : 500 FCFA pour 6 heures · 1 000 FCFA pour 24 heures. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Après 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
+              content:`TARIFS DE PUBLICATION : ANNONCES CLASSIQUES : publication gratuite et illimitée pour tous. SPONSORING ANNONCES : 500 FCFA pour 7 jours · 1 500 FCFA pour 30 jours · 3 500 FCFA pour 90 jours · 6 000 FCFA pour 180 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 4 jours gratuits par mois puis 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. BADGE URGENT : 500 FCFA pour 3 jours · 1 000 FCFA pour 7 jours. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Après 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
             },
             {
               num:"4",
@@ -7222,9 +7222,9 @@ const PHONE_EXAMPLE = {
                   <p style={{ color:theme.sub,fontSize:13 }}>Un badge 🔥 URGENT rouge animé s'affiche sur votre annonce — visible par tous.</p>
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
-                  {[{dur:"6 heures",price:500,hours:6},{dur:"24 heures",price:1000,hours:24}].map(opt=>(
+                  {[{dur:"3 jours",price:500,days:3},{dur:"7 jours",price:1000,days:7}].map(opt=>(
                     <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Badge Urgent ${opt.dur} sur MarchéduRoi`,async()=>{
-                      const until = new Date(); until.setHours(until.getHours()+opt.hours);
+                      const until = new Date(); until.setDate(until.getDate()+opt.days);
                       const urgent_until = until.toISOString();
                       const urgent_activated_at = new Date().toISOString();
                       const {error} = await supabase.from("posts").update({urgent:true, urgent_until, urgent_activated_at}).eq("id",modal.data.id);
@@ -7256,9 +7256,9 @@ const PHONE_EXAMPLE = {
                   <p style={{ color:theme.sub,fontSize:13 }}>Votre établissement apparaît dans le bandeau 🔥 EN CE MOMENT — visible en tête de page par tous les visiteurs.</p>
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
-                  {[{dur:"6 heures",price:500,hours:6},{dur:"24 heures",price:1000,hours:24}].map(opt=>(
+                  {[{dur:"3 jours",price:500,days:3},{dur:"7 jours",price:1000,days:7}].map(opt=>(
                     <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Badge Urgent ${opt.dur} sur MarchéduRoi`,async()=>{
-                      const until = new Date(); until.setHours(until.getHours()+opt.hours);
+                      const until = new Date(); until.setDate(until.getDate()+opt.days);
                       const urgent_until = until.toISOString();
                       const urgent_activated_at = new Date().toISOString();
                       const setterMap = {boutiques:setBoutiques, ateliers:setAteliers, restos:setRestos, beaute:setBeaute};
