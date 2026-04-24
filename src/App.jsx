@@ -1426,6 +1426,8 @@ function AppContent() {
   const sponsorPost = async (postId, duration) => {
     const expDate = new Date();
     if (duration === "week") expDate.setDate(expDate.getDate() + 7);
+    else if (duration === "3months") expDate.setDate(expDate.getDate() + 90);
+    else if (duration === "6months") expDate.setDate(expDate.getDate() + 180);
     else expDate.setMonth(expDate.getMonth() + 1);
     const expStr = expDate.toISOString().slice(0,10);
 
@@ -2010,12 +2012,9 @@ const PHONE_EXAMPLE = {
   const isMoto    = postForm.category === "Motos & Tricycles";
 
   // ─── GRILLE TARIFAIRE ────────────────────────────────────────────────────────
-  const TARIFS_ANNONCE = [
-    { label:"30 jours",  days:30,  price:1000 },
-    { label:"90 jours",  days:90,  price:2500 },
-    { label:"180 jours", days:180, price:4500 },
-    { label:"360 jours", days:360, price:8000 },
-  ];
+  // Annonces classiques : publication gratuite et illimitée
+  // Monétisation uniquement via le Sponsoring
+  const TARIFS_ANNONCE = []; // conservé pour compatibilité édition
   const TARIFS_BOUTIQUE = [
     { label:"30 jours",  days:30,  price:2500  },
     { label:"90 jours",  days:90,  price:6000  },
@@ -2024,25 +2023,10 @@ const PHONE_EXAMPLE = {
   ];
 
   // 4 jours gratuits par mois — vérifie si l'utilisateur a déjà utilisé son crédit ce mois
-  const canPublishFree = async () => {
-    if (!user) return false;
-    const month = new Date().toISOString().slice(0,7);
-    const { data } = await supabase.from("free_days").select("used").eq("user_id", user.id).eq("month", month).maybeSingle();
-    return !data || data.used < 4;
-  };
-  const useFreeDay = async () => {
-    const month = new Date().toISOString().slice(0,7);
-    const { data } = await supabase.from("free_days").select("used").eq("user_id", user.id).eq("month", month).maybeSingle();
-    if (data) {
-      await supabase.from("free_days").update({ used: data.used + 1 }).eq("user_id", user.id).eq("month", month);
-    } else {
-      await supabase.from("free_days").insert({ user_id: user.id, month, used: 1 });
-    }
-  };
-  const [canFree, setCanFree] = useState(false);
-  useEffect(() => {
-    if (user) canPublishFree().then(setCanFree);
-  }, [user]);
+  // Publication gratuite pour tous — plus de limite mensuelle
+  const canPublishFree = async () => true;
+  const useFreeDay = async () => {}; // no-op
+  const [canFree, setCanFree] = useState(true);
   // ─────────────────────────────────────────────────────────────────────────────
 
   // ─── FEDAPAY : Paiement avant publication ───────────────────────────────────
@@ -5644,7 +5628,7 @@ const PHONE_EXAMPLE = {
               num:"3",
               title:"Publication d'annonces et tarification",
               icon:"💰",
-              content:`TARIFS DE PUBLICATION : Tous les inscrits bénéficient de 4 jours gratuits par mois pour tous types d'annonces. ANNONCES CLASSIQUES (toutes catégories) : 1 000 FCFA pour 30 jours · 2 500 FCFA pour 90 jours · 4 500 FCFA pour 180 jours · 8 000 FCFA pour 360 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. SPONSORING : 500 FCFA par semaine · 1 500 FCFA par mois. BADGE URGENT : 500 FCFA pour 6 heures · 1 000 FCFA pour 24 heures. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Après 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
+              content:`TARIFS DE PUBLICATION : ANNONCES CLASSIQUES : publication gratuite et illimitée pour tous. SPONSORING ANNONCES : 500 FCFA pour 7 jours · 1 500 FCFA pour 30 jours · 3 500 FCFA pour 90 jours · 6 000 FCFA pour 180 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 4 jours gratuits par mois puis 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. BADGE URGENT : 500 FCFA pour 6 heures · 1 000 FCFA pour 24 heures. MODIFICATION : Gratuite dans les 24 heures suivant la publication. Après 24 heures : 200 FCFA pour une annonce simple, 300 FCFA pour boutique, atelier, restaurant ou salon. Maximum 3 modifications payantes par mois et par annonce. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
             },
             {
               num:"4",
@@ -6152,66 +6136,22 @@ const PHONE_EXAMPLE = {
                   </div>
                 )}
                 {modal.type==="add" && user?.role !== "admin" && (
-                  <div style={{ background:theme.bg,border:`1px solid #6C63FF44`,borderRadius:14,padding:20,marginTop:16 }}>
-                    <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4 }}>💰 Durée de publication</p>
-
-                    {/* Option gratuite */}
-                    {canFree && (
-                      <div onClick={()=>setSelectedTarif(-1)}
-                        style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"12px 16px",marginBottom:8,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-                        <div>
-                          <p style={{ fontWeight:700,color:theme.text,fontSize:14 }}>🎁 4 jours gratuits</p>
-                          <p style={{ color:theme.sub,fontSize:12 }}>Votre crédit mensuel gratuit</p>
-                        </div>
-                        <span style={{ fontWeight:800,color:"#43C6AC",fontSize:16 }}>GRATUIT</span>
-                      </div>
-                    )}
-
-                    {/* Options payantes */}
-                    {TARIFS_ANNONCE.map((t,i)=>(
-                      <div key={i} onClick={()=>setSelectedTarif(i)}
-                        style={{ background:selectedTarif===i?"rgba(108,99,255,0.12)":theme.card,border:`2px solid ${selectedTarif===i?"#6C63FF":theme.border}`,borderRadius:12,padding:"12px 16px",marginBottom:8,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-                        <div>
-                          <p style={{ fontWeight:700,color:theme.text,fontSize:14 }}>{t.label}</p>
-                          <p style={{ color:theme.sub,fontSize:12 }}>{Math.round(t.price/t.days*30).toLocaleString()} FCFA/mois effectif</p>
-                        </div>
-                        <div style={{ textAlign:"right" }}>
-                            <span style={{ fontWeight:800,color:"#6C63FF",fontSize:16,display:"block" }}>{t.price.toLocaleString()} FCFA</span>
-                            <span style={{ fontWeight:600,color:theme.sub,fontSize:11 }}>≈ {(t.price/610).toFixed(1)} USD</span>
-                          </div>
-                      </div>
-                    ))}
-                    <p style={{ fontSize:11,color:"#43C6AC",textAlign:"center",fontWeight:600,marginTop:8 }}>💳 Paiement sécurisé MTN / Moov Money (FedaPay)</p>
+                  <div style={{ background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:14,padding:16,marginTop:16,display:"flex",alignItems:"center",gap:12 }}>
+                    <span style={{ fontSize:28 }}>🎁</span>
+                    <div>
+                      <p style={{ fontWeight:700,fontSize:14,color:"#43C6AC",marginBottom:2 }}>Publication gratuite et illimitée !</p>
+                      <p style={{ color:theme.sub,fontSize:12 }}>Votre annonce reste visible jusqu'à ce que vous la supprimiez. Boostez-la avec le Sponsoring 🌟</p>
+                    </div>
                   </div>
                 )}
                 <button
                   onClick={modal.type==="add"
-                    ? () => {
-                        if (!validatePostForm()) return;
-                        if (selectedTarif === -1) {
-                          useFreeDay();
-                          const exp = new Date();
-                          exp.setDate(exp.getDate() + 4);
-                          addPost(exp.toISOString().slice(0,10));
-                        } else {
-                          const tarif = TARIFS_ANNONCE[selectedTarif] || TARIFS_ANNONCE[0];
-                          const exp2 = new Date();
-                          exp2.setDate(exp2.getDate() + tarif.days);
-                          const expStr = exp2.toISOString().slice(0,10);
-                          handlePayment(tarif.price, `Publication annonce ${tarif.label} sur MarchéduRoi`, () => addPost(expStr));
-                        }
-                      }
+                    ? () => { if (!validatePostForm()) return; addPost(null); }
                     : editPost
                   }
                   className="btn-glow"
                   style={{ width:"100%",marginTop:16,padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-                  {modal.type==="add"
-                    ? user?.role==="admin"
-                      ? "Publier l'annonce"
-                      : selectedTarif===-1
-                        ? "🎁 Publier gratuitement (4 jours)"
-                        : `💳 Payer & Publier · ${(TARIFS_ANNONCE[selectedTarif]||TARIFS_ANNONCE[0]).price.toLocaleString()} FCFA`
-                    : "Enregistrer"}
+                  {modal.type==="add" ? "🎁 Publier gratuitement" : "Enregistrer"}
                 </button>
               </>
             )}
@@ -7099,7 +7039,7 @@ const PHONE_EXAMPLE = {
                 <div style={{ background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:12,padding:16,marginTop:8 }}>
                   <p style={{ fontWeight:700,color:"#43C6AC",fontSize:14,marginBottom:8 }}>📋 Tarifs annonces classiques</p>
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:16 }}>
-                    {[["4 jours","Gratuit"],["30 jours","1 000 F"],["90 jours","2 500 F"],["180 jours","4 500 F"],["360 jours","8 000 F"]].map(([d,p])=>(
+                    {[["Illimitée","Gratuit"],["Sponsoring 7j","500 F"],["Sponsoring 30j","1 500 F"],["Sponsoring 90j","3 500 F"],["Sponsoring 180j","6 000 F"]].map(([d,p])=>(
                       <div key={d} style={{ background:theme.card,borderRadius:8,padding:"8px 10px",display:"flex",flexDirection:"column",gap:2 }}>
                         <span style={{ color:theme.sub,fontSize:12 }}>{d}</span>
                         <span style={{ fontWeight:800,color:p==="Gratuit"?"#43C6AC":"#6C63FF",fontSize:13 }}>{p}</span>
@@ -7155,31 +7095,26 @@ const PHONE_EXAMPLE = {
                     </>
                   ) : (
                     <>
-                      <div onClick={()=>handlePayment(500,"Sponsoring 1 semaine sur MarchéduRoi",async()=>{
-                        await sponsorPost(modal.data.id,"week");
-                        setModal({type:"sponsor_success", data:modal.data, duration:"1 semaine"});
-                      })} style={{ background:theme.card,border:"2px solid #FFD700",borderRadius:14,padding:20,cursor:"pointer" }}>
-                        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-                          <div>
-                            <p style={{ fontWeight:800,fontSize:16,color:"#FFD700",marginBottom:4 }}>🌟 Sponsoring 1 semaine</p>
-                            <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en tête pendant 7 jours</p>
+                      {[
+                        { dur:"week",     days:7,   price:500,  label:"7 jours",   color:"#FFD700", popular:false },
+                        { dur:"month",    days:30,  price:1500, label:"30 jours",  color:"#FFA500", popular:true  },
+                        { dur:"3months",  days:90,  price:3500, label:"90 jours",  color:"#FF8C00", popular:false },
+                        { dur:"6months",  days:180, price:6000, label:"180 jours", color:"#FF6B35", popular:false },
+                      ].map(opt=>(
+                        <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Sponsoring ${opt.label} sur MarchéduRoi`,async()=>{
+                          await sponsorPost(modal.data.id,opt.dur);
+                          setModal({type:"sponsor_success",data:modal.data,duration:opt.label});
+                        })} style={{ background:`linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,165,0,0.08))`,border:`2px solid ${opt.color}`,borderRadius:14,padding:16,cursor:"pointer",position:"relative",marginBottom:0 }}>
+                          {opt.popular && <div style={{ position:"absolute",top:-10,right:14,background:`linear-gradient(135deg,#FFD700,#FFA500)`,color:"#000",padding:"2px 10px",borderRadius:20,fontSize:10,fontWeight:800 }}>POPULAIRE</div>}
+                          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                            <div>
+                              <p style={{ fontWeight:800,fontSize:15,color:opt.color,marginBottom:2 }}>🌟 {opt.label}</p>
+                              <p style={{ color:theme.sub,fontSize:12 }}>En tête des résultats pendant {opt.days} jours</p>
+                            </div>
+                            <span style={{ fontWeight:800,fontSize:18,color:opt.color }}>{opt.price.toLocaleString()} FCFA</span>
                           </div>
-                          <span style={{ fontWeight:800,fontSize:20,color:"#FFD700" }}>500 FCFA</span>
                         </div>
-                      </div>
-                      <div onClick={()=>handlePayment(1500,"Sponsoring 1 mois sur MarchéduRoi",async()=>{
-                        await sponsorPost(modal.data.id,"month");
-                        setModal({type:"sponsor_success", data:modal.data, duration:"1 mois"});
-                      })} style={{ background:"linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.1))",border:"2px solid #FFA500",borderRadius:14,padding:20,cursor:"pointer",position:"relative" }}>
-                        <div style={{ position:"absolute",top:-12,right:16,background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:800 }}>POPULAIRE</div>
-                        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-                          <div>
-                            <p style={{ fontWeight:800,fontSize:16,color:"#FFA500",marginBottom:4 }}>🌟 Sponsoring 1 mois</p>
-                            <p style={{ color:theme.sub,fontSize:13 }}>Votre annonce en tête pendant 30 jours</p>
-                          </div>
-                          <span style={{ fontWeight:800,fontSize:20,color:"#FFA500" }}>1 500 FCFA</span>
-                        </div>
-                      </div>
+                      ))}
                     </>
                   )}
                 </div>
