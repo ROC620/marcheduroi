@@ -1243,12 +1243,8 @@ function AppContent() {
   const isCertified = (authorId) => certifiedUsers.includes(authorId);
 
 
-  const canModifyFree = (post) => {
-    const publishedAt = new Date(post.date);
-    const now = new Date();
-    const hoursDiff = (now - publishedAt) / (1000 * 60 * 60);
-    return hoursDiff <= 24;
-  };
+  // Modification gratuite et illimitée pour les annonces classiques
+  const canModifyFree = (post) => true;
 
   const getModifPrice = (post) => {
     const isSimple = !["Boutiques","Ateliers","Restos","Beauté"].includes(post.category);
@@ -2560,17 +2556,6 @@ const PHONE_EXAMPLE = {
       setVehicleForm(post.vehicle||{});
       if (post.immo) setImmoForm({...{ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" },...post.immo});
       setModal({ type:"edit", data:post });
-      return;
-    }
-    const isFree = canModifyFree(post);
-    if (!isFree) {
-      const count = getModifCount(post.id);
-      if (count >= MAX_MODIFS) {
-        notify(`Limite de ${MAX_MODIFS} modifications payantes atteinte ce mois-ci`, "error");
-        return;
-      }
-      const price = getModifPrice(post);
-      setModal({ type:"confirmEdit", data:post, price, count });
       return;
     }
     setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"" });
@@ -4199,7 +4184,7 @@ const PHONE_EXAMPLE = {
                   { icon:"❤️", val:post.likes, label:"likes", color:"#FF6584" },
                   { icon:"⭐", val:getAvgRating(post.id)?`${getAvgRating(post.id)}/5`:"–", label:"note", color:"#FFD700" },
                   { icon:"📊", val: postViews[post.id]>0 ? Math.round((contactClicks[post.id]||0)/postViews[post.id]*100)+"%" : "–", label:"conversion", color:"#43C6AC" },
-                  { icon:"✏️", val:`${getModifCount(post.id)}/${MAX_MODIFS}`, label:"modifs ce mois", color: getModifCount(post.id)>=MAX_MODIFS?"#FF4757":"#6C63FF" },
+                  { icon:"✏️", val:"∞", label:"modifs gratuites", color:"#43C6AC" },
                 ].map(s=>(
                   <div key={s.label} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:8,padding:"5px 10px",display:"flex",alignItems:"center",gap:4 }}>
                     <span style={{ fontSize:12 }}>{s.icon}</span>
@@ -6973,46 +6958,6 @@ const PHONE_EXAMPLE = {
               </>
             )}
 
-            {modal.type==="confirmEdit"&&(
-              <>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>✏️ Modification payante</h3>
-                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
-                </div>
-                <div style={{ background:theme.bg,borderRadius:12,padding:16,marginBottom:20 }}>
-                  <p style={{ fontWeight:700,color:theme.text,marginBottom:4 }}>{modal.data.title}</p>
-                  <p style={{ color:theme.sub,fontSize:13 }}>Publiée le {modal.data.date}</p>
-                </div>
-                <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:12,padding:20,marginBottom:20,textAlign:"center" }}>
-                  <p style={{ color:theme.sub,fontSize:14,marginBottom:8 }}>Le délai de 24h gratuit est écoulé.</p>
-                  <p style={{ fontWeight:800,fontSize:28,color:"#6C63FF" }}>{modal.price} FCFA</p>
-                  <p style={{ color:theme.sub,fontSize:13,marginTop:4 }}>≈ ${(modal.price/600).toFixed(2)} USD par modification</p>
-                  <p style={{ color:"#FFD700",fontSize:12,marginTop:6,fontWeight:600 }}>
-                    📋 {modal.count}/{MAX_MODIFS} modifications utilisées ce mois · Il vous reste {MAX_MODIFS - modal.count} modification(s)
-                  </p>
-                  <p style={{ fontSize:11,color:"#43C6AC",marginTop:8,fontWeight:600 }}>💳 Paiement sécurisé via MTN / Moov Money (FedaPay)</p>
-                </div>
-                <div style={{ display:"flex",gap:12 }}>
-                  <button onClick={()=>setModal(null)} style={{ flex:1,padding:"12px",background:"transparent",border:`1px solid ${theme.border}`,color:theme.text,borderRadius:12,fontWeight:600,cursor:"pointer" }}>Annuler</button>
-                  <button onClick={()=>{
-                    handleFedaPayment(
-                      modal.price,
-                      `Modification annonce "${modal.data.title}" sur MarchéduRoi`,
-                      () => {
-                        recordModification(modal.data.id);
-                        setPostForm({ title:modal.data.title, category:modal.data.category, description:modal.data.description, price:modal.data.price||"", contact:modal.data.contact||"", phone:modal.data.phone||"" });
-                        setPostPhotos(modal.data.photos||[]);
-                        setVehicleForm(modal.data.vehicle||{});
-                        setImmoForm(modal.data.immo||{ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" });
-                        setModal({ type:"edit", data:modal.data });
-                      }
-                    );
-                  }} className="btn-glow" style={{ flex:2,padding:"12px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,cursor:"pointer",transition:"box-shadow 0.2s" }}>
-                    💳 Payer {modal.price} FCFA et modifier
-                  </button>
-                </div>
-              </>
-            )}
 
             {/* HOWTO */}
             {modal.type==="howto"&&(
