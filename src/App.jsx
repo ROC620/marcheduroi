@@ -388,6 +388,31 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false
 
 function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed }) {
   const [paused, setPaused] = React.useState(false);
+  const stripRef = React.useRef(null);
+  const resumeTimer = React.useRef(null);
+
+  const navigate_urg = (dir) => {
+    if (!stripRef.current) return;
+    const el = stripRef.current;
+    // Capturer la position CSS courante via la matrice de transform
+    const matrix = window.getComputedStyle(el).transform;
+    const currentX = matrix && matrix !== "none"
+      ? parseFloat(matrix.split(",")[4]) : 0;
+    const step = (cardW + GAP) * dir;
+    // Geler l'animation et appliquer un décalage avec transition
+    el.style.animationPlayState = "paused";
+    el.style.transition = "transform 0.35s ease";
+    el.style.transform = `translateX(${currentX - step}px)`;
+    setPaused(true);
+    // Reprendre après 3s
+    clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => {
+      el.style.transition = "";
+      el.style.transform = "";
+      el.style.animationPlayState = "";
+      setPaused(false);
+    }, 3000);
+  };
 
   const allUrgents = [
     ...posts.filter(p => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date()).map(p => ({...p, _urgentType:"annonce", _urgentIcon:"📋", _urgentLabel:"Annonce"})),
@@ -452,13 +477,14 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
           <p style={{ fontWeight:800, fontSize:windowWidth<=500?14:16, color:"#FF4757", letterSpacing:0.5 }}>EN CE MOMENT</p>
           <span style={{ background:"rgba(255,71,87,0.15)", color:"#FF4757", borderRadius:20, padding:"2px 10px", fontSize:11, fontWeight:700 }}>{allUrgents.length}</span>
         </div>
-        <button onClick={() => setPaused(p => !p)} style={{ background:"rgba(255,71,87,0.1)", border:"1px solid rgba(255,71,87,0.3)", color:"#FF4757", padding:"4px 10px", borderRadius:20, fontSize:11, fontWeight:700, cursor:"pointer" }}>
-          {paused ? "▶ Reprendre" : "⏸ Pause"}
-        </button>
+        <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+          <button onClick={() => navigate_urg(-1)} style={{ background:"rgba(255,71,87,0.1)", border:"1px solid rgba(255,71,87,0.3)", color:"#FF4757", width:28, height:28, borderRadius:"50%", fontSize:15, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>‹</button>
+          <button onClick={() => navigate_urg(1)}  style={{ background:"rgba(255,71,87,0.1)", border:"1px solid rgba(255,71,87,0.3)", color:"#FF4757", width:28, height:28, borderRadius:"50%", fontSize:15, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>›</button>
+        </div>
       </div>
       <div style={{ overflow:"hidden", width:"100%" }}
         onTouchStart={() => setPaused(true)} onTouchEnd={() => setTimeout(() => setPaused(false), 2000)}>
-        <div className={`carousel-rtl${paused ? " carousel-paused" : ""}`}
+        <div ref={stripRef} className={`carousel-rtl${paused ? " carousel-paused" : ""}`}
           style={{ display:"flex", width:"max-content", animationDuration:`${duration}s` }}>
           {loopItems.map((post, i) => <UrgentCard key={post.id + "-urg-" + i} post={post} idx={i} />)}
         </div>
@@ -470,6 +496,28 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
 
 function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed }) {
   const [paused, setPaused] = React.useState(false);
+  const stripRef = React.useRef(null);
+  const resumeTimer = React.useRef(null);
+
+  const navigate_sp = (dir) => {
+    if (!stripRef.current) return;
+    const el = stripRef.current;
+    const matrix = window.getComputedStyle(el).transform;
+    const currentX = matrix && matrix !== "none"
+      ? parseFloat(matrix.split(",")[4]) : 0;
+    const step = (cardW + GAP) * dir;
+    el.style.animationPlayState = "paused";
+    el.style.transition = "transform 0.35s ease";
+    el.style.transform = `translateX(${currentX - step}px)`;
+    setPaused(true);
+    clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => {
+      el.style.transition = "";
+      el.style.transform = "";
+      el.style.animationPlayState = "";
+      setPaused(false);
+    }, 3000);
+  };
 
   const allSponsored = [
     ...posts.filter(p => p.sponsored && p.sponsoredUntil && new Date(p.sponsoredUntil) > new Date()).map(p => ({...p, _type:"annonce", _icon:"📋", _label:"Annonce"})),
@@ -517,13 +565,14 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
           <p style={{ fontWeight:800, fontSize:windowWidth<=500?14:16, color:"#FFD700", letterSpacing:0.5 }}>SPONSORISÉES</p>
           <span style={{ background:"rgba(255,215,0,0.15)", color:"#FFD700", borderRadius:20, padding:"2px 10px", fontSize:11, fontWeight:700 }}>{allSponsored.length}</span>
         </div>
-        <button onClick={() => setPaused(p => !p)} style={{ background:"rgba(255,215,0,0.1)", border:"1px solid rgba(255,215,0,0.3)", color:"#FFD700", padding:"4px 10px", borderRadius:20, fontSize:11, fontWeight:700, cursor:"pointer" }}>
-          {paused ? "▶ Reprendre" : "⏸ Pause"}
-        </button>
+        <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+          <button onClick={() => navigate_sp(-1)} style={{ background:"rgba(255,215,0,0.1)", border:"1px solid rgba(255,215,0,0.3)", color:"#FFD700", width:28, height:28, borderRadius:"50%", fontSize:15, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>‹</button>
+          <button onClick={() => navigate_sp(1)}  style={{ background:"rgba(255,215,0,0.1)", border:"1px solid rgba(255,215,0,0.3)", color:"#FFD700", width:28, height:28, borderRadius:"50%", fontSize:15, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>›</button>
+        </div>
       </div>
       <div style={{ overflow:"hidden", width:"100%" }}
         onTouchStart={() => setPaused(true)} onTouchEnd={() => setTimeout(() => setPaused(false), 2000)}>
-        <div className={`carousel-ltr${paused ? " carousel-paused" : ""}`}
+        <div ref={stripRef} className={`carousel-ltr${paused ? " carousel-paused" : ""}`}
           style={{ display:"flex", width:"max-content", animationDuration:`${duration}s` }}>
           {loopItems.map((item, i) => <SponsoredCard key={item.id + "-sp-" + i} item={item} />)}
         </div>
