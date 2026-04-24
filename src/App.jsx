@@ -306,7 +306,7 @@ const FLAGS = [
 ];
 
 // ── Composant vidéo auto-play sur les cartes ─────────────────────────────────
-function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
+function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false }) {
   const [playing, setPlaying] = React.useState(false);
   const containerRef = React.useRef(null);
   const videoRef = React.useRef(null);
@@ -316,15 +316,19 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60 }) {
   const ytMatch = (video||"").match(/(?:v=|youtu\.be\/|shorts\/)([\w-]{11})/);
   const ytId = ytMatch ? ytMatch[1] : null;
 
-  // Arrêter la vidéo quand la carte sort du viewport
+  // Lancer/arrêter selon la visibilité dans le viewport
   React.useEffect(() => {
     if (!containerRef.current) return;
     const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) setPlaying(false);
-    }, { threshold: 0.3 });
+      if (autoPlay) {
+        setPlaying(entry.isIntersecting);
+      } else {
+        if (!entry.isIntersecting) setPlaying(false);
+      }
+    }, { threshold: 0.5 });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [autoPlay]);
 
   // Limite de durée pour Cloudinary
   const handleTimeUpdate = () => {
@@ -3987,7 +3991,7 @@ const PHONE_EXAMPLE = {
                         <button onClick={()=>setModal({type:"contact",data:post})} style={{ background:"rgba(67,198,172,0.12)",border:"1px solid rgba(67,198,172,0.3)",color:"#43C6AC",padding:"9px 14px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
                           <Icon name="mail" size={14}/> Envoyer un message
                         </button>
-                        {post.phone && (
+                        {post.phone && user?.id !== post.authorId && (
                           <div style={{ display:"flex",gap:8 }}>
                             <a href={"tel:"+post.phone} style={{ flex:1,textDecoration:"none" }}>
                               <div style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"9px 14px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:8,cursor:"pointer" }}>
@@ -5078,7 +5082,7 @@ const PHONE_EXAMPLE = {
             .map(b=>(
               <div key={b.id} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120}/>}
+                  {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={true}/>}
                   {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
                   {isCertified(b.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
@@ -5175,7 +5179,7 @@ const PHONE_EXAMPLE = {
             .map(a=>(
               <div key={a.id} className={`card-hover${a.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(a.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(a.id)?"2px solid #FFD700":a.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {a.video && <VideoCardPlayer video={a.video?.url||a.video} photos={a.photos||[]} maxSeconds={120}/>}
+                  {a.video && <VideoCardPlayer video={a.video?.url||a.video} photos={a.photos||[]} maxSeconds={120} autoPlay={true}/>}
                   {!a.video && a.photos&&a.photos.length>0 && <PhotoCarousel photos={a.photos}/>}
                   {isCertified(a.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
@@ -5280,7 +5284,7 @@ const PHONE_EXAMPLE = {
             .map(r=>(
               <div key={r.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(r.id)?"0 4px 24px rgba(255,215,0,0.4)":r.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(r.id)?`2px solid #FFD700`:r.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {r.video && <VideoCardPlayer video={r.video?.url||r.video} photos={r.photos||[]} maxSeconds={120}/>}
+                  {r.video && <VideoCardPlayer video={r.video?.url||r.video} photos={r.photos||[]} maxSeconds={120} autoPlay={true}/>}
                   {!r.video && r.photos&&r.photos.length>0 && <PhotoCarousel photos={r.photos}/>}
                   {isCertified(r.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
@@ -5388,7 +5392,7 @@ const PHONE_EXAMPLE = {
             .map(b=>(
               <div key={b.id} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120}/>}
+                  {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={true}/>}
                   {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
                   {isCertified(b.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
