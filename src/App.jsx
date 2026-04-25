@@ -2758,7 +2758,7 @@ const PHONE_EXAMPLE = {
     notify("Restaurant/Bar publié !");
   };
 
-  const addShop = async () => {
+  const addShop = async (forcedExpiresAt) => {
     if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("⚠️ Votre annonce contient des termes non autorisés.", "error"); return; }
     if (!checkRateLimit()) return;
     if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
@@ -2772,11 +2772,11 @@ const PHONE_EXAMPLE = {
       author: user.name, authorId: user.id,
       date: new Date().toISOString().slice(0,10),
       likes: 0, photos: shopPhotos, video: shopVideo,
-      expiresAt: isAdmin ? null : expDate.toISOString().slice(0,10),
+      expiresAt: isAdmin ? null : (forcedExpiresAt || expDate.toISOString().slice(0,10)),
     };
     const tableName = shopMode === "boutique" ? "boutiques" : "ateliers";
     const { error } = await supabase.from(tableName).insert({
-      id: shopId, name: newShop.name, type: newShop.type||"",
+      id: shopId, name: newShop.name, type: newShop.type||"", sous_type: newShop.sousType||"",
       description: newShop.description, services: newShop.services||"",
       keywords: newShop.keywords||"", ville: newShop.ville||"",
       quartier: newShop.quartier||"", von: newShop.von||"",
@@ -5199,6 +5199,15 @@ const PHONE_EXAMPLE = {
               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une boutique par nom, type, mots clés..." style={{ width:"100%",padding:"14px 20px 14px 44px",background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,color:theme.text,fontSize:14,fontFamily:"inherit",outline:"none" }}/>
             </div>
           </div>
+          {/* Filtres rapides par type */}
+          <div style={{ display:"flex",gap:6,overflowX:"auto",scrollbarWidth:"none",marginBottom:12,paddingBottom:4 }}>
+            {["Tous",...BOUTIQUE_TYPES].map(t=>(
+              <button key={t} onClick={()=>setSearch(t==="Tous"?"":t)}
+                style={{ flexShrink:0,background:search===t||(!search&&t==="Tous")?"#FF6584":"rgba(255,101,132,0.08)",border:`1px solid ${search===t||(!search&&t==="Tous")?"#FF6584":"rgba(255,101,132,0.25)"}`,color:search===t||(!search&&t==="Tous")?"#fff":"#FF6584",padding:"5px 12px",borderRadius:18,fontWeight:700,fontSize:11,cursor:"pointer",whiteSpace:"nowrap",transition:"all 0.2s" }}>
+                {t}
+              </button>
+            ))}
+          </div>
           <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24,flexWrap:"wrap",gap:10 }}>
             <button onClick={getUserLocation} style={{ background:userLocation?"rgba(67,198,172,0.15)":"rgba(108,99,255,0.1)",border:`1px solid ${userLocation?"rgba(67,198,172,0.5)":"rgba(108,99,255,0.3)"}`,color:userLocation?"#43C6AC":"#6C63FF",padding:"8px 16px",borderRadius:24,fontWeight:600,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
               {locationLoading?"⏳...":userLocation?"📍 Position active":"📍 Près de moi"}
@@ -5214,7 +5223,7 @@ const PHONE_EXAMPLE = {
             )}
           </div>
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
-            {boutiques.filter(b=>!search||normalizeText(b.name+b.description+(b.keywords||"")+(b.type||"")).includes(normalizeText(search)))
+            {boutiques.filter(b=>!search||normalizeText(b.name+b.description+(b.keywords||"")+(b.type||"")+(b.sousType||"")).includes(normalizeText(search)))
             .map(b=>({...b, distance: userLocation&&b.lat&&b.lng ? getDistance(userLocation.lat,userLocation.lng,parseFloat(b.lat),parseFloat(b.lng)) : null}))
             .sort((a,b)=>{
               if(featuredPosts.includes(a.id)&&!featuredPosts.includes(b.id)) return -1;
@@ -6944,7 +6953,16 @@ const PHONE_EXAMPLE = {
                 <button
                   onClick={modal.data?.editing
                     ? editShop
-                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication ${shopMode==="boutique"?"boutique":"atelier"} ${t.label} sur MarchéduRoi`,addShop); }
+                    : ()=>{
+      if (selectedTarif === -1) {
+        // 4 jours gratuits
+        const exp = new Date(); exp.setDate(exp.getDate()+4);
+        addShop(exp.toISOString().slice(0,10));
+      } else {
+        const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0];
+        handlePayment(t.price,`Publication ${shopMode==="boutique"?"boutique":"atelier"} ${t.label} sur MarchéduRoi`,addShop);
+      }
+    }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:shopMode==="boutique"?"linear-gradient(135deg,#FF6584,#FFB347)":"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
