@@ -486,53 +486,78 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
 }
 
 function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed }) {
-  const scrollRef  = React.useRef(null);
-  const dirRef     = React.useRef(1);    // 1 = gauche→droite (normal)
-  const rafRef     = React.useRef(null);
-  const initDone   = React.useRef(false);
-
   const allSponsored = [
     ...posts.filter(p => p.sponsored && p.sponsoredUntil && new Date(p.sponsoredUntil) > new Date()).map(p => ({...p, _type:"annonce", _icon:"📋", _label:"Annonce"})),
     ...boutiques.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"boutique", _icon:"🛍️", _label:"Boutique"})),
     ...ateliers.filter(a => a.sponsored && a.sponsoredUntil && new Date(a.sponsoredUntil) > new Date()).map(a => ({...a, title:a.name, _type:"atelier", _icon:"🔧", _label:"Atelier"})),
     ...restos.filter(r => r.sponsored && r.sponsoredUntil && new Date(r.sponsoredUntil) > new Date()).map(r => ({...r, title:r.name, _type:"resto", _icon:"🍽️", _label:"Restaurant"})),
     ...beaute.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"beaute", _icon:"💇", _label:"Beauté"})),
-  ].sort((a,b) => new Date(b.sponsoredUntil) - new Date(a.sponsoredUntil));
-
-  const cardW = windowWidth<=500 ? 160 : windowWidth<=800 ? 190 : 220;
-  const GAP   = 12;
-  const loopItems = [...allSponsored, ...allSponsored, ...allSponsored];
-
-  React.useEffect(() => {
-    if (!scrollRef.current || initDone.current || allSponsored.length === 0) return;
-    initDone.current = true;
-    const offset = Math.floor(sessionSeed * allSponsored.length) * (cardW + GAP);
-    scrollRef.current.scrollLeft = allSponsored.length * (cardW + GAP) + offset;
-  }, [allSponsored.length, cardW, sessionSeed]);
-
-  React.useEffect(() => {
-    if (allSponsored.length === 0) return;
-    const tick = () => {
-      const el = scrollRef.current;
-      if (el) {
-        const totalW = allSponsored.length * (cardW + GAP);
-        el.scrollLeft += dirRef.current * 1.5;
-        if (el.scrollLeft <= 2)            el.scrollLeft += totalW;
-        if (el.scrollLeft >= totalW*2 - 2) el.scrollLeft -= totalW;
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [allSponsored.length, cardW]);
+  ].sort((a, b) => new Date(b.sponsoredUntil) - new Date(a.sponsoredUntil));
 
   if (allSponsored.length === 0) return null;
 
+  // Nombre de cartes visibles selon la largeur
+  const perPage = windowWidth <= 500 ? 2 : windowWidth <= 900 ? 2 : 3;
+  const cardW   = windowWidth <= 500 ? 155 : windowWidth <= 800 ? 185 : 215;
+  const GAP     = 12;
+
+  // Groupes de perPage cartes (en boucle)
+  const totalGroups = Math.ceil(allSponsored.length / perPage);
+  const [groupIdx, setGroupIdx] = React.useState(() => Math.floor(sessionSeed * totalGroups));
+  const timerRef = React.useRef(null);
+  const [animating, setAnimating] = React.useState(false);
+  const [dir, setDir] = React.useState(1); // 1=forward, -1=back
+
+  const goTo = (newIdx, direction) => {
+    setDir(direction);
+    setAnimating(true);
+    setTimeout(() => {
+      setGroupIdx(((newIdx % totalGroups) + totalGroups) % totalGroups);
+      setAnimating(false);
+    }, 400);
+  };
+
+  const startTimer = () => {
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setGroupIdx(prev => {
+        const next = (prev + 1) % totalGroups;
+        setDir(1);
+        setAnimating(true);
+        setTimeout(() => setAnimating(false), 400);
+        return next;
+      });
+    }, 4500);
+  };
+
+  React.useEffect(() => {
+    if (totalGroups <= 1) return;
+    startTimer();
+    return () => clearInterval(timerRef.current);
+  }, [totalGroups]);
+
+  const handlePrev = () => {
+    clearInterval(timerRef.current);
+    goTo(groupIdx - 1, -1);
+    startTimer();
+  };
+  const handleNext = () => {
+    clearInterval(timerRef.current);
+    goTo(groupIdx + 1, 1);
+    startTimer();
+  };
+
+  // Cartes du groupe courant
+  const startIdx = groupIdx * perPage;
+  const group = Array.from({ length: perPage }, (_, i) => allSponsored[(startIdx + i) % allSponsored.length]);
+
   const SponsoredCard = ({ item }) => (
-    <div onClick={() => navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`)}
-      style={{ flexShrink:0, width:cardW, marginRight:GAP, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
-      <div style={{ width:"100%",height:windowWidth<=500?100:130,background:"linear-gradient(135deg,#1a1d30,#2a2d45)",position:"relative",overflow:"hidden" }}>
-        {item.photos&&item.photos[0] ? <img src={item.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/> : <div style={{ width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32 }}>📦</div>}
+    <div onClick={() => navigate(`/${item._type === "annonce" ? "annonce" : item._type}/${item.id}`)}
+      style={{ flex:`0 0 ${cardW}px`, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
+      <div style={{ width:"100%", height:windowWidth<=500?100:130, background:"linear-gradient(135deg,#1a1d30,#2a2d45)", position:"relative", overflow:"hidden" }}>
+        {item.photos&&item.photos[0]
+          ? <img src={item.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
+          : <div style={{ width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32 }}>📦</div>}
         <div style={{ position:"absolute",top:8,left:8,background:"#FFD700",color:"#000",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800 }}>🌟 SPONSORISÉ</div>
         {item._type!=="annonce"&&<div style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700 }}>{item._icon} {item._label}</div>}
       </div>
@@ -546,26 +571,43 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
 
   return (
     <div style={{ marginBottom:24, width:"100%" }}>
+      {/* Header */}
       <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12 }}>
         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
           <span style={{ fontSize:windowWidth<=500?16:20 }}>🌟</span>
           <p style={{ fontWeight:800,fontSize:windowWidth<=500?14:16,color:"#FFD700",letterSpacing:0.5 }}>SPONSORISÉES</p>
           <span style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700",borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700 }}>{allSponsored.length}</span>
         </div>
-        <button
-          onMouseDown={() => { dirRef.current = -1; }}
-          onMouseUp={() => { dirRef.current = 1; }}
-          onMouseLeave={() => { dirRef.current = 1; }}
-          onTouchStart={e => { e.preventDefault(); dirRef.current = -1; }}
-          onTouchEnd={() => { dirRef.current = 1; }}
-          style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"5px 12px",borderRadius:20,fontSize:11,fontWeight:700,cursor:"pointer",userSelect:"none" }}>
-          ‹ Reculer
-        </button>
+        {totalGroups > 1 && (
+          <div style={{ display:"flex",gap:6,alignItems:"center" }}>
+            <button onClick={handlePrev} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",width:28,height:28,borderRadius:"50%",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center" }}>‹</button>
+            <span style={{ fontSize:11,color:theme.sub }}>{groupIdx+1}/{totalGroups}</span>
+            <button onClick={handleNext} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",width:28,height:28,borderRadius:"50%",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center" }}>›</button>
+          </div>
+        )}
       </div>
-      <div ref={scrollRef} style={{ display:"flex",overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",paddingBottom:4 }}>
-        {loopItems.map((item,i) => <SponsoredCard key={item.id+"-sp-"+i} item={item}/>)}
+
+      {/* Groupe de cartes avec transition */}
+      <div style={{ overflow:"hidden", width:"100%" }}>
+        <div style={{ display:"flex",gap:GAP,
+          opacity: animating ? 0 : 1,
+          transform: animating ? `translateX(${dir * 20}px)` : "translateX(0)",
+          transition: "opacity 0.3s ease, transform 0.3s ease" }}>
+          {group.map((item, i) => <SponsoredCard key={item.id+"-sp-"+i} item={item}/>)}
+        </div>
       </div>
-      <div style={{ borderBottom:`1px solid ${theme.border}`,marginTop:16 }}/>
+
+      {/* Dots indicateurs */}
+      {totalGroups > 1 && (
+        <div style={{ display:"flex",justifyContent:"center",gap:5,marginTop:10 }}>
+          {Array.from({length:totalGroups}).map((_,i)=>(
+            <div key={i} onClick={()=>goTo(i, i>groupIdx?1:-1)}
+              style={{ width:i===groupIdx?18:6,height:6,borderRadius:3,background:i===groupIdx?"#FFD700":"rgba(255,215,0,0.25)",transition:"all 0.3s",cursor:"pointer" }}/>
+          ))}
+        </div>
+      )}
+
+      <div style={{ borderBottom:`1px solid ${theme.border}`,marginTop:14 }}/>
     </div>
   );
 }
@@ -3798,6 +3840,32 @@ const PHONE_EXAMPLE = {
           {/* Bandeau Urgent — EN CE MOMENT */}
           <UrgentBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed}/>
           <SponsoredBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed}/>
+
+          {/* Barre catégories sticky — reste visible pendant le scroll du fil */}
+          <div style={{ position:"sticky",top:0,zIndex:20,background:theme.bg,paddingTop:8,paddingBottom:8,marginBottom:8,borderBottom:`1px solid ${theme.border}` }}>
+            <div style={{ display:"flex",gap:5,overflowX:"auto",flexWrap:"nowrap",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
+              {CATEGORIES.filter(c=>c!=="Mode"&&c!=="Agro-alimentaire").map(c=>{
+                const cc = CATEGORY_COLORS[c]||{bg:"rgba(108,99,255,0.12)",border:"rgba(108,99,255,0.3)",text:"#6C63FF",icon:"🏷️"};
+                const isActive = category === c;
+                return (
+                  <button key={c+"-sticky"} onClick={()=>setCategory(c)}
+                    style={{ background:isActive?cc.text:cc.bg,border:`1px solid ${isActive?cc.text:cc.border}`,color:isActive?"#fff":cc.text,padding:"5px 12px",borderRadius:18,fontWeight:700,fontSize:11,flexShrink:0,whiteSpace:"nowrap",cursor:"pointer",boxShadow:isActive?`0 2px 10px ${cc.text}44`:"none",transition:"all 0.2s" }}>
+                    <span style={{fontSize:10,marginRight:3}}>{cc.icon}</span>{c}
+                  </button>
+                );
+              })}
+              {["Mode","Agro-alimentaire"].map(c=>{
+                const cc = CATEGORY_COLORS[c]||{bg:"rgba(108,99,255,0.12)",border:"rgba(108,99,255,0.3)",text:"#6C63FF",icon:"🏷️"};
+                const isActive = category === c;
+                return (
+                  <button key={c+"-sticky"} onClick={()=>setCategory(c)}
+                    style={{ background:isActive?cc.text:cc.bg,border:`1px solid ${isActive?cc.text:cc.border}`,color:isActive?"#fff":cc.text,padding:"5px 12px",borderRadius:18,fontWeight:700,fontSize:11,flexShrink:0,whiteSpace:"nowrap",cursor:"pointer",boxShadow:isActive?`0 2px 10px ${cc.text}44`:"none",transition:"all 0.2s" }}>
+                    <span style={{fontSize:10,marginRight:3}}>{cc.icon}</span>{c}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Résultats de recherche globale — boutiques, ateliers, restos, beauté */}
           {globalSearch.length > 0 && (
