@@ -599,76 +599,6 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
   );
 }
 
-function CategoryCarousel({ catName, posts, cardStyle, theme, navigate, windowWidth, user, setModal, openEdit, isUrgentActive, notify, setActiveConv, setShowMessages, messages, gridCols, catColor }) {
-  const scrollRef = React.useRef(null);
-  if (posts.length === 0) return null;
-
-  const cardW = windowWidth <= 500 ? 260 : windowWidth <= 800 ? 290 : 320;
-  const GAP = 12;
-
-  const scrollBy = (dir) => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollBy({ left: dir * (cardW + GAP) * (windowWidth <= 500 ? 1 : 2), behavior: "smooth" });
-  };
-
-  return (
-    <div style={{ marginBottom:28, width:"100%" }} id={"cat-"+catName}>
-      {/* Header catégorie */}
-      <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10 }}>
-        <div style={{ display:"flex",alignItems:"center",gap:8 }}>
-          <span style={{ fontSize:16 }}>{catColor?.icon||"🏷️"}</span>
-          <p style={{ fontWeight:800,fontSize:15,color:catColor?.text||"#6C63FF" }}>{catName}</p>
-          <span style={{ background:`${catColor?.bg||"rgba(108,99,255,0.12)"}`,color:catColor?.text||"#6C63FF",borderRadius:20,padding:"2px 8px",fontSize:11,fontWeight:700 }}>{posts.length}</span>
-        </div>
-        <div style={{ display:"flex",gap:6 }}>
-          <button onClick={()=>scrollBy(-1)} style={{ background:catColor?.bg||"rgba(108,99,255,0.1)",border:`1px solid ${catColor?.border||"rgba(108,99,255,0.3)"}`,color:catColor?.text||"#6C63FF",width:28,height:28,borderRadius:"50%",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center" }}>‹</button>
-          <button onClick={()=>scrollBy(1)}  style={{ background:catColor?.bg||"rgba(108,99,255,0.1)",border:`1px solid ${catColor?.border||"rgba(108,99,255,0.3)"}`,color:catColor?.text||"#6C63FF",width:28,height:28,borderRadius:"50%",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center" }}>›</button>
-        </div>
-      </div>
-      {/* Carousel horizontal */}
-      <div ref={scrollRef} style={{ display:"flex",gap:GAP,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",paddingBottom:4,scrollSnapType:"x mandatory" }}>
-        {posts.map(post=>(
-          <div key={post.id} id={"post-"+post.id}
-            className={`card-hover${isUrgentActive(post)?" card-urgent":post.sponsored?" card-sponsored":""}`}
-            style={{ ...cardStyle,flexShrink:0,width:cardW,borderRadius:16,overflow:"hidden",boxShadow:"none",border:isUrgentActive(post)?"2px solid #FF4757":post.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,scrollSnapAlign:"start" }}>
-            {post.video
-              ? null
-              : post.photos&&post.photos.length>0&&<div style={{ height:160,overflow:"hidden" }}><img src={post.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/></div>
-            }
-            <div style={{ padding:"12px 14px" }}>
-              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6 }}>
-                <span style={{ fontSize:11,fontWeight:700,color:"#8B84FF",background:"rgba(108,99,255,0.12)",padding:"2px 8px",borderRadius:10 }}>{post.category}</span>
-                <div style={{ display:"flex",gap:4 }}>
-                  {isUrgentActive(post)&&<span style={{ fontSize:10,fontWeight:800,color:"#FF4757",background:"rgba(255,71,87,0.1)",padding:"2px 6px",borderRadius:8 }}>🔥 URGENT</span>}
-                  {post.sponsored&&<span style={{ fontSize:10,fontWeight:800,color:"#FFD700",background:"rgba(255,215,0,0.1)",padding:"2px 6px",borderRadius:8 }}>🌟</span>}
-                </div>
-              </div>
-              <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{post.title}</p>
-              {post.price&&<p style={{ fontWeight:800,fontSize:15,color:"#43C6AC",marginBottom:4 }}>{post.price} FCFA</p>}
-              {(post.ville||post.quartier)&&<p style={{ fontSize:11,color:theme.sub,marginBottom:6 }}>📍 {[post.ville,post.quartier].filter(Boolean).join(", ")}</p>}
-              <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                {post.phone&&user?.id!==post.authorId&&(
-                  <a href={"https://wa.me/"+post.phone.replace(/[\s+\-()]/g,"")} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
-                    <div style={{ background:"rgba(37,211,102,0.15)",color:"#25D366",padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,cursor:"pointer" }}>WA</div>
-                  </a>
-                )}
-                {user&&user.id!==post.authorId&&(
-                  <button onClick={()=>{ setActiveConv&&setActiveConv({postId:post.id,postTitle:post.title,postPrice:post.price||"",postPhoto:post.photos?.[0],receiverId:post.authorId,receiverName:post.contact,messages:messages.filter(m=>(m.post_id===post.id)&&((m.sender_id===user.id&&m.receiver_id===post.authorId)||(m.receiver_id===user.id&&m.sender_id===post.authorId)))}); setShowMessages&&setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"5px 10px",borderRadius:8,fontSize:11,cursor:"pointer",fontWeight:700 }}>💬</button>
-                )}
-                {user&&(user.id===post.authorId||user.role==="admin")&&(
-                  <button onClick={()=>setModal({type:"view",data:post})} style={{ background:"rgba(108,99,255,0.08)",border:"none",color:"#6C63FF",padding:"5px 10px",borderRadius:8,fontSize:11,cursor:"pointer",fontWeight:700 }}>Voir →</button>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div style={{ borderBottom:`1px solid ${theme.border}`,marginTop:14 }}/>
-    </div>
-  );
-}
-
-
 function FlagCylinder({ theme }) {
   const [angle, setAngle] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -3957,61 +3887,279 @@ const PHONE_EXAMPLE = {
             </div>
           )}
 
-          {/* Carousels par catégorie */}
-          {(() => {
-            // Si une catégorie spécifique est sélectionnée
-            if (category !== "Toutes") {
-              const cc = CATEGORY_COLORS[category]||{bg:"rgba(108,99,255,0.12)",border:"rgba(108,99,255,0.3)",text:"#6C63FF",icon:"🏷️"};
-              return (
-                <CategoryCarousel
-                  catName={category}
-                  posts={filtered}
-                  cardStyle={cardStyle}
-                  theme={theme}
-                  navigate={navigate}
-                  windowWidth={windowWidth}
-                  user={user}
-                  setModal={setModal}
-                  openEdit={openEdit}
-                  isUrgentActive={isUrgentActive}
-                  notify={notify}
-                  setActiveConv={setActiveConv}
-                  setShowMessages={setShowMessages}
-                  messages={messages}
-                  gridCols={gridCols}
-                  catColor={cc}
-                />
-              );
-            }
-            // Toutes les catégories — une par section
-            const allCats = CATEGORIES.filter(c => c !== "Toutes");
-            return allCats.map(cat => {
-              const catPosts = filtered.filter(p => p.category === cat);
-              if (catPosts.length === 0) return null;
-              const cc = CATEGORY_COLORS[cat]||{bg:"rgba(108,99,255,0.12)",border:"rgba(108,99,255,0.3)",text:"#6C63FF",icon:"🏷️"};
-              return (
-                <CategoryCarousel
-                  key={cat}
-                  catName={cat}
-                  posts={catPosts}
-                  cardStyle={cardStyle}
-                  theme={theme}
-                  navigate={navigate}
-                  windowWidth={windowWidth}
-                  user={user}
-                  setModal={setModal}
-                  openEdit={openEdit}
-                  isUrgentActive={isUrgentActive}
-                  notify={notify}
-                  setActiveConv={setActiveConv}
-                  setShowMessages={setShowMessages}
-                  messages={messages}
-                  gridCols={gridCols}
-                  catColor={cc}
-                />
-              );
-            });
-          })()}
+          <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
+            {filtered.slice(0, visibleCount).map(post=>(
+              <div key={post.id} id={"post-"+post.id} className={`card-hover${isUrgentActive(post)?" card-urgent":post.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:isUrgentActive(post)?"2px solid #FF4757":post.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
+                {post.video
+                  ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60}/>
+                  : post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
+                }
+                <div style={{ padding:"14px 16px" }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8 }}>
+                    <span className="tag" style={{ background:post.category==="Véhicules"?"rgba(255,101,132,0.15)":"rgba(108,99,255,0.15)",color:post.category==="Véhicules"?"#FF6584":"#8B84FF",display:"flex",alignItems:"center",gap:4 }}>
+                      {post.category==="Véhicules"&&<Icon name="car" size={10}/>}{post.category}
+                    </span>
+                    {(post.price||post.price_day||post.priceDay)&&(
+                    <div style={{ textAlign:"right" }}>
+                      {post.category==="Location de véhicules" ? (
+                        <div>
+                          {(post.price_day||post.priceDay) && <p style={{ fontWeight:800,color:"#FF9F43",fontSize:14 }}>🔑 {(post.price_day||post.priceDay)} FCFA/j</p>}
+                          {(post.price_week||post.priceWeek) && <p style={{ color:theme.sub,fontSize:11 }}>{(post.price_week||post.priceWeek)} FCFA/sem</p>}
+                          {(post.price_month||post.priceMonth) && <p style={{ color:theme.sub,fontSize:11 }}>{(post.price_month||post.priceMonth)} FCFA/mois</p>}
+                        </div>
+                      ) : (
+                        <div>
+                          <p style={{ fontWeight:700,color:"#43C6AC",fontSize:14 }}>{post.price} FCFA</p>
+                          {(()=>{ const num=parseInt((post.price||"").replace(/[^0-9]/g,"")); return num>0?<p style={{ color:theme.sub,fontSize:11 }}>≈ ${(num/600).toFixed(2)} USD</p>:null; })()}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  </div>
+                  {/* Badge expiration */}
+                  {post.expiresAt && (() => {
+                    const d = getDaysLeft(post.expiresAt);
+                    const isOwner = user && user.id === post.authorId;
+                    const isAdmin = user && user.role === "admin";
+                    const canSee = isOwner || isAdmin;
+                    if (!canSee) return null;
+                    if (d !== null && d <= 7) return (
+                      isOwner
+                        ? <button onClick={()=>setView("dashboard")} style={{ width:"100%",background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6,cursor:"pointer",textAlign:"left" }}>
+                            <span style={{ fontSize:12 }}>⚠️</span>
+                            <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""} · Prolongez →</p>
+                          </button>
+                        : <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:8,padding:"6px 12px",marginBottom:8,display:"flex",alignItems:"center",gap:6 }}>
+                            <span>⚠️</span>
+                            <p style={{ fontSize:12,color:"#FF4757",fontWeight:600 }}>Expire dans {d} jour{d>1?"s":""} — {post.expiresAt}</p>
+                          </div>
+                    );
+                    return (
+                      <div style={{ background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.25)",borderRadius:8,padding:"5px 10px",marginBottom:8 }}>
+                        <p style={{ fontSize:12,color:"#43C6AC",fontWeight:600 }}>⏳ Expire le {post.expiresAt} ({d} j restants)</p>
+                      </div>
+                    );
+                  })()}
+                  <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6,alignItems:"center" }}>
+
+                    {post.sponsored && !isUrgentActive(post) && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#FFD700,#FFA500)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,color:"#000" }}>
+                        🌟 Sponsorisé
+                      </div>
+                    )}
+                    {post.flash && new Date(post.flashUntil) > new Date() && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#6C63FF,#8B84FF)",borderRadius:20,padding:"3px 12px",fontSize:11,fontWeight:800,color:"#fff" }}>
+                        ⚡ FLASH
+                      </div>
+                    )}
+                    {post.ownerVerified && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.15)",border:"1px solid rgba(67,198,172,0.4)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,color:"#43C6AC" }}>
+                        ✅ Vendeur vérifié
+                      </div>
+                    )}
+                    {/* Badge Nouveau — annonce < 24h */}
+                    {post.date && (Date.now() - new Date(post.date).getTime()) < 86400000 && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:3,background:"linear-gradient(135deg,#43C6AC,#2ecc71)",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:800,color:"#fff" }}>
+                        ✨ Nouveau
+                      </div>
+                    )}
+                    {/* Compteur de vues */}
+                    {liveViewers[post.id] && (
+                    <span style={{ background:"rgba(255,71,87,0.15)",color:"#FF4757",borderRadius:20,padding:"2px 8px",fontSize:11,fontWeight:700,display:"flex",alignItems:"center",gap:4 }}>
+                      🔴 {liveViewers[post.id]} en ligne
+                    </span>
+                  )}
+                  {(postViews[post.id]||0) > 0 && (
+                      <div style={{ display:"inline-flex",alignItems:"center",gap:3,background:"rgba(154,154,176,0.1)",borderRadius:20,padding:"3px 8px",fontSize:11,color:theme.sub }}>
+                        👁️ {postViews[post.id]}
+                      </div>
+                    )}
+                  </div>
+                  {post.distance!==null ? (
+                    <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:700 }}>
+                      📍 {formatDistance(post.distance)}
+                    </div>
+                  ) : (post.lat && post.lng) ? (
+                    <div style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.2)",borderRadius:20,padding:"3px 10px",marginBottom:8,fontSize:11,color:"#43C6AC",fontWeight:600 }}>
+                      📍 Localisation disponible
+                    </div>
+                  ) : null}
+                  <h3 style={{ fontWeight:700,fontSize:15,marginBottom:4,lineHeight:1.3,color:theme.text }}>{post.title}</h3>
+                  {getAvgRating(post.id) && (
+                    <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:8 }}>
+                      <div style={{ display:"flex" }}>{renderStars(getAvgRating(post.id))}</div>
+                      <span style={{ fontSize:12,color:"#FFD700",fontWeight:700 }}>{getAvgRating(post.id)}</span>
+                      <span style={{ fontSize:11,color:theme.sub }}>({getRatingCount(post.id)} avis)</span>
+                    </div>
+                  )}
+
+                  {/* Bouton Contacter — tiroir sur PC/tablette, inline sur mobile */}
+                  {!expandedContacts[post.id] && (
+                    <button onClick={(e)=>{
+                      e.stopPropagation();
+                      if (!user || user.id !== post.authorId) {
+                        const viewKey = "viewed_" + post.id;
+                        if (!sessionStorage.getItem(viewKey)) {
+                          sessionStorage.setItem(viewKey, "1");
+                          trackView(post.id);
+                          trackContact(post.id);
+                        }
+                      }
+                      if (windowWidth > 600) {
+                        setContactDrawer(post);
+                      } else {
+                        setExpandedContacts({ [post.id]: true });
+                      }
+                    }} style={{ width:"100%",background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.25)",color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all 0.2s" }}>
+                      <Icon name="mail" size={14}/>
+                      Contacter ▾
+                    </button>
+                  )}
+
+                  {/* Panneau déplié — clic intérieur ne ferme pas */}
+                  {expandedContacts[post.id] && (
+                    <div id={"contact-panel-"+post.id} onClick={e=>e.stopPropagation()} style={{ marginTop:10,animation:"fadeIn 0.2s ease" }}>
+
+                      {/* Mini fiche immobilière */}
+                      {post.immo&&(
+                        <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:10 }}>
+                          {[{v:post.immo.transaction},{v:post.immo.sousType},{v:post.immo.superficie?(post.immo.superficie+" "+(post.immo.superficieUnit||"m²")):null},{v:post.immo.pieces?(post.immo.pieces+" pièce"+(parseInt(post.immo.pieces)>1?"s":"")):null},{v:post.immo.ville}].filter(f=>f.v).map((f,i)=>(
+                            <span key={i} className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{f.v}</span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Mini fiche agro */}
+                      {post.agro&&(
+                        <div style={{ marginBottom:10 }}>
+                          <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:6 }}>
+                            {post.agro.sousCategorie&&<span className="tag" style={{ background:"rgba(22,163,74,0.1)",border:"1px solid rgba(22,163,74,0.3)",color:"#16A34A",fontWeight:600 }}>🌾 {post.agro.sousCategorie.split("(")[0].trim()}</span>}
+                            {post.agro.qualite&&<span className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{post.agro.qualite}</span>}
+                            {post.agro.disponibilite&&<span className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{post.agro.disponibilite}</span>}
+                          </div>
+                          <div style={{ display:"flex",gap:12,flexWrap:"wrap",fontSize:13,padding:"8px 12px",background:theme.bg,borderRadius:8,border:`1px solid rgba(22,163,74,0.2)` }}>
+                            {post.agro.quantite&&<span style={{ color:theme.sub }}>📦 <b style={{ color:theme.text }}>{post.agro.quantite} {post.agro.unite}</b></span>}
+                            {post.agro.prixUnitaire&&<span style={{ color:theme.sub }}>💰 <b style={{ color:"#16A34A" }}>{post.agro.prixUnitaire} FCFA</b>/{post.agro.unite}</span>}
+                            {post.agro.lieuEnlevement&&<span style={{ color:theme.sub }}>📍 {post.agro.lieuEnlevement}</span>}
+                            {post.agro.saisonRecolte&&<span style={{ color:theme.sub }}>🗓️ {post.agro.saisonRecolte}</span>}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Mini fiche véhicule */}
+                      {post.vehicle&&(
+                        <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginBottom:10 }}>
+                          {[{k:"marque",v:post.vehicle.marque},{k:"modele",v:post.vehicle.modele},{k:"annee",v:post.vehicle.annee},{k:"carburant",v:post.vehicle.carburant},{k:"cylindree",v:post.vehicle.cylindree},{k:"etat",v:post.vehicle.etat}].filter(f=>f.v).map(f=>(
+                            <span key={f.k} className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub }}>{f.v}</span>
+                          ))}
+                          {post.vehicle.position&&<span className="tag" style={{ background:theme.bg,border:`1px solid ${theme.border}`,color:theme.sub,display:"flex",alignItems:"center",gap:3 }}><Icon name="pin" size={9}/>{post.vehicle.position}</span>}
+                        </div>
+                      )}
+                      {/* Description */}
+                      <p style={{ color:theme.sub,fontSize:12,lineHeight:1.4,marginBottom:10 }}>{post.description.length>120?post.description.slice(0,120)+"...":post.description}</p>
+
+                      {/* Auteur + badge vérifié */}
+                      <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,paddingBottom:10,borderBottom:`1px solid ${theme.border}` }}>
+                        <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+                          <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0 }}>{post.author[0]}</div>
+                          <div>
+                            <p style={{ fontSize:12,fontWeight:600,color:theme.text }}>{post.author}</p>
+                            <p style={{ fontSize:11,color:theme.sub }}>{post.date}</p>
+                          </div>
+                        </div>
+                        {isCertified(post.authorId||post.author_id) && <CertifiedBadge size={40}/>}
+                      </div>
+
+                      {/* Likes + Favoris + Partage */}
+                      <div style={{ display:"flex",gap:4,alignItems:"center",flexWrap:"wrap",marginBottom:10 }}>
+                        <button onClick={()=>likePost(post.id)} style={{ background:likedPosts.includes(post.id)?"rgba(255,101,132,0.2)":"transparent",border:"none",color:likedPosts.includes(post.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{post.likes}</button>
+                        <button onClick={()=>toggleFavorite(post.id)} style={{ background:favorites.includes(post.id)?"rgba(255,215,0,0.2)":"transparent",border:"none",color:favorites.includes(post.id)?"#FFD700":theme.sub,padding:"6px 8px",borderRadius:8,fontSize:16,cursor:"pointer" }}>{favorites.includes(post.id)?"★":"☆"}</button>
+                        <a href={"https://wa.me/?text="+encodeURIComponent("*"+post.title+"*"+"\nPrix: "+((post.price||"Non précisé").toString().includes("FCFA")?(post.price||"Non précisé"):(post.price||"Non précisé")+" FCFA")+"\nVoir: https://marcheduroi.com/annonce/"+post.id+"\n\"Sur MarchéduRoi, vous êtes le Roi du Marché 👑\"")} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                          <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4,cursor:"pointer" }}>
+                            <svg width="13" height="13" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                            Partager
+                          </div>
+                        </a>
+                        <button onClick={async()=>{
+                          const url="https://marcheduroi.com/annonce/"+post.id;
+                          const photo = post.photos?.[0];
+                          if(navigator.share && photo){
+                            try {
+                              let blob = await addLogoWatermark(photo);
+                              if (!blob) { const r = await fetch(photo); blob = await r.blob(); }
+                              const file = new File([blob], "annonce.jpg", { type: "image/jpeg" });
+                              if(navigator.canShare && navigator.canShare({ files:[file] })){
+                                await navigator.share({ title:post.title, text:post.title+(post.price?" — "+post.price+" FCFA":"")+".", url, files:[file] });
+                                return;
+                              }
+                            } catch(e){}
+                            navigator.share({ title:post.title, text:post.title+(post.price?" — "+post.price+" FCFA":"")+" "+url+" Sur MarchéduRoi, vous êtes le Roi du Marché 👑" });
+                          } else if(navigator.share){
+                            navigator.share({ title:post.title, url });
+                          } else {
+                            navigator.clipboard.writeText(url); notify("🔗 Lien copié !");
+                          }
+                        }} style={{ background:"rgba(0,0,0,0.06)",border:"none",color:theme.text,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:3 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        </button>
+                        {user&&(user.id===post.authorId||user.role==="admin")&&(
+                          <div style={{ display:"flex",gap:4,alignItems:"center",flexWrap:"wrap" }}>
+                            <button onClick={()=>openEdit(post)} style={{ background:"transparent",border:"none",color:"#6C63FF",padding:6,borderRadius:6 }}><Icon name="edit" size={14}/></button>
+                            <button onClick={()=>setModal({type:"delete",data:post})} style={{ background:"transparent",border:"none",color:"#FF4757",padding:6,borderRadius:6 }}><Icon name="trash" size={14}/></button>
+                            {!post.sponsored&&user.role!=="admin"&&<button onClick={()=>setModal({type:"sponsor",data:post})} style={{ background:"rgba(255,215,0,0.12)",border:"1px solid rgba(255,215,0,0.4)",color:"#FFD700",padding:"4px 8px",borderRadius:6,fontWeight:700,fontSize:11,cursor:"pointer" }}>🌟 Sponsoriser</button>}
+                            {post.sponsored&&<span style={{ color:"#FFD700",fontSize:11,fontWeight:700,padding:"4px 6px" }}>🌟 Sponsorisé</span>}
+                            {!isUrgentActive(post)&&user.role!=="admin"&&<button onClick={()=>setModal({type:"urgent",data:post})} style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"4px 8px",borderRadius:6,fontWeight:700,fontSize:11,cursor:"pointer" }}>🔥 Urgent</button>}
+                            {isUrgentActive(post)&&<span style={{ color:"#FF4757",fontSize:11,fontWeight:700,padding:"4px 6px" }}>🔥 En cours</span>}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Infos de contact */}
+                      <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+                        <button onClick={()=>setModal({type:"contact",data:post})} style={{ background:"rgba(67,198,172,0.12)",border:"1px solid rgba(67,198,172,0.3)",color:"#43C6AC",padding:"9px 14px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+                          <Icon name="mail" size={14}/> Envoyer un message
+                        </button>
+                        {post.phone && user?.id !== post.authorId && (
+                          <div style={{ display:"flex",gap:8 }}>
+                            <a href={"tel:"+post.phone} style={{ flex:1,textDecoration:"none" }}>
+                              <div style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"9px 14px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:8,cursor:"pointer" }}>
+                                📞 {post.phone}
+                              </div>
+                            </a>
+                            <a href={"https://wa.me/"+post.phone.replace(/[\s+\-()]/g,"")+"?text="+encodeURIComponent("Bonjour, je suis intéressé(e) par votre annonce : *"+post.title+"*\nPrix : "+(post.price||"Non précisé")+"\nLien : https://marcheduroi.com/annonce/"+post.id)} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                              <div style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",color:"#25D366",padding:"9px 12px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6,cursor:"pointer" }}>
+                                <svg width="14" height="14" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                                WA
+                              </div>
+                            </a>
+                          </div>
+                        )}
+                        {post.lat && post.lng && (
+                          <a href={"https://www.google.com/maps/dir/?api=1&destination="+post.lat+","+post.lng} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                            <div style={{ background:"rgba(66,133,244,0.1)",border:"1px solid rgba(66,133,244,0.3)",color:"#4285F4",padding:"9px 14px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:8,cursor:"pointer" }}>
+                              🗺️ Itinéraire Google Maps
+                            </div>
+                          </a>
+                        )}
+                        {user && user.id !== (post.authorId||post.author_id) && (post.authorId||post.author_id) && (
+                          <button onClick={()=>{ const ownerId=post.authorId||post.author_id; setActiveConv({postId:post.id,postTitle:post.title,postPrice:post.price,postPhoto:post.photos?.[0],receiverId:ownerId,receiverName:post.author,messages:messages.filter(m=>(m.post_id===post.id)&&((m.sender_id===user.id&&m.receiver_id===ownerId)||(m.receiver_id===user.id&&m.sender_id===ownerId)))}); setShowMessages(true); markConvRead({messages:messages.filter(m=>m.post_id===post.id&&m.receiver_id===user.id)}); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"9px 14px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+                            💬 Message privé
+                          </button>
+                        )}
+                        <button onClick={()=>setModal({type:"report",data:post})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"4px 0",fontSize:11,cursor:"pointer",textAlign:"left" }}>
+                          🚩 Signaler cette annonce
+                        </button>
+                      </div>
+                      {/* Bouton Masquer en bas du panneau */}
+                      <button onClick={e=>{ e.stopPropagation(); setExpandedContacts({}); }}
+                        style={{ width:"100%",background:"rgba(67,198,172,0.15)",border:"1px solid rgba(67,198,172,0.5)",color:"#43C6AC",padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:10,transition:"all 0.2s" }}>
+                        <Icon name="mail" size={14}/> Masquer ▲
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
           {filtered.length===0 && postsLoaded && (
             <div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}>
               <p style={{ fontSize:40,marginBottom:12 }}>🔍</p>
@@ -4026,6 +4174,8 @@ const PHONE_EXAMPLE = {
               )}
             </div>
           )}
+
+          {/* Bouton voir toutes les annonces si filtre pays actif */}
           {filtered.length > 0 && !showAllCountries && !search && postsLoaded && (
             <div style={{ textAlign:"center",marginTop:16,marginBottom:8 }}>
               <button onClick={()=>setShowAllCountries(true)} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,padding:"8px 20px",borderRadius:20,fontWeight:600,fontSize:13,cursor:"pointer" }}>
@@ -4037,6 +4187,25 @@ const PHONE_EXAMPLE = {
             <div style={{ textAlign:"center",marginTop:8,marginBottom:8 }}>
               <button onClick={()=>setShowAllCountries(false)} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:"#6C63FF",padding:"8px 20px",borderRadius:20,fontWeight:600,fontSize:13,cursor:"pointer" }}>
                 📍 Afficher mon pays uniquement
+              </button>
+            </div>
+          )}
+
+          {/* Voir plus */}
+          {filtered.length > visibleCount && (
+            <div style={{ textAlign:"center",marginTop:32 }}>
+              <p style={{ color:theme.sub,fontSize:13,marginBottom:12 }}>
+                Affichage de {Math.min(visibleCount,filtered.length)} sur {filtered.length} annonces
+              </p>
+              <button onClick={()=>setVisibleCount(v=>v+POSTS_PER_PAGE)} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
+                Voir plus ({filtered.length-visibleCount} restantes) ↓
+              </button>
+            </div>
+          )}
+          {filtered.length > POSTS_PER_PAGE && visibleCount >= filtered.length && (
+            <div style={{ textAlign:"center",marginTop:24 }}>
+              <button onClick={()=>setVisibleCount(12)} style={{ background:"transparent",border:`1px solid ${theme.border}`,color:theme.sub,padding:"10px 24px",borderRadius:12,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+                ↑ Réduire la liste
               </button>
             </div>
           )}
