@@ -3891,7 +3891,7 @@ const PHONE_EXAMPLE = {
             {filtered.slice(0, visibleCount).map(post=>(
               <div key={post.id} id={"post-"+post.id} className={`card-hover${isUrgentActive(post)?" card-urgent":post.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:isUrgentActive(post)?"2px solid #FF4757":post.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 {post.video
-                  ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60}/>
+                  ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60} autoPlay={isUrgentActive(post)||!!post.sponsored}/>
                   : post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
                 }
                 <div style={{ padding:"14px 16px" }}>
@@ -5751,7 +5751,7 @@ const PHONE_EXAMPLE = {
               num:"3",
               title:"Publication d'annonces et tarification",
               icon:"💰",
-              content:`TARIFS DE PUBLICATION : ANNONCES CLASSIQUES : publication gratuite et illimitée pour tous. SPONSORING ANNONCES : 500 FCFA pour 7 jours · 1 500 FCFA pour 30 jours · 3 500 FCFA pour 90 jours · 6 000 FCFA pour 180 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 4 jours gratuits par mois puis 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. BADGE URGENT : 500 FCFA pour 3 jours · 1 000 FCFA pour 7 jours. MODIFICATION : Gratuite et illimitée pour les annonces classiques. Pour les boutiques, ateliers, restaurants et salons beauté, les modifications sont incluses dans l'abonnement actif. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
+              content:`TARIFS DE PUBLICATION : ANNONCES CLASSIQUES : publication gratuite et illimitée pour tous. SPONSORING ANNONCES : 500 FCFA pour 7 jours · 1 500 FCFA pour 30 jours · 3 500 FCFA pour 90 jours · 6 000 FCFA pour 180 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 4 jours gratuits par mois puis 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. BADGE URGENT : 500 FCFA pour 3 jours · 1 000 FCFA pour 7 jours. VIDÉO : La vidéo ajoutée à une annonce doit montrer uniquement le produit ou service annoncé. Toute vidéo montrant autre chose (boutique entière, publicité générale, contenu non lié) constitue un abus et entraîne la suppression de l'annonce sans préavis. MODIFICATION : Gratuite et illimitée pour les annonces classiques. Pour les boutiques, ateliers, restaurants et salons beauté, les modifications sont incluses dans l'abonnement actif. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
             },
             {
               num:"4",
@@ -5957,6 +5957,10 @@ const PHONE_EXAMPLE = {
                   return (
                     <div style={{ marginBottom:16 }}>
                       <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎬 Lien vidéo (optionnel)</label>
+                      <div style={{ display:"flex",alignItems:"flex-start",gap:6,marginBottom:7,padding:"8px 10px",background:"rgba(255,71,87,0.06)",borderRadius:8,border:"1px solid rgba(255,71,87,0.2)" }}>
+                        <span style={{ fontSize:13,marginTop:1 }}>⚠️</span>
+                        <span style={{ fontSize:11,color:"#FF6584",lineHeight:1.5 }}>La vidéo doit montrer uniquement le produit ou service de cette annonce. Toute vidéo hors-sujet entraîne la suppression de l'annonce. Les annonces sponsorisées et urgentes bénéficient de la lecture automatique.</span>
+                      </div>
                       <input
                         value={postVideo||""}
                         onChange={e=>setPostVideo(e.target.value.trim())}
