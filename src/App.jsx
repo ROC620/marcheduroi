@@ -282,7 +282,25 @@ const INITIAL_ATELIERS = [
   },
 ];
 
-const BOUTIQUE_TYPES = ["Cosmétiques & Beauté","Alimentation & Restauration","Électronique & Informatique","Mode & Vêtements","Pharmacie & Santé","Matériaux & Construction","Agriculture & Élevage","Librairie & Papeterie","Sport & Loisirs","Autre"];
+const BOUTIQUE_TYPES = ["Cosmétiques & Beauté","Alimentation & Restauration","Électronique & Informatique","Mode & Vêtements","Pharmacie & Santé","Matériaux & Construction","Agriculture & Élevage","Librairie & Papeterie","Sport & Loisirs","Autres Boutiques","Autre"];
+const AUTRES_BOUTIQUES_SOUS_CAT = [
+  // Alimentation & Boissons
+  "Alimentation générale","Épicerie","Boulangerie & Pâtisserie","Boissons & Eau","Compléments alimentaires",
+  // Maison & Décoration
+  "Meubles & Décoration","Articles ménagers","Literie & Rideaux","Électroménager","Matériaux de construction",
+  // Mode & Beauté
+  "Vêtements & Mode","Chaussures & Maroquinerie","Bijouterie & Accessoires","Cosmétiques & Parfums","Perruques & Extensions",
+  // Électronique & Technologie
+  "Téléphones & Accessoires","Informatique","Électronique & Hi-Fi","Panneaux solaires & Énergie",
+  // Services & Fournitures
+  "Papeterie & Librairie","Fournitures de bureau","Imprimerie & Communication","Jeux & Jouets",
+  // Agriculture & Élevage
+  "Semences & Engrais","Élevage & Animaux","Matériel agricole",
+  // Machines & Équipements
+  "Machines à coudre","Ventilateurs & Climatisation","Moteurs & Groupes électrogènes","Pompes & Irrigation","Outillage & Machines","Équipements industriels",
+  // Divers
+  "Cadeaux & Souvenirs","Articles religieux","Quincaillerie","Divers","Autres"
+];
 const ATELIER_TYPES = ["Couture/Mode","Mécanique","Menuiserie/Soudure","Artistique (peinture, musique...)","Électricité & Plomberie","Coiffure & Beauté","Imprimerie & Communication","Autre"];
 const IMMO_TYPES = ["Maison","Appartement","Duplex","Villa","Magasin","Local commercial","Parcelle","Domaine / Terrain","Sanitaire 3 chambres 1 salon","Sanitaire 2 chambres 1 salon","Sanitaire chambre salon","Sanitaire entrée-couchée","Ordinaire 3 chambres 1 salon","Ordinaire 2 chambres 1 salon","Ordinaire chambre salon","Entrée-couchée ordinaire"];
 const IMMO_ETATS = ["Neuf","Bon état","À rénover","En construction"];
@@ -4654,7 +4672,7 @@ const PHONE_EXAMPLE = {
             <div key={b.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
               <div style={{ display:"flex",gap:12,alignItems:"center" }}>
                 {b.photos&&b.photos.length>0&&<img src={b.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
-                <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.type}</p></div>
+                <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.sousType||b.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
                 <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"✅ Certifié":"Certifier"}</button>
@@ -4708,7 +4726,7 @@ const PHONE_EXAMPLE = {
             <div key={b.id} style={{ ...cardStyle,borderRadius:12,padding:16,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12 }}>
               <div style={{ display:"flex",gap:12,alignItems:"center" }}>
                 {b.photos&&b.photos.length>0&&<img src={b.photos[0]} alt="" style={{ width:40,height:40,borderRadius:6,objectFit:"cover" }}/>}
-                <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.type}</p></div>
+                <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.sousType||b.type}</p></div>
               </div>
               <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
                 <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"✅ Certifié":"Certifier"}</button>
@@ -5219,7 +5237,7 @@ const PHONE_EXAMPLE = {
                 </div>
                 <div style={{ padding:20 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
-                    <span className="tag" style={{ background:"rgba(255,101,132,0.15)",color:"#FF6584" }}>🛍️ {b.type}</span>
+                    <span className="tag" style={{ background:"rgba(255,101,132,0.15)",color:"#FF6584" }}>🛍️ {b.sousType||b.type}</span>
                   </div>
                   <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:6 }}>
                     {b.sponsored && <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",color:"#000",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:800 }}>🌟 Sponsorisé</span>}
@@ -6840,11 +6858,25 @@ const PHONE_EXAMPLE = {
                 {/* Type */}
                 <div style={{ marginBottom:16 }}>
                   <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Type {shopMode==="boutique"?"de boutique":"d'atelier"} *</label>
-                  <select value={shopForm.type} onChange={e=>setShopForm(s=>({...s,type:e.target.value}))} style={inputStyle}>
+                  <select value={shopForm.type} onChange={e=>setShopForm(s=>({...s,type:e.target.value,sousType:""}))} style={inputStyle}>
                     <option value="">-- Choisir --</option>
                     {(shopMode==="boutique"?BOUTIQUE_TYPES:ATELIER_TYPES).map(t=><option key={t}>{t}</option>)}
                   </select>
                 </div>
+
+                {/* Sous-catégorie — uniquement pour Autres Boutiques */}
+                {shopMode==="boutique" && shopForm.type==="Autres Boutiques" && (
+                  <div style={{ marginBottom:16 }}>
+                    <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Sous-catégorie *</label>
+                    <select value={shopForm.sousType||""} onChange={e=>setShopForm(s=>({...s,sousType:e.target.value}))} style={inputStyle}>
+                      <option value="">-- Choisir une sous-catégorie --</option>
+                      {AUTRES_BOUTIQUES_SOUS_CAT.map(t=><option key={t}>{t}</option>)}
+                    </select>
+                    {shopForm.sousType && (
+                      <p style={{ fontSize:11,color:"#43C6AC",marginTop:4,fontWeight:600 }}>✓ {shopForm.sousType} sélectionné</p>
+                    )}
+                  </div>
+                )}
 
                 {/* Champs principaux */}
                 {[
