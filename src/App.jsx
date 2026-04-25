@@ -496,38 +496,31 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
 
   if (allSponsored.length === 0) return null;
 
-  // Nombre de cartes visibles selon la largeur
-  const perPage = windowWidth <= 500 ? 2 : windowWidth <= 900 ? 2 : 3;
-  const cardW   = windowWidth <= 500 ? 155 : windowWidth <= 800 ? 185 : 215;
-  const GAP     = 12;
-
-  // Groupes de perPage cartes (en boucle)
+  const perPage   = windowWidth <= 500 ? 2 : 3;
+  const cardW     = windowWidth <= 500 ? 155 : windowWidth <= 800 ? 185 : 215;
+  const GAP       = 12;
   const totalGroups = Math.ceil(allSponsored.length / perPage);
-  const [groupIdx, setGroupIdx] = React.useState(() => Math.floor(sessionSeed * totalGroups));
-  const timerRef = React.useRef(null);
-  const [animating, setAnimating] = React.useState(false);
-  const [dir, setDir] = React.useState(1); // 1=forward, -1=back
 
-  const goTo = (newIdx, direction) => {
-    setDir(direction);
-    setAnimating(true);
+  const [groupIdx, setGroupIdx] = React.useState(() => Math.floor(sessionSeed * totalGroups) % totalGroups);
+  const [slide, setSlide]       = React.useState("idle"); // "idle" | "out" | "in"
+  const timerRef = React.useRef(null);
+
+  const advance = (nextIdx) => {
+    // 1. Sortie : glisse vers la gauche (disparaît)
+    setSlide("out");
     setTimeout(() => {
-      setGroupIdx(((newIdx % totalGroups) + totalGroups) % totalGroups);
-      setAnimating(false);
+      setGroupIdx(((nextIdx % totalGroups) + totalGroups) % totalGroups);
+      // 2. Entrée : arrive de la droite
+      setSlide("in");
+      setTimeout(() => setSlide("idle"), 500);
     }, 400);
   };
 
   const startTimer = () => {
     clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
-      setGroupIdx(prev => {
-        const next = (prev + 1) % totalGroups;
-        setDir(1);
-        setAnimating(true);
-        setTimeout(() => setAnimating(false), 400);
-        return next;
-      });
-    }, 4500);
+      setGroupIdx(prev => { advance(prev + 1); return prev; });
+    }, 4800);
   };
 
   React.useEffect(() => {
@@ -536,25 +529,24 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
     return () => clearInterval(timerRef.current);
   }, [totalGroups]);
 
-  const handlePrev = () => {
-    clearInterval(timerRef.current);
-    goTo(groupIdx - 1, -1);
-    startTimer();
-  };
-  const handleNext = () => {
-    clearInterval(timerRef.current);
-    goTo(groupIdx + 1, 1);
-    startTimer();
-  };
+  const handlePrev = () => { clearInterval(timerRef.current); advance(groupIdx - 1); startTimer(); };
+  const handleNext = () => { clearInterval(timerRef.current); advance(groupIdx + 1); startTimer(); };
 
-  // Cartes du groupe courant
-  const startIdx = groupIdx * perPage;
-  const group = Array.from({ length: perPage }, (_, i) => allSponsored[(startIdx + i) % allSponsored.length]);
+  const group = Array.from({ length: perPage }, (_, i) =>
+    allSponsored[(groupIdx * perPage + i) % allSponsored.length]);
+
+  // Styles de glissement
+  const slideStyle = {
+    idle: { transform:"translateX(0)",     opacity:1, transition:"transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s" },
+    out:  { transform:"translateX(-60px)", opacity:0, transition:"transform 0.4s ease-in, opacity 0.4s ease-in" },
+    in:   { transform:"translateX(0)",     opacity:1, transition:"transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s",
+            animation:"slideFromRight 0.5s cubic-bezier(0.25,0.46,0.45,0.94)" },
+  };
 
   const SponsoredCard = ({ item }) => (
-    <div onClick={() => navigate(`/${item._type === "annonce" ? "annonce" : item._type}/${item.id}`)}
+    <div onClick={() => navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`)}
       style={{ flex:`0 0 ${cardW}px`, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
-      <div style={{ width:"100%", height:windowWidth<=500?100:130, background:"linear-gradient(135deg,#1a1d30,#2a2d45)", position:"relative", overflow:"hidden" }}>
+      <div style={{ width:"100%",height:windowWidth<=500?100:130,background:"linear-gradient(135deg,#1a1d30,#2a2d45)",position:"relative",overflow:"hidden" }}>
         {item.photos&&item.photos[0]
           ? <img src={item.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
           : <div style={{ width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32 }}>📦</div>}
@@ -570,8 +562,7 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
   );
 
   return (
-    <div style={{ marginBottom:24, width:"100%" }}>
-      {/* Header */}
+    <div style={{ marginBottom:24,width:"100%" }}>
       <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12 }}>
         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
           <span style={{ fontSize:windowWidth<=500?16:20 }}>🌟</span>
@@ -587,26 +578,22 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
         )}
       </div>
 
-      {/* Groupe de cartes avec transition */}
-      <div style={{ overflow:"hidden", width:"100%" }}>
-        <div style={{ display:"flex",gap:GAP,
-          opacity: animating ? 0 : 1,
-          transform: animating ? `translateX(${dir * 20}px)` : "translateX(0)",
-          transition: "opacity 0.3s ease, transform 0.3s ease" }}>
-          {group.map((item, i) => <SponsoredCard key={item.id+"-sp-"+i} item={item}/>)}
+      {/* Cartes avec glissement droite→gauche */}
+      <div style={{ overflow:"hidden",width:"100%" }}>
+        <div style={{ display:"flex",gap:GAP, ...slideStyle[slide] }}>
+          {group.map((item,i) => <SponsoredCard key={item.id+"-sp-"+groupIdx+"-"+i} item={item}/>)}
         </div>
       </div>
 
-      {/* Dots indicateurs */}
+      {/* Dots */}
       {totalGroups > 1 && (
         <div style={{ display:"flex",justifyContent:"center",gap:5,marginTop:10 }}>
           {Array.from({length:totalGroups}).map((_,i)=>(
-            <div key={i} onClick={()=>goTo(i, i>groupIdx?1:-1)}
+            <div key={i} onClick={()=>{ clearInterval(timerRef.current); advance(i); startTimer(); }}
               style={{ width:i===groupIdx?18:6,height:6,borderRadius:3,background:i===groupIdx?"#FFD700":"rgba(255,215,0,0.25)",transition:"all 0.3s",cursor:"pointer" }}/>
           ))}
         </div>
       )}
-
       <div style={{ borderBottom:`1px solid ${theme.border}`,marginTop:14 }}/>
     </div>
   );
@@ -2887,6 +2874,7 @@ const PHONE_EXAMPLE = {
         @keyframes goldGlow{0%,100%{box-shadow:0 0 8px rgba(255,215,0,0.6),0 0 20px rgba(255,215,0,0.3),0 4px 24px rgba(255,215,0,0.25)}50%{box-shadow:0 0 16px rgba(255,215,0,0.9),0 0 36px rgba(255,215,0,0.5),0 4px 32px rgba(255,215,0,0.4)}}
         @keyframes urgentGlow{0%,100%{box-shadow:0 0 8px rgba(255,71,87,0.6),0 0 20px rgba(255,71,87,0.3),0 4px 24px rgba(255,71,87,0.2)}50%{box-shadow:0 0 18px rgba(255,71,87,0.9),0 0 40px rgba(255,71,87,0.5),0 4px 32px rgba(255,71,87,0.35)}}
         @keyframes carouselRTL{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        @keyframes slideFromRight{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
         @keyframes carouselLTR{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
         .carousel-rtl{animation:carouselRTL 30s linear infinite;}
         .carousel-ltr{animation:carouselLTR 30s linear infinite;}
