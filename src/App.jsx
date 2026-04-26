@@ -338,37 +338,45 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false
   const ytMatch = (video||"").match(/(?:v=|youtu\.be\/|shorts\/)([\w-]{11})/);
   const ytId = ytMatch ? ytMatch[1] : null;
 
-  // Une seule vidéo autoPlay à la fois — IntersectionObserver avec ratio élevé
+  // Dwell time — démarre après 2s de présence dans le viewport
+  const dwellTimer = React.useRef(null);
+
   React.useEffect(() => {
     if (!containerRef.current || !autoPlay) return;
+
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && entry.intersectionRatio >= 0.75) {
-        // Cette vidéo est suffisamment visible — elle prend la main
-        if (activeVideoId.current !== instanceId.current) {
-          // Signaler aux autres de s'arrêter
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+        // L'utilisateur est sur la carte — démarrer le timer 2s
+        dwellTimer.current = setTimeout(() => {
+          // Stopper toutes les autres vidéos autoPlay
           window.dispatchEvent(new CustomEvent("mdr_stop_videos", { detail: instanceId.current }));
           activeVideoId.current = instanceId.current;
-        }
-        setPlaying(true);
+          setPlaying(true);
+        }, 2000);
       } else {
-        // Sort du viewport — s'arrêter
+        // L'utilisateur a scrollé — annuler le timer + stopper
+        clearTimeout(dwellTimer.current);
         if (activeVideoId.current === instanceId.current) {
           activeVideoId.current = null;
         }
         setPlaying(false);
       }
-    }, { threshold: 0.75 });
+    }, { threshold: 0.5 });
+
     observer.observe(containerRef.current);
 
     // Écouter les demandes d'arrêt des autres instances
     const handleStop = (e) => {
       if (e.detail !== instanceId.current) {
+        clearTimeout(dwellTimer.current);
         setPlaying(false);
       }
     };
     window.addEventListener("mdr_stop_videos", handleStop);
+
     return () => {
       observer.disconnect();
+      clearTimeout(dwellTimer.current);
       window.removeEventListener("mdr_stop_videos", handleStop);
     };
   }, [autoPlay]);
@@ -843,6 +851,7 @@ function AppContent() {
     return history.state?.view || "landing";
   });
   const [showCategories, setShowCategories] = useState(false);
+  const [showPublishMenu, setShowPublishMenu] = useState(false);
 
   // Navigation avec historique — remplace setView partout
   const setView = (newView) => {
@@ -3762,9 +3771,59 @@ const PHONE_EXAMPLE = {
               <span style={{ background:theme.card,border:`1px solid ${theme.border}`,color:theme.sub,padding:"2px 10px",borderRadius:20,fontSize:12,fontWeight:600 }}>{filtered.length} annonce{filtered.length!==1?"s":""}</span>
             </div>
             {canEdit ? (
-              <button onClick={()=>{setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:""});setPostPhotos([]);setVehicleForm({});setImmoForm({sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:""}); setMonths(1); setModal({type:"add"});}} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"9px 18px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6,transition:"box-shadow 0.2s",flexShrink:0 }}>
-                <Icon name="plus" size={14}/>Publier
-              </button>
+              <div style={{ position:"relative",flexShrink:0 }}>
+                {/* Bouton principal */}
+                <button onClick={()=>setShowPublishMenu(m=>!m)} className="btn-glow"
+                  style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"9px 18px",borderRadius:10,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6,transition:"box-shadow 0.2s",cursor:"pointer" }}>
+                  <Icon name="plus" size={14}/>Publier
+                  <span style={{ fontSize:10,transition:"transform 0.2s",display:"inline-block",transform:showPublishMenu?"rotate(180deg)":"rotate(0deg)" }}>▾</span>
+                </button>
+
+                {/* Sous-menu */}
+                {showPublishMenu && (
+                  <>
+                    {/* Overlay transparent pour fermer en cliquant ailleurs */}
+                    <div onClick={()=>setShowPublishMenu(false)} style={{ position:"fixed",inset:0,zIndex:98 }}/>
+                    <div style={{ position:"absolute",right:0,top:"calc(100% + 8px)",zIndex:99,background:theme.card,border:`1px solid ${theme.border}`,borderRadius:16,padding:8,minWidth:220,boxShadow:"0 8px 32px rgba(0,0,0,0.35)",animation:"fadeIn 0.15s ease" }}>
+                      
+                      {/* Titre */}
+                      <p style={{ fontSize:11,fontWeight:700,color:theme.sub,padding:"4px 12px 8px",textTransform:"uppercase",letterSpacing:0.8 }}>Que souhaitez-vous publier ?</p>
+
+                      {/* Options */}
+                      {[
+                        { icon:"📋", label:"Annonce classique", badge:"Gratuit", badgeColor:"#43C6AC", badgeBg:"rgba(67,198,172,0.15)",
+                          action:()=>{ setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:""}); setPostPhotos([]); setVehicleForm({}); setImmoForm({sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:""}); setMonths(1); setModal({type:"add"}); setShowPublishMenu(false); }
+                        },
+                        { icon:"🛍️", label:"Boutique", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
+                          action:()=>{ setShopMode("boutique"); setShopForm({name:"",type:"",sousType:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addShop"}); setShowPublishMenu(false); }
+                        },
+                        { icon:"🔧", label:"Atelier", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
+                          action:()=>{ setShopMode("ateliers"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addShop"}); setShowPublishMenu(false); }
+                        },
+                        { icon:"🍽️", label:"Restaurant & Bar", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
+                          action:()=>{ setShopMode("restos"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addShop"}); setShowPublishMenu(false); }
+                        },
+                        { icon:"💇", label:"Beauté & Bien-être", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
+                          action:()=>{ setShopMode("beaute"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addShop"}); setShowPublishMenu(false); }
+                        },
+                      ].map((opt,i) => (
+                        <button key={i} onClick={opt.action}
+                          style={{ width:"100%",display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:"transparent",border:"none",borderRadius:10,cursor:"pointer",textAlign:"left",transition:"background 0.15s" }}
+                          onMouseEnter={e=>e.currentTarget.style.background=theme.bg}
+                          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                          <span style={{ fontSize:20,flexShrink:0 }}>{opt.icon}</span>
+                          <span style={{ flex:1,fontWeight:600,fontSize:13,color:theme.text }}>{opt.label}</span>
+                          <span style={{ background:opt.badgeBg,color:opt.badgeColor,padding:"2px 8px",borderRadius:20,fontSize:10,fontWeight:800,flexShrink:0 }}>{opt.badge}</span>
+                        </button>
+                      ))}
+
+                      {/* Séparateur + astuce */}
+                      <div style={{ borderTop:`1px solid ${theme.border}`,margin:"8px 0 4px" }}/>
+                      <p style={{ fontSize:10,color:theme.sub,textAlign:"center",padding:"0 12px 4px" }}>💡 Sponsorisez pour plus de visibilité</p>
+                    </div>
+                  </>
+                )}
+              </div>
             ) : (
               windowWidth > 600 ? (
                 <button onClick={()=>setView("register")} style={{ ...cardStyle,border:`1px dashed #6C63FF`,color:"#6C63FF",padding:"9px 14px",borderRadius:10,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,flexShrink:0 }}>
