@@ -323,27 +323,62 @@ const FLAGS = [
   {code:"bi",pays:"Burundi"},{code:"td",pays:"Tchad"},{code:"mr",pays:"Mauritanie"},
 ];
 
+// ── Gestionnaire global : une seule vidéo autoPlay active à la fois ─────────
+const activeVideoId = { current: null };
+
 // ── Composant vidéo auto-play sur les cartes ─────────────────────────────────
 function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false }) {
   const [playing, setPlaying] = React.useState(false);
   const containerRef = React.useRef(null);
   const videoRef = React.useRef(null);
+  const instanceId = React.useRef(Math.random().toString(36).slice(2));
   const isYT = /youtube\.com|youtu\.be/.test(video||"");
   const isCL = /cloudinary\.com/.test(video||"");
   const isShort = /youtube\.com\/shorts\//.test(video||"");
   const ytMatch = (video||"").match(/(?:v=|youtu\.be\/|shorts\/)([\w-]{11})/);
   const ytId = ytMatch ? ytMatch[1] : null;
 
-  // Lancer/arrêter selon la visibilité dans le viewport
+  // Une seule vidéo autoPlay à la fois — IntersectionObserver avec ratio élevé
   React.useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !autoPlay) return;
     const observer = new IntersectionObserver(([entry]) => {
-      if (autoPlay) {
-        setPlaying(entry.isIntersecting);
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.75) {
+        // Cette vidéo est suffisamment visible — elle prend la main
+        if (activeVideoId.current !== instanceId.current) {
+          // Signaler aux autres de s'arrêter
+          window.dispatchEvent(new CustomEvent("mdr_stop_videos", { detail: instanceId.current }));
+          activeVideoId.current = instanceId.current;
+        }
+        setPlaying(true);
       } else {
-        if (!entry.isIntersecting) setPlaying(false);
+        // Sort du viewport — s'arrêter
+        if (activeVideoId.current === instanceId.current) {
+          activeVideoId.current = null;
+        }
+        setPlaying(false);
       }
-    }, { threshold: 0.5 });
+    }, { threshold: 0.75 });
+    observer.observe(containerRef.current);
+
+    // Écouter les demandes d'arrêt des autres instances
+    const handleStop = (e) => {
+      if (e.detail !== instanceId.current) {
+        setPlaying(false);
+      }
+    };
+    window.addEventListener("mdr_stop_videos", handleStop);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("mdr_stop_videos", handleStop);
+    };
+  }, [autoPlay]);
+
+  // Sans autoPlay : arrêter quand sort du viewport
+  React.useEffect(() => {
+    if (!containerRef.current || autoPlay) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) setPlaying(false);
+    }, { threshold: 0.3 });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, [autoPlay]);
@@ -3909,7 +3944,7 @@ const PHONE_EXAMPLE = {
             {filtered.slice(0, visibleCount).map(post=>(
               <div key={post.id} id={"post-"+post.id} className={`card-hover${isUrgentActive(post)?" card-urgent":post.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:isUrgentActive(post)?"2px solid #FF4757":post.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 {post.video
-                  ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60} autoPlay={isUrgentActive(post)||!!post.sponsored}/>
+                  ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60} autoPlay={(isUrgentActive(post)||!!post.sponsored) && windowWidth<=600}/>
                   : post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
                 }
                 <div style={{ padding:"14px 16px" }}>
@@ -5236,7 +5271,7 @@ const PHONE_EXAMPLE = {
             .map(b=>(
               <div key={b.id} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={true}/>}
+                  {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
                   {isCertified(b.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
@@ -5333,7 +5368,7 @@ const PHONE_EXAMPLE = {
             .map(a=>(
               <div key={a.id} className={`card-hover${a.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(a.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(a.id)?"2px solid #FFD700":a.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {a.video && <VideoCardPlayer video={a.video?.url||a.video} photos={a.photos||[]} maxSeconds={120} autoPlay={true}/>}
+                  {a.video && <VideoCardPlayer video={a.video?.url||a.video} photos={a.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!a.video && a.photos&&a.photos.length>0 && <PhotoCarousel photos={a.photos}/>}
                   {isCertified(a.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
@@ -5438,7 +5473,7 @@ const PHONE_EXAMPLE = {
             .map(r=>(
               <div key={r.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(r.id)?"0 4px 24px rgba(255,215,0,0.4)":r.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(r.id)?`2px solid #FFD700`:r.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {r.video && <VideoCardPlayer video={r.video?.url||r.video} photos={r.photos||[]} maxSeconds={120} autoPlay={true}/>}
+                  {r.video && <VideoCardPlayer video={r.video?.url||r.video} photos={r.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!r.video && r.photos&&r.photos.length>0 && <PhotoCarousel photos={r.photos}/>}
                   {isCertified(r.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
@@ -5546,7 +5581,7 @@ const PHONE_EXAMPLE = {
             .map(b=>(
               <div key={b.id} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
-                  {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={true}/>}
+                  {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
                   {isCertified(b.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
