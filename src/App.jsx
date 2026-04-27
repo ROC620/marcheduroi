@@ -3795,16 +3795,16 @@ const PHONE_EXAMPLE = {
                           action:()=>{ setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:""}); setPostPhotos([]); setVehicleForm({}); setImmoForm({sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:""}); setMonths(1); setModal({type:"add"}); setShowPublishMenu(false); }
                         },
                         { icon:"🛍️", label:"Boutique", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
-                          action:()=>{ setShopMode("boutique"); setShopForm({name:"",type:"",sousType:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addShop"}); setShowPublishMenu(false); }
+                          action:()=>{ setShopMode("boutique"); setShopForm({name:"",type:"",sousType:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addshop"}); setShowPublishMenu(false); }
                         },
                         { icon:"🔧", label:"Atelier", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
-                          action:()=>{ setShopMode("ateliers"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addShop"}); setShowPublishMenu(false); }
+                          action:()=>{ setShopMode("atelier"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addshop"}); setShowPublishMenu(false); }
                         },
                         { icon:"🍽️", label:"Restaurant & Bar", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
-                          action:()=>{ setShopMode("restos"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addShop"}); setShowPublishMenu(false); }
+                          action:()=>{ setShopMode("restos"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addresto"}); setShowPublishMenu(false); }
                         },
                         { icon:"💇", label:"Beauté & Bien-être", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
-                          action:()=>{ setShopMode("beaute"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addShop"}); setShowPublishMenu(false); }
+                          action:()=>{ setShopMode("beaute"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addbeaute"}); setShowPublishMenu(false); }
                         },
                       ].map((opt,i) => (
                         <button key={i} onClick={opt.action}
