@@ -2591,11 +2591,12 @@ const PHONE_EXAMPLE = {
 
   const editShop = async () => {
     const id = modal.data?.id;
-    if (!id) return;
-    const tableMap = {boutique:"boutiques", atelier:"ateliers", resto:"restos", beaute:"beaute"};
-    const tableName = tableMap[shopMode] || "boutiques";
+    if (!id) { notify("Identifiant manquant","error"); return; }
+    // Déterminer la table depuis l'ID ou le shopMode
+    const tableMap = {boutique:"boutiques", atelier:"ateliers", ateliers:"ateliers", resto:"restos", restos:"restos", beaute:"beaute"};
+    const tableName = tableMap[shopMode] || (id.startsWith("boutique")?"boutiques":id.startsWith("atelier")?"ateliers":id.startsWith("resto")?"restos":id.startsWith("beaute")?"beaute":"boutiques");
     const { error } = await supabase.from(tableName).update({
-      name: shopForm.name, type: shopForm.type||"",
+      name: shopForm.name, type: shopForm.type||"", sous_type: shopForm.sousType||"",
       description: shopForm.description, services: shopForm.services||"",
       keywords: shopForm.keywords||"", ville: shopForm.ville||"",
       quartier: shopForm.quartier||"", von: shopForm.von||"",
@@ -2605,14 +2606,14 @@ const PHONE_EXAMPLE = {
       specialite: shopForm.specialite||"", tarifs: shopForm.tarifs||"",
       rendezvous: shopForm.rendezvous||"", produits: shopForm.produits||"",
     }).eq("id", id);
-    if (error) { notify("Erreur de modification","error"); return; }
-    const updated = {...modal.data,...shopForm,photos:shopPhotos,video:shopVideo};
-    if (shopMode==="boutique") setBoutiques(b=>b.map(x=>x.id===id?updated:x));
-    else if (shopMode==="atelier") setAteliers(a=>a.map(x=>x.id===id?updated:x));
-    else if (shopMode==="resto") setRestos(r=>r.map(x=>x.id===id?updated:x));
-    else if (shopMode==="beaute") setBeaute(b=>b.map(x=>x.id===id?updated:x));
+    if (error) { notify("Erreur : "+error.message,"error"); return; }
+    const updated = {...modal.data,...shopForm,sousType:shopForm.sousType,photos:shopPhotos,video:shopVideo};
+    if (tableName==="boutiques") setBoutiques(b=>b.map(x=>x.id===id?updated:x));
+    else if (tableName==="ateliers") setAteliers(a=>a.map(x=>x.id===id?updated:x));
+    else if (tableName==="restos") setRestos(r=>r.map(x=>x.id===id?updated:x));
+    else if (tableName==="beaute") setBeaute(b=>b.map(x=>x.id===id?updated:x));
     setModal(null);
-    setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
+    setShopForm({name:"",type:"",sousType:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
     setShopPhotos([]); setShopVideo(null);
     notify("✅ Modification appliquée !");
   };
@@ -2630,7 +2631,7 @@ const PHONE_EXAMPLE = {
       lat: shopForm.lat||null, lng: shopForm.lng||null,
       specialite: shopForm.specialite||"",
     }).eq("id", id);
-    if (error) { notify("Erreur de modification","error"); return; }
+    if (error) { notify("Erreur : "+error.message,"error"); return; }
     setRestos(r=>r.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
     setModal(null);
     setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
@@ -2652,7 +2653,7 @@ const PHONE_EXAMPLE = {
       specialite: shopForm.specialite||"", tarifs: shopForm.tarifs||"",
       rendezvous: shopForm.rendezvous||"", produits: shopForm.produits||"",
     }).eq("id", id);
-    if (error) { notify("Erreur de modification","error"); return; }
+    if (error) { notify("Erreur : "+error.message,"error"); return; }
     setBeaute(b=>b.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
     setModal(null);
     setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
@@ -2669,7 +2670,8 @@ const PHONE_EXAMPLE = {
 
       setShopMode(shopType==="boutique"?"boutique":shopType==="atelier"?"atelier":shopType);
       setShopForm({
-        name:item.name||"", type:item.type||"", description:item.description||"",
+        name:item.name||"", type:item.type||"", sousType:item.sousType||item.sous_type||"",
+        description:item.description||"",
         services:item.services||"", keywords:item.keywords||"",
         ville:item.ville||"", quartier:item.quartier||"", von:item.von||"",
         horaires:item.horaires||"", contact:item.contact||"", phone:item.phone||"",
@@ -4772,7 +4774,7 @@ const PHONE_EXAMPLE = {
                 <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"✅ Certifié":"Certifier"}</button>
                 <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(b.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
                 {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
-                <button onClick={()=>{ openEditShop(b,"boutique", setBoutiques); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
+                <button onClick={()=>{ openEditShop(b,"boutique", editShop); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                 <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
@@ -4790,7 +4792,7 @@ const PHONE_EXAMPLE = {
                 <button onClick={()=>toggleCertified(a.authorId, a.author)} style={{ background:isCertified(a.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(a.authorId)?"✅ Certifié":"Certifier"}</button>
                 <button onClick={()=>toggleFeatured(a.id)} style={{ background:featuredPosts.includes(a.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(a.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
                 {!a.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...a,title:a.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(a.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
-                <button onClick={()=>{ openEditShop(a,"atelier", setAteliers); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
+                <button onClick={()=>{ openEditShop(a,"atelier", editShop); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                 <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
@@ -4808,7 +4810,7 @@ const PHONE_EXAMPLE = {
                 <button onClick={()=>toggleCertified(r.authorId, r.author)} style={{ background:isCertified(r.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(r.authorId)?"✅ Certifié":"Certifier"}</button>
                 <button onClick={()=>toggleFeatured(r.id)} style={{ background:featuredPosts.includes(r.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(r.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
                 {!r.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...r,title:r.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(r.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
-                <button onClick={()=>{ openEditShop(r,"resto", setRestos); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
+                <button onClick={()=>{ openEditShop(r,"resto", editResto); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                 <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
@@ -4826,7 +4828,7 @@ const PHONE_EXAMPLE = {
                 <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"✅ Certifié":"Certifier"}</button>
                 <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(b.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
                 {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
-                <button onClick={()=>{ openEditShop(b,"beaute", setBeaute); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
+                <button onClick={()=>{ openEditShop(b,"beaute", editBeaute); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
                 <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
               </div>
             </div>
