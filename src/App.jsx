@@ -7600,7 +7600,7 @@ const PHONE_EXAMPLE = {
                 {/* Photos */}
                 <div style={{ marginBottom:16 }}>
                   <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:5 }}>📸 Photo (optionnel)</label>
-                  <PhotoUploader photos={promoPhotos} onPhotosChange={setPromoPhotos} maxPhotos={3}/>
+                  <PhotoUploader photos={promoPhotos} setPhotos={setPromoPhotos} theme={theme} folder="annonces"/>
                 </div>
                 <button onClick={()=>handlePayment(500,"Publication Promo/Nouveauté sur MarchéduRoi",()=>addPromo(modal.data, modal.shopType))}
                   className="btn-glow"
