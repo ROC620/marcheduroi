@@ -2528,6 +2528,14 @@ const PHONE_EXAMPLE = {
   const [selectedTarif, setSelectedTarif] = useState(0); // index dans TARIFS_ANNONCE ou TARIFS_BOUTIQUE
   const [promoForm, setPromoForm] = useState({ title:"", description:"", price:"" });
   const [promoPhotos, setPromoPhotos] = useState([]);
+  const [recrutTab, setRecrutTab] = useState("offres"); // "offres" | "cvs"
+  const [offreForm, setOffreForm] = useState({ entreprise:"", poste:"", description:"", salaire:"", localisation:"", contact:"", phone:"" });
+  const [cvForm, setCvForm] = useState({ nom:"", poste:"", competences:"", experience:"", disponibilite:"", localisation:"", contact:"", phone:"" });
+  const [selectedTarifOffre, setSelectedTarifOffre] = useState(0);
+  const TARIFS_OFFRE = [
+    { label:"30 jours", days:30, price:1500 },
+    { label:"90 jours", days:90, price:3500 },
+  ];
 
   // Vérifier les nouvelles demandes toutes les 5 minutes
   useEffect(() => {
@@ -3005,6 +3013,69 @@ const PHONE_EXAMPLE = {
     setPromoForm({ title:"", description:"", price:"" });
     setPromoPhotos([]);
     notify("📣 Promo publiée dans les annonces !");
+  };
+
+  // Publier une offre d'emploi (payant)
+  const addOffre = async (expiresAt) => {
+    if (!offreForm.poste?.trim()||!offreForm.description?.trim()||!offreForm.entreprise?.trim()) {
+      notify("Entreprise, poste et description requis","error"); return;
+    }
+    const postId = "offre_" + Date.now();
+    const exp = expiresAt || (() => { const d=new Date(); d.setDate(d.getDate()+30); return d.toISOString().slice(0,10); })();
+    const newOffre = {
+      id: postId, title: offreForm.poste, description: offreForm.description,
+      price: offreForm.salaire||"", category: "Offre d'emploi",
+      contact: offreForm.entreprise, phone: offreForm.phone||"",
+      ville: offreForm.localisation||"", quartier:"",
+      author: offreForm.entreprise, authorId: user.id,
+      date: new Date().toISOString().slice(0,10), photos:[], expiresAt: exp,
+      recrutType:"offre", entreprise: offreForm.entreprise,
+    };
+    const { error } = await supabase.from("posts").insert({
+      id:postId, title:newOffre.title, description:newOffre.description,
+      price:newOffre.price, category:newOffre.category,
+      contact:newOffre.contact, phone:newOffre.phone,
+      ville:newOffre.ville, author:newOffre.author,
+      author_id:user.id, date:newOffre.date, photos:[],
+      expires_at:exp, from_establishment:JSON.stringify({recrutType:"offre",entreprise:offreForm.entreprise}),
+    });
+    if (error) { notify("Erreur : "+error.message,"error"); return; }
+    setPosts(p=>[newOffre,...p]);
+    setModal(null);
+    setOffreForm({ entreprise:"",poste:"",description:"",salaire:"",localisation:"",contact:"",phone:"" });
+    notify("✅ Offre d'emploi publiée !");
+  };
+
+  // Publier un profil CV (gratuit)
+  const addCV = async () => {
+    if (!cvForm.nom?.trim()||!cvForm.poste?.trim()||!cvForm.competences?.trim()) {
+      notify("Nom, poste recherché et compétences requis","error"); return;
+    }
+    const postId = "cv_" + Date.now();
+    const newCV = {
+      id:postId, title:cvForm.poste+" — "+cvForm.nom,
+      description:`${cvForm.competences}
+
+Expérience : ${cvForm.experience||"Non précisée"}
+Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
+      price:"", category:"Profil CV",
+      contact:cvForm.nom, phone:cvForm.phone||"",
+      ville:cvForm.localisation||"", author:cvForm.nom,
+      authorId:user.id, date:new Date().toISOString().slice(0,10),
+      photos:[], expiresAt:null, recrutType:"cv",
+    };
+    const { error } = await supabase.from("posts").insert({
+      id:postId, title:newCV.title, description:newCV.description,
+      price:"", category:"Profil CV", contact:newCV.contact,
+      phone:newCV.phone, ville:newCV.ville, author:newCV.author,
+      author_id:user.id, date:newCV.date, photos:[], expires_at:null,
+      from_establishment:JSON.stringify({recrutType:"cv"}),
+    });
+    if (error) { notify("Erreur : "+error.message,"error"); return; }
+    setPosts(p=>[newCV,...p]);
+    setModal(null);
+    setCvForm({ nom:"",poste:"",competences:"",experience:"",disponibilite:"",localisation:"",contact:"",phone:"" });
+    notify("✅ Profil publié dans la section Recrutement !");
   };
 
   const userCountry = getUserCountry();
@@ -3775,7 +3846,7 @@ const PHONE_EXAMPLE = {
                   <span style={{ marginLeft:"auto",fontSize:18,opacity:0.6 }}>›</span>
                 </button>
 
-                {/* 3. Demandes / Recrutement */}
+                {/* 3. Demandes */}
                 <button onClick={()=>{ setShowCategories(false); localStorage.setItem('mdr_demandes_last_visit', new Date().toISOString()); setHasNewDemandes(false); window.open("https://marcheduroi.com/demandes","_blank"); }}
                   style={{ background:"linear-gradient(135deg,rgba(255,140,0,0.12),rgba(255,215,0,0.06))",
                     border:"2px solid rgba(255,140,0,0.45)",color:"#FF8C00",
@@ -3784,10 +3855,25 @@ const PHONE_EXAMPLE = {
                     backdropFilter:"blur(8px)",transition:"all 0.2s",position:"relative" }}>
                   <div style={{ background:"rgba(255,140,0,0.15)",borderRadius:14,width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:22 }}>📢</div>
                   <div>
-                    <p style={{ fontWeight:800,fontSize:15,marginBottom:2 }}>Demandes & Recrutement</p>
-                    <p style={{ fontWeight:500,fontSize:12,color:"rgba(255,140,0,0.75)" }}>Trouvez ce que vous cherchez</p>
+                    <p style={{ fontWeight:800,fontSize:15,marginBottom:2 }}>Demandes récentes</p>
+                    <p style={{ fontWeight:500,fontSize:12,color:"rgba(255,140,0,0.75)" }}>Ce que les gens recherchent</p>
                   </div>
                   {hasNewDemandes && <span style={{ position:"absolute",top:10,right:14,background:"#FF4757",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:10,fontWeight:800 }}>Nouveau !</span>}
+                  <span style={{ marginLeft:"auto",fontSize:18,opacity:0.6 }}>›</span>
+                </button>
+
+                {/* 4. Recrutement */}
+                <button onClick={()=>{ setShowCategories(false); setView("recrutement"); }}
+                  style={{ background:"linear-gradient(135deg,rgba(67,198,172,0.12),rgba(67,198,172,0.06))",
+                    border:"2px solid rgba(67,198,172,0.45)",color:"#43C6AC",
+                    padding:"16px 24px",borderRadius:18,fontWeight:800,fontSize:15,cursor:"pointer",
+                    display:"flex",alignItems:"center",gap:14,textAlign:"left",width:"100%",
+                    backdropFilter:"blur(8px)",transition:"all 0.2s" }}>
+                  <div style={{ background:"rgba(67,198,172,0.15)",borderRadius:14,width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:22 }}>💼</div>
+                  <div>
+                    <p style={{ fontWeight:800,fontSize:15,marginBottom:2 }}>Recrutement</p>
+                    <p style={{ fontWeight:500,fontSize:12,color:"rgba(67,198,172,0.75)" }}>Offres d'emploi & Profils CV</p>
+                  </div>
                   <span style={{ marginLeft:"auto",fontSize:18,opacity:0.6 }}>›</span>
                 </button>
 
@@ -5299,6 +5385,116 @@ const PHONE_EXAMPLE = {
           </div>
         </div>
       )}
+
+      {/* ── RECRUTEMENT ── */}
+      {view==="recrutement"&&(
+        <div style={{ animation:"fadeIn 0.4s ease",padding:"24px 20px",maxWidth:820,margin:"0 auto",width:"100%" }}>
+          <div style={{ textAlign:"center",marginBottom:28 }}>
+            <h1 style={{ fontSize:windowWidth<=600?28:40,fontWeight:800,color:theme.text,marginBottom:8 }}>
+              {"💼 "}
+              <span style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Recrutement</span>
+            </h1>
+            <p style={{ color:theme.sub,fontSize:14 }}>Offres d\'emploi et profils de candidats</p>
+          </div>
+          <div style={{ display:"flex",gap:8,marginBottom:24,background:theme.card,padding:4,borderRadius:14 }}>
+            {[{key:"offres",label:"💼 Offres d\'emploi"},{key:"cvs",label:"👤 Profils / CV"}].map(tab=>(
+              <button key={tab.key} onClick={()=>setRecrutTab(tab.key)}
+                style={{ flex:1,padding:"10px 16px",borderRadius:12,fontWeight:700,fontSize:13,cursor:"pointer",border:"none",
+                  background:recrutTab===tab.key?"linear-gradient(135deg,#43C6AC,#6C63FF)":"transparent",
+                  color:recrutTab===tab.key?"#fff":theme.sub,transition:"all 0.2s" }}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:20 }}>
+            {user && recrutTab==="offres" && (
+              <button onClick={()=>setModal({type:"addOffre"})} className="btn-glow"
+                style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:12,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                + Publier une offre
+              </button>
+            )}
+            {user && recrutTab==="cvs" && (
+              <button onClick={()=>setModal({type:"addCV"})} className="btn-glow"
+                style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:12,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                + Publier mon CV
+              </button>
+            )}
+          </div>
+          {recrutTab==="offres" && (()=>{
+            const offres = posts.filter(p=>p.category==="Offre d\'emploi").sort((a,b)=>new Date(b.date)-new Date(a.date));
+            if (offres.length===0) return (
+              <div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}>
+                <p style={{ fontSize:40,marginBottom:12 }}>{"💼"}</p>
+                <p style={{ fontWeight:600,marginBottom:8 }}>Aucune offre pour le moment</p>
+                <p style={{ fontSize:13 }}>1 500 FCFA / 30 jours · 3 500 FCFA / 90 jours</p>
+              </div>
+            );
+            return (
+              <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
+                {offres.map(o=>(
+                  <div key={o.id} style={{ ...cardStyle,borderRadius:16,padding:20,border:`1px solid ${theme.border}` }}>
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10,flexWrap:"wrap",gap:8 }}>
+                      <div>
+                        <p style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:4 }}>{o.title}</p>
+                        <p style={{ fontWeight:700,fontSize:13,color:"#43C6AC" }}>{"🏢 "}{o.contact}</p>
+                      </div>
+                      {o.price&&<span style={{ background:"rgba(67,198,172,0.12)",color:"#43C6AC",borderRadius:8,padding:"4px 12px",fontSize:13,fontWeight:700 }}>{"💰 "}{o.price} FCFA</span>}
+                    </div>
+                    <p style={{ color:theme.sub,fontSize:13,lineHeight:1.6,marginBottom:10 }}>{o.description}</p>
+                    <div style={{ display:"flex",gap:8,flexWrap:"wrap",alignItems:"center" }}>
+                      {o.ville&&<span style={{ fontSize:12,color:theme.sub }}>{"📍 "}{o.ville}</span>}
+                      <span style={{ fontSize:12,color:theme.sub }}>{"📅 "}{o.date}</span>
+                      {o.phone&&user&&user.id!==o.authorId&&(
+                        <a href={"https://wa.me/"+o.phone.replace(/[\s+()]/g,"")} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
+                          <div style={{ background:"rgba(37,211,102,0.15)",color:"#25D366",padding:"4px 10px",borderRadius:8,fontSize:12,fontWeight:700 }}>WA</div>
+                        </a>
+                      )}
+                      {user&&user.id!==o.authorId&&(
+                        <button onClick={()=>{ setActiveConv({postId:o.id,postTitle:o.title,postPrice:"",postPhoto:null,receiverId:o.authorId,receiverName:o.contact,messages:messages.filter(m=>(m.post_id===o.id)&&((m.sender_id===user.id&&m.receiver_id===o.authorId)||(m.receiver_id===user.id&&m.sender_id===o.authorId)))}); setShowMessages(true); }}
+                          style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"4px 10px",borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer" }}>{"💬 Postuler"}</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+          {recrutTab==="cvs" && (()=>{
+            const cvs = posts.filter(p=>p.category==="Profil CV").sort((a,b)=>new Date(b.date)-new Date(a.date));
+            if (cvs.length===0) return (
+              <div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}>
+                <p style={{ fontSize:40,marginBottom:12 }}>{"👤"}</p>
+                <p style={{ fontWeight:600,marginBottom:8 }}>Aucun profil pour le moment</p>
+                <p style={{ fontSize:13 }}>Publication gratuite</p>
+              </div>
+            );
+            return (
+              <div style={{ display:"grid",gridTemplateColumns:windowWidth<=600?"1fr":windowWidth<=900?"1fr 1fr":"1fr 1fr 1fr",gap:14 }}>
+                {cvs.map(cv=>(
+                  <div key={cv.id} style={{ ...cardStyle,borderRadius:16,padding:18,border:`1px solid ${theme.border}` }}>
+                    <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:12 }}>
+                      <div style={{ width:44,height:44,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#43C6AC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:700,color:"#fff",flexShrink:0 }}>{cv.contact?.[0]||"?"}</div>
+                      <div>
+                        <p style={{ fontWeight:800,fontSize:14,color:theme.text }}>{cv.contact}</p>
+                        <p style={{ fontSize:12,color:"#43C6AC",fontWeight:600 }}>{cv.title.split(" — ")[0]}</p>
+                      </div>
+                    </div>
+                    <p style={{ color:theme.sub,fontSize:12,lineHeight:1.6,marginBottom:10,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden" }}>{cv.description}</p>
+                    <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
+                      {cv.ville&&<span style={{ fontSize:11,color:theme.sub }}>{"📍 "}{cv.ville}</span>}
+                      {user&&user.id!==cv.authorId&&(
+                        <button onClick={()=>{ setActiveConv({postId:cv.id,postTitle:cv.title,postPrice:"",postPhoto:null,receiverId:cv.authorId,receiverName:cv.contact,messages:messages.filter(m=>(m.post_id===cv.id)&&((m.sender_id===user.id&&m.receiver_id===cv.authorId)||(m.receiver_id===user.id&&m.sender_id===cv.authorId)))}); setShowMessages(true); }}
+                          style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"3px 8px",borderRadius:6,fontSize:11,fontWeight:700,cursor:"pointer" }}>{"💬 Contacter"}</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
 
       {/* À PROPOS */}
       {view==="about"&&(
@@ -7573,6 +7769,87 @@ const PHONE_EXAMPLE = {
               </>
             )}
 
+
+            {/* OFFRE D'EMPLOI */}
+            {modal.type==="addOffre"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16 }}>
+                  <h3 style={{ fontWeight:800,fontSize:18,color:theme.text }}>💼 Publier une offre d'emploi</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <div style={{ background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.2)",borderRadius:10,padding:"10px 14px",marginBottom:16,fontSize:12,color:"#43C6AC" }}>
+                  💳 1 500 FCFA / 30 jours · 3 500 FCFA / 90 jours · Paiement MTN/Moov Money
+                </div>
+                {/* Sélection durée */}
+                <div style={{ display:"flex",gap:8,marginBottom:16 }}>
+                  {TARIFS_OFFRE.map((t,i)=>(
+                    <div key={i} onClick={()=>setSelectedTarifOffre(i)}
+                      style={{ flex:1,padding:"10px",borderRadius:10,cursor:"pointer",textAlign:"center",
+                        background:selectedTarifOffre===i?"rgba(67,198,172,0.15)":theme.card,
+                        border:`2px solid ${selectedTarifOffre===i?"#43C6AC":theme.border}` }}>
+                      <p style={{ fontWeight:700,fontSize:13,color:theme.text }}>{t.label}</p>
+                      <p style={{ fontWeight:800,fontSize:14,color:"#43C6AC" }}>{t.price.toLocaleString()} FCFA</p>
+                    </div>
+                  ))}
+                </div>
+                {[
+                  {label:"Nom de l'entreprise *",key:"entreprise",placeholder:"Ex: Boulangerie du Roi"},
+                  {label:"Poste recherché *",key:"poste",placeholder:"Ex: Vendeur(se), Comptable, Chauffeur..."},
+                  {label:"Description du poste *",key:"description",placeholder:"Responsabilités, conditions, profil recherché...",multi:true},
+                  {label:"Salaire / Rémunération",key:"salaire",placeholder:"Ex: 80 000 FCFA / mois"},
+                  {label:"Ville / Localisation",key:"localisation",placeholder:"Ex: Cotonou, Parakou..."},
+                  {label:"Contact (email ou nom)",key:"contact",placeholder:"Ex: rh@entreprise.com"},
+                  {label:"WhatsApp",key:"phone",placeholder:"Ex: +229 97 00 00 00"},
+                ].map(f=>(
+                  <div key={f.key} style={{ marginBottom:12 }}>
+                    <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>{f.label}</label>
+                    {f.multi
+                      ? <textarea value={offreForm[f.key]} onChange={e=>setOffreForm(p=>({...p,[f.key]:e.target.value}))} placeholder={f.placeholder} rows={3} style={{ ...inputStyle,resize:"vertical",fontFamily:"inherit" }}/>
+                      : <input value={offreForm[f.key]} onChange={e=>setOffreForm(p=>({...p,[f.key]:e.target.value}))} placeholder={f.placeholder} style={inputStyle}/>
+                    }
+                  </div>
+                ))}
+                <button onClick={()=>{ const t=TARIFS_OFFRE[selectedTarifOffre]; handlePayment(t.price,`Offre d'emploi ${t.label} sur MarchéduRoi`,()=>addOffre((() => { const d=new Date(); d.setDate(d.getDate()+t.days); return d.toISOString().slice(0,10); })())); }}
+                  className="btn-glow"
+                  style={{ width:"100%",padding:"13px",background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer",marginTop:4 }}>
+                  💳 Payer {TARIFS_OFFRE[selectedTarifOffre]?.price.toLocaleString()} FCFA et Publier
+                </button>
+              </>
+            )}
+
+            {/* PROFIL CV */}
+            {modal.type==="addCV"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16 }}>
+                  <h3 style={{ fontWeight:800,fontSize:18,color:theme.text }}>👤 Publier mon profil / CV</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <div style={{ background:"rgba(67,198,172,0.08)",border:"1px solid rgba(67,198,172,0.2)",borderRadius:10,padding:"10px 14px",marginBottom:16,fontSize:12,color:"#43C6AC" }}>
+                  🎁 Publication gratuite — votre profil reste visible jusqu'à ce que vous le supprimiez
+                </div>
+                {[
+                  {label:"Votre nom *",key:"nom",placeholder:"Ex: Koffi Mensah"},
+                  {label:"Poste / Métier recherché *",key:"poste",placeholder:"Ex: Comptable, Electricien, Secrétaire..."},
+                  {label:"Compétences *",key:"competences",placeholder:"Listez vos compétences et savoir-faire...",multi:true},
+                  {label:"Expérience professionnelle",key:"experience",placeholder:"Ex: 3 ans en comptabilité chez ABC SARL...",multi:true},
+                  {label:"Disponibilité",key:"disponibilite",placeholder:"Ex: Immédiate, À partir du 01/06/2026..."},
+                  {label:"Ville / Localisation",key:"localisation",placeholder:"Ex: Cotonou, Porto-Novo..."},
+                  {label:"WhatsApp",key:"phone",placeholder:"Ex: +229 97 00 00 00"},
+                ].map(f=>(
+                  <div key={f.key} style={{ marginBottom:12 }}>
+                    <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>{f.label}</label>
+                    {f.multi
+                      ? <textarea value={cvForm[f.key]} onChange={e=>setCvForm(p=>({...p,[f.key]:e.target.value}))} placeholder={f.placeholder} rows={3} style={{ ...inputStyle,resize:"vertical",fontFamily:"inherit" }}/>
+                      : <input value={cvForm[f.key]} onChange={e=>setCvForm(p=>({...p,[f.key]:e.target.value}))} placeholder={f.placeholder} style={inputStyle}/>
+                    }
+                  </div>
+                ))}
+                <button onClick={addCV} className="btn-glow"
+                  style={{ width:"100%",padding:"13px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer",marginTop:4 }}>
+                  🎁 Publier gratuitement
+                </button>
+              </>
+            )}
 
             {/* PROMO / NOUVEAUTÉ depuis un établissement */}
             {modal.type==="addPromo"&&(
