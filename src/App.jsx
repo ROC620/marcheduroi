@@ -1901,19 +1901,16 @@ function AppContent() {
   const login = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });
     if (error) {
-      const msg = error.message||"";
-      if (msg.includes("Invalid login") || msg.includes("user not found") || msg.includes("Email not confirmed")) {
-        // Vérifier si l'email existe dans profiles
-        const { data: exists } = await supabase.from("profiles").select("id").eq("id","00000000-0000-0000-0000-000000000000").maybeSingle();
-        const { count } = await supabase.from("profiles").select("id",{count:"exact",head:true}).ilike("id","%%");
-        // Tenter de distinguer email inexistant vs mauvais mdp
-        if (msg.includes("Invalid login credentials")) {
-          notify("Email ou mot de passe incorrect — Si vous n'avez pas de compte, inscrivez-vous gratuitement !", "error");
-        } else {
-          notify("Email ou mot de passe incorrect","error");
-        }
+      // Vérifier si l'email existe dans la base
+      const { count } = await supabase.from("profiles").select("email", {count:"exact", head:true}).eq("email", authForm.email.toLowerCase().trim());
+      if (count === 0) {
+        // Email inconnu → inviter à s'inscrire
+        notify("❌ Cet email n'existe pas encore. Inscrivez-vous pour continuer !", "error");
+        // Basculer automatiquement vers l'onglet inscription
+        setTimeout(() => setAuthMode("register"), 1200);
       } else {
-        notify("Email ou mot de passe incorrect","error");
+        // Email connu → mauvais mot de passe
+        notify("🔑 Mot de passe incorrect. Mot de passe oublié ?", "error");
       }
       return;
     }
@@ -1931,7 +1928,7 @@ function AppContent() {
     } else {
       // Récupérer le vrai nom depuis les métadonnées Supabase Auth si disponible
       const realName = data.user.user_metadata?.name || data.user.email.split("@")[0];
-      await supabase.from("profiles").insert({ id:data.user.id, name:realName, role:"user", country:"BJ" });
+      await supabase.from("profiles").insert({ id:data.user.id, name:realName, role:"user", country:"BJ", email:data.user.email.toLowerCase() });
       setUser({ id:data.user.id, name:realName, role:"user" });
     }
     const pendingRef = localStorage.getItem("mdr_ref");
@@ -1998,11 +1995,20 @@ const PHONE_EXAMPLE = {
         data: { name: authForm.name }
       }
     });
-    if (error) { notify("Erreur : "+error.message,"error"); return; }
+    if (error) {
+      const msg = error.message||"";
+      if (msg.includes("already registered") || msg.includes("already been registered") || msg.includes("User already")) {
+        notify("📧 Vous êtes déjà inscrit avec cet email. Connectez-vous ou réinitialisez votre mot de passe.", "error");
+        setTimeout(() => setAuthMode("login"), 1200);
+      } else {
+        notify("Erreur : "+msg, "error");
+      }
+      return;
+    }
     if (!data.user) { notify("Erreur lors de la création du compte","error"); return; }
 
     // Créer le profil
-    await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ", phone:authForm.phone||null });
+    await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ", phone:authForm.phone||null, email:authForm.email.toLowerCase().trim() });
 
     // NE PAS connecter l'utilisateur — attendre confirmation email
     setTurnstileToken("");
