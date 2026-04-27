@@ -345,23 +345,31 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false
     if (!containerRef.current || !autoPlay) return;
 
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-        // L'utilisateur est sur la carte — démarrer le timer 2s
-        dwellTimer.current = setTimeout(() => {
-          // Stopper toutes les autres vidéos autoPlay
-          window.dispatchEvent(new CustomEvent("mdr_stop_videos", { detail: instanceId.current }));
-          activeVideoId.current = instanceId.current;
-          setPlaying(true);
-        }, 2000);
-      } else {
-        // L'utilisateur a scrollé — annuler le timer + stopper
-        clearTimeout(dwellTimer.current);
-        if (activeVideoId.current === instanceId.current) {
-          activeVideoId.current = null;
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.7) {
+        // Vérifier que le centre de la carte est dans la moitié centrale du viewport
+        const rect = containerRef.current.getBoundingClientRect();
+        const cardCenterY = rect.top + rect.height / 2;
+        const viewH = window.innerHeight;
+        // Zone centrale = entre 25% et 75% du viewport
+        const inCenter = cardCenterY >= viewH * 0.25 && cardCenterY <= viewH * 0.75;
+        if (!inCenter) { clearTimeout(dwellTimer.current); return; }
+        // Démarrer le timer 2s seulement si pas déjà en attente
+        if (!dwellTimer.current) {
+          dwellTimer.current = setTimeout(() => {
+            dwellTimer.current = null;
+            window.dispatchEvent(new CustomEvent("mdr_stop_videos", { detail: instanceId.current }));
+            activeVideoId.current = instanceId.current;
+            setPlaying(true);
+          }, 2000);
         }
+      } else {
+        // Sort du centre — annuler et stopper
+        clearTimeout(dwellTimer.current);
+        dwellTimer.current = null;
+        if (activeVideoId.current === instanceId.current) activeVideoId.current = null;
         setPlaying(false);
       }
-    }, { threshold: 0.5 });
+    }, { threshold: [0.0, 0.25, 0.5, 0.7, 1.0] });
 
     observer.observe(containerRef.current);
 
@@ -966,8 +974,12 @@ function AppContent() {
   const [suggestions, setSuggestions] = useState([{ id:1,text:"Ajouter un système de messagerie interne",author:"Visiteur anonyme",date:"2026-03-10",status:"en attente" }]);
   const [user, setUser] = useState(null);
   const [view, setViewState] = useState(() => {
-    // Restaurer la vue depuis l'historique si disponible
-    return history.state?.view || "landing";
+    // Toujours commencer sur landing au rechargement de la page
+    // Exception : lien partagé (mdr_open_post en sessionStorage)
+    const hasSharedPost = sessionStorage.getItem("mdr_open_post");
+    if (hasSharedPost) return history.state?.view || "landing";
+    // Forcer landing à chaque rechargement
+    return "landing";
   });
   const [showCategories, setShowCategories] = useState(false);
   const [showPublishMenu, setShowPublishMenu] = useState(false);
@@ -1930,6 +1942,11 @@ function AppContent() {
   };
 
   useEffect(() => {
+    // Forcer la page d'accueil à chaque rechargement (sauf lien partagé og)
+    const hasOgPost = new URLSearchParams(window.location.search).get("mdr_post");
+    if (!hasOgPost && window.location.pathname === "/") {
+      setViewState("landing");
+    }
     if (window.location.pathname === "/reset-password") {
       setViewState("reset-password");
       // Lire params depuis sessionStorage (capturés avant React dans index.html)
@@ -4026,6 +4043,15 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                         },
                         { icon:"💇", label:"Beauté & Bien-être", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
                           action:()=>{ setShopMode("beaute"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addbeaute"}); setShowPublishMenu(false); }
+                        },
+                        { icon:"📢", label:"Demande", badge:"Gratuit", badgeColor:"#FF8C00", badgeBg:"rgba(255,140,0,0.12)",
+                          action:()=>{ setShowPublishMenu(false); window.open("https://marcheduroi.com/demandes","_blank"); }
+                        },
+                        { icon:"👤", label:"Publier mon CV", badge:"Gratuit", badgeColor:"#43C6AC", badgeBg:"rgba(67,198,172,0.12)",
+                          action:()=>{ setShowPublishMenu(false); setView("recrutement"); setRecrutTab("cvs"); setTimeout(()=>setModal({type:"addCV"}),300); }
+                        },
+                        { icon:"💼", label:"Offre d'emploi", badge:"1 500 FCFA", badgeColor:"#6C63FF", badgeBg:"rgba(108,99,255,0.12)",
+                          action:()=>{ setShowPublishMenu(false); setView("recrutement"); setRecrutTab("offres"); setTimeout(()=>setModal({type:"addOffre"}),300); }
                         },
                       ].map((opt,i) => (
                         <button key={i} onClick={opt.action}
