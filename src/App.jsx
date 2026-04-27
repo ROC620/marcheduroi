@@ -2526,6 +2526,8 @@ const PHONE_EXAMPLE = {
 
   const [months, setMonths] = useState(1);
   const [selectedTarif, setSelectedTarif] = useState(0); // index dans TARIFS_ANNONCE ou TARIFS_BOUTIQUE
+  const [promoForm, setPromoForm] = useState({ title:"", description:"", price:"" });
+  const [promoPhotos, setPromoPhotos] = useState([]);
 
   // Vérifier les nouvelles demandes toutes les 5 minutes
   useEffect(() => {
@@ -2963,6 +2965,46 @@ const PHONE_EXAMPLE = {
     setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"" });
     setShopPhotos([]); setShopVideo(null); setMonths(1);
     notify(shopMode==="boutique" ? "Boutique publiée !" : "Atelier publié !");
+  };
+
+  // Publication Promo/Nouveauté depuis un établissement (500 FCFA)
+  const addPromo = async (establishment, establishmentType) => {
+    if (!promoForm.title?.trim()||!promoForm.description?.trim()) {
+      notify("Titre et description requis","error"); return;
+    }
+    const postId = "post_" + Date.now();
+    const newPost = {
+      id: postId,
+      title: promoForm.title,
+      description: promoForm.description,
+      price: promoForm.price || "",
+      category: "Promo & Nouveauté",
+      contact: establishment.name,
+      phone: establishment.phone || "",
+      ville: establishment.ville || "",
+      quartier: establishment.quartier || "",
+      author: establishment.name,
+      authorId: user.id,
+      date: new Date().toISOString().slice(0,10),
+      photos: promoPhotos,
+      expiresAt: null,
+      fromEstablishment: { id: establishment.id, name: establishment.name, type: establishmentType },
+    };
+    const { error } = await supabase.from("posts").insert({
+      id: postId, title: newPost.title, description: newPost.description,
+      price: newPost.price, category: newPost.category,
+      contact: newPost.contact, phone: newPost.phone,
+      ville: newPost.ville, quartier: newPost.quartier,
+      author: newPost.author, author_id: newPost.authorId,
+      date: newPost.date, photos: newPost.photos, expires_at: null,
+      from_establishment: JSON.stringify(newPost.fromEstablishment),
+    });
+    if (error) { notify("Erreur : "+error.message,"error"); return; }
+    setPosts(p=>[newPost,...p]);
+    setModal(null);
+    setPromoForm({ title:"", description:"", price:"" });
+    setPromoPhotos([]);
+    notify("📣 Promo publiée dans les annonces !");
   };
 
   const userCountry = getUserCountry();
@@ -4270,7 +4312,13 @@ const PHONE_EXAMPLE = {
                         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
                           <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0 }}>{post.author[0]}</div>
                           <div>
-                            <p style={{ fontSize:12,fontWeight:600,color:theme.text }}>{post.author}</p>
+                            {post.fromEstablishment
+                              ? <p style={{ fontSize:12,fontWeight:700,color:"#FF6584",cursor:"pointer" }}
+                                  onClick={e=>{ e.stopPropagation(); navigate("/"+post.fromEstablishment.type+"/"+post.fromEstablishment.id); }}>
+                                  🏪 {post.author}
+                                </p>
+                              : <p style={{ fontSize:12,fontWeight:600,color:theme.text }}>{post.author}</p>
+                            }
                             <p style={{ fontSize:11,color:theme.sub }}>{post.date}</p>
                           </div>
                         </div>
@@ -5496,6 +5544,7 @@ const PHONE_EXAMPLE = {
                       <>
                         {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && !b.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"boutiques",shopSetter:"setBoutiques"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
                         {b.urgent&&new Date(b.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(b.id,"boutiques",setBoutiques)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
+                        <button onClick={()=>setModal({type:"addPromo",data:b,shopType:"boutique"})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Publier une Promo">📣</button>
                         <button onClick={()=>openEditShop(b,"boutique",editShop)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"boutique"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -5600,6 +5649,7 @@ const PHONE_EXAMPLE = {
                       <>
                         {!(a.urgent&&new Date(a.urgentUntil)>new Date()) && !a.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...a,title:a.name},shopTable:"ateliers",shopSetter:"setAteliers"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
                         {a.urgent&&new Date(a.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(a.id,"ateliers",setAteliers)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
+                        <button onClick={()=>setModal({type:"addPromo",data:a,shopType:"atelier"})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Publier une Promo">📣</button>
                         <button onClick={()=>openEditShop(a,"atelier",editShop)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:a,shopType:"atelier"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -5708,6 +5758,7 @@ const PHONE_EXAMPLE = {
                       <>
                         {!(r.urgent&&new Date(r.urgentUntil)>new Date()) && !r.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...r,title:r.name},shopTable:"restos",shopSetter:"setRestos"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
                         {r.urgent&&new Date(r.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(r.id,"restos",setRestos)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
+                        <button onClick={()=>setModal({type:"addPromo",data:r,shopType:"resto"})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Publier une Promo">📣</button>
                         <button onClick={()=>openEditShop(r,"resto",editResto)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:r,shopType:"resto"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -5809,6 +5860,7 @@ const PHONE_EXAMPLE = {
                       <>
                         {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && !b.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"beaute",shopSetter:"setBeaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
                         {b.urgent&&new Date(b.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(b.id,"beaute",setBeaute)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
+                        <button onClick={()=>setModal({type:"addPromo",data:b,shopType:"beaute"})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Publier une Promo">📣</button>
                         <button onClick={()=>openEditShop(b,"beaute",editBeaute)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
                         <button onClick={()=>setModal({type:"deleteshop",data:b,shopType:"beaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="trash" size={14}/></button>
                       </>
@@ -7521,6 +7573,42 @@ const PHONE_EXAMPLE = {
               </>
             )}
 
+
+            {/* PROMO / NOUVEAUTÉ depuis un établissement */}
+            {modal.type==="addPromo"&&(
+              <>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16 }}>
+                  <h3 style={{ fontWeight:800,fontSize:18,color:theme.text }}>📣 Publier une Promo / Nouveauté</h3>
+                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
+                </div>
+                <div style={{ background:"rgba(255,140,0,0.08)",border:"1px solid rgba(255,140,0,0.25)",borderRadius:10,padding:"10px 14px",marginBottom:16,fontSize:12,color:"#FF8C00" }}>
+                  🏪 Publiée au nom de <strong>{modal.data?.name}</strong> · 500 FCFA · Apparaît dans les annonces classiques
+                </div>
+                {[
+                  { label:"Titre *", key:"title", placeholder:"Ex: Promo -30% sur les robes" },
+                  { label:"Description *", key:"description", placeholder:"Décrivez votre promo ou nouveauté...", multiline:true },
+                  { label:"Prix promo (optionnel)", key:"price", placeholder:"Ex: 5000" },
+                ].map(f=>(
+                  <div key={f.key} style={{ marginBottom:14 }}>
+                    <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:5 }}>{f.label}</label>
+                    {f.multiline
+                      ? <textarea value={promoForm[f.key]} onChange={e=>setPromoForm(p=>({...p,[f.key]:e.target.value}))} placeholder={f.placeholder} rows={3} style={{ ...inputStyle,resize:"vertical",fontFamily:"inherit" }}/>
+                      : <input value={promoForm[f.key]} onChange={e=>setPromoForm(p=>({...p,[f.key]:e.target.value}))} placeholder={f.placeholder} style={inputStyle}/>
+                    }
+                  </div>
+                ))}
+                {/* Photos */}
+                <div style={{ marginBottom:16 }}>
+                  <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:5 }}>📸 Photo (optionnel)</label>
+                  <PhotoUploader photos={promoPhotos} onPhotosChange={setPromoPhotos} maxPhotos={3}/>
+                </div>
+                <button onClick={()=>handlePayment(500,"Publication Promo/Nouveauté sur MarchéduRoi",()=>addPromo(modal.data, modal.shopType))}
+                  className="btn-glow"
+                  style={{ width:"100%",padding:"13px",background:"linear-gradient(135deg,#FF8C00,#FFD700)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer" }}>
+                  💳 Payer 500 FCFA et Publier
+                </button>
+              </>
+            )}
 
             {/* URGENT SHOP — boutiques/ateliers/restos/beauté */}
             {modal.type==="urgentShop"&&(
