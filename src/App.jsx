@@ -3559,107 +3559,78 @@ const PHONE_EXAMPLE = {
             );
           })()}
 
-          {/* Boutons CTA */}
-          <div style={{ display:"flex",gap:12,flexWrap:"wrap",justifyContent:"center",marginBottom:8 }}>
+          {/* ── Bouton principal "Visitez librement" ── */}
+          <div style={{ display:"flex",flexDirection:"column",alignItems:"center",gap:0,marginBottom:8,width:"100%",maxWidth:500 }}>
 
-            {/* Mobile: "Annonces" + "Demandes" côte à côte */}
-            {windowWidth <= 600 ? (
-              <div style={{ display:"flex",gap:8 }}>
-                <button onClick={()=>setShowCategories(s=>!s)} className="btn-glow btn-tooltip" data-tooltip="Je vends" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 20px",borderRadius:14,fontWeight:800,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
-                  {showCategories ? "Masquer ▲" : "Annonces ▾"}
+            {/* Bouton principal */}
+            <button onClick={()=>setShowCategories(s=>!s)} className="btn-glow"
+              style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",border:"none",color:"#fff",
+                padding:windowWidth<=600?"14px 32px":"16px 48px",borderRadius:20,fontWeight:800,
+                fontSize:windowWidth<=600?16:18,cursor:"pointer",transition:"box-shadow 0.2s",
+                boxShadow:"0 6px 28px rgba(108,99,255,0.45)",display:"flex",alignItems:"center",gap:10,
+                letterSpacing:0.3 }}>
+              <span style={{ fontSize:20 }}>👑</span>
+              Visitez librement
+              <span style={{ fontSize:14,transition:"transform 0.3s",display:"inline-block",transform:showCategories?"rotate(180deg)":"rotate(0deg)" }}>▾</span>
+            </button>
+
+            {/* Sous-menu dépliant — 3 boutons modernes */}
+            <div style={{
+              width:"100%",overflow:"hidden",
+              maxHeight:showCategories ? 340 : 0,
+              opacity:showCategories ? 1 : 0,
+              transform:showCategories ? "translateY(0)" : "translateY(-10px)",
+              transition:"max-height 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease, transform 0.35s ease",
+            }}>
+              <div style={{ display:"flex",flexDirection:"column",gap:10,marginTop:14,padding:"4px 0 8px" }}>
+
+                {/* 1. Explorez les annonces */}
+                <button onClick={()=>{ setShowCategories(false); setView("home"); }} className="btn-glow"
+                  style={{ background:"linear-gradient(135deg,rgba(108,99,255,0.12),rgba(108,99,255,0.06))",
+                    border:"2px solid rgba(108,99,255,0.45)",color:"#6C63FF",
+                    padding:"16px 24px",borderRadius:18,fontWeight:800,fontSize:15,cursor:"pointer",
+                    display:"flex",alignItems:"center",gap:14,textAlign:"left",width:"100%",
+                    backdropFilter:"blur(8px)",transition:"all 0.2s" }}>
+                  <div style={{ background:"rgba(108,99,255,0.15)",borderRadius:14,width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:22 }}>📋</div>
+                  <div>
+                    <p style={{ fontWeight:800,fontSize:15,marginBottom:2 }}>Explorez les annonces</p>
+                    <p style={{ fontWeight:500,fontSize:12,color:"rgba(108,99,255,0.75)" }}>{posts.length} annonces disponibles</p>
+                  </div>
+                  <span style={{ marginLeft:"auto",fontSize:18,opacity:0.6 }}>›</span>
                 </button>
-                <button
-                  onClick={()=>{ localStorage.setItem('mdr_demandes_last_visit', new Date().toISOString()); setHasNewDemandes(false); window.open("https://marcheduroi.com/demandes","_blank"); }}
-                  className={`btn-tooltip${hasNewDemandes ? " demande-pulse" : ""}`} data-tooltip="Je cherche"
-                  style={{ background:"linear-gradient(135deg,#FF8C00,#FFD700)",border:"none",color:"#0D0F1A",padding:"13px 20px",borderRadius:14,fontWeight:800,fontSize:15,cursor:"pointer",position:"relative" }}>
-                  📢 Demandes
-                  {hasNewDemandes && <span style={{ position:"absolute",top:-4,right:-4,background:"#FF4757",color:"#fff",borderRadius:"50%",width:16,height:16,fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center" }}>!</span>}
+
+                {/* 2. Découvrez les établissements */}
+                <button onClick={()=>{ setShowCategories(false); setView("boutiques"); }} className="btn-glow"
+                  style={{ background:"linear-gradient(135deg,rgba(255,101,132,0.12),rgba(255,101,132,0.06))",
+                    border:"2px solid rgba(255,101,132,0.45)",color:"#FF6584",
+                    padding:"16px 24px",borderRadius:18,fontWeight:800,fontSize:15,cursor:"pointer",
+                    display:"flex",alignItems:"center",gap:14,textAlign:"left",width:"100%",
+                    backdropFilter:"blur(8px)",transition:"all 0.2s" }}>
+                  <div style={{ background:"rgba(255,101,132,0.15)",borderRadius:14,width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:22 }}>🏪</div>
+                  <div>
+                    <p style={{ fontWeight:800,fontSize:15,marginBottom:2 }}>Découvrez les établissements</p>
+                    <p style={{ fontWeight:500,fontSize:12,color:"rgba(255,101,132,0.75)" }}>{boutiques.length+ateliers.length+restos.length+beaute.length} établissements actifs</p>
+                  </div>
+                  <span style={{ marginLeft:"auto",fontSize:18,opacity:0.6 }}>›</span>
                 </button>
-              </div>
-            ) : (
-              /* Desktop: bouton annonces normal */
-              <button onClick={()=>setShowCategories(s=>!s)} className="btn-glow btn-tooltip" data-tooltip="Je vends" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",transition:"box-shadow 0.2s",boxShadow:"0 4px 20px rgba(108,99,255,0.4)" }}>
-                {showCategories ? "Masquer ▲" : "Voir les annonces ▾"}
-              </button>
-            )}
 
-            {/* Desktop: "Demandes récentes" remplace "Créer un compte" */}
-            {windowWidth > 600 && (
-              <button
-                onClick={()=>{ localStorage.setItem('mdr_demandes_last_visit', new Date().toISOString()); setHasNewDemandes(false); window.open("https://marcheduroi.com/demandes","_blank"); }}
-                className={`btn-tooltip${hasNewDemandes ? " demande-pulse" : ""}`} data-tooltip="Je cherche"
-                style={{ background:"linear-gradient(135deg,#FF8C00,#FFD700)",border:"none",color:"#0D0F1A",padding:"13px 28px",borderRadius:14,fontWeight:800,fontSize:16,cursor:"pointer",position:"relative",display:"flex",alignItems:"center",gap:8 }}>
-                📢 Demandes récentes
-                {hasNewDemandes && <span style={{ background:"#FF4757",color:"#fff",borderRadius:10,padding:"2px 7px",fontSize:11,fontWeight:800 }}>Nouveau !</span>}
-              </button>
-            )}
+                {/* 3. Demandes / Recrutement */}
+                <button onClick={()=>{ setShowCategories(false); localStorage.setItem('mdr_demandes_last_visit', new Date().toISOString()); setHasNewDemandes(false); window.open("https://marcheduroi.com/demandes","_blank"); }}
+                  style={{ background:"linear-gradient(135deg,rgba(255,140,0,0.12),rgba(255,215,0,0.06))",
+                    border:"2px solid rgba(255,140,0,0.45)",color:"#FF8C00",
+                    padding:"16px 24px",borderRadius:18,fontWeight:800,fontSize:15,cursor:"pointer",
+                    display:"flex",alignItems:"center",gap:14,textAlign:"left",width:"100%",
+                    backdropFilter:"blur(8px)",transition:"all 0.2s",position:"relative" }}>
+                  <div style={{ background:"rgba(255,140,0,0.15)",borderRadius:14,width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:22 }}>📢</div>
+                  <div>
+                    <p style={{ fontWeight:800,fontSize:15,marginBottom:2 }}>Demandes & Recrutement</p>
+                    <p style={{ fontWeight:500,fontSize:12,color:"rgba(255,140,0,0.75)" }}>Trouvez ce que vous cherchez</p>
+                  </div>
+                  {hasNewDemandes && <span style={{ position:"absolute",top:10,right:14,background:"#FF4757",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:10,fontWeight:800 }}>Nouveau !</span>}
+                  <span style={{ marginLeft:"auto",fontSize:18,opacity:0.6 }}>›</span>
+                </button>
 
-            {windowWidth > 600 && (
-              <button onClick={()=>window.open("https://marcheduroi.com/exemples.html","_blank")} style={{ background:"rgba(67,198,172,0.1)",border:`1px solid rgba(67,198,172,0.4)`,color:"#43C6AC",padding:"13px 20px",borderRadius:14,fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
-                📖 Exemples
-              </button>
-            )}
-          </div>
-
-          {/* Catégories + Sections — apparaissent au clic sur "Voir les annonces" */}
-          <div style={{
-            width:"100%",maxWidth:700,
-            overflow:"hidden",
-            maxHeight: showCategories ? 200 : 0,
-            opacity: showCategories ? 1 : 0,
-            transition:"max-height 0.4s ease, opacity 0.3s ease",
-          }}>
-            {/* Catégories — défilement horizontal */}
-            <div style={{ position:"relative",marginBottom:10 }}>
-              <div style={{ position:"absolute",right:0,top:0,bottom:0,width:40,background:`linear-gradient(to left,${theme.bg} 30%,transparent)`,zIndex:2,pointerEvents:"none",display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:4 }}>
-                <span style={{ fontSize:12,color:theme.sub,opacity:0.6 }}>›</span>
               </div>
-              <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 4px 4px 0",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-                {[
-                  {label:"Immobilier",icon:"🏠",color:"#6C63FF"},
-                  {label:"Véhicules",icon:"🚗",color:"#FF6584"},
-                  {label:"Location de véhicules",icon:"🔑",color:"#FF9F43"},
-                  {label:"Motos & Tricycles",icon:"🏍️",color:"#FF8C42"},
-                  {label:"Électronique",icon:"📱",color:"#43C6AC"},
-                  {label:"Services",icon:"🔧",color:"#FFD700"},
-                  {label:"Sport",icon:"⚽",color:"#22C55E"},
-                  {label:"Autre",icon:"📦",color:"#9CA3AF"},
-                ].map(c=>(
-                  <button key={c.label} onClick={()=>{ setCategory(c.label); setView("home"); }}
-                    style={{ background:`${c.color}15`,border:`1px solid ${c.color}44`,color:c.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
-                    {c.icon} {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Sections — défilement horizontal (sans Mode — déjà dans Catégories) */}
-            <div style={{ position:"relative",marginBottom:16 }}>
-              <div style={{ position:"absolute",right:0,top:0,bottom:0,width:40,background:`linear-gradient(to left,${theme.bg} 30%,transparent)`,zIndex:2,pointerEvents:"none",display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:4 }}>
-                <span style={{ fontSize:12,color:theme.sub,opacity:0.6 }}>›</span>
-              </div>
-              <div style={{ display:"flex",gap:8,overflowX:"auto",flexWrap:"nowrap",padding:"4px 4px 4px 0",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-                {[
-                  {label:"🛍️ Boutiques",color:"#FF6584",bg:"rgba(255,101,132,0.1)",border:"rgba(255,101,132,0.3)",count:boutiques.length,action:()=>setView("boutiques")},
-                  {label:"🔧 Ateliers",color:"#43C6AC",bg:"rgba(67,198,172,0.1)",border:"rgba(67,198,172,0.3)",count:ateliers.length,action:()=>setView("ateliers")},
-                  {label:"🍽️ Restos & Bars",color:"#FF8C00",bg:"rgba(255,140,0,0.1)",border:"rgba(255,140,0,0.3)",count:restos.length,action:()=>setView("restos")},
-                  {label:"💇 Beauté & Coiffure",color:"#FF69B4",bg:"rgba(255,105,180,0.1)",border:"rgba(255,105,180,0.3)",count:beaute.length,action:()=>setView("beaute")},
-                  {label:"👗 Mode",color:"#9A78CF",bg:"rgba(154,120,207,0.1)",border:"rgba(154,120,207,0.3)",count:null,action:()=>{ setCategory("Mode"); setView("home"); }},
-                  {label:"🌾 Agro-alimentaire",color:"#16A34A",bg:"rgba(22,163,74,0.1)",border:"rgba(22,163,74,0.3)",count:null,action:()=>{ setCategory("Agro-alimentaire"); setView("home"); }},
-                ].map(s=>(
-                  <button key={s.label} onClick={s.action}
-                    style={{ background:s.bg,border:`1px solid ${s.border}`,color:s.color,padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,flexShrink:0,whiteSpace:"nowrap" }}>
-                    {s.label} {s.count!==null&&<span style={{ background:s.border,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Bouton direct vers toutes les annonces */}
-            <div style={{ textAlign:"center",paddingBottom:8 }}>
-              <button onClick={()=>setView("home")} style={{ background:"rgba(108,99,255,0.1)",border:`1px solid rgba(108,99,255,0.3)`,color:"#6C63FF",padding:"8px 20px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer" }}>
-                📋 Toutes les annonces →
-              </button>
             </div>
           </div>
 
