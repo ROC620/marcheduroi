@@ -3809,7 +3809,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
             {/* Sous-menu dépliant — 3 boutons modernes */}
             <div style={{
               width:"100%",overflow:"hidden",
-              maxHeight:showCategories ? 340 : 0,
+              maxHeight:showCategories ? 520 : 0,
               opacity:showCategories ? 1 : 0,
               transform:showCategories ? "translateY(0)" : "translateY(-10px)",
               transition:"max-height 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease, transform 0.35s ease",
