@@ -2737,7 +2737,6 @@ const PHONE_EXAMPLE = {
       phone: shopForm.phone||"", photos: shopPhotos||[], video: shopVideo||null,
       lat: shopForm.lat||null, lng: shopForm.lng||null,
       specialite: shopForm.specialite||"", tarifs: shopForm.tarifs||"",
-      rendezvous: shopForm.rendezvous||"", produits: shopForm.produits||"",
     }).eq("id", id);
     if (error) { notify("Erreur : "+error.message,"error"); return; }
     const updated = {...modal.data,...shopForm,sousType:shopForm.sousType,photos:shopPhotos,video:shopVideo};
@@ -2784,7 +2783,6 @@ const PHONE_EXAMPLE = {
       phone: shopForm.phone||"", photos: shopPhotos||[], video: shopVideo||null,
       lat: shopForm.lat||null, lng: shopForm.lng||null,
       specialite: shopForm.specialite||"", tarifs: shopForm.tarifs||"",
-      rendezvous: shopForm.rendezvous||"", produits: shopForm.produits||"",
     }).eq("id", id);
     if (error) { notify("Erreur : "+error.message,"error"); return; }
     setBeaute(b=>b.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
@@ -2809,7 +2807,7 @@ const PHONE_EXAMPLE = {
         ville:item.ville||"", quartier:item.quartier||"", von:item.von||"",
         horaires:item.horaires||"", contact:item.contact||"", phone:item.phone||"",
         specialite:item.specialite||"", tarifs:item.tarifs||"",
-        rendezvous:item.rendezvous||"", produits:item.produits||"",
+
         lat:item.lat||"", lng:item.lng||""
       });
       setShopPhotos(item.photos||[]);
@@ -2884,7 +2882,6 @@ const PHONE_EXAMPLE = {
       id: beauteId, name: newBeaute.name, type: newBeaute.type||"",
       description: newBeaute.description, specialite: newBeaute.specialite||"",
       services: newBeaute.services||"", tarifs: newBeaute.tarifs||"",
-      rendezvous: newBeaute.rendezvous||"", produits: newBeaute.produits||"",
       keywords: newBeaute.keywords||"", ville: newBeaute.ville||"",
       quartier: newBeaute.quartier||"", von: newBeaute.von||"",
       horaires: newBeaute.horaires||"", contact: newBeaute.contact||"",
