@@ -1342,6 +1342,7 @@ function AppContent() {
     });
   };
   const [authForm, setAuthForm] = useState({ email:"",password:"",name:"",country:"BJ",phone:"" });
+  const [loginError, setLoginError] = useState(null); // null | "unknown_email" | "wrong_password"
   const [turnstileToken, setTurnstileToken] = useState("");
   const turnstileRef = React.useRef(null);
 
@@ -1904,16 +1905,13 @@ function AppContent() {
       // Vérifier si l'email existe dans la base
       const { count } = await supabase.from("profiles").select("email", {count:"exact", head:true}).eq("email", authForm.email.toLowerCase().trim());
       if (count === 0) {
-        // Email inconnu → inviter à s'inscrire
-        notify("❌ Cet email n'existe pas encore. Inscrivez-vous pour continuer !", "error");
-        // Basculer automatiquement vers l'onglet inscription
-        setTimeout(() => setAuthMode("register"), 1200);
+        setLoginError("unknown_email");
       } else {
-        // Email connu → mauvais mot de passe
-        notify("🔑 Mot de passe incorrect. Mot de passe oublié ?", "error");
+        setLoginError("wrong_password");
       }
       return;
     }
+    setLoginError(null);
 
     // Bloquer si email non confirmé
     if (!data.user.email_confirmed_at) {
@@ -5066,11 +5064,32 @@ const PHONE_EXAMPLE = {
                     <button type="button" onClick={()=>setShowPassword(s=>!s)} style={{ position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",color:theme.sub,cursor:"pointer",fontSize:18 }}>{showPassword?"🙈":"👁️"}</button>
                   </div>
                 ) : (
-                  <input type="email" value={authForm[f.key]} onChange={e=>setAuthForm(a=>({...a,email:onlyEmail(e.target.value)}))} placeholder="contact@marcheduroi.com" maxLength={80} inputMode="email" style={inputStyle}/>
+                  <input type="email" value={authForm[f.key]} onChange={e=>{ setAuthForm(a=>({...a,email:onlyEmail(e.target.value)})); setLoginError(null); }} placeholder="contact@marcheduroi.com" maxLength={80} inputMode="email" style={inputStyle}/>
                 )}
               </div>
             ))}
             <button onClick={login} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s" }}>Se connecter</button>
+
+            {/* Message d'erreur inline */}
+            {loginError==="unknown_email" && (
+              <div style={{ marginTop:14,padding:"14px 16px",background:"rgba(255,71,87,0.08)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:12,textAlign:"center" }}>
+                <p style={{ color:"#FF4757",fontWeight:700,fontSize:14,marginBottom:6 }}>❌ Cet email n'est pas encore inscrit</p>
+                <p style={{ color:theme.sub,fontSize:12,marginBottom:10 }}>Créez votre compte gratuit pour continuer</p>
+                <button onClick={()=>{ setLoginError(null); setView("register"); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 20px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                  ✨ Inscrivez-vous gratuitement
+                </button>
+              </div>
+            )}
+            {loginError==="wrong_password" && (
+              <div style={{ marginTop:14,padding:"14px 16px",background:"rgba(255,165,0,0.08)",border:"1px solid rgba(255,165,0,0.3)",borderRadius:12,textAlign:"center" }}>
+                <p style={{ color:"#FFA500",fontWeight:700,fontSize:14,marginBottom:6 }}>🔑 Vous êtes déjà inscrit</p>
+                <p style={{ color:theme.sub,fontSize:12,marginBottom:10 }}>Mot de passe incorrect — vous avez oublié votre mot de passe ?</p>
+                <button onClick={()=>{ setLoginError(null); setModal({type:"forgot"}); }} style={{ background:"linear-gradient(135deg,#FFA500,#FFD700)",border:"none",color:"#fff",padding:"8px 20px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                  🔓 Réinitialiser mon mot de passe
+                </button>
+              </div>
+            )}
+
             <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:16 }}>
               <p style={{ color:theme.sub,fontSize:13 }}>Pas de compte ? <button onClick={()=>setView("register")} style={{ background:"none",border:"none",color:"#6C63FF",fontWeight:600,cursor:"pointer" }}>S'inscrire</button></p>
               <button onClick={()=>setModal({type:"forgot"})} style={{ background:"none",border:"none",color:theme.sub,fontSize:13,cursor:"pointer",textDecoration:"underline" }}>Mot de passe oublié ?</button>
