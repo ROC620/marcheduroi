@@ -2316,10 +2316,32 @@ const PHONE_EXAMPLE = {
   ];
 
   // 4 jours gratuits par mois — vérifie si l'utilisateur a déjà utilisé son crédit ce mois
-  // Publication gratuite pour tous — plus de limite mensuelle
+  // Publication gratuite pour tous — plus de limite mensuelle (annonces classiques)
   const canPublishFree = async () => true;
   const useFreeDay = async () => {}; // no-op
+
+  // 4 jours gratuits par mois pour les établissements (boutiques/ateliers/restos/beauté)
+  const canPublishFreeShop = async () => {
+    if (!user) return false;
+    if (user.role === "admin") return true;
+    const month = new Date().toISOString().slice(0,7);
+    const { data } = await supabase.from("free_days").select("shop_used").eq("user_id", user.id).eq("month", month).maybeSingle();
+    return !data || !data.shop_used;
+  };
+  const useFreeShop = async () => {
+    const month = new Date().toISOString().slice(0,7);
+    const { data } = await supabase.from("free_days").select("shop_used").eq("user_id", user.id).eq("month", month).maybeSingle();
+    if (data) {
+      await supabase.from("free_days").update({ shop_used: true }).eq("user_id", user.id).eq("month", month);
+    } else {
+      await supabase.from("free_days").insert({ user_id: user.id, month, shop_used: true, used: 0 });
+    }
+  };
   const [canFree, setCanFree] = useState(true);
+  const [canFreeShop, setCanFreeShop] = useState(false);
+  useEffect(() => {
+    if (user) canPublishFreeShop().then(setCanFreeShop);
+  }, [user]);
   // ─────────────────────────────────────────────────────────────────────────────
 
   // ─── FEDAPAY : Paiement avant publication ───────────────────────────────────
@@ -2879,7 +2901,7 @@ const PHONE_EXAMPLE = {
     setSuggestionText(""); setSuggestionName(""); setModal(null); notify("Merci pour votre suggestion !");
   };
 
-  const addBeaute = async () => {
+  const addBeaute = async (forcedExpiresAt) => {
     if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("⚠️ Votre annonce contient des termes non autorisés.", "error"); return; }
     if (!checkRateLimit()) return;
     if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
@@ -2893,7 +2915,7 @@ const PHONE_EXAMPLE = {
       author: user.name, authorId: user.id,
       date: new Date().toISOString().slice(0,10),
       likes: 0, photos: shopPhotos, video: shopVideo,
-      expiresAt: isAdmin ? null : expDate.toISOString().slice(0,10),
+      expiresAt: isAdmin ? null : (forcedExpiresAt || expDate.toISOString().slice(0,10)),
     };
     const { error } = await supabase.from("beaute").insert({
       id: beauteId, name: newBeaute.name, type: newBeaute.type||"",
@@ -2915,7 +2937,7 @@ const PHONE_EXAMPLE = {
     notify("Salon publié !");
   };
 
-  const addResto = async () => {
+  const addResto = async (forcedExpiresAt) => {
     if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("⚠️ Votre annonce contient des termes non autorisés.", "error"); return; }
     if (!checkRateLimit()) return;
     if (!shopForm.name||!shopForm.description) { notify("Nom et description requis","error"); return; }
@@ -2929,7 +2951,7 @@ const PHONE_EXAMPLE = {
       author: user.name, authorId: user.id,
       date: new Date().toISOString().slice(0,10),
       likes: 0, photos: shopPhotos, video: shopVideo,
-      expiresAt: isAdmin ? null : expDate.toISOString().slice(0,10),
+      expiresAt: isAdmin ? null : (forcedExpiresAt || expDate.toISOString().slice(0,10)),
     };
     const { error } = await supabase.from("restos").insert({
       id: restoId, name: newResto.name, type: newResto.type||"",
@@ -7127,7 +7149,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF69B444`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
-                    {canFree && (
+                    {canFreeShop && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
@@ -7144,7 +7166,15 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 <button
                   onClick={modal.data?.editing
                     ? editBeaute
-                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication salon beauté ${t.label} sur MarchéduRoi`,addBeaute); }
+                    : ()=>{
+                        if (selectedTarif===-1) {
+                          const exp=new Date(); exp.setDate(exp.getDate()+4);
+                          useFreeShop(); addBeaute(exp.toISOString().slice(0,10));
+                        } else {
+                          const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0];
+                          handlePayment(t.price,`Publication salon beauté ${t.label} sur MarchéduRoi`,addBeaute);
+                        }
+                      }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FF69B4,#FF1493)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
@@ -7270,7 +7300,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF8C0044`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
-                    {canFree && (
+                    {canFreeShop && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
@@ -7287,7 +7317,15 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 <button
                   onClick={modal.data?.editing
                     ? editResto
-                    : ()=>{ const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]; handlePayment(t.price,`Publication restaurant/bar ${t.label} sur MarchéduRoi`,addResto); }
+                    : ()=>{
+                        if (selectedTarif===-1) {
+                          const exp=new Date(); exp.setDate(exp.getDate()+4);
+                          useFreeShop(); addResto(exp.toISOString().slice(0,10));
+                        } else {
+                          const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0];
+                          handlePayment(t.price,`Publication restaurant/bar ${t.label} sur MarchéduRoi`,addResto);
+                        }
+                      }
                   }
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
@@ -7429,7 +7467,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 {user?.role !== "admin" && !modal.data?.editing && (
                   <div style={{ background:theme.bg,border:`1px solid #FF658444`,borderRadius:14,padding:20,marginBottom:16 }}>
                     <p style={{ fontWeight:700,fontSize:14,color:theme.text,marginBottom:8 }}>💰 Durée de publication</p>
-                    {canFree && (
+                    {canFreeShop && (
                       <div onClick={()=>setSelectedTarif(-1)} style={{ background:selectedTarif===-1?"rgba(67,198,172,0.15)":theme.card,border:`2px solid ${selectedTarif===-1?"#43C6AC":theme.border}`,borderRadius:12,padding:"10px 14px",marginBottom:6,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                         <div><p style={{ fontWeight:700,color:theme.text,fontSize:13 }}>🎁 4 jours gratuits</p><p style={{ color:theme.sub,fontSize:11 }}>Crédit mensuel</p></div>
                         <span style={{ fontWeight:800,color:"#43C6AC",fontSize:14 }}>GRATUIT</span>
