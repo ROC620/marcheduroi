@@ -338,45 +338,70 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false
   const ytMatch = (video||"").match(/(?:v=|youtu\.be\/|shorts\/)([\w-]{11})/);
   const ytId = ytMatch ? ytMatch[1] : null;
 
-  // Dwell time — démarre après 2s de présence dans le viewport
+  // Autoplay intelligent — démarre UNIQUEMENT si :
+  // 1. L'utilisateur a arrêté de scroller
+  // 2. La carte est au beau milieu de l'écran (zone 30%-70%)
+  // 3. L'utilisateur attend 2.5 secondes dessus sans bouger
   const dwellTimer = React.useRef(null);
+  const scrollStopTimer = React.useRef(null);
+  const isVisible = React.useRef(false);
 
   React.useEffect(() => {
     if (!containerRef.current || !autoPlay) return;
 
+    // Observer pour savoir si la carte est visible
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && entry.intersectionRatio >= 0.7) {
-        // Vérifier que le centre de la carte est dans la moitié centrale du viewport
-        const rect = containerRef.current.getBoundingClientRect();
-        const cardCenterY = rect.top + rect.height / 2;
-        const viewH = window.innerHeight;
-        // Zone centrale = entre 25% et 75% du viewport
-        const inCenter = cardCenterY >= viewH * 0.25 && cardCenterY <= viewH * 0.75;
-        if (!inCenter) { clearTimeout(dwellTimer.current); return; }
-        // Démarrer le timer 2s seulement si pas déjà en attente
-        if (!dwellTimer.current) {
-          dwellTimer.current = setTimeout(() => {
-            dwellTimer.current = null;
-            window.dispatchEvent(new CustomEvent("mdr_stop_videos", { detail: instanceId.current }));
-            activeVideoId.current = instanceId.current;
-            setPlaying(true);
-          }, 2000);
-        }
-      } else {
-        // Sort du centre — annuler et stopper
+      isVisible.current = entry.isIntersecting && entry.intersectionRatio >= 0.6;
+      if (!isVisible.current) {
+        // Sort du viewport — tout annuler
         clearTimeout(dwellTimer.current);
         dwellTimer.current = null;
         if (activeVideoId.current === instanceId.current) activeVideoId.current = null;
         setPlaying(false);
       }
-    }, { threshold: [0.0, 0.25, 0.5, 0.7, 1.0] });
-
+    }, { threshold: [0.0, 0.3, 0.6, 1.0] });
     observer.observe(containerRef.current);
+
+    // Détecter l'arrêt du scroll — seulement là on vérifie le centre
+    const onScroll = () => {
+      // Pendant le scroll : annuler tout timer en cours
+      clearTimeout(dwellTimer.current);
+      dwellTimer.current = null;
+      clearTimeout(scrollStopTimer.current);
+
+      // 400ms après arrêt du scroll : vérifier si cette carte est au centre
+      scrollStopTimer.current = setTimeout(() => {
+        if (!isVisible.current || !containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const cardCenterY = rect.top + rect.height / 2;
+        const viewH = window.innerHeight;
+        // Zone stricte : centre de la carte entre 30% et 70% du viewport
+        const inCenter = cardCenterY >= viewH * 0.30 && cardCenterY <= viewH * 0.70;
+        if (!inCenter) return;
+
+        // La carte est au centre et le scroll est arrêté — démarrer le dwell 2.5s
+        dwellTimer.current = setTimeout(() => {
+          dwellTimer.current = null;
+          if (!isVisible.current) return;
+          // Vérifier une dernière fois qu'elle est toujours au centre
+          const r2 = containerRef.current.getBoundingClientRect();
+          const c2 = r2.top + r2.height / 2;
+          if (c2 < viewH * 0.25 || c2 > viewH * 0.75) return;
+          // Lancer la vidéo — stopper les autres
+          window.dispatchEvent(new CustomEvent("mdr_stop_videos", { detail: instanceId.current }));
+          activeVideoId.current = instanceId.current;
+          setPlaying(true);
+        }, 2500);
+      }, 400);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     // Écouter les demandes d'arrêt des autres instances
     const handleStop = (e) => {
       if (e.detail !== instanceId.current) {
         clearTimeout(dwellTimer.current);
+        dwellTimer.current = null;
         setPlaying(false);
       }
     };
@@ -385,6 +410,8 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false
     return () => {
       observer.disconnect();
       clearTimeout(dwellTimer.current);
+      clearTimeout(scrollStopTimer.current);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("mdr_stop_videos", handleStop);
     };
   }, [autoPlay]);
