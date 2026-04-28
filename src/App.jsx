@@ -2308,11 +2308,12 @@ const PHONE_EXAMPLE = {
   // Annonces classiques : publication gratuite et illimitée
   // Monétisation uniquement via le Sponsoring
   const TARIFS_ANNONCE = []; // conservé pour compatibilité édition
+  // Tarifs de lancement (valables jusqu'à fin juin 2026 — anciens: 2500/6000/10000/18000)
   const TARIFS_BOUTIQUE = [
-    { label:"30 jours",  days:30,  price:2500  },
-    { label:"90 jours",  days:90,  price:6000  },
-    { label:"180 jours", days:180, price:10000 },
-    { label:"360 jours", days:360, price:18000 },
+    { label:"30 jours",  days:30,  price:1500  },
+    { label:"90 jours",  days:90,  price:3500  },
+    { label:"180 jours", days:180, price:6000  },
+    { label:"360 jours", days:360, price:10000 },
   ];
 
   // 4 jours gratuits par mois — vérifie si l'utilisateur a déjà utilisé son crédit ce mois
@@ -6293,7 +6294,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               num:"3",
               title:"Publication d'annonces et tarification",
               icon:"💰",
-              content:`TARIFS DE PUBLICATION : ANNONCES CLASSIQUES : publication gratuite et illimitée pour tous. SPONSORING ANNONCES : 500 FCFA pour 7 jours · 1 500 FCFA pour 30 jours · 3 500 FCFA pour 90 jours · 6 000 FCFA pour 180 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 4 jours gratuits par mois puis 2 500 FCFA pour 30 jours · 6 000 FCFA pour 90 jours · 10 000 FCFA pour 180 jours · 18 000 FCFA pour 360 jours. BADGE URGENT : 500 FCFA pour 3 jours · 1 000 FCFA pour 7 jours. VIDÉO : La vidéo ajoutée à une annonce doit montrer uniquement le produit ou service annoncé. Toute vidéo montrant autre chose (boutique entière, publicité générale, contenu non lié) constitue un abus et entraîne la suppression de l'annonce sans préavis. MODIFICATION : Gratuite et illimitée pour les annonces classiques. Pour les boutiques, ateliers, restaurants et salons beauté, les modifications sont incluses dans l'abonnement actif. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
+              content:`TARIFS DE PUBLICATION : ANNONCES CLASSIQUES : publication gratuite et illimitée pour tous. SPONSORING ANNONCES : 500 FCFA pour 7 jours · 1 500 FCFA pour 30 jours · 3 500 FCFA pour 90 jours · 6 000 FCFA pour 180 jours. BOUTIQUES, ATELIERS, RESTAURANTS & BARS, SALONS BEAUTÉ : 4 jours gratuits par mois puis 1 500 FCFA pour 30 jours · 3 500 FCFA pour 90 jours · 6 000 FCFA pour 180 jours · 10 000 FCFA pour 360 jours (tarifs de lancement valables jusqu'à fin juin 2026). BADGE URGENT : 500 FCFA pour 3 jours · 1 000 FCFA pour 7 jours. VIDÉO : La vidéo ajoutée à une annonce doit montrer uniquement le produit ou service annoncé. Toute vidéo montrant autre chose (boutique entière, publicité générale, contenu non lié) constitue un abus et entraîne la suppression de l'annonce sans préavis. MODIFICATION : Gratuite et illimitée pour les annonces classiques. Pour les boutiques, ateliers, restaurants et salons beauté, les modifications sont incluses dans l'abonnement actif. Les paiements s'effectuent selon le pays de l'utilisateur : via Mobile Money (MTN Money, Moov Money) par l'intermédiaire de FedaPay pour les pays de la zone UEMOA, et via Flutterwave pour les autres pays africains couverts par la plateforme. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée et prouvée de la plateforme. En cas de réclamation, contacter support@marcheduroi.com dans un délai de 7 jours ouvrables.`
             },
             {
               num:"4",
