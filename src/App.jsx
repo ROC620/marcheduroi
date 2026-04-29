@@ -5802,7 +5802,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               <div key={b.id} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
                   {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
-                  {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
+                  {!b.video && b.photos&&b.photos.length>0 && (
+                    <div style={{ width:"100%",height:180,overflow:"hidden",background:"#1a1d30",position:"relative" }}>
+                      <img src={b.photos[0]} alt={b.name} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
+                        onError={e=>{ e.target.style.display="none"; }}/>
+                      {b.photos.length>1 && <span style={{ position:"absolute",bottom:6,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>+{b.photos.length-1}</span>}
+                    </div>
+                  )}
                   {isCertified(b.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
                       <CertifiedBadge size={52}/>
@@ -5898,7 +5904,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               <div key={a.id} className={`card-hover${a.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(a.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(a.id)?"2px solid #FFD700":a.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
                   {a.video && <VideoCardPlayer video={a.video?.url||a.video} photos={a.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
-                  {!a.video && a.photos&&a.photos.length>0 && <PhotoCarousel photos={a.photos}/>}
+                  {!a.video && a.photos&&a.photos.length>0 && (
+                    <div style={{ width:"100%",height:180,overflow:"hidden",background:"#1a1d30",position:"relative" }}>
+                      <img src={a.photos[0]} alt={a.name} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
+                        onError={e=>{ e.target.style.display="none"; }}/>
+                      {a.photos.length>1 && <span style={{ position:"absolute",bottom:6,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>+{a.photos.length-1}</span>}
+                    </div>
+                  )}
                   {isCertified(a.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
                       <CertifiedBadge size={52}/>
@@ -6007,7 +6019,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               <div key={r.id} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(r.id)?"0 4px 24px rgba(255,215,0,0.4)":r.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(r.id)?`2px solid #FFD700`:r.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
                   {r.video && <VideoCardPlayer video={r.video?.url||r.video} photos={r.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
-                  {!r.video && r.photos&&r.photos.length>0 && <PhotoCarousel photos={r.photos}/>}
+                  {!r.video && r.photos&&r.photos.length>0 && (
+                    <div style={{ width:"100%",height:180,overflow:"hidden",background:"#1a1d30",position:"relative" }}>
+                      <img src={r.photos[0]} alt={r.name} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
+                        onError={e=>{ e.target.style.display="none"; }}/>
+                      {r.photos.length>1 && <span style={{ position:"absolute",bottom:6,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>+{r.photos.length-1}</span>}
+                    </div>
+                  )}
                   {isCertified(r.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
                       <CertifiedBadge size={52}/>
@@ -6120,7 +6138,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               <div key={b.id} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}` }}>
                 <div style={{ position:"relative" }}>
                   {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
-                  {!b.video && b.photos&&b.photos.length>0 && <PhotoCarousel photos={b.photos}/>}
+                  {!b.video && b.photos&&b.photos.length>0 && (
+                    <div style={{ width:"100%",height:180,overflow:"hidden",background:"#1a1d30",position:"relative" }}>
+                      <img src={b.photos[0]} alt={b.name} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
+                        onError={e=>{ e.target.style.display="none"; }}/>
+                      {b.photos.length>1 && <span style={{ position:"absolute",bottom:6,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>+{b.photos.length-1}</span>}
+                    </div>
+                  )}
                   {isCertified(b.authorId) && (
                     <div style={{ position:"absolute",bottom:8,right:8 }}>
                       <CertifiedBadge size={52}/>
