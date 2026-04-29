@@ -325,6 +325,12 @@ const FLAGS = [
 
 // ── Gestionnaire global : une seule vidéo autoPlay active à la fois ─────────
 const activeVideoId = { current: null };
+// Bloquer l'autoplay après un scroll programmatique (ex: lien partagé)
+const autoPlayBlocked = { current: false };
+const blockAutoPlay = (ms = 4000) => {
+  autoPlayBlocked.current = true;
+  setTimeout(() => { autoPlayBlocked.current = false; }, ms);
+};
 
 // ── Composant vidéo auto-play sur les cartes ─────────────────────────────────
 function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false }) {
@@ -383,6 +389,8 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false
         dwellTimer.current = setTimeout(() => {
           dwellTimer.current = null;
           if (!isVisible.current) return;
+          // Ne pas démarrer si le scroll était programmatique (lien partagé, navigation)
+          if (autoPlayBlocked.current) return;
           // Vérifier une dernière fois qu'elle est toujours au centre
           const r2 = containerRef.current.getBoundingClientRect();
           const c2 = r2.top + r2.height / 2;
@@ -2041,7 +2049,10 @@ function AppContent() {
         setExpandedContacts({ [postFromSession]: true });
         setTimeout(() => {
           const el = document.getElementById("post-" + postFromSession);
-          if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
+          if (el) {
+            blockAutoPlay(5000); // Bloquer l'autoplay 5s après le scroll
+            el.scrollIntoView({ behavior:"smooth", block:"center" });
+          }
         }, 800);
       }
     }
