@@ -2023,14 +2023,27 @@ function AppContent() {
     if (postFromSession) {
       sessionStorage.removeItem("mdr_open_post");
       sessionStorage.removeItem("mdr_open_src");
-      // Aller sur la page annonces et ouvrir l'annonce en mode étendu
-      setView("home");
-      setExpandedContacts({ [postFromSession]: true });
-      // Scroll vers l'annonce après chargement
-      setTimeout(() => {
-        const el = document.getElementById("post-" + postFromSession);
-        if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
-      }, 800);
+      // Mapper la source vers le chemin de route
+      const srcRouteMap = {
+        posts: null,           // annonces classiques → scroll dans le fil
+        boutiques: "boutique",
+        ateliers: "atelier",
+        restos: "resto",
+        beaute: "beaute",
+      };
+      const routePath = srcRouteMap[srcFromSession];
+      if (routePath) {
+        // Établissement → naviguer directement sur la fiche dédiée
+        setTimeout(() => navigate("/" + routePath + "/" + postFromSession, { replace: true }), 0);
+      } else {
+        // Annonce classique → scroll dans le fil
+        setView("home");
+        setExpandedContacts({ [postFromSession]: true });
+        setTimeout(() => {
+          const el = document.getElementById("post-" + postFromSession);
+          if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
+        }, 800);
+      }
     }
     supabase.auth.onAuthStateChange((event, session) => {
       if (!session) { setUser(null); localStorage.removeItem("mdr_user_role"); return; }
