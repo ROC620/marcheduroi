@@ -1203,7 +1203,18 @@ function AppContent() {
 
   const loadShops = async () => {
     try {
-      const mapItem = x => ({...x, authorId: x.author_id, expiresAt: x.expires_at, sponsoredUntil: x.sponsored_until, urgentUntil: x.urgent_until, urgentActivatedAt: x.urgent_activated_at, photos: x.photos||[], likes: x.likes||0});
+      const mapItem = x => {
+        // Parser les photos si Supabase les retourne comme string JSON
+        let photos = x.photos||[];
+        if (typeof photos === "string") {
+          try { photos = JSON.parse(photos); } catch(e) { photos = []; }
+        }
+        if (!Array.isArray(photos)) photos = [];
+        return {...x, authorId: x.author_id, expiresAt: x.expires_at,
+          sponsoredUntil: x.sponsored_until, urgentUntil: x.urgent_until,
+          urgentActivatedAt: x.urgent_activated_at, photos, likes: x.likes||0,
+          sousType: x.sous_type||x.sousType||""};
+      };
       const { data: bData } = await supabase.from("boutiques").select("*").order("created_at", { ascending: false }).range(0, 99);
       if (bData && bData.length > 0) setBoutiques(bData.map(mapItem));
       const { data: aData } = await supabase.from("ateliers").select("*").order("created_at", { ascending: false }).range(0, 99);
@@ -5809,7 +5820,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     <button onClick={()=>setModal({type:"report",data:{...b,title:b.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===b.authorId||user.role==="admin")&&(
                       <>
-                        {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && !b.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"boutiques",shopSetter:"setBoutiques"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && (user.role==="admin" || !b.sponsored) && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"boutiques",shopSetter:"setBoutiques"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
                         {b.urgent&&new Date(b.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(b.id,"boutiques",setBoutiques)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>setModal({type:"addPromo",data:b,shopType:"boutique"})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Publier une Promo">📣</button>
                         <button onClick={()=>openEditShop(b,"boutique",editShop)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
@@ -5917,7 +5928,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     <button onClick={()=>setModal({type:"report",data:{...a,title:a.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===a.authorId||user.role==="admin")&&(
                       <>
-                        {!(a.urgent&&new Date(a.urgentUntil)>new Date()) && !a.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...a,title:a.name},shopTable:"ateliers",shopSetter:"setAteliers"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {!(a.urgent&&new Date(a.urgentUntil)>new Date()) && (user.role==="admin" || !a.sponsored) && <button onClick={()=>setModal({type:"urgentShop",data:{...a,title:a.name},shopTable:"ateliers",shopSetter:"setAteliers"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
                         {a.urgent&&new Date(a.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(a.id,"ateliers",setAteliers)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>setModal({type:"addPromo",data:a,shopType:"atelier"})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Publier une Promo">📣</button>
                         <button onClick={()=>openEditShop(a,"atelier",editShop)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
@@ -6030,7 +6041,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     <button onClick={()=>setModal({type:"report",data:{...r,title:r.name}})} style={{ background:"transparent",border:"none",color:theme.sub,padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Signaler">🚩</button>
                     {user&&(user.id===r.authorId||user.role==="admin")&&(
                       <>
-                        {!(r.urgent&&new Date(r.urgentUntil)>new Date()) && !r.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...r,title:r.name},shopTable:"restos",shopSetter:"setRestos"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {!(r.urgent&&new Date(r.urgentUntil)>new Date()) && (user.role==="admin" || !r.sponsored) && <button onClick={()=>setModal({type:"urgentShop",data:{...r,title:r.name},shopTable:"restos",shopSetter:"setRestos"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
                         {r.urgent&&new Date(r.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(r.id,"restos",setRestos)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>setModal({type:"addPromo",data:r,shopType:"resto"})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Publier une Promo">📣</button>
                         <button onClick={()=>openEditShop(r,"resto",editResto)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
@@ -6136,7 +6147,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     {user&&user.id!==b.authorId&&<button onClick={()=>{ setActiveConv({postId:b.id,postTitle:b.name,postPrice:b.tarifs||"",postPhoto:b.photos?.[0],receiverId:b.authorId,receiverName:b.author,messages:messages.filter(m=>(m.post_id===b.id)&&((m.sender_id===user.id&&m.receiver_id===b.authorId)||(m.receiver_id===user.id&&m.sender_id===b.authorId)))}); setShowMessages(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Message">💬</button>}
                     {user&&(user.id===b.authorId||user.role==="admin")&&(
                       <>
-                        {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && !b.sponsored && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"beaute",shopSetter:"setBeaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
+                        {!(b.urgent&&new Date(b.urgentUntil)>new Date()) && (user.role==="admin" || !b.sponsored) && <button onClick={()=>setModal({type:"urgentShop",data:{...b,title:b.name},shopTable:"beaute",shopSetter:"setBeaute"})} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }}>🔥</button>}
                         {b.urgent&&new Date(b.urgentUntil)>new Date()&&<button onClick={()=>removeUrgentShop(b.id,"beaute",setBeaute)} style={{ background:"rgba(255,71,87,0.15)",border:"1px solid #FF4757",color:"#FF4757",padding:"6px 8px",borderRadius:8,fontSize:11,cursor:"pointer" }}>✕🔥</button>}
                         <button onClick={()=>setModal({type:"addPromo",data:b,shopType:"beaute"})} style={{ background:"rgba(255,140,0,0.1)",border:"none",color:"#FF8C00",padding:"6px 8px",borderRadius:8,fontSize:12,cursor:"pointer" }} title="Publier une Promo">📣</button>
                         <button onClick={()=>openEditShop(b,"beaute",editBeaute)} style={{ background:"rgba(108,99,255,0.15)",border:"none",color:"#6C63FF",padding:"6px 8px",borderRadius:8,cursor:"pointer" }}><Icon name="edit" size={14}/></button>
