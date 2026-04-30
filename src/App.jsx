@@ -4893,15 +4893,26 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
             </div>
           </div>
 
-          {/* ── ALERTE BANNIÈRES EN ATTENTE — visible en haut du dashboard ── */}
-          {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
+          {/* ── DEMANDES BANNIÈRES — toujours visible pour l'admin ── */}
+          {user?.role==="admin" && (
             <div style={{ background:"rgba(108,99,255,0.08)",border:"2px solid rgba(108,99,255,0.4)",borderRadius:16,padding:20,marginBottom:24 }}>
-              <p style={{ fontWeight:800,fontSize:15,color:"#6C63FF",marginBottom:14,display:"flex",alignItems:"center",gap:8 }}>
-                📢 Demandes de bannières en attente
-                <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>
-                  {adRequests.filter(r=>r.status==="en_attente").length}
-                </span>
-              </p>
+              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14 }}>
+                <p style={{ fontWeight:800,fontSize:15,color:"#6C63FF",display:"flex",alignItems:"center",gap:8 }}>
+                  📢 Demandes de bannières en attente
+                  {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
+                    <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>
+                      {adRequests.filter(r=>r.status==="en_attente").length}
+                    </span>
+                  )}
+                </p>
+                <button onClick={()=>{ supabase.from("ad_requests").select("*").order("created_at",{ascending:false}).then(({data})=>{ if(data) setAdRequests(data); notify("Actualisé ✅"); }); }}
+                  style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"5px 12px",borderRadius:8,fontWeight:700,fontSize:11,cursor:"pointer" }}>
+                  🔄 Actualiser
+                </button>
+              </div>
+              {adRequests.filter(r=>r.status==="en_attente").length===0 && (
+                <p style={{ color:theme.sub,fontSize:13,padding:"12px 0" }}>✅ Aucune demande en attente</p>
+              )}
               {adRequests.filter(r=>r.status==="en_attente").map(req=>(
                 <div key={req.id} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:16,marginBottom:10 }}>
                   <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,flexWrap:"wrap" }}>
