@@ -4893,6 +4893,60 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
             </div>
           </div>
 
+          {/* ── ALERTE BANNIÈRES EN ATTENTE — visible en haut du dashboard ── */}
+          {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
+            <div style={{ background:"rgba(108,99,255,0.08)",border:"2px solid rgba(108,99,255,0.4)",borderRadius:16,padding:20,marginBottom:24 }}>
+              <p style={{ fontWeight:800,fontSize:15,color:"#6C63FF",marginBottom:14,display:"flex",alignItems:"center",gap:8 }}>
+                📢 Demandes de bannières en attente
+                <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>
+                  {adRequests.filter(r=>r.status==="en_attente").length}
+                </span>
+              </p>
+              {adRequests.filter(r=>r.status==="en_attente").map(req=>(
+                <div key={req.id} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:12,padding:16,marginBottom:10 }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,flexWrap:"wrap" }}>
+                    <div style={{ flex:1 }}>
+                      <p style={{ fontWeight:700,color:theme.text,fontSize:14,marginBottom:4 }}>{req.entreprise}</p>
+                      {req.slogan && <p style={{ color:theme.sub,fontSize:12,marginBottom:4 }}>{req.slogan}</p>}
+                      <div style={{ display:"flex",gap:8,flexWrap:"wrap",fontSize:12,color:theme.sub }}>
+                        <span>👤 {req.user_name}</span>
+                        <span>📅 {req.duree} jours</span>
+                        <span>💰 {(req.prix||0).toLocaleString()} FCFA</span>
+                        <span>📆 Expire le {req.expires_at}</span>
+                      </div>
+                    </div>
+                    <div style={{ display:"flex",gap:8,flexShrink:0 }}>
+                      <button onClick={async()=>{
+                        const { error } = await supabase.from("ads").insert({
+                          entreprise:req.entreprise, slogan:req.slogan||"",
+                          logo_url:req.logo_url||"", lien:req.lien||"",
+                          couleur1:req.couleur1||"#6C63FF", couleur2:req.couleur2||"#8B84FF",
+                          fin:req.expires_at, actif:true,
+                        });
+                        if (error) { notify("Erreur activation","error"); return; }
+                        await supabase.from("ad_requests").update({status:"approuve"}).eq("id",req.id);
+                        setAdRequests(prev=>prev.map(r=>r.id===req.id?{...r,status:"approuve"}:r));
+                        const today = new Date().toISOString().slice(0,10);
+                        const { data } = await supabase.from("ads").select("*").eq("actif",true).or(`fin.is.null,fin.gte.${today}`);
+                        if (data) setAds(data);
+                        notify("✅ Bannière activée !");
+                      }} style={{ background:"rgba(67,198,172,0.15)",border:"1px solid #43C6AC",color:"#43C6AC",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                        ✅ Activer
+                      </button>
+                      <button onClick={async()=>{
+                        await supabase.from("ad_requests").update({status:"refuse"}).eq("id",req.id);
+                        setAdRequests(prev=>prev.map(r=>r.id===req.id?{...r,status:"refuse"}:r));
+                        notify("Demande refusée");
+                      }} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                        ✕ Refuser
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Signalements en attente */}
           {(()=>{
             const pendingReports = reports.filter(r=>r.status==="En attente");
