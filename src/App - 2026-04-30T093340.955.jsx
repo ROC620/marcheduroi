@@ -2405,6 +2405,14 @@ const PHONE_EXAMPLE = {
   useEffect(() => {
     if (user) canPublishFreeShop().then(setCanFreeShop);
   }, [user]);
+
+  // Recharger les adRequests à chaque ouverture du dashboard admin
+  useEffect(() => {
+    if (view === "dashboard" && user?.role === "admin") {
+      supabase.from("ad_requests").select("*").order("created_at", { ascending: false })
+        .then(({ data }) => { if (data) setAdRequests(data); });
+    }
+  }, [view]);
   // ─────────────────────────────────────────────────────────────────────────────
 
   // ─── FEDAPAY : Paiement avant publication ───────────────────────────────────
@@ -5172,15 +5180,21 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
           {/* ── GESTION BANNIÈRES PUBLICITAIRES ── */}
           <div id="admin-bannières" style={{ marginTop:40 }}>
-            <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text,display:"flex",alignItems:"center",gap:8 }}>
-              📢 Bannières publicitaires
-              <span style={{ background:"rgba(108,99,255,0.15)",color:"#6C63FF",borderRadius:20,padding:"2px 10px",fontSize:12,fontWeight:600 }}>{ads.length} active{ads.length>1?"s":""}</span>
-              {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
-                <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>
-                  {adRequests.filter(r=>r.status==="en_attente").length}
-                </span>
-              )}
-            </h3>
+            <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16 }}>
+              <h3 style={{ fontWeight:700,fontSize:18,color:theme.text,display:"flex",alignItems:"center",gap:8 }}>
+                📢 Bannières publicitaires
+                <span style={{ background:"rgba(108,99,255,0.15)",color:"#6C63FF",borderRadius:20,padding:"2px 10px",fontSize:12,fontWeight:600 }}>{ads.length} active{ads.length>1?"s":""}</span>
+                {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
+                  <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:22,height:22,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700 }}>
+                    {adRequests.filter(r=>r.status==="en_attente").length}
+                  </span>
+                )}
+              </h3>
+              <button onClick={()=>{ supabase.from("ad_requests").select("*").order("created_at",{ascending:false}).then(({data})=>{ if(data) setAdRequests(data); notify("Actualisé ✅"); }); }}
+                style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"6px 14px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                🔄 Actualiser
+              </button>
+            </div>
             {adRequests.filter(r=>r.status==="en_attente").length > 0 && (
               <div style={{ marginBottom:24 }}>
                 <h4 style={{ fontWeight:700,fontSize:15,color:"#FF8C00",marginBottom:12 }}>⏳ Demandes en attente ({adRequests.filter(r=>r.status==="en_attente").length})</h4>
