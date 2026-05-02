@@ -8588,14 +8588,16 @@ function AnnonceDetail() {
 // Layout persistant — AppContent reste monté en permanence
 function PersistentLayout() {
   const location = useLocation();
-  const isDetail = /^\/(annonce|boutique|atelier|resto|beaute)\//.test(location.pathname);
+  // Vérifier que l'URL a bien un segment après le type (ex: /boutique/ID)
+  const detailMatch = location.pathname.match(/^\/(annonce|boutique|atelier|resto|beaute)\/(.+)$/);
+  const isDetail = detailMatch && detailMatch[2] && detailMatch[2] !== "undefined";
   return (
     <>
       {/* AppContent toujours monté — ne se démonte jamais */}
       <div style={{ display: isDetail ? "none" : "block" }}>
         <AppContent/>
       </div>
-      {/* AnnonceDetail affiché par-dessus quand on est sur une fiche */}
+      {/* AnnonceDetail affiché uniquement quand l'id est valide */}
       {isDetail && <AnnonceDetail/>}
     </>
   );
