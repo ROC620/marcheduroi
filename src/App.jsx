@@ -648,7 +648,7 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
   };
 
   const SponsoredCard = ({ item }) => (
-    <div onClick={() => navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`)}
+    <div onClick={() => { sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`); }}
       style={{ flex:`0 0 ${cardW}px`, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
       <div style={{ width:"100%",height:windowWidth<=500?100:130,background:"linear-gradient(135deg,#1a1d30,#2a2d45)",position:"relative",overflow:"hidden" }}>
         {item.photos&&item.photos[0]
@@ -4341,7 +4341,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
             {filtered.slice(0, visibleCount).map(post=>(
-              <div key={post.id} id={"post-"+post.id} onClick={()=>navigate("/annonce/"+post.id)} className={`card-hover${isUrgentActive(post)?" card-urgent":post.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:isUrgentActive(post)?"2px solid #FF4757":post.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
+              <div key={post.id} id={"post-"+post.id} onClick={()=>{ sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); navigate("/annonce/"+post.id); }} className={`card-hover${isUrgentActive(post)?" card-urgent":post.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:isUrgentActive(post)?"2px solid #FF4757":post.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
                 {post.video
                   ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60} autoPlay={(isUrgentActive(post)||!!post.sponsored) && windowWidth<=600}/>
                   : post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
@@ -5878,7 +5878,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               return 0;
             }).slice(0,visibleBeaute)
             .map(b=>(
-              <div key={b.id} onClick={()=>navigate("/boutique/"+b.id)} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
+              <div key={b.id} onClick={()=>{ sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); navigate("/boutique/"+b.id); }} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
                 <div style={{ position:"relative" }}>
                   {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!b.video && b.photos&&b.photos.length>0 && (
@@ -5980,7 +5980,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               return 0;
             }).slice(0,visibleAteliers)
             .map(a=>(
-              <div key={a.id} onClick={()=>navigate("/atelier/"+a.id)} className={`card-hover${a.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(a.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(a.id)?"2px solid #FFD700":a.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
+              <div key={a.id} onClick={()=>{ sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); navigate("/atelier/"+a.id); }} className={`card-hover${a.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(a.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(a.id)?"2px solid #FFD700":a.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
                 <div style={{ position:"relative" }}>
                   {a.video && <VideoCardPlayer video={a.video?.url||a.video} photos={a.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!a.video && a.photos&&a.photos.length>0 && (
@@ -6095,7 +6095,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               return 0;
             }).slice(0,visibleRestos)
             .map(r=>(
-              <div key={r.id} onClick={()=>navigate("/resto/"+r.id)} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(r.id)?"0 4px 24px rgba(255,215,0,0.4)":r.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(r.id)?`2px solid #FFD700`:r.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}`,cursor:"pointer" }}>
+              <div key={r.id} onClick={()=>{ sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); navigate("/resto/"+r.id); }} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(r.id)?"0 4px 24px rgba(255,215,0,0.4)":r.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(r.id)?`2px solid #FFD700`:r.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}`,cursor:"pointer" }}>
                 <div style={{ position:"relative" }}>
                   {r.video && <VideoCardPlayer video={r.video?.url||r.video} photos={r.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!r.video && r.photos&&r.photos.length>0 && (
@@ -6214,7 +6214,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               return 0;
             }).slice(0,visibleBeaute)
             .map(b=>(
-              <div key={b.id} onClick={()=>navigate("/beaute/"+b.id)} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
+              <div key={b.id} onClick={()=>{ sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); navigate("/beaute/"+b.id); }} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
                 <div style={{ position:"relative" }}>
                   {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!b.video && b.photos&&b.photos.length>0 && (
@@ -8441,7 +8441,11 @@ function AnnonceDetail() {
           <button onClick={handleShare} style={{ background:"rgba(108,99,255,0.15)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             🔗 Partager
           </button>
-          <button onClick={()=>{ if(window.history.length>1){ navigate(-1); } else { navigate("/"); }}} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+          <button onClick={()=>{
+            const pos = sessionStorage.getItem("mdr_scroll_pos");
+            if(window.history.length>1){ navigate(-1); } else { navigate("/"); }
+            if(pos) setTimeout(()=>window.scrollTo({top:parseInt(pos),behavior:"instant"}),80);
+          }} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             ← Retour
           </button>
         </div>
@@ -8544,7 +8548,11 @@ function AnnonceDetail() {
           </button>
         </div>
 
-        <button onClick={()=>{ if(window.history.length>1){ navigate(-1); } else { navigate("/"); }}} style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+        <button onClick={()=>{
+            const pos = sessionStorage.getItem("mdr_scroll_pos");
+            if(window.history.length>1){ navigate(-1); } else { navigate("/"); }
+            if(pos) setTimeout(()=>window.scrollTo({top:parseInt(pos),behavior:"instant"}),80);
+          }} style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
           ← Retour
         </button>
       </div>
