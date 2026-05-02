@@ -8421,7 +8421,7 @@ function AnnonceDetail() {
       <p style={{ fontSize:48,marginBottom:16 }}>😕</p>
       <h2 style={{ fontSize:24,fontWeight:700,marginBottom:12 }}>Contenu introuvable</h2>
       <p style={{ color:"#9A9AB0",marginBottom:24 }}>Ce lien n'est plus disponible ou a expiré.</p>
-      <button onClick={()=>{ if(window.history.length>1){ navigate(-1); } else { navigate('/'); } }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+      <button onClick={()=>window.history.back()} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
         ← Retour
       </button>
     </div>
@@ -8434,7 +8434,7 @@ function AnnonceDetail() {
     <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",color:"#E8E8F0" }}>
       {/* Navbar */}
       <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100 }}>
-        <div style={{ display:"flex",alignItems:"center",cursor:"pointer" }} onClick={()=>{ if(window.history.length>1){ navigate(-1); } else { navigate('/'); } }}>
+        <div style={{ display:"flex",alignItems:"center",cursor:"pointer" }} onClick={()=>window.history.back()}>
           <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,width:"auto",objectFit:"contain" }}/>
         </div>
         <div style={{ display:"flex",gap:8 }}>
@@ -8443,8 +8443,8 @@ function AnnonceDetail() {
           </button>
           <button onClick={()=>{
             const pos = sessionStorage.getItem("mdr_scroll_pos");
-            if(window.history.length>1){ navigate(-1); } else { navigate("/"); }
-            if(pos) setTimeout(()=>window.scrollTo({top:parseInt(pos),behavior:"instant"}),80);
+            window.history.back();
+            if(pos) setTimeout(()=>window.scrollTo({top:parseInt(pos),behavior:"instant"}),150);
           }} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             ← Retour
           </button>
@@ -8550,8 +8550,8 @@ function AnnonceDetail() {
 
         <button onClick={()=>{
             const pos = sessionStorage.getItem("mdr_scroll_pos");
-            if(window.history.length>1){ navigate(-1); } else { navigate("/"); }
-            if(pos) setTimeout(()=>window.scrollTo({top:parseInt(pos),behavior:"instant"}),80);
+            window.history.back();
+            if(pos) setTimeout(()=>window.scrollTo({top:parseInt(pos),behavior:"instant"}),150);
           }} style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
           ← Retour
         </button>
