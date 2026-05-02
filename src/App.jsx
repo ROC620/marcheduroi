@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { BrowserRouter, Routes, Route, useNavigate, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
 import { supabase } from "./supabase";
 import Icon from "./components/Icon";
 import PhotoCarousel from "./components/PhotoCarousel";
@@ -648,7 +648,7 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
   };
 
   const SponsoredCard = ({ item }) => (
-    <div onClick={() => navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`)}
+    <div onClick={() => { sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); sessionStorage.setItem("mdr_back_view",view||"home"); navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`, { state:{ fromView:view||"home", scrollPos:window.scrollY } }); }}
       style={{ flex:`0 0 ${cardW}px`, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
       <div style={{ width:"100%",height:windowWidth<=500?100:130,background:"linear-gradient(135deg,#1a1d30,#2a2d45)",position:"relative",overflow:"hidden" }}>
         {item.photos&&item.photos[0]
@@ -1009,11 +1009,13 @@ function AppContent() {
   const [suggestions, setSuggestions] = useState([{ id:1,text:"Ajouter un système de messagerie interne",author:"Visiteur anonyme",date:"2026-03-10",status:"en attente" }]);
   const [user, setUser] = useState(null);
   const [view, setViewState] = useState(() => {
-    // Toujours commencer sur landing au rechargement de la page
-    // Exception : lien partagé (mdr_open_post en sessionStorage)
+    // Si on revient d'une fiche détail → restaurer la vue précédente
+    const returnView = sessionStorage.getItem("mdr_back_view");
+    if (returnView) return returnView;
+    // Lien partagé → garder la vue actuelle
     const hasSharedPost = sessionStorage.getItem("mdr_open_post");
     if (hasSharedPost) return history.state?.view || "landing";
-    // Forcer landing à chaque rechargement
+    // Sinon → page d'accueil
     return "landing";
   });
   const [showCategories, setShowCategories] = useState(false);
@@ -1905,11 +1907,14 @@ function AppContent() {
       window._turnstileToken = token;
       document.dispatchEvent(new CustomEvent("turnstile-success", { detail: token }));
     };
-    const ts = document.createElement("script");
-    ts.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
-    ts.async = true;
-    ts.defer = true;
-    document.head.appendChild(ts);
+    // Charger Turnstile une seule fois
+    if (!document.querySelector('script[src*="turnstile"]')) {
+      const ts = document.createElement("script");
+      ts.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+      ts.async = true;
+      ts.defer = true;
+      document.head.appendChild(ts);
+    }
     }
     // PWA install prompt
     const handleInstallPrompt = (e) => {
@@ -1921,11 +1926,9 @@ function AppContent() {
     window.addEventListener("beforeinstallprompt", handleInstallPrompt);
 
     // Bouton Retour mobile — restaurer la vue précédente
+    // NE PAS intercepter les popstate : le useEffect([appLocation.state]) s'en charge
     const handlePopState = (e) => {
-      const previousView = e.state?.view || "landing";
-      setViewState(previousView);
-      setModal(null);
-      window.scrollTo(0, 0);
+      // Ne rien faire — React Router + useEffect([appLocation.state]) gèrent tout
     };
     window.addEventListener("popstate", handlePopState);
 
@@ -1988,9 +1991,21 @@ function AppContent() {
   };
 
   useEffect(() => {
-    // Forcer la page d'accueil à chaque rechargement (sauf lien partagé og)
+    // Restaurer scroll si on revient d'une fiche
+    const returnView = sessionStorage.getItem("mdr_back_view");
+    const scrollPos = sessionStorage.getItem("mdr_scroll_pos");
+    if (returnView) {
+      sessionStorage.removeItem("mdr_back_view");
+      if (scrollPos) {
+        sessionStorage.removeItem("mdr_scroll_pos");
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          window.scrollTo({ top: parseInt(scrollPos), behavior: "instant" });
+        }));
+      }
+    }
+    // Forcer la page d'accueil à chaque rechargement (sauf retour depuis fiche ou lien partagé)
     const hasOgPost = new URLSearchParams(window.location.search).get("mdr_post");
-    if (!hasOgPost && window.location.pathname === "/") {
+    if (!hasOgPost && !returnView && window.location.pathname === "/") {
       setViewState("landing");
     }
     if (window.location.pathname === "/reset-password") {
@@ -2413,6 +2428,23 @@ const PHONE_EXAMPLE = {
         .then(({ data }) => { if (data) setAdRequests(data); });
     }
   }, [view]);
+
+  // Restaurer la vue et le scroll au retour depuis une fiche détail
+  // Utilise un événement custom pour éviter tout conflit avec React Router
+  useEffect(() => {
+    const handler = (e) => {
+      const { view: rv, scrollPos: sp } = e.detail;
+      setViewState(rv);
+      setModal(null);
+      if (sp) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          window.scrollTo({ top: parseInt(sp), behavior: "instant" });
+        }));
+      }
+    };
+    window.addEventListener("mdr_restore_view", handler);
+    return () => window.removeEventListener("mdr_restore_view", handler);
+  }, []);
   // ─────────────────────────────────────────────────────────────────────────────
 
   // ─── FEDAPAY : Paiement avant publication ───────────────────────────────────
@@ -4341,7 +4373,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
           <div style={{ display:"grid",gridTemplateColumns:gridCols,gap:16,width:"100%",alignItems:"start" }}>
             {filtered.slice(0, visibleCount).map(post=>(
-              <div key={post.id} id={"post-"+post.id} onClick={()=>navigate("/annonce/"+post.id)} className={`card-hover${isUrgentActive(post)?" card-urgent":post.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:isUrgentActive(post)?"2px solid #FF4757":post.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
+              <div key={post.id} id={"post-"+post.id} onClick={()=>{ sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); sessionStorage.setItem("mdr_back_view",view); navigate("/annonce/"+post.id, { state:{ fromView:view, scrollPos:window.scrollY } }); }} className={`card-hover${isUrgentActive(post)?" card-urgent":post.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:"none",animation:"fadeIn 0.4s ease",border:isUrgentActive(post)?"2px solid #FF4757":post.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
                 {post.video
                   ? <VideoCardPlayer video={post.video} photos={post.photos} maxSeconds={60} autoPlay={(isUrgentActive(post)||!!post.sponsored) && windowWidth<=600}/>
                   : post.photos&&post.photos.length>0&&<PhotoCarousel photos={post.photos}/>
@@ -5878,7 +5910,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               return 0;
             }).slice(0,visibleBeaute)
             .map(b=>(
-              <div key={b.id} onClick={()=>navigate("/boutique/"+b.id)} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
+              <div key={b.id} onClick={()=>{ sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); sessionStorage.setItem("mdr_back_view","boutiques"); navigate("/boutique/"+b.id, { state:{ fromView:"boutiques", scrollPos:window.scrollY } }); }} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
                 <div style={{ position:"relative" }}>
                   {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!b.video && b.photos&&b.photos.length>0 && (
@@ -5980,7 +6012,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               return 0;
             }).slice(0,visibleAteliers)
             .map(a=>(
-              <div key={a.id} onClick={()=>navigate("/atelier/"+a.id)} className={`card-hover${a.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(a.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(a.id)?"2px solid #FFD700":a.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
+              <div key={a.id} onClick={()=>{ sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); sessionStorage.setItem("mdr_back_view","ateliers"); navigate("/atelier/"+a.id, { state:{ fromView:"ateliers", scrollPos:window.scrollY } }); }} className={`card-hover${a.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(a.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(a.id)?"2px solid #FFD700":a.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
                 <div style={{ position:"relative" }}>
                   {a.video && <VideoCardPlayer video={a.video?.url||a.video} photos={a.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!a.video && a.photos&&a.photos.length>0 && (
@@ -6095,7 +6127,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               return 0;
             }).slice(0,visibleRestos)
             .map(r=>(
-              <div key={r.id} onClick={()=>navigate("/resto/"+r.id)} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(r.id)?"0 4px 24px rgba(255,215,0,0.4)":r.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(r.id)?`2px solid #FFD700`:r.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}`,cursor:"pointer" }}>
+              <div key={r.id} onClick={()=>{ sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); sessionStorage.setItem("mdr_back_view","restos"); navigate("/resto/"+r.id, { state:{ fromView:"restos", scrollPos:window.scrollY } }); }} className="card-hover" style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(r.id)?"0 4px 24px rgba(255,215,0,0.4)":r.sponsored?"0 4px 24px rgba(255,215,0,0.2)":"0 4px 20px rgba(0,0,0,0.15)",border:featuredPosts.includes(r.id)?`2px solid #FFD700`:r.sponsored?`1px solid rgba(255,215,0,0.5)`:`1px solid ${theme.border}`,cursor:"pointer" }}>
                 <div style={{ position:"relative" }}>
                   {r.video && <VideoCardPlayer video={r.video?.url||r.video} photos={r.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!r.video && r.photos&&r.photos.length>0 && (
@@ -6214,7 +6246,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               return 0;
             }).slice(0,visibleBeaute)
             .map(b=>(
-              <div key={b.id} onClick={()=>navigate("/beaute/"+b.id)} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
+              <div key={b.id} onClick={()=>{ sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); sessionStorage.setItem("mdr_back_view","beaute"); navigate("/beaute/"+b.id, { state:{ fromView:"beaute", scrollPos:window.scrollY } }); }} className={`card-hover${b.sponsored?" card-sponsored":""}`} style={{ ...cardStyle,borderRadius:16,overflow:"hidden",boxShadow:featuredPosts.includes(b.id)?"0 4px 24px rgba(255,215,0,0.4)":"none",border:featuredPosts.includes(b.id)?"2px solid #FFD700":b.sponsored?"2px solid #FFD700":`1px solid ${theme.border}`,cursor:"pointer" }}>
                 <div style={{ position:"relative" }}>
                   {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!b.video && b.photos&&b.photos.length>0 && (
@@ -8350,6 +8382,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 function AnnonceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const pathname = window.location.pathname;
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -8421,8 +8454,8 @@ function AnnonceDetail() {
       <p style={{ fontSize:48,marginBottom:16 }}>😕</p>
       <h2 style={{ fontSize:24,fontWeight:700,marginBottom:12 }}>Contenu introuvable</h2>
       <p style={{ color:"#9A9AB0",marginBottom:24 }}>Ce lien n'est plus disponible ou a expiré.</p>
-      <button onClick={()=>navigate("/")} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
-        Retour à l'accueil
+      <button onClick={()=>window.history.back()} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+        ← Retour
       </button>
     </div>
   );
@@ -8434,14 +8467,24 @@ function AnnonceDetail() {
     <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",color:"#E8E8F0" }}>
       {/* Navbar */}
       <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100 }}>
-        <div style={{ display:"flex",alignItems:"center",cursor:"pointer" }} onClick={()=>navigate("/")}>
+        <div style={{ display:"flex",alignItems:"center",cursor:"pointer" }} onClick={()=>{
+          const fromView = location.state?.fromView || sessionStorage.getItem("mdr_back_view") || "home";
+          const scrollPos = location.state?.scrollPos || parseInt(sessionStorage.getItem("mdr_scroll_pos")||"0");
+          navigate("/");
+          setTimeout(() => window.dispatchEvent(new CustomEvent("mdr_restore_view", { detail: { view: fromView, scrollPos } })), 60);
+        }}>
           <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,width:"auto",objectFit:"contain" }}/>
         </div>
         <div style={{ display:"flex",gap:8 }}>
           <button onClick={handleShare} style={{ background:"rgba(108,99,255,0.15)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             🔗 Partager
           </button>
-          <button onClick={()=>{ if(window.history.length>1){ navigate(-1); } else { navigate("/"); }}} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+          <button onClick={()=>{
+            const fromView = location.state?.fromView || sessionStorage.getItem("mdr_back_view") || "home";
+            const scrollPos = location.state?.scrollPos || parseInt(sessionStorage.getItem("mdr_scroll_pos")||"0");
+            navigate("/");
+            setTimeout(() => window.dispatchEvent(new CustomEvent("mdr_restore_view", { detail: { view: fromView, scrollPos } })), 60);
+          }} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             ← Retour
           </button>
         </div>
@@ -8544,7 +8587,12 @@ function AnnonceDetail() {
           </button>
         </div>
 
-        <button onClick={()=>{ if(window.history.length>1){ navigate(-1); } else { navigate("/"); }}} style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+        <button onClick={()=>{
+            const fromView = location.state?.fromView || sessionStorage.getItem("mdr_back_view") || "home";
+            const scrollPos = location.state?.scrollPos || parseInt(sessionStorage.getItem("mdr_scroll_pos")||"0");
+            navigate("/");
+            setTimeout(() => window.dispatchEvent(new CustomEvent("mdr_restore_view", { detail: { view: fromView, scrollPos } })), 60);
+          }} style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
           ← Retour
         </button>
       </div>
@@ -8552,17 +8600,29 @@ function AnnonceDetail() {
   );
 }
 
+// Layout persistant — AppContent reste monté en permanence
+function PersistentLayout() {
+  const location = useLocation();
+  // Vérifier que l'URL a bien un segment après le type (ex: /boutique/ID)
+  const detailMatch = location.pathname.match(/^\/(annonce|boutique|atelier|resto|beaute)\/(.+)$/);
+  const isDetail = detailMatch && detailMatch[2] && detailMatch[2] !== "undefined";
+  return (
+    <>
+      {/* AppContent toujours monté — ne se démonte jamais */}
+      <div style={{ display: isDetail ? "none" : "block" }}>
+        <AppContent/>
+      </div>
+      {/* AnnonceDetail affiché uniquement quand l'id est valide */}
+      {isDetail && <AnnonceDetail/>}
+    </>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AppContent/>}/>
-        <Route path="/annonce/:id" element={<AnnonceDetail/>}/>
-        <Route path="/boutique/:id" element={<AnnonceDetail/>}/>
-        <Route path="/atelier/:id" element={<AnnonceDetail/>}/>
-        <Route path="/resto/:id" element={<AnnonceDetail/>}/>
-        <Route path="/beaute/:id" element={<AnnonceDetail/>}/>
-        <Route path="/reset-password" element={<AppContent/>}/>
+        <Route path="/*" element={<PersistentLayout/>}/>
       </Routes>
     </BrowserRouter>
   );
