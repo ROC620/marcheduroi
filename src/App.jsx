@@ -8380,10 +8380,11 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
 // Page détail universelle
 function AnnonceDetail() {
-  const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = window.location.pathname;
+  // Extraire l'id depuis l'URL directement (route /* ne fournit pas useParams)
+  const id = pathname.split("/").pop();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -8605,9 +8606,9 @@ function AnnonceDetail() {
 // Layout persistant — AppContent reste monté en permanence
 function PersistentLayout() {
   const location = useLocation();
-  // Vérifier que l'URL a bien un segment après le type (ex: /boutique/ID)
-  const detailMatch = location.pathname.match(/^\/(annonce|boutique|atelier|resto|beaute)\/(.+)$/);
-  const isDetail = detailMatch && detailMatch[2] && detailMatch[2] !== "undefined";
+  const segments = location.pathname.split("/").filter(Boolean);
+  const validTypes = ["annonce","boutique","atelier","resto","beaute"];
+  const isDetail = segments.length >= 2 && validTypes.includes(segments[0]) && segments[1] && segments[1] !== "undefined";
   return (
     <>
       {/* AppContent toujours monté — ne se démonte jamais */}
