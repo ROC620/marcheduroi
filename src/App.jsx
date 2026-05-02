@@ -1921,11 +1921,19 @@ function AppContent() {
     window.addEventListener("beforeinstallprompt", handleInstallPrompt);
 
     // Bouton Retour mobile — restaurer la vue précédente
+    // On ignore les popstate venant de React Router (fiches detail)
     const handlePopState = (e) => {
-      const previousView = e.state?.view || "landing";
-      setViewState(previousView);
-      setModal(null);
-      window.scrollTo(0, 0);
+      // Si l'état a une view SPA → restaurer
+      if (e.state?.view) {
+        setViewState(e.state.view);
+        setModal(null);
+        // Restaurer la position de scroll si disponible
+        const pos = sessionStorage.getItem("mdr_scroll_pos");
+        if (pos) {
+          setTimeout(() => window.scrollTo({ top: parseInt(pos), behavior: "instant" }), 50);
+        }
+      }
+      // Sinon c'est React Router qui gère (fiche detail) — ne rien faire
     };
     window.addEventListener("popstate", handlePopState);
 
