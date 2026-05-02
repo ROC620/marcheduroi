@@ -8585,17 +8585,27 @@ function AnnonceDetail() {
   );
 }
 
+// Layout persistant — AppContent reste monté en permanence
+function PersistentLayout() {
+  const location = useLocation();
+  const isDetail = /^\/(annonce|boutique|atelier|resto|beaute)\//.test(location.pathname);
+  return (
+    <>
+      {/* AppContent toujours monté — ne se démonte jamais */}
+      <div style={{ display: isDetail ? "none" : "block" }}>
+        <AppContent/>
+      </div>
+      {/* AnnonceDetail affiché par-dessus quand on est sur une fiche */}
+      {isDetail && <AnnonceDetail/>}
+    </>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AppContent/>}/>
-        <Route path="/annonce/:id" element={<AnnonceDetail/>}/>
-        <Route path="/boutique/:id" element={<AnnonceDetail/>}/>
-        <Route path="/atelier/:id" element={<AnnonceDetail/>}/>
-        <Route path="/resto/:id" element={<AnnonceDetail/>}/>
-        <Route path="/beaute/:id" element={<AnnonceDetail/>}/>
-        <Route path="/reset-password" element={<AppContent/>}/>
+        <Route path="/*" element={<PersistentLayout/>}/>
       </Routes>
     </BrowserRouter>
   );
