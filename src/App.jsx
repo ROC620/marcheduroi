@@ -8398,6 +8398,8 @@ function AnnonceDetail() {
   const tableMap = { annonce:"posts", boutique:"boutiques", atelier:"ateliers", resto:"restos", beaute:"beaute" };
 
   useEffect(() => {
+    // Ignorer si id n'est pas encore défini (transition de route)
+    if (!id || id === "undefined") return;
     const load = async () => {
       setLoading(true);
       const table = tableMap[type];
