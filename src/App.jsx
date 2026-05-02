@@ -981,7 +981,6 @@ async function addLogoWatermark(photoUrl) {
 
 function AppContent() {
   const navigate = useNavigate();
-  const appLocation = useLocation();
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [postsLoaded, setPostsLoaded] = useState(false);
   const [ads, setAds] = useState([]);
@@ -2416,24 +2415,21 @@ const PHONE_EXAMPLE = {
   }, [view]);
 
   // Restaurer la vue et le scroll au retour depuis une fiche détail
-  // (appLocation déclaré en haut du composant avec useNavigate)
+  // Utilise un événement custom pour éviter tout conflit avec React Router
   useEffect(() => {
-    if (appLocation.state?.restoreView) {
-      const rv = appLocation.state.restoreView;
-      const sp = appLocation.state.scrollPos;
+    const handler = (e) => {
+      const { view: rv, scrollPos: sp } = e.detail;
       setViewState(rv);
       setModal(null);
       if (sp) {
-        // Attendre que React finisse le rendu avant de scroller
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            window.scrollTo({ top: parseInt(sp), behavior: "instant" });
-          });
-        });
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          window.scrollTo({ top: parseInt(sp), behavior: "instant" });
+        }));
       }
-      window.history.replaceState({ view: rv }, "", window.location.pathname);
-    }
-  }, [appLocation.state]);
+    };
+    window.addEventListener("mdr_restore_view", handler);
+    return () => window.removeEventListener("mdr_restore_view", handler);
+  }, []);
   // ─────────────────────────────────────────────────────────────────────────────
 
   // ─── FEDAPAY : Paiement avant publication ───────────────────────────────────
@@ -8458,8 +8454,9 @@ function AnnonceDetail() {
       <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100 }}>
         <div style={{ display:"flex",alignItems:"center",cursor:"pointer" }} onClick={()=>{
           const fromView = location.state?.fromView || sessionStorage.getItem("mdr_back_view") || "home";
-          const scrollPos = location.state?.scrollPos || sessionStorage.getItem("mdr_scroll_pos");
-          navigate("/", { state: { restoreView: fromView, scrollPos } });
+          const scrollPos = location.state?.scrollPos || parseInt(sessionStorage.getItem("mdr_scroll_pos")||"0");
+          navigate("/");
+          setTimeout(() => window.dispatchEvent(new CustomEvent("mdr_restore_view", { detail: { view: fromView, scrollPos } })), 60);
         }}>
           <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,width:"auto",objectFit:"contain" }}/>
         </div>
@@ -8469,8 +8466,9 @@ function AnnonceDetail() {
           </button>
           <button onClick={()=>{
             const fromView = location.state?.fromView || sessionStorage.getItem("mdr_back_view") || "home";
-            const scrollPos = location.state?.scrollPos || sessionStorage.getItem("mdr_scroll_pos");
-            navigate("/", { state: { restoreView: fromView, scrollPos } });
+            const scrollPos = location.state?.scrollPos || parseInt(sessionStorage.getItem("mdr_scroll_pos")||"0");
+            navigate("/");
+            setTimeout(() => window.dispatchEvent(new CustomEvent("mdr_restore_view", { detail: { view: fromView, scrollPos } })), 60);
           }} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             ← Retour
           </button>
@@ -8576,8 +8574,9 @@ function AnnonceDetail() {
 
         <button onClick={()=>{
             const fromView = location.state?.fromView || sessionStorage.getItem("mdr_back_view") || "home";
-            const scrollPos = location.state?.scrollPos || sessionStorage.getItem("mdr_scroll_pos");
-            navigate("/", { state: { restoreView: fromView, scrollPos } });
+            const scrollPos = location.state?.scrollPos || parseInt(sessionStorage.getItem("mdr_scroll_pos")||"0");
+            navigate("/");
+            setTimeout(() => window.dispatchEvent(new CustomEvent("mdr_restore_view", { detail: { view: fromView, scrollPos } })), 60);
           }} style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
           ← Retour
         </button>
