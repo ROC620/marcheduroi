@@ -981,6 +981,7 @@ async function addLogoWatermark(photoUrl) {
 
 function AppContent() {
   const navigate = useNavigate();
+  const appLocation = useLocation();
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [postsLoaded, setPostsLoaded] = useState(false);
   const [ads, setAds] = useState([]);
@@ -2415,15 +2416,21 @@ const PHONE_EXAMPLE = {
   }, [view]);
 
   // Restaurer la vue et le scroll au retour depuis une fiche détail
-  const appLocation = useLocation();
+  // (appLocation déclaré en haut du composant avec useNavigate)
   useEffect(() => {
     if (appLocation.state?.restoreView) {
       const rv = appLocation.state.restoreView;
       const sp = appLocation.state.scrollPos;
       setViewState(rv);
       setModal(null);
-      if (sp) setTimeout(() => window.scrollTo({ top: parseInt(sp), behavior: "instant" }), 80);
-      // Nettoyer le state pour éviter de relancer à chaque render
+      if (sp) {
+        // Attendre que React finisse le rendu avant de scroller
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            window.scrollTo({ top: parseInt(sp), behavior: "instant" });
+          });
+        });
+      }
       window.history.replaceState({ view: rv }, "", window.location.pathname);
     }
   }, [appLocation.state]);
