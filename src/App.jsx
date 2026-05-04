@@ -73,6 +73,20 @@ const getPhonePlaceholder = () => {
   return PHONE_PLACEHOLDERS[country] || (PHONE_CODES[country] ? PHONE_CODES[country] + " votre numéro" : "+indicatif votre numéro");
 };
 
+// Récupère le thème depuis localStorage pour les composants hors AppContent
+const getThemeFromStorage = () => {
+  const id = localStorage.getItem("mf_theme") || "dark";
+  const themes = {
+    dark:   { bg:"#0D0F1A", card:"#1A1D30", text:"#E8E8F0", sub:"#9A9AB0", border:"#2A2D45" },
+    light:  { bg:"#F5F5FA", card:"#FFFFFF", text:"#1A1D30", sub:"#6B7280", border:"#E5E7EB" },
+    ocean:  { bg:"#0A1628", card:"#112240", text:"#E6F1FF", sub:"#8892B0", border:"#1E3A5F" },
+    forest: { bg:"#0D1F14", card:"#1A3122", text:"#E8F5E9", sub:"#81C784", border:"#2E7D32" },
+    sunset: { bg:"#1A0F0A", card:"#2D1B10", text:"#FFF3E0", sub:"#FFAB76", border:"#5D2E0C" },
+    purple: { bg:"#0F0A1A", card:"#1E1432", text:"#EDE7F6", sub:"#B39DDB", border:"#4A148C" },
+  };
+  return themes[id] || themes.dark;
+};
+
 const INITIAL_POSTS = [
   // IMMOBILIER
   {
@@ -8691,14 +8705,14 @@ function AdminVitrineWeb({ theme, notify }) {
 
   // ---- Formulaire de création ----
   const emptyForm = {
-    slug:"", name:"", type:"École", slogan:"", description:"",
+    slug:"", name:"", type:"Restaurant", slogan:"", description:"",
     logo_url:"", cover_url:"", photos:"", video:"",
     address:"", ville:"", quartier:"", von:"",
     gps_lat:"", gps_lng:"",
     phone:"", phone2:"", whatsapp:"", email:"",
     website:"", facebook:"", instagram:"",
     hours:"", languages:"", services:"",
-    verified: false, active: true,
+    verified: false, active: true, free_activation: false,
   };
   const [form,    setForm]    = React.useState(emptyForm);
   const [saving,  setSaving]  = React.useState(false);
@@ -8814,7 +8828,9 @@ function AdminVitrineWeb({ theme, notify }) {
       services:    form.services || null,
       news:        [],
       verified:    form.verified,
-      active:      form.active,
+      active:      form.free_activation ? true : form.active,
+      paid_at:     form.free_activation ? new Date().toISOString() : null,
+      expires_at:  form.free_activation ? new Date(Date.now() + 365*24*60*60*1000).toISOString() : null,
     };
 
     const { data, error } = await supabase.from("structures").insert(payload).select().single();
@@ -8853,7 +8869,7 @@ function AdminVitrineWeb({ theme, notify }) {
     paddingBottom:8, borderBottom:`1px solid ${theme.border || "#2A2D45"}`,
   };
 
-  const TYPES = ["École","Clinique","Pharmacie","Cabinet médical","ONG","Association","Mairie","Paroisse / Église","Mosquée","Hôtel","Fondation","Cabinet d'avocats","Bureau d'études","Agence immobilière","Autre"];
+  const TYPES = ["Restaurant","Maquis / Buvette","Fast-food","Pâtisserie / Boulangerie","Bar / Lounge","École maternelle","École primaire","Collège","Lycée","Complexe scolaire","Université / Institut","Centre de formation","Crèche / Garderie","Clinique","Cabinet médical","Pharmacie","Cabinet dentaire","Cabinet ophtalmologique","Maternité","Centre de kinésithérapie","Laboratoire d'analyses","Hôtel","Auberge / Maison d'hôtes","Boutique / Magasin","Supermarché","Agence immobilière","Station-service","Garage / Mécanique","Salon de coiffure","Spa / Beauté","Pressing / Laverie","Imprimerie / Copie","Cabinet d'avocats","Notaire","Huissier","Bureau d'expertise comptable","Architecte","Bureau d'études","Agence de communication","Mairie","ONG","Association","Fondation","Paroisse / Église","Mosquée","Temple","Autre"];
 
   return (
     <div id="admin-vitrines" style={{ scrollMarginTop:80, marginBottom:32 }}>
@@ -9268,6 +9284,11 @@ function AdminVitrineWeb({ theme, notify }) {
           <p style={sectionTitleStyle}>⚙️ Options</p>
           <div style={{ display:"flex",gap:20,flexWrap:"wrap",marginTop:8 }}>
             <label style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer",color:theme.text||"#E8E8F0",fontSize:14 }}>
+              <input type="checkbox" checked={form.free_activation} onChange={e=>setForm(f=>({...f,free_activation:e.target.checked}))}
+                style={{ width:16,height:16,accentColor:"#FFD700" }}/>
+              ⚡ Activer sans paiement (vitrine offerte / partenaire / démo)
+            </label>
+            <label style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer",color:theme.text||"#E8E8F0",fontSize:14 }}>
               <input type="checkbox" checked={form.verified} onChange={e=>setForm(f=>({...f,verified:e.target.checked}))}
                 style={{ width:16,height:16,accentColor:COLOR }}/>
               ✅ Marquer comme Vérifié EDENPORTAIL
@@ -9318,12 +9339,13 @@ function AdminVitrineWeb({ theme, notify }) {
 // -----------------------------------------------
 function VitrineRequest() {
   const navigate = useNavigate();
-  const COLOR = "#10B981";
+  const COLOR    = "#10B981";
+  const T        = getThemeFromStorage(); // Thème adaptatif
 
-  const TYPES = ["École","Clinique","Pharmacie","Cabinet médical","ONG","Association","Mairie","Paroisse / Église","Mosquée","Hôtel","Fondation","Cabinet d'avocats","Bureau d'études","Agence immobilière","Autre"];
+  const TYPES = ["Restaurant","Maquis / Buvette","Fast-food","Pâtisserie / Boulangerie","Bar / Lounge","École maternelle","École primaire","Collège","Lycée","Complexe scolaire","Université / Institut","Centre de formation","Crèche / Garderie","Clinique","Cabinet médical","Pharmacie","Cabinet dentaire","Cabinet ophtalmologique","Maternité","Centre de kinésithérapie","Laboratoire d'analyses","Hôtel","Auberge / Maison d'hôtes","Boutique / Magasin","Supermarché","Agence immobilière","Station-service","Garage / Mécanique","Salon de coiffure","Spa / Beauté","Pressing / Laverie","Imprimerie / Copie","Cabinet d'avocats","Notaire","Huissier","Bureau d'expertise comptable","Architecte","Bureau d'études","Agence de communication","Mairie","ONG","Association","Fondation","Paroisse / Église","Mosquée","Temple","Autre"];
 
   const [form, setForm] = React.useState({
-    name:"", type:"École", slogan:"", description:"",
+    name:"", type:"Restaurant", slogan:"", description:"",
     ville:"", quartier:"", von:"", address:"",
     gps_lat:"", gps_lng:"",
     phone:getPhonePrefix(), whatsapp:getPhonePrefix(), email:"", facebook:"",
@@ -9336,11 +9358,16 @@ function VitrineRequest() {
   const [slug,    setSlug]    = React.useState("");
   const [authChecked, setAuthChecked] = React.useState(false);
   const [isLoggedIn,  setIsLoggedIn]  = React.useState(false);
+  const [isAdmin,     setIsAdmin]     = React.useState(false);
 
-  // Vérifier si l'utilisateur est connecté
+  // Vérifier si l'utilisateur est connecté et s'il est admin
   React.useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setIsLoggedIn(!!session);
+      if (session) {
+        const { data } = await supabase.from("profiles").select("role").eq("id", session.user.id).single();
+        setIsAdmin(data?.role === "admin");
+      }
       setAuthChecked(true);
     });
   }, []);
@@ -9414,6 +9441,8 @@ function VitrineRequest() {
     if (!form.name.trim()) { setError("Le nom de la structure est obligatoire."); return; }
     if (!form.phone.trim()) { setError("Le numéro de téléphone est obligatoire."); return; }
     setError(null);
+    // Admin → activation directe sans paiement
+    if (isAdmin) { handlePaymentSuccess(); return; }
     try {
       await loadFedaPay();
       const FP = window.FedaPay;
@@ -9422,7 +9451,7 @@ function VitrineRequest() {
         transaction: { amount: 15000, description: `VitrineWeb — Création de vitrine : ${form.name}` },
         customer:    { email: form.email || "client@marcheduroi.com" },
         onComplete(resp, reason) {
-          const ok = reason === FP.TRANSACTION_APPROVED || reason === "transaction_approved" || reason === "approved" || reason === "checkout_complete";
+          const ok = reason === FP.TRANSACTION_APPROVED || reason === "transaction_approved" || reason === "approved";
           if (ok) handlePaymentSuccess();
           else setError("Paiement annulé. Réessayez quand vous voulez.");
         }
@@ -9446,40 +9475,40 @@ function VitrineRequest() {
   };
 
   const inp = {
-    width:"100%", background:"#1A1D30", border:"1px solid #2A2D45", borderRadius:10,
-    padding:"12px 14px", color:"#E8E8F0", fontSize:14, fontFamily:"Sora,sans-serif",
+    width:"100%", background:T.card, border:`1px solid ${T.border}`, borderRadius:10,
+    padding:"12px 14px", color:T.text, fontSize:14, fontFamily:"Sora,sans-serif",
     outline:"none", boxSizing:"border-box",
   };
-  const lbl = { display:"block", color:"#9A9AB0", fontSize:12, fontWeight:600, marginBottom:5, marginTop:16 };
-  const sec = { fontWeight:700, color:"#E8E8F0", fontSize:15, margin:"28px 0 4px", paddingBottom:10, borderBottom:"1px solid #2A2D45" };
+  const lbl = { display:"block", color:T.sub, fontSize:12, fontWeight:600, marginBottom:5, marginTop:16 };
+  const sec = { fontWeight:700, color:T.text, fontSize:15, margin:"28px 0 4px", paddingBottom:10, borderBottom:`1px solid ${T.border}` };
 
   if (!authChecked) return (
-    <div style={{ display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0D0F1A",fontFamily:"Sora,sans-serif" }}>
+    <div style={{ display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:T.bg,fontFamily:"Sora,sans-serif" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ width:40,height:40,border:"4px solid #2A2D45",borderTop:"4px solid #10B981",borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 12px" }}/>
+        <div style={{ width:40,height:40,border:`4px solid ${T.border}`,borderTop:"4px solid #10B981",borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 12px" }}/>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-        <p style={{ color:"#9A9AB0",fontSize:14 }}>Vérification…</p>
+        <p style={{ color:T.sub,fontSize:14 }}>Vérification…</p>
       </div>
     </div>
   );
 
   if (!isLoggedIn) return (
-    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",display:"flex",alignItems:"center",justifyContent:"center",padding:24 }}>
+    <div style={{ background:T.bg,minHeight:"100vh",fontFamily:"Sora,sans-serif",display:"flex",alignItems:"center",justifyContent:"center",padding:24 }}>
       <div style={{ maxWidth:420,textAlign:"center" }}>
         <div style={{ fontSize:56,marginBottom:16 }}>🔐</div>
-        <h2 style={{ fontSize:22,fontWeight:800,color:"#E8E8F0",marginBottom:12 }}>Connexion requise</h2>
-        <p style={{ color:"#9A9AB0",lineHeight:1.75,marginBottom:28,fontSize:15 }}>
+        <h2 style={{ fontSize:22,fontWeight:800,color:T.text,marginBottom:12 }}>Connexion requise</h2>
+        <p style={{ color:T.sub,lineHeight:1.75,marginBottom:28,fontSize:15 }}>
           Vous devez être inscrit et connecté à MarchéduRoi pour créer une VitrineWeb.
         </p>
         <div style={{ display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap" }}>
           <button onClick={()=>navigate("/")} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
             Se connecter
           </button>
-          <button onClick={()=>navigate("/")} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+          <button onClick={()=>navigate("/")} style={{ background:"transparent",border:`1px solid ${T.border}`,color:T.sub,padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
             ← Retour
           </button>
         </div>
-        <p style={{ color:"#9A9AB0",fontSize:12,marginTop:20 }}>
+        <p style={{ color:T.sub,fontSize:12,marginTop:20 }}>
           Pas encore de compte ? L'inscription est <strong style={{ color:"#10B981" }}>gratuite</strong> sur MarchéduRoi.
         </p>
       </div>
@@ -9487,16 +9516,16 @@ function VitrineRequest() {
   );
 
   if (done) return (
-    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",display:"flex",alignItems:"center",justifyContent:"center",padding:24 }}>
+    <div style={{ background:T.bg,minHeight:"100vh",fontFamily:"Sora,sans-serif",display:"flex",alignItems:"center",justifyContent:"center",padding:24 }}>
       <div style={{ maxWidth:480,textAlign:"center" }}>
         <div style={{ fontSize:64,marginBottom:20 }}>🎉</div>
-        <h1 style={{ fontSize:26,fontWeight:800,color:"#E8E8F0",marginBottom:12 }}>Demande enregistrée !</h1>
+        <h1 style={{ fontSize:26,fontWeight:800,color:T.text,marginBottom:12 }}>Demande enregistrée !</h1>
         <div style={{ background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:16,padding:24,marginBottom:28 }}>
           <p style={{ color:COLOR,fontWeight:700,fontSize:16,marginBottom:8 }}>✅ Paiement confirmé</p>
           <p style={{ color:"#B8B8CC",lineHeight:1.8,fontSize:15 }}>
-            Votre vitrine <strong style={{ color:"#E8E8F0" }}>{form.name}</strong> sera visible sur MarchéduRoi en moins de <strong style={{ color:COLOR }}>3 heures</strong> après validation par notre équipe.
+            Votre vitrine <strong style={{ color:T.text }}>{form.name}</strong> sera visible sur MarchéduRoi en moins de <strong style={{ color:COLOR }}>3 heures</strong> après validation par notre équipe.
           </p>
-          <p style={{ color:"#9A9AB0",fontSize:13,marginTop:12 }}>
+          <p style={{ color:T.sub,fontSize:13,marginTop:12 }}>
             Vous recevrez un message WhatsApp avec le lien de votre vitrine dès qu'elle sera en ligne.
           </p>
         </div>
@@ -9508,14 +9537,14 @@ function VitrineRequest() {
   );
 
   return (
-    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",color:"#E8E8F0" }}>
+    <div style={{ background:T.bg,minHeight:"100vh",fontFamily:"Sora,sans-serif",color:T.text }}>
 
       {/* Navbar */}
       <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(8px)" }}>
         <div style={{ cursor:"pointer" }} onClick={()=>navigate("/")}>
           <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,objectFit:"contain" }}/>
         </div>
-        <button onClick={()=>navigate("/")} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+        <button onClick={()=>navigate("/")} style={{ background:"transparent",border:`1px solid ${T.border}`,color:T.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
           ← Retour
         </button>
       </div>
@@ -9526,7 +9555,7 @@ function VitrineRequest() {
         <div style={{ background:"rgba(255,140,0,0.08)",border:"1px solid rgba(255,140,0,0.25)",borderRadius:14,padding:16,marginBottom:28,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
           <div>
             <p style={{ fontWeight:700,color:"#FF8C00",margin:"0 0 4px",fontSize:14 }}>👀 Vous voulez voir à quoi ressemble une vitrine ?</p>
-            <p style={{ color:"#9A9AB0",fontSize:13,margin:0 }}>Consultez l'exemple de démonstration avant de vous lancer.</p>
+            <p style={{ color:T.sub,fontSize:13,margin:0 }}>Consultez l'exemple de démonstration avant de vous lancer.</p>
           </div>
           <a href="/structure/restaurant-chez-tante-rosine-calavi" target="_blank" rel="noopener noreferrer"
             style={{ background:"rgba(255,140,0,0.15)",border:"1px solid rgba(255,140,0,0.4)",color:"#FF8C00",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",flexShrink:0,whiteSpace:"nowrap" }}>
@@ -9538,17 +9567,17 @@ function VitrineRequest() {
         <div style={{ textAlign:"center",marginBottom:36 }}>
           <div style={{ width:72,height:72,borderRadius:18,background:`linear-gradient(135deg,${COLOR},#059669)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,margin:"0 auto 16px" }}>🏛️</div>
           <h1 style={{ fontSize:26,fontWeight:800,marginBottom:8 }}>Créez votre VitrineWeb</h1>
-          <p style={{ color:"#9A9AB0",fontSize:15,lineHeight:1.7 }}>Donnez une présence numérique à votre structure sur MarchéduRoi.</p>
+          <p style={{ color:T.sub,fontSize:15,lineHeight:1.7 }}>Donnez une présence numérique à votre structure sur MarchéduRoi.</p>
 
           {/* Prix */}
           <div style={{ display:"inline-flex",gap:16,marginTop:16,flexWrap:"wrap",justifyContent:"center" }}>
             <div style={{ background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:12,padding:"10px 20px" }}>
               <p style={{ color:COLOR,fontWeight:800,fontSize:18,margin:0 }}>15 000 FCFA</p>
-              <p style={{ color:"#9A9AB0",fontSize:12,margin:"2px 0 0" }}>Création (unique)</p>
+              <p style={{ color:T.sub,fontSize:12,margin:"2px 0 0" }}>Création (unique)</p>
             </div>
             <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:12,padding:"10px 20px" }}>
               <p style={{ color:"#6C63FF",fontWeight:800,fontSize:18,margin:0 }}>18 000 FCFA/an</p>
-              <p style={{ color:"#9A9AB0",fontSize:12,margin:"2px 0 0" }}>Renouvellement annuel</p>
+              <p style={{ color:T.sub,fontSize:12,margin:"2px 0 0" }}>Renouvellement annuel</p>
             </div>
           </div>
         </div>
@@ -9557,7 +9586,7 @@ function VitrineRequest() {
         <p style={sec}>🏛️ Identité de votre structure</p>
         <label style={lbl}>Nom officiel *</label>
         <input style={inp} value={form.name} onChange={e=>handleName(e.target.value)} placeholder="École Sainte-Marie de Cotonou"/>
-        {slug && <p style={{ color:"#9A9AB0",fontSize:11,marginTop:4 }}>URL : <span style={{ color:COLOR }}>marcheduroi.com/structure/{slug}</span></p>}
+        {slug && <p style={{ color:T.sub,fontSize:11,marginTop:4 }}>URL : <span style={{ color:COLOR }}>marcheduroi.com/structure/{slug}</span></p>}
 
         <label style={lbl}>Type de structure *</label>
         <select style={{...inp,cursor:"pointer"}} value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value}))}>
@@ -9627,7 +9656,7 @@ function VitrineRequest() {
         <textarea style={{...inp,minHeight:70,resize:"vertical"}} value={form.services} onChange={e=>setForm(f=>({...f,services:e.target.value}))} placeholder="Consultations, urgences 24h/24, maternité…"/>
 
         {/* MÉDIAS */}
-        <p style={sec}>🖼️ Médias <span style={{ color:"#9A9AB0",fontSize:12,fontWeight:400 }}>(optionnel — modifiable après)</span></p>
+        <p style={sec}>🖼️ Médias <span style={{ color:T.sub,fontSize:12,fontWeight:400 }}>(optionnel — modifiable après)</span></p>
         <label style={lbl}>Logo (lien URL)</label>
         <input style={inp} value={form.logo_url} onChange={e=>setForm(f=>({...f,logo_url:e.target.value}))} placeholder="https://i.ibb.co/.../logo.png"/>
         <label style={lbl}>Photo de couverture (lien URL)</label>
@@ -9638,8 +9667,8 @@ function VitrineRequest() {
         <input style={inp} value={form.video} onChange={e=>setForm(f=>({...f,video:e.target.value}))} placeholder="https://www.youtube.com/watch?v=..."/>
 
         <div style={{ background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.15)",borderRadius:12,padding:14,marginTop:16 }}>
-          <p style={{ color:"#9A9AB0",fontSize:12,margin:0,lineHeight:1.7 }}>
-            💡 <strong style={{ color:"#E8E8F0" }}>Pour les médias :</strong> hébergez vos photos sur <strong style={{ color:COLOR }}>imgbb.com</strong> (gratuit) et copiez les liens ici. Vous pourrez les modifier à tout moment après activation.
+          <p style={{ color:T.sub,fontSize:12,margin:0,lineHeight:1.7 }}>
+            💡 <strong style={{ color:T.text }}>Pour les médias :</strong> hébergez vos photos sur <strong style={{ color:COLOR }}>imgbb.com</strong> (gratuit) et copiez les liens ici. Vous pourrez les modifier à tout moment après activation.
           </p>
         </div>
 
@@ -9651,26 +9680,26 @@ function VitrineRequest() {
         )}
 
         {/* Récapitulatif + paiement */}
-        <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:16,padding:24,marginTop:28 }}>
-          <p style={{ fontWeight:700,color:"#E8E8F0",marginBottom:14,fontSize:15 }}>📋 Récapitulatif du paiement</p>
+        <div style={{ background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:24,marginTop:28 }}>
+          <p style={{ fontWeight:700,color:T.text,marginBottom:14,fontSize:15 }}>📋 Récapitulatif du paiement</p>
           <div style={{ display:"flex",justifyContent:"space-between",marginBottom:8 }}>
-            <span style={{ color:"#9A9AB0" }}>Création de la vitrine</span>
+            <span style={{ color:T.sub }}>Création de la vitrine</span>
             <span style={{ fontWeight:700,color:COLOR }}>15 000 FCFA</span>
           </div>
           <div style={{ display:"flex",justifyContent:"space-between",marginBottom:16,paddingBottom:16,borderBottom:"1px solid #2A2D45" }}>
-            <span style={{ color:"#9A9AB0",fontSize:13 }}>Renouvellement (dans 12 mois)</span>
-            <span style={{ color:"#9A9AB0",fontSize:13 }}>18 000 FCFA/an</span>
+            <span style={{ color:T.sub,fontSize:13 }}>Renouvellement (dans 12 mois)</span>
+            <span style={{ color:T.sub,fontSize:13 }}>18 000 FCFA/an</span>
           </div>
           <div style={{ display:"flex",gap:8,flexWrap:"wrap",marginBottom:16 }}>
             {["MTN Money","Moov Money","Carte bancaire"].map(m=>(
-              <span key={m} style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",color:"#9A9AB0",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:600 }}>{m}</span>
+              <span key={m} style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",color:T.sub,padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:600 }}>{m}</span>
             ))}
           </div>
           <button onClick={launchPayment} disabled={paying}
-            style={{ width:"100%",padding:16,background:paying?"#2A2D45":`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:paying?"#9A9AB0":"#fff",borderRadius:12,fontWeight:800,fontSize:16,cursor:paying?"not-allowed":"pointer",transition:"all 0.2s" }}>
-            {paying ? "Enregistrement…" : "💳 Payer 15 000 FCFA et créer ma vitrine"}
+            style={{ width:"100%",padding:16,background:paying?T.border:`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:paying?T.sub:"#fff",borderRadius:12,fontWeight:800,fontSize:16,cursor:paying?"not-allowed":"pointer",transition:"all 0.2s" }}>
+            {paying ? "Enregistrement…" : isAdmin ? "⚡ Créer la vitrine (Admin — sans paiement)" : "💳 Payer 15 000 FCFA et créer ma vitrine"}
           </button>
-          <p style={{ textAlign:"center",color:"#9A9AB0",fontSize:11,marginTop:12,lineHeight:1.6 }}>
+          <p style={{ textAlign:"center",color:T.sub,fontSize:11,marginTop:12,lineHeight:1.6 }}>
             Paiement sécurisé · En payant vous acceptez les CGU de MarchéduRoi<br/>
             Votre vitrine sera visible en moins de 3h après validation
           </p>
@@ -9876,6 +9905,9 @@ function VitrinePayment({ structure, token, onDone }) {
 
 
 function VitrineEdit({ structure, token, onDone }) {
+  const T = getThemeFromStorage();
+  const COLOR = "#10B981";
+
   const [form, setForm] = React.useState({
     phone:    structure.phone    || "",
     phone2:   structure.phone2   || "",
@@ -9886,41 +9918,63 @@ function VitrineEdit({ structure, token, onDone }) {
     video:    structure.video    || "",
     photos:   (structure.photos  || []).join("\n"),
     services: structure.services || "",
-    news_title:   "",
-    news_content: "",
+    news_title:"", news_content:"", news_type:"Actualité",
   });
-  const [news,         setNews]         = React.useState(structure.news || []);
-  const [saving,       setSaving]       = React.useState(false);
-  const [saved,        setSaved]        = React.useState(false);
-  const [saveError,    setSaveError]    = React.useState(null);
-  const [tokenValid,   setTokenValid]   = React.useState(false);
-  const [checkingTok,  setCheckingTok]  = React.useState(true);
+
+  const [news,        setNews]        = React.useState(structure.news || []);
+  const [saving,      setSaving]      = React.useState(false);
+  const [saved,       setSaved]       = React.useState(false);
+  const [saveError,   setSaveError]   = React.useState(null);
+  const [tokenValid,  setTokenValid]  = React.useState(false);
+  const [checkingTok, setCheckingTok] = React.useState(true);
+  const defaultSection = new URLSearchParams(window.location.search).get("section") || "contacts";
+  const [openSection, setOpenSection] = React.useState(defaultSection);
+  const [editBlocked, setEditBlocked] = React.useState(false); // Bloqué après 1ère modif
+  const [payingEdit,  setPayingEdit]  = React.useState(false); // Paiement en cours
 
   React.useEffect(() => {
     if (!token || !structure) { setCheckingTok(false); return; }
     setTokenValid(String(structure.edit_token) === String(token));
+    // Vérifier si déjà modifié aujourd'hui
+    const today = new Date().toISOString().slice(0,10);
+    if (structure.last_edit_date === today) setEditBlocked(true);
     setCheckingTok(false);
   }, [token, structure]);
 
   const handleSave = async () => {
     setSaving(true); setSaveError(null);
     const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean);
+    const today = new Date().toISOString().slice(0,10);
     const { error } = await supabase.from("structures").update({
-      phone:      form.phone,
-      phone2:     form.phone2,
-      whatsapp:   form.whatsapp,
-      email:      form.email,
-      facebook:   form.facebook,
-      hours:      form.hours,
-      video:      form.video,
-      photos:     photosArray,
-      services:   form.services,
-      news,
-      updated_at: new Date().toISOString(),
+      phone: form.phone, phone2: form.phone2, whatsapp: form.whatsapp,
+      email: form.email, facebook: form.facebook, hours: form.hours,
+      video: form.video, photos: photosArray, services: form.services,
+      news, updated_at: new Date().toISOString(),
+      last_edit_date: today,
     }).eq("id", structure.id).eq("edit_token", token);
     if (error) setSaveError("Erreur lors de la sauvegarde. Réessayez.");
     else { setSaved(true); setTimeout(onDone, 1800); }
     setSaving(false);
+  };
+
+  // Paiement 200 FCFA pour modifier une 2ème fois
+  const handlePayEdit = async () => {
+    setPayingEdit(true);
+    try {
+      const loadFP = () => new Promise((res,rej)=>{ if(window.FedaPay){res();return;} const s=document.createElement("script"); s.src="https://cdn.fedapay.com/checkout.js?v=1.1.7"; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+      await loadFP();
+      window.FedaPay.init({
+        public_key: import.meta.env.VITE_FEDAPAY_PUBLIC_KEY || "pk_sandbox_VOTRE_CLE_ICI",
+        transaction: { amount: 200, description: `Modification supplémentaire — ${structure.name}` },
+        customer: { email: structure.email || "client@marcheduroi.com" },
+        onComplete(resp, reason) {
+          const ok = reason === window.FedaPay.TRANSACTION_APPROVED || reason === "transaction_approved" || reason === "approved";
+          if (ok) { setEditBlocked(false); }
+          else setSaveError("Paiement annulé.");
+        }
+      }).open();
+    } catch { setSaveError("Module de paiement non chargé."); }
+    setPayingEdit(false);
   };
 
   const addNews = () => {
@@ -9932,39 +9986,47 @@ function VitrineEdit({ structure, token, onDone }) {
       type:    form.news_type || "Actualité",
     };
     setNews(prev => [entry, ...prev]);
-    setForm(f => ({ ...f, news_title: "", news_content: "" }));
+    setForm(f => ({ ...f, news_title:"", news_content:"", news_type:"Actualité" }));
   };
 
   if (checkingTok) return (
-    <div style={{ display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0D0F1A",fontFamily:"Sora,sans-serif",color:"#9A9AB0" }}>
-      Vérification du lien…
-    </div>
+    <div style={{ display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:T.bg,fontFamily:"Sora,sans-serif",color:T.sub }}>Vérification…</div>
   );
 
   if (!tokenValid) return (
-    <div style={{ textAlign:"center",padding:"80px 24px",fontFamily:"Sora,sans-serif",background:"#0D0F1A",minHeight:"100vh",color:"#E8E8F0" }}>
+    <div style={{ textAlign:"center",padding:"80px 24px",fontFamily:"Sora,sans-serif",background:T.bg,minHeight:"100vh",color:T.text }}>
       <p style={{ fontSize:48,marginBottom:16 }}>🔒</p>
       <h2 style={{ fontSize:22,fontWeight:700,marginBottom:12 }}>Lien non valide</h2>
-      <p style={{ color:"#9A9AB0",marginBottom:24 }}>Ce lien de modification est incorrect ou a expiré.<br/>Contactez EDENPORTAIL pour obtenir un nouveau lien.</p>
+      <p style={{ color:T.sub }}>Contactez EDENPORTAIL pour obtenir un nouveau lien.</p>
     </div>
   );
 
-  const COLOR = "#10B981";
-  const inputStyle = {
-    width:"100%", background:"#1A1D30", border:"1px solid #2A2D45", borderRadius:10,
-    padding:"12px 14px", color:"#E8E8F0", fontSize:14, fontFamily:"Sora,sans-serif",
-    outline:"none", boxSizing:"border-box",
+  const inp = { width:"100%",background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:"12px 14px",color:T.text,fontSize:14,fontFamily:"Sora,sans-serif",outline:"none",boxSizing:"border-box" };
+  const lbl = { display:"block",color:T.sub,fontSize:12,fontWeight:600,marginBottom:5,marginTop:14 };
+
+  // Accordéon — rendu d'une section
+  const Section = ({ id, icon, title, children }) => {
+    const open = openSection === id;
+    return (
+      <div style={{ border:`1px solid ${open ? COLOR+"55" : T.border}`,borderRadius:14,marginBottom:10,overflow:"hidden",transition:"all 0.2s" }}>
+        <div onClick={()=>setOpenSection(open ? null : id)}
+          style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",cursor:"pointer",background:open?`rgba(16,185,129,0.06)`:T.card }}>
+          <span style={{ fontWeight:700,color:open?COLOR:T.text,fontSize:14 }}>{icon} {title}</span>
+          <span style={{ color:T.sub,fontSize:18,fontWeight:300 }}>{open ? "▲" : "▼"}</span>
+        </div>
+        {open && (
+          <div style={{ padding:"4px 16px 16px",background:T.bg }}>
+            {children}
+          </div>
+        )}
+      </div>
+    );
   };
-  const labelStyle = {
-    display:"block", color:"#9A9AB0", fontSize:13, fontWeight:600,
-    marginBottom:6, marginTop:16,
-  };
-  const sectionStyle = { fontWeight:700, color:"#E8E8F0", margin:"28px 0 4px", fontSize:15 };
 
   return (
-    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",color:"#E8E8F0" }}>
+    <div style={{ background:T.bg,minHeight:"100vh",fontFamily:"Sora,sans-serif",color:T.text }}>
       {/* Navbar */}
-      <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100 }}>
+      <div style={{ background:T.bg+"EE",borderBottom:`1px solid ${T.border}`,padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100 }}>
         <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,objectFit:"contain" }}/>
         <span style={{ color:COLOR,fontWeight:700,fontSize:14 }}>✏️ Modifier ma vitrine</span>
       </div>
@@ -9972,127 +10034,133 @@ function VitrineEdit({ structure, token, onDone }) {
       <div style={{ maxWidth:620,margin:"0 auto",padding:"24px 24px 48px" }}>
 
         {/* Bandeau info */}
-        <div style={{ background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:12,padding:16,marginBottom:24 }}>
+        <div style={{ background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:12,padding:16,marginBottom:20 }}>
           <p style={{ margin:0,fontWeight:700,color:COLOR }}>✏️ {structure.name}</p>
-          <p style={{ margin:"6px 0 0",color:"#9A9AB0",fontSize:13,lineHeight:1.6 }}>
-            Vous pouvez mettre à jour vos contacts, photos, horaires et actualités.<br/>
-            Pour modifier le nom ou l'adresse, contactez <strong style={{ color:"#E8E8F0" }}>EDENPORTAIL</strong>.
+          <p style={{ margin:"6px 0 0",color:T.sub,fontSize:13,lineHeight:1.6 }}>
+            Cliquez sur une section pour la modifier. Pour changer le nom ou l'adresse, contactez <strong style={{ color:T.text }}>EDENPORTAIL</strong>.
           </p>
         </div>
 
-        {/* CONTACTS */}
-        <p style={sectionStyle}>📞 Contacts</p>
-        <label style={labelStyle}>Téléphone principal</label>
-        <input style={inputStyle} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder={getPhonePlaceholder()}/>
-        <label style={labelStyle}>Téléphone secondaire (optionnel)</label>
-        <input style={inputStyle} value={form.phone2} onChange={e=>setForm(f=>({...f,phone2:e.target.value}))} placeholder={getPhonePlaceholder()}/>
-        <label style={labelStyle}>WhatsApp</label>
-        <input style={inputStyle} value={form.whatsapp} onChange={e=>setForm(f=>({...f,whatsapp:e.target.value}))} placeholder={getPhonePlaceholder()}/>
-        <label style={labelStyle}>Email</label>
-        <input style={inputStyle} type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} placeholder="contact@mastructure.bj"/>
-        <label style={labelStyle}>Facebook (URL ou nom de page)</label>
-        <input style={inputStyle} value={form.facebook} onChange={e=>setForm(f=>({...f,facebook:e.target.value}))} placeholder="https://facebook.com/mastructure"/>
-
-        {/* HORAIRES */}
-        <p style={sectionStyle}>🕐 Horaires d'ouverture</p>
-        <label style={labelStyle}>Horaires (texte libre, Entrée pour retour à la ligne)</label>
-        <textarea style={{...inputStyle,minHeight:90,resize:"vertical"}} value={form.hours}
-          onChange={e=>setForm(f=>({...f,hours:e.target.value}))}
-          placeholder={"Lun–Ven : 7h30–17h00\nSam : 8h00–12h00\nDim : Fermé"}/>
-
-        {/* PHOTOS */}
-        <p style={sectionStyle}>🖼️ Photos</p>
-        <label style={labelStyle}>Liens photos — un lien par ligne</label>
-        <textarea style={{...inputStyle,minHeight:130,resize:"vertical",fontFamily:"monospace",fontSize:12}}
-          value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))}
-          placeholder={"https://i.ibb.co/xyz/facade.jpg\nhttps://i.ibb.co/abc/salle-classe.jpg\nhttps://i.ibb.co/def/equipe.jpg"}/>
-        <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:10,padding:12,marginTop:8 }}>
-          <p style={{ margin:0,color:"#9A9AB0",fontSize:12,lineHeight:1.7 }}>
-            💡 <strong style={{ color:"#E8E8F0" }}>Comment héberger vos photos :</strong><br/>
-            1. Allez sur <strong style={{ color:COLOR }}>imgbb.com</strong> ou <strong style={{ color:COLOR }}>postimages.org</strong><br/>
-            2. Uploadez votre photo → copiez le <em>lien direct</em><br/>
-            3. Collez le lien ici<br/>
-            ⚠️ Ne supprimez jamais vos photos de ImgBB, sinon elles disparaissent de votre vitrine.
-          </p>
-        </div>
-
-        {/* VIDÉO */}
-        <p style={sectionStyle}>🎬 Vidéo de présentation</p>
-        <label style={labelStyle}>Lien YouTube</label>
-        <input style={inputStyle} value={form.video}
-          onChange={e=>setForm(f=>({...f,video:e.target.value}))}
-          placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX"/>
-
-        {/* SERVICES */}
-        <p style={sectionStyle}>✅ Services proposés</p>
-        <label style={labelStyle}>Décrivez vos services</label>
-        <textarea style={{...inputStyle,minHeight:80,resize:"vertical"}} value={form.services}
-          onChange={e=>setForm(f=>({...f,services:e.target.value}))}
-          placeholder="Consultations générales, pédiatrie, maternité, urgences 24h/24…"/>
-
-        {/* ACTUALITÉS */}
-        <p style={sectionStyle}>📰 Actualités</p>
-        <label style={labelStyle}>Titre de l'actualité</label>
-        <input style={inputStyle} value={form.news_title}
-          onChange={e=>setForm(f=>({...f,news_title:e.target.value}))}
-          placeholder="Menu du jour · Nouvelle recette · Promotion · Événement…"/>
-        <label style={labelStyle}>Type</label>
-        <select style={{...inputStyle,cursor:"pointer"}} value={form.news_type||"Actualité"}
-          onChange={e=>setForm(f=>({...f,news_type:e.target.value}))}>
-          {["Actualité","Promotion","Nouveauté","Événement","Offre d'emploi"].map(t=>(
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
-        <label style={labelStyle}>Contenu</label>
-        <textarea style={{...inputStyle,minHeight:70,resize:"vertical"}} value={form.news_content}
-          onChange={e=>setForm(f=>({...f,news_content:e.target.value}))}
-          placeholder="Les inscriptions sont ouvertes du 1er juin au 31 juillet…"/>
-        <button onClick={addNews} style={{ marginTop:10,background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.3)",color:COLOR,padding:"10px 20px",borderRadius:10,fontWeight:600,cursor:"pointer",fontSize:14 }}>
-          + Ajouter l'actualité à la liste
-        </button>
-
-        {/* Liste des actualités existantes */}
-        {news.length > 0 && (
-          <div style={{ marginTop:12,display:"flex",flexDirection:"column",gap:8 }}>
-            {news.map((n, i) => (
-              <div key={i} style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:10,padding:12,display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8 }}>
-                <div style={{ flex:1 }}>
-                  <p style={{ margin:0,fontWeight:700,fontSize:14 }}>{n.title}</p>
-                  <p style={{ margin:"2px 0 0",color:"#9A9AB0",fontSize:12 }}>{n.date}</p>
-                  {n.content && <p style={{ margin:"4px 0 0",color:"#9A9AB0",fontSize:13,lineHeight:1.5 }}>{n.content}</p>}
-                </div>
-                <button onClick={()=>setNews(prev=>prev.filter((_,j)=>j!==i))}
-                  style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"6px 12px",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600,flexShrink:0 }}>
-                  Supprimer
-                </button>
-              </div>
-            ))}
+        {/* Blocage 2ème modification */}
+        {editBlocked && (
+          <div style={{ background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:12,padding:16,marginBottom:20 }}>
+            <p style={{ margin:"0 0 8px",fontWeight:700,color:"#FFD700" }}>⚠️ Modification du jour déjà effectuée</p>
+            <p style={{ margin:"0 0 12px",color:T.sub,fontSize:13,lineHeight:1.6 }}>
+              Vous avez déjà modifié votre vitrine aujourd'hui. Une modification supplémentaire coûte <strong style={{ color:"#FFD700" }}>200 FCFA</strong>.
+            </p>
+            <button onClick={handlePayEdit} disabled={payingEdit}
+              style={{ background:"rgba(255,215,0,0.15)",border:"1px solid rgba(255,215,0,0.4)",color:"#FFD700",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,cursor:"pointer" }}>
+              {payingEdit ? "Chargement…" : "💳 Payer 200 FCFA pour modifier à nouveau"}
+            </button>
           </div>
         )}
 
-        {/* Messages d'état */}
+        {/* Sections accordéon */}
+        <Section id="contacts" icon="📞" title="Contacts">
+          <label style={lbl}>Téléphone principal</label>
+          <input style={inp} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="+229 0100000000" disabled={editBlocked}/>
+          <label style={lbl}>Téléphone secondaire</label>
+          <input style={inp} value={form.phone2} onChange={e=>setForm(f=>({...f,phone2:e.target.value}))} placeholder="+229 0100000000" disabled={editBlocked}/>
+          <label style={lbl}>WhatsApp</label>
+          <input style={inp} value={form.whatsapp} onChange={e=>setForm(f=>({...f,whatsapp:e.target.value}))} placeholder="+229 0100000000" disabled={editBlocked}/>
+          <label style={lbl}>Email</label>
+          <input style={inp} type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} placeholder="contact@mastructure.bj" disabled={editBlocked}/>
+          <label style={lbl}>Facebook</label>
+          <input style={inp} value={form.facebook} onChange={e=>setForm(f=>({...f,facebook:e.target.value}))} placeholder="https://facebook.com/mastructure" disabled={editBlocked}/>
+        </Section>
+
+        <Section id="horaires" icon="🕐" title="Horaires d'ouverture">
+          <label style={lbl}>Horaires (Entrée pour retour à la ligne)</label>
+          <textarea style={{...inp,minHeight:90,resize:"vertical"}} value={form.hours}
+            onChange={e=>setForm(f=>({...f,hours:e.target.value}))}
+            placeholder={"Lun–Ven : 7h30–17h00\nSam : 8h00–12h00\nDim : Fermé"} disabled={editBlocked}/>
+        </Section>
+
+        <Section id="services" icon="✅" title="Services proposés">
+          <textarea style={{...inp,minHeight:80,resize:"vertical"}} value={form.services}
+            onChange={e=>setForm(f=>({...f,services:e.target.value}))}
+            placeholder="Consultations générales, urgences 24h/24…" disabled={editBlocked}/>
+        </Section>
+
+        <Section id="photos" icon="🖼️" title="Photos">
+          <label style={lbl}>Un lien par ligne</label>
+          <textarea style={{...inp,minHeight:130,resize:"vertical",fontFamily:"monospace",fontSize:12}}
+            value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))}
+            placeholder={"https://i.ibb.co/xyz/facade.jpg\nhttps://i.ibb.co/abc/salle.jpg"} disabled={editBlocked}/>
+          <div style={{ background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:12,marginTop:8 }}>
+            <p style={{ margin:0,color:T.sub,fontSize:12,lineHeight:1.7 }}>
+              💡 Hébergez vos photos sur <strong style={{ color:COLOR }}>imgbb.com</strong> → copiez le lien direct.<br/>
+              ⚠️ Ne supprimez jamais vos photos de ImgBB.
+            </p>
+          </div>
+        </Section>
+
+        <Section id="video" icon="🎬" title="Vidéo YouTube">
+          <label style={lbl}>Lien YouTube</label>
+          <input style={inp} value={form.video}
+            onChange={e=>setForm(f=>({...f,video:e.target.value}))}
+            placeholder="https://www.youtube.com/watch?v=..." disabled={editBlocked}/>
+        </Section>
+
+        <Section id="news" icon="📰" title="Actualités & Promotions">
+          <label style={lbl}>Type</label>
+          <select style={{...inp,cursor:"pointer"}} value={form.news_type}
+            onChange={e=>setForm(f=>({...f,news_type:e.target.value}))} disabled={editBlocked}>
+            {["Actualité","Promotion","Nouveauté","Événement","Offre d'emploi"].map(t=>(
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          <label style={lbl}>Titre</label>
+          <input style={inp} value={form.news_title}
+            onChange={e=>setForm(f=>({...f,news_title:e.target.value}))}
+            placeholder="Menu du jour · Nouvelle recette · Promotion…" disabled={editBlocked}/>
+          <label style={lbl}>Contenu</label>
+          <textarea style={{...inp,minHeight:70,resize:"vertical"}} value={form.news_content}
+            onChange={e=>setForm(f=>({...f,news_content:e.target.value}))}
+            placeholder="Détails de l'actualité…" disabled={editBlocked}/>
+          <button onClick={addNews} disabled={editBlocked}
+            style={{ marginTop:10,background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.3)",color:COLOR,padding:"10px 20px",borderRadius:10,fontWeight:600,cursor:editBlocked?"not-allowed":"pointer",fontSize:14 }}>
+            + Ajouter
+          </button>
+
+          {news.length > 0 && (
+            <div style={{ marginTop:12,display:"flex",flexDirection:"column",gap:8 }}>
+              {news.map((n,i) => (
+                <div key={i} style={{ background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:12,display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8 }}>
+                  <div style={{ flex:1 }}>
+                    <p style={{ margin:0,fontWeight:700,fontSize:14,color:T.text }}>{n.title}</p>
+                    <p style={{ margin:"2px 0 0",color:T.sub,fontSize:12 }}>{n.type} · {n.date}</p>
+                    {n.content && <p style={{ margin:"4px 0 0",color:T.sub,fontSize:13,lineHeight:1.5 }}>{n.content}</p>}
+                  </div>
+                  <button onClick={()=>setNews(prev=>prev.filter((_,j)=>j!==i))} disabled={editBlocked}
+                    style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"6px 12px",borderRadius:8,cursor:editBlocked?"not-allowed":"pointer",fontSize:12,fontWeight:600,flexShrink:0 }}>
+                    Supprimer
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </Section>
+
         {saveError && (
-          <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:10,padding:14,marginTop:20 }}>
+          <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:10,padding:14,marginTop:16 }}>
             <p style={{ margin:0,color:"#FF4757",fontWeight:600 }}>❌ {saveError}</p>
           </div>
         )}
         {saved && (
-          <div style={{ background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:10,padding:14,marginTop:20 }}>
-            <p style={{ margin:0,color:COLOR,fontWeight:600 }}>✅ Vitrine mise à jour avec succès ! Redirection en cours…</p>
+          <div style={{ background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:10,padding:14,marginTop:16 }}>
+            <p style={{ margin:0,color:COLOR,fontWeight:600 }}>✅ Vitrine mise à jour ! Redirection…</p>
           </div>
         )}
 
-        {/* Bouton enregistrer */}
-        <button onClick={handleSave} disabled={saving}
-          style={{ width:"100%",marginTop:28,padding:16,background:saving?"#1A1D30":"linear-gradient(135deg,#10B981,#059669)",border:saving?"1px solid #2A2D45":"none",color:saving?"#9A9AB0":"#fff",borderRadius:12,fontWeight:700,fontSize:16,cursor:saving?"not-allowed":"pointer",transition:"all 0.2s" }}>
-          {saving ? "Enregistrement en cours…" : "💾 Enregistrer les modifications"}
+        <button onClick={handleSave} disabled={saving || editBlocked}
+          style={{ width:"100%",marginTop:24,padding:16,background:(saving||editBlocked)?"#1A1D30":`linear-gradient(135deg,${COLOR},#059669)`,border:(saving||editBlocked)?`1px solid ${T.border}`:"none",color:(saving||editBlocked)?T.sub:"#fff",borderRadius:12,fontWeight:700,fontSize:16,cursor:(saving||editBlocked)?"not-allowed":"pointer" }}>
+          {saving ? "Enregistrement…" : editBlocked ? "Modification du jour déjà utilisée" : "💾 Enregistrer les modifications"}
         </button>
       </div>
     </div>
   );
 }
-
-
 // -----------------------------------------------
 // VitrineDetail — Page publique d'une structure
 // Route : /structure/:slug
@@ -10393,6 +10461,18 @@ function VitrineDetail() {
             </div>
           </div>
         )}
+
+        {/* ---- Bouton Ajouter une actualité ---- */}
+        <div style={{ background:"rgba(255,140,0,0.07)",border:"1px solid rgba(255,140,0,0.25)",borderRadius:14,padding:16,marginBottom:20,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
+          <div>
+            <p style={{ fontWeight:700,color:"#FF8C00",margin:"0 0 4px",fontSize:14 }}>📢 Vous gérez cette structure ?</p>
+            <p style={{ color:"#9A9AB0",fontSize:13,margin:0 }}>Ajoutez une promotion, un menu du jour, une actualité…</p>
+          </div>
+          <a href={`/structure/${structure.slug}/modifier?token=&section=news`}
+            style={{ background:"rgba(255,140,0,0.15)",border:"1px solid rgba(255,140,0,0.4)",color:"#FF8C00",padding:"10px 18px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",flexShrink:0,whiteSpace:"nowrap" }}>
+            + Ajouter une actualité
+          </a>
+        </div>
 
         {/* ---- Partage ---- */}
         <div style={{ display:"flex",gap:10,marginBottom:24,flexWrap:"wrap" }}>
