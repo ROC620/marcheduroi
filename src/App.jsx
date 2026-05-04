@@ -16,6 +16,63 @@ import {
   COUNTRIES_FLAGS
 } from "./constants";
 
+// Indicatifs téléphoniques par pays — utilisé dans tous les formulaires
+const PHONE_CODES = {
+  "BJ":"+229","TG":"+228","CI":"+225","SN":"+221","ML":"+223",
+  "BF":"+226","NE":"+227","GN":"+224","NG":"+234","CM":"+237",
+  "CG":"+242","CD":"+243","GA":"+241","MG":"+261","RW":"+250",
+  "BI":"+257","TD":"+235","MR":"+222","FR":"+33","BE":"+32",
+  "CH":"+41","CA":"+1","US":"+1","GB":"+44","DE":"+49",
+  "MA":"+212","DZ":"+213","TN":"+216","EG":"+20","GH":"+233",
+};
+
+// Exemples de numéros complets par pays (indicatif + chiffres locaux)
+const PHONE_PLACEHOLDERS = {
+  "BJ": "+229 0100000000",    // 10 chiffres
+  "TG": "+228 90000000",      // 8 chiffres
+  "CI": "+225 0100000000",    // 10 chiffres
+  "SN": "+221 700000000",     // 9 chiffres
+  "ML": "+223 60000000",      // 8 chiffres
+  "BF": "+226 60000000",      // 8 chiffres
+  "NE": "+227 90000000",      // 8 chiffres
+  "GN": "+224 600000000",     // 9 chiffres
+  "NG": "+234 8000000000",    // 10 chiffres
+  "CM": "+237 600000000",     // 9 chiffres
+  "CG": "+242 060000000",     // 9 chiffres
+  "CD": "+243 810000000",     // 9 chiffres
+  "GA": "+241 060000000",     // 9 chiffres
+  "GH": "+233 200000000",     // 9 chiffres
+  "MG": "+261 320000000",     // 9 chiffres
+  "RW": "+250 780000000",     // 9 chiffres
+  "BI": "+257 79000000",      // 8 chiffres
+  "TD": "+235 60000000",      // 8 chiffres
+  "MR": "+222 20000000",      // 8 chiffres
+  "FR": "+33 600000000",      // 9 chiffres
+  "BE": "+32 470000000",      // 9 chiffres
+  "CH": "+41 760000000",      // 9 chiffres
+  "CA": "+1 5140000000",      // 10 chiffres
+  "US": "+1 2120000000",      // 10 chiffres
+  "GB": "+44 7000000000",     // 10 chiffres
+  "DE": "+49 1500000000",     // 10 chiffres
+  "MA": "+212 600000000",     // 9 chiffres
+  "DZ": "+213 550000000",     // 9 chiffres
+  "TN": "+216 20000000",      // 8 chiffres
+  "EG": "+20 1000000000",     // 10 chiffres
+};
+
+// Récupère l'indicatif enregistré dans localStorage (rempli par AppContent au démarrage)
+const getPhonePrefix = () => {
+  const country = localStorage.getItem("mdr_country") || "BJ";
+  return PHONE_CODES[country] || "+";
+};
+
+// Récupère le placeholder complet selon le pays
+// Pour les pays hors liste → juste l'indicatif (liberté à l'utilisateur)
+const getPhonePlaceholder = () => {
+  const country = localStorage.getItem("mdr_country") || "BJ";
+  return PHONE_PLACEHOLDERS[country] || (PHONE_CODES[country] ? PHONE_CODES[country] + " votre numéro" : "+indicatif votre numéro");
+};
+
 const INITIAL_POSTS = [
   // IMMOBILIER
   {
@@ -1028,7 +1085,7 @@ function AppContent() {
     setViewState(newView);
     window.scrollTo(0, 0);
   };
-  const [shopForm, setShopForm] = useState({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"",lat:"",lng:"" });
+  const [shopForm, setShopForm] = useState({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"" });
   const [immoForm, setImmoForm] = useState({ sousType:"Maison", transaction:"Vente", superficie:"", pieces:"", titre:"", ville:"", quartier:"", von:"", eau:"Oui", electricite:"Oui", etat:"Bon état", recasee:"", autres:"" });
   const [shopPhotos, setShopPhotos] = useState([]);
   const [shopVideo, setShopVideo] = useState(null);
@@ -1319,7 +1376,7 @@ function AppContent() {
       return updated;
     });
   };
-  const [reportOtp, setReportOtp] = useState({ phone:"", code:"", generated:"", verified:false, postData:null });
+  const [reportOtp, setReportOtp] = useState({ phone:getPhonePrefix(), code:"", generated:"", verified:false, postData:null });
   const [cancelableReports, setCancelableReports] = useState({});
 
   const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
@@ -1602,7 +1659,7 @@ function AppContent() {
     setModifHistory(updated);
     localStorage.setItem("mf_modifs", JSON.stringify(updated));
   };
-  const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:"",lat:"",lng:"" });
+  const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"" });
   const [agroForm, setAgroForm] = useState({ sousCategorie:"", quantite:"", unite:"sac de 50 kg", prixUnitaire:"", qualite:"Standard / Grade B", disponibilite:"Toute l'année", lieuEnlevement:"", saisonRecolte:"" });
   const [postPhotos, setPostPhotos] = useState([]);
   const [postVideo, setPostVideo] = useState("");
@@ -2535,8 +2592,9 @@ const PHONE_EXAMPLE = {
         const match = text.match(/loc=([A-Z]{2})/);
         const code = match ? match[1] : "BJ";
         setDetectedCountry(code);
+        localStorage.setItem("mdr_country", code);
       })
-      .catch(() => setDetectedCountry("BJ"));
+      .catch(() => { setDetectedCountry("BJ"); localStorage.setItem("mdr_country","BJ"); });
   }, []);
 
   // Convertir un montant XOF vers la devise locale
@@ -2783,7 +2841,7 @@ const PHONE_EXAMPLE = {
     if (error) { console.error("Supabase error:", error); notify("Erreur de sauvegarde","error"); return; }
     setPosts(p=>[newPost,...p]);
     setModal(null);
-    setPostForm({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:"",lat:"",lng:"" });
+    setPostForm({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"" });
     setAgroForm({ sousCategorie:"", quantite:"", unite:"sac de 50 kg", prixUnitaire:"", qualite:"Standard / Grade B", disponibilite:"Toute l'année", lieuEnlevement:"", saisonRecolte:"" });
     setPostPhotos([]); setPostVideo(""); setVehicleForm({}); setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" }); setMonths(1); setSelectedTarif(0);
     notify(isAdmin ? "✅ Annonce publiée !" : expiresAt ? `✅ Annonce publiée jusqu'au ${expiresAt} !` : "✅ Annonce publiée !");
@@ -2887,7 +2945,7 @@ const PHONE_EXAMPLE = {
     else if (tableName==="restos") setRestos(r=>r.map(x=>x.id===id?updated:x));
     else if (tableName==="beaute") setBeaute(b=>b.map(x=>x.id===id?updated:x));
     setModal(null);
-    setShopForm({name:"",type:"",sousType:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
+    setShopForm({name:"",type:"",sousType:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix()});
     setShopPhotos([]); setShopVideo(null);
     notify("✅ Modification appliquée !");
   };
@@ -2908,7 +2966,7 @@ const PHONE_EXAMPLE = {
     if (error) { notify("Erreur : "+error.message,"error"); return; }
     setRestos(r=>r.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
     setModal(null);
-    setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
+    setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix()});
     setShopPhotos([]); setShopVideo(null);
     notify("✅ Modification appliquée !");
   };
@@ -2929,7 +2987,7 @@ const PHONE_EXAMPLE = {
     if (error) { notify("Erreur : "+error.message,"error"); return; }
     setBeaute(b=>b.map(x=>x.id===id?{...x,...shopForm,photos:shopPhotos,video:shopVideo}:x));
     setModal(null);
-    setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""});
+    setShopForm({name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix()});
     setShopPhotos([]); setShopVideo(null);
     notify("✅ Modification appliquée !");
   };
@@ -3035,7 +3093,7 @@ const PHONE_EXAMPLE = {
     if (error) { console.error(error); notify("Erreur de sauvegarde","error"); return; }
     setBeaute(b=>[newBeaute,...b]);
     setModal(null);
-    setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"" });
+    setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix() });
     setShopPhotos([]); setShopVideo(null); setMonths(1);
     notify("Salon publié !");
   };
@@ -3071,7 +3129,7 @@ const PHONE_EXAMPLE = {
     if (error) { console.error("Supabase error:", error); notify("Erreur de sauvegarde","error"); return; }
     setRestos(r=>[newResto,...r]);
     setModal(null);
-    setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"" });
+    setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix() });
     setShopPhotos([]); setShopVideo(null); setMonths(1);
     notify("Restaurant/Bar publié !");
   };
@@ -3109,7 +3167,7 @@ const PHONE_EXAMPLE = {
     if (shopMode==="boutique") setBoutiques(b=>[newShop,...b]);
     else setAteliers(a=>[newShop,...a]);
     setModal(null);
-    setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:"" });
+    setShopForm({ name:"",type:"",description:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix() });
     setShopPhotos([]); setShopVideo(null); setMonths(1);
     notify(shopMode==="boutique" ? "Boutique publiée !" : "Atelier publié !");
   };
@@ -4156,19 +4214,19 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                       {/* Options */}
                       {[
                         { icon:"📋", label:"Annonce classique", badge:"Gratuit", badgeColor:"#43C6AC", badgeBg:"rgba(67,198,172,0.15)",
-                          action:()=>{ setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:""}); setPostPhotos([]); setVehicleForm({}); setImmoForm({sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:""}); setMonths(1); setModal({type:"add"}); setShowPublishMenu(false); }
+                          action:()=>{ setPostForm({title:"",category:"Autre",description:"",price:"",contact:"",phone:getPhonePrefix()}); setPostPhotos([]); setVehicleForm({}); setImmoForm({sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:""}); setMonths(1); setModal({type:"add"}); setShowPublishMenu(false); }
                         },
                         { icon:"🛍️", label:"Boutique", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
-                          action:()=>{ setShopMode("boutique"); setShopForm({name:"",type:"",sousType:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addshop"}); setShowPublishMenu(false); }
+                          action:()=>{ setShopMode("boutique"); setShopForm({name:"",type:"",sousType:"",description:"",services:"",phone:getPhonePrefix(),ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addshop"}); setShowPublishMenu(false); }
                         },
                         { icon:"🔧", label:"Atelier", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
-                          action:()=>{ setShopMode("atelier"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addshop"}); setShowPublishMenu(false); }
+                          action:()=>{ setShopMode("atelier"); setShopForm({name:"",type:"",description:"",services:"",phone:getPhonePrefix(),ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addshop"}); setShowPublishMenu(false); }
                         },
                         { icon:"🍽️", label:"Restaurant & Bar", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
-                          action:()=>{ setShopMode("restos"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addresto"}); setShowPublishMenu(false); }
+                          action:()=>{ setShopMode("restos"); setShopForm({name:"",type:"",description:"",services:"",phone:getPhonePrefix(),ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addresto"}); setShowPublishMenu(false); }
                         },
                         { icon:"💇", label:"Beauté & Bien-être", badge:"4j offerts", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.12)",
-                          action:()=>{ setShopMode("beaute"); setShopForm({name:"",type:"",description:"",services:"",phone:"",ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addbeaute"}); setShowPublishMenu(false); }
+                          action:()=>{ setShopMode("beaute"); setShopForm({name:"",type:"",description:"",services:"",phone:getPhonePrefix(),ville:"",quartier:"",latitude:null,longitude:null,horaires:"",tarifs:""}); setShopPhotos([]); setShopVideo(""); setSelectedTarif(-1); setModal({type:"addbeaute"}); setShowPublishMenu(false); }
                         },
                         { icon:"📢", label:"Demande", badge:"Gratuit", badgeColor:"#FF8C00", badgeBg:"rgba(255,140,0,0.12)",
                           action:()=>{ setShowPublishMenu(false); window.open("https://marcheduroi.com/demandes","_blank"); }
@@ -5596,7 +5654,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 type="tel"
                 value={authForm.phone}
                 onChange={e=>setAuthForm(a=>({...a,phone:e.target.value}))}
-                placeholder="Ex: +229 01 23 45 67"
+                placeholder={getPhonePlaceholder()}
                 maxLength={25}
                 inputMode="tel"
                 style={inputStyle}
@@ -5897,7 +5955,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               {locationLoading?"⏳...":userLocation?"📍 Position active":"📍 Près de moi"}
             </button>
             {canEdit ? (
-              <button onClick={()=>{ setShopMode("boutique"); setShopForm({name:"",type:"",description:"",services:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addshop"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#FF6584,#FFB347)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
+              <button onClick={()=>{ setShopMode("boutique"); setShopForm({name:"",type:"",description:"",services:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix()}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addshop"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#FF6584,#FFB347)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
                 <Icon name="plus" size={16}/>Publier ma boutique
               </button>
             ) : (
@@ -5999,7 +6057,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
           </div>
           <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:24 }}>
             {canEdit ? (
-              <button onClick={()=>{ setShopMode("atelier"); setShopForm({name:"",type:"",description:"",services:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addshop"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
+              <button onClick={()=>{ setShopMode("atelier"); setShopForm({name:"",type:"",description:"",services:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix()}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addshop"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
                 <Icon name="plus" size={16}/>Publier mon atelier
               </button>
             ) : (
@@ -6113,7 +6171,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
           <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:24 }}>
             {canEdit ? (
-              <button onClick={()=>{ setShopMode("resto"); setShopForm({name:"",type:"",description:"",specialite:"",plats:"",prixMoyen:"",capacite:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addresto"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
+              <button onClick={()=>{ setShopMode("resto"); setShopForm({name:"",type:"",description:"",specialite:"",plats:"",prixMoyen:"",capacite:"",services:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix()}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addresto"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
                 <Icon name="plus" size={16}/>Publier mon établissement
               </button>
             ) : (
@@ -6232,7 +6290,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
           <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:24 }}>
             {canEdit ? (
-              <button onClick={()=>{ setShopMode("beaute"); setShopForm({name:"",type:"",description:"",specialite:"",services:"",tarifs:"",rendezvous:"Non",produits:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:""}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addbeaute"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#FF69B4,#FF1493)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
+              <button onClick={()=>{ setShopMode("beaute"); setShopForm({name:"",type:"",description:"",specialite:"",services:"",tarifs:"",rendezvous:"Non",produits:"",keywords:"",ville:"",quartier:"",von:"",horaires:"",contact:"",phone:getPhonePrefix()}); setShopPhotos([]); setShopVideo(null); setMonths(1); setModal({type:"addbeaute"}); }} className="btn-glow" style={{ background:"linear-gradient(135deg,#FF69B4,#FF1493)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8,transition:"box-shadow 0.2s" }}>
                 <Icon name="plus" size={16}/>Publier mon salon
               </button>
             ) : (
@@ -6754,7 +6812,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   {label:"Description *", key:"description",type:"textarea",max:1000,fn: v=>cleanLongText(v,1000)},
                   {label: postForm.category==="Location de véhicules" ? "Prix de vente (optionnel)" : "Prix", key:"price", type:"input", max:30, fn: formatThousands, hint: postForm.category==="Location de véhicules" ? "Ex: 5 000 000 (si à vendre aussi)" : "Ex: 15 000", mode:"numeric"},
                   {label:"Email de contact",key:"contact",type:"input",   max:80,  fn: noSpaces,         hint:"Ex: nom@email.com"},
-                  {label:"Téléphone / WhatsApp",key:"phone",type:"input", max:20,  fn: onlyPhone,    hint:"Ex: +229 01 23 45 67"},
+                  {label:"Téléphone / WhatsApp",key:"phone",type:"input", max:20,  fn: onlyPhone,    hint:getPhonePlaceholder()},
                 ].map(f=>(
                   <div key={f.key} style={{ marginBottom:16 }}>
                     <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
@@ -7321,7 +7379,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   {label:"Produits utilisés",    key:"produits",    fn:v=>cleanText(v,100),      max:100, placeholder:"Ex: L'Oréal, MAC, Dark & Lovely..."},
                   {label:"Mots clés",            key:"keywords",    fn:v=>cleanText(v,100),      max:100, placeholder:"Ex: tresses, coiffure, mariage, africain..."},
                   {label:"Horaires",             key:"horaires",    fn:v=>cleanText(v,60),       max:60,  placeholder:"Ex: Lun-Sam 8h-20h"},
-                  {label:"Téléphone / WhatsApp", key:"phone",       fn:onlyPhone,               max:20,  placeholder:"+229 XX XX XX XX", mode:"tel"},
+                  {label:"Téléphone / WhatsApp", key:"phone",       fn:onlyPhone,               max:20,  placeholder:getPhonePlaceholder(), mode:"tel"},
                   {label:"Email",                key:"contact",     fn:onlyEmail,               max:80},
                 ].map(f=>(
                   <div key={f.key} style={{ marginBottom:16 }}>
@@ -7473,7 +7531,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   {label:"Services proposés",         key:"services",   fn:v=>cleanText(v,150),     max:150, placeholder:"Sur place, À emporter, Livraison..."},
                   {label:"Mots clés",                 key:"keywords",   fn:v=>cleanText(v,100),     max:100, placeholder:"Ex: maquis, traditionnel, livraison..."},
                   {label:"Horaires",                  key:"horaires",   fn:v=>cleanText(v,60),      max:60,  placeholder:"Ex: Lun-Dim 7h-22h"},
-                  {label:"Téléphone / WhatsApp",      key:"phone",      fn:onlyPhone,              max:20,  placeholder:"+229 XX XX XX XX", mode:"tel"},
+                  {label:"Téléphone / WhatsApp",      key:"phone",      fn:onlyPhone,              max:20,  placeholder:getPhonePlaceholder(), mode:"tel"},
                   {label:"Email",                     key:"contact",    fn:onlyEmail,              max:80},
                 ].map(f=>(
                   <div key={f.key} style={{ marginBottom:16 }}>
@@ -7638,7 +7696,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   {label:"Horaires d'ouverture",          key:"horaires",  fn:v=>cleanText(v,60),  max:60,  placeholder:"Ex: Lun-Sam 8h-18h"},
                   {label:"Mots clés (pour la recherche)", key:"keywords",  fn:v=>cleanText(v,100), max:100, placeholder:"Ex: cosmétiques, soins, beauté..."},
                   {label:"Email de contact",               key:"contact",   fn:onlyEmail,           max:80},
-                  {label:"Téléphone / WhatsApp",           key:"phone",     fn:onlyPhone,           max:20,  placeholder:"+229 XX XX XX XX", mode:"tel"},
+                  {label:"Téléphone / WhatsApp",           key:"phone",     fn:onlyPhone,           max:20,  placeholder:getPhonePlaceholder(), mode:"tel"},
                 ].map(f=>(
                   <div key={f.key} style={{ marginBottom:16 }}>
                     <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>{f.label}</label>
@@ -7732,7 +7790,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     <p style={{ fontWeight:700,color:theme.text,fontSize:14,marginBottom:4 }}>📱 Étape 1 — Vérifiez votre numéro</p>
                     <p style={{ color:theme.sub,fontSize:12,marginBottom:12 }}>Pour éviter les abus, un code vous sera envoyé par SMS.</p>
                     <div style={{ display:"flex",gap:8,marginBottom:10 }}>
-                      <input value={reportOtp.phone} onChange={e=>setReportOtp(r=>({...r,phone:e.target.value}))} placeholder="+229 XX XX XX XX" style={{ ...inputStyle,flex:1 }}/>
+                      <input value={reportOtp.phone} onChange={e=>setReportOtp(r=>({...r,phone:e.target.value}))} placeholder={getPhonePlaceholder()} style={{ ...inputStyle,flex:1 }}/>
                       <button onClick={()=>sendOtp(reportOtp.phone)} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",whiteSpace:"nowrap" }}>
                         Envoyer OTP
                       </button>
@@ -8081,7 +8139,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   {label:"Salaire / Rémunération",key:"salaire",placeholder:"Ex: 80 000 FCFA / mois"},
                   {label:"Ville / Localisation",key:"localisation",placeholder:"Ex: Cotonou, Parakou..."},
                   {label:"Contact (email ou nom)",key:"contact",placeholder:"Ex: rh@entreprise.com"},
-                  {label:"WhatsApp",key:"phone",placeholder:"Ex: +229 97 00 00 00"},
+                  {label:"WhatsApp",key:"phone",placeholder:getPhonePlaceholder()},
                 ].map(f=>(
                   <div key={f.key} style={{ marginBottom:12 }}>
                     <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>{f.label}</label>
@@ -8116,7 +8174,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   {label:"Expérience professionnelle",key:"experience",placeholder:"Ex: 3 ans en comptabilité chez ABC SARL...",multi:true},
                   {label:"Disponibilité",key:"disponibilite",placeholder:"Ex: Immédiate, À partir du 01/06/2026..."},
                   {label:"Ville / Localisation",key:"localisation",placeholder:"Ex: Cotonou, Porto-Novo..."},
-                  {label:"WhatsApp",key:"phone",placeholder:"Ex: +229 97 00 00 00"},
+                  {label:"WhatsApp",key:"phone",placeholder:getPhonePlaceholder()},
                 ].map(f=>(
                   <div key={f.key} style={{ marginBottom:12 }}>
                     <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>{f.label}</label>
@@ -9073,19 +9131,19 @@ function AdminVitrineWeb({ theme, notify }) {
               <label style={labelStyle}>Téléphone principal</label>
               <input style={inputStyle} value={form.phone}
                 onChange={e=>setForm(f=>({...f,phone:e.target.value}))}
-                placeholder="+2290100000000"/>
+                placeholder={getPhonePlaceholder()}/>
             </div>
             <div>
               <label style={labelStyle}>Téléphone secondaire</label>
               <input style={inputStyle} value={form.phone2}
                 onChange={e=>setForm(f=>({...f,phone2:e.target.value}))}
-                placeholder="+2290100000000"/>
+                placeholder={getPhonePlaceholder()}/>
             </div>
             <div>
               <label style={labelStyle}>WhatsApp</label>
               <input style={inputStyle} value={form.whatsapp}
                 onChange={e=>setForm(f=>({...f,whatsapp:e.target.value}))}
-                placeholder="+2290100000000"/>
+                placeholder={getPhonePlaceholder()}/>
             </div>
             <div>
               <label style={labelStyle}>Email</label>
@@ -9226,7 +9284,7 @@ function VitrineRequest() {
     name:"", type:"École", slogan:"", description:"",
     ville:"", quartier:"", von:"", address:"",
     gps_lat:"", gps_lng:"",
-    phone:"", whatsapp:"", email:"", facebook:"",
+    phone:getPhonePrefix(), whatsapp:getPhonePrefix(), email:"", facebook:"",
     logo_url:"", cover_url:"", photos:"", video:"",
     hours:"", services:"",
   });
@@ -9491,11 +9549,11 @@ function VitrineRequest() {
         <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
           <div>
             <label style={lbl}>Téléphone principal *</label>
-            <input style={inp} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="+2290100000000"/>
+            <input style={inp} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder={getPhonePlaceholder()}/>
           </div>
           <div>
             <label style={lbl}>WhatsApp</label>
-            <input style={inp} value={form.whatsapp} onChange={e=>setForm(f=>({...f,whatsapp:e.target.value}))} placeholder="+2290100000000"/>
+            <input style={inp} value={form.whatsapp} onChange={e=>setForm(f=>({...f,whatsapp:e.target.value}))} placeholder={getPhonePlaceholder()}/>
           </div>
           <div>
             <label style={lbl}>Email</label>
@@ -9870,11 +9928,11 @@ function VitrineEdit({ structure, token, onDone }) {
         {/* CONTACTS */}
         <p style={sectionStyle}>📞 Contacts</p>
         <label style={labelStyle}>Téléphone principal</label>
-        <input style={inputStyle} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="+2290100000000"/>
+        <input style={inputStyle} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder={getPhonePlaceholder()}/>
         <label style={labelStyle}>Téléphone secondaire (optionnel)</label>
-        <input style={inputStyle} value={form.phone2} onChange={e=>setForm(f=>({...f,phone2:e.target.value}))} placeholder="+2290100000000"/>
+        <input style={inputStyle} value={form.phone2} onChange={e=>setForm(f=>({...f,phone2:e.target.value}))} placeholder={getPhonePlaceholder()}/>
         <label style={labelStyle}>WhatsApp</label>
-        <input style={inputStyle} value={form.whatsapp} onChange={e=>setForm(f=>({...f,whatsapp:e.target.value}))} placeholder="+2290100000000"/>
+        <input style={inputStyle} value={form.whatsapp} onChange={e=>setForm(f=>({...f,whatsapp:e.target.value}))} placeholder={getPhonePlaceholder()}/>
         <label style={labelStyle}>Email</label>
         <input style={inputStyle} type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} placeholder="contact@mastructure.bj"/>
         <label style={labelStyle}>Facebook (URL ou nom de page)</label>
