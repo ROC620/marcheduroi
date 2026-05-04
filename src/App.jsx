@@ -3498,6 +3498,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 { label:"🎨 "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
               ] : []),
               { label:"📢 Tableau de demandes", action:()=>{ window.open("https://marcheduroi.com/demandes","_blank"); setShowMoreMenu(false); } },
+              { label:"🏛️ Créer ma vitrine", action:()=>{ setShowMoreMenu(false); navigate("/vitrine"); } },
               { label:"📖 Exemples de publications", action:()=>{ window.open("https://marcheduroi.com/exemples.html","_blank"); setShowMoreMenu(false); } },
               { label:"📞 Support WhatsApp", action:()=>{ window.open("https://wa.me/2290140906020","_blank"); setShowMoreMenu(false); } },
               { label:t.stats, action:()=>{setView("stats");setShowMoreMenu(false);} },
@@ -4177,6 +4178,9 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                         },
                         { icon:"💼", label:"Offre d'emploi", badge:"1 500 FCFA", badgeColor:"#6C63FF", badgeBg:"rgba(108,99,255,0.12)",
                           action:()=>{ setShowPublishMenu(false); setView("recrutement"); setRecrutTab("offres"); setTimeout(()=>setModal({type:"addOffre"}),300); }
+                        },
+                        { icon:"🏛️", label:"Créer ma vitrine", badge:"15 000 FCFA", badgeColor:"#10B981", badgeBg:"rgba(16,185,129,0.12)",
+                          action:()=>{ setShowPublishMenu(false); navigate("/vitrine"); }
                         },
                       ].map((opt,i) => (
                         <button key={i} onClick={opt.action}
@@ -8816,6 +8820,53 @@ function AdminVitrineWeb({ theme, notify }) {
         </div>
       </div>
 
+      {/* ========== DEMANDES EN ATTENTE ========== */}
+      {tab === "liste" && (() => {
+        const pending = structures.filter(s => s.paid_at && !s.active);
+        if (pending.length === 0) return null;
+        return (
+          <div style={{ background:"rgba(255,215,0,0.05)",border:"2px solid rgba(255,215,0,0.3)",borderRadius:14,padding:16,marginBottom:20 }}>
+            <p style={{ fontWeight:800,color:"#FFD700",fontSize:14,marginBottom:12,display:"flex",alignItems:"center",gap:8 }}>
+              ⏳ En attente de validation
+              <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:20,height:20,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700 }}>
+                {pending.length}
+              </span>
+            </p>
+            {pending.map(s => (
+              <div key={s.id} style={{ background:"#1A1D30",border:"1px solid rgba(255,215,0,0.2)",borderRadius:12,padding:14,marginBottom:10 }}>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8,flexWrap:"wrap",marginBottom:10 }}>
+                  <div>
+                    <p style={{ fontWeight:700,color:"#E8E8F0",margin:"0 0 4px",fontSize:15 }}>{s.name}</p>
+                    <p style={{ color:"#9A9AB0",fontSize:12,margin:0 }}>{s.type} · {s.ville||"—"} · Payé le {s.paid_at ? new Date(s.paid_at).toLocaleDateString("fr-FR") : "—"}</p>
+                    <p style={{ color:"#9A9AB0",fontSize:11,margin:"4px 0 0",fontFamily:"monospace" }}>/{s.slug}</p>
+                  </div>
+                  <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+                    {/* Valider */}
+                    <button onClick={async()=>{
+                      const now = new Date();
+                      const exp = new Date(now); exp.setFullYear(exp.getFullYear()+1);
+                      const { error } = await supabase.from("structures").update({ active:true, expires_at:exp.toISOString() }).eq("id",s.id);
+                      if (!error) {
+                        setStructures(prev => prev.map(x => x.id===s.id ? {...x, active:true, expires_at:exp.toISOString()} : x));
+                        notify("✅ Vitrine validée et mise en ligne !");
+                      }
+                    }} style={{ background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.4)",color:"#10B981",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                      ✅ Valider
+                    </button>
+                    {/* Envoyer WhatsApp */}
+                    <a href={"https://wa.me/"+( s.phone||s.whatsapp||"").replace(/[^\d]/g,"")+"?text="+encodeURIComponent(`Bonjour ! 👋\nVotre vitrine *${s.name}* est maintenant en ligne sur MarchéduRoi.\n\n🔗 Voici votre lien : ${window.location.origin}/structure/${s.slug}\n\nVous pouvez le partager sur WhatsApp, Facebook, ou l'imprimer sur vos cartes de visite.\n\nMerci de votre confiance — EDENPORTAIL 👑`)}
+                      target="_blank" rel="noopener noreferrer"
+                      style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",color:"#25D366",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",display:"flex",alignItems:"center",gap:6 }}>
+                      📱 WhatsApp client
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       {/* ========== ONGLET LISTE ========== */}
       {tab === "liste" && (
         <div>
@@ -9161,6 +9212,321 @@ function AdminVitrineWeb({ theme, notify }) {
 // VitrinePayment — Page de paiement client
 // Route : /structure/:slug/payer?token=XXX
 // -----------------------------------------------
+// -----------------------------------------------
+// VitrineRequest — Formulaire public de création
+// Route : /vitrine
+// -----------------------------------------------
+function VitrineRequest() {
+  const navigate = useNavigate();
+  const COLOR = "#10B981";
+
+  const TYPES = ["École","Clinique","Pharmacie","Cabinet médical","ONG","Association","Mairie","Paroisse / Église","Mosquée","Hôtel","Fondation","Cabinet d'avocats","Bureau d'études","Agence immobilière","Autre"];
+
+  const [form, setForm] = React.useState({
+    name:"", type:"École", slogan:"", description:"",
+    ville:"", quartier:"", von:"", address:"",
+    gps_lat:"", gps_lng:"",
+    phone:"", whatsapp:"", email:"", facebook:"",
+    logo_url:"", cover_url:"", photos:"", video:"",
+    hours:"", services:"",
+  });
+  const [paying,  setPaying]  = React.useState(false);
+  const [done,    setDone]    = React.useState(false);
+  const [error,   setError]   = React.useState(null);
+  const [slug,    setSlug]    = React.useState("");
+
+  // Auto-slug depuis le nom
+  const toSlug = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\s-]/g,"").trim().replace(/\s+/g,"-");
+  const handleName = (v) => { setForm(f=>({...f,name:v})); setSlug(toSlug(v)); };
+
+  // Charger FedaPay
+  const loadFedaPay = () => new Promise((res,rej)=>{
+    if (window.FedaPay) { res(); return; }
+    const s = document.createElement("script");
+    s.src = "https://cdn.fedapay.com/checkout.js?v=1.1.7";
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+
+  // Charger Flutterwave
+  const loadFlutterwave = () => new Promise((res,rej)=>{
+    if (window.FlutterwaveCheckout) { res(); return; }
+    const s = document.createElement("script");
+    s.src = "https://checkout.flutterwave.com/v3.js";
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+
+  const handlePaymentSuccess = async () => {
+    setPaying(true);
+    const finalSlug = slug || toSlug(form.name) + "-" + Date.now();
+    const photos = form.photos.split("\n").map(l=>l.trim()).filter(Boolean);
+    const now = new Date();
+    const { error: dbErr } = await supabase.from("structures").insert({
+      slug:        finalSlug,
+      name:        form.name.trim(),
+      type:        form.type,
+      slogan:      form.slogan || null,
+      description: form.description || null,
+      ville:       form.ville || null,
+      quartier:    form.quartier || null,
+      von:         form.von || null,
+      address:     form.address || null,
+      gps_lat:     form.gps_lat ? parseFloat(form.gps_lat) : null,
+      gps_lng:     form.gps_lng ? parseFloat(form.gps_lng) : null,
+      phone:       form.phone || null,
+      whatsapp:    form.whatsapp || null,
+      email:       form.email || null,
+      facebook:    form.facebook || null,
+      logo_url:    form.logo_url || null,
+      cover_url:   form.cover_url || null,
+      photos,
+      video:       form.video || null,
+      hours:       form.hours || null,
+      services:    form.services || null,
+      news:        [],
+      active:      false,
+      verified:    false,
+      paid_at:     now.toISOString(),
+      creation_amount: 15000,
+      renewal_amount:  18000,
+    });
+    if (dbErr) {
+      setError("Paiement reçu mais enregistrement échoué. Contactez-nous : contact@marcheduroi.com");
+    } else {
+      setDone(true);
+    }
+    setPaying(false);
+  };
+
+  const launchPayment = async () => {
+    // Validation
+    if (!form.name.trim()) { setError("Le nom de la structure est obligatoire."); return; }
+    if (!form.phone.trim()) { setError("Le numéro de téléphone est obligatoire."); return; }
+    setError(null);
+    try {
+      await loadFedaPay();
+      const FP = window.FedaPay;
+      FP.init({
+        public_key: import.meta.env.VITE_FEDAPAY_PUBLIC_KEY || "pk_sandbox_VOTRE_CLE_ICI",
+        transaction: { amount: 15000, description: `VitrineWeb — Création de vitrine : ${form.name}` },
+        customer:    { email: form.email || "client@marcheduroi.com" },
+        onComplete(resp, reason) {
+          const ok = reason === FP.TRANSACTION_APPROVED || reason === "transaction_approved" || reason === "approved" || reason === "checkout_complete";
+          if (ok) handlePaymentSuccess();
+          else setError("Paiement annulé. Réessayez quand vous voulez.");
+        }
+      }).open();
+    } catch {
+      // Fallback Flutterwave
+      try {
+        await loadFlutterwave();
+        window.FlutterwaveCheckout({
+          public_key: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY || "",
+          tx_ref:     "vitrine-new-" + Date.now(),
+          amount:     15000, currency: "XOF",
+          payment_options: "mobilemoney,card,ussd",
+          customer:   { email: form.email || "client@marcheduroi.com", name: form.name },
+          customizations: { title:"VitrineWeb MarchéduRoi", description:`Création — ${form.name}`, logo: window.location.origin+"/marcheduRoi-icon.svg" },
+          callback(r)  { if (r.status==="successful") handlePaymentSuccess(); else setError("Paiement échoué. Réessayez."); },
+          onclose()    {},
+        });
+      } catch { setError("Module de paiement non chargé. Vérifiez votre connexion."); }
+    }
+  };
+
+  const inp = {
+    width:"100%", background:"#1A1D30", border:"1px solid #2A2D45", borderRadius:10,
+    padding:"12px 14px", color:"#E8E8F0", fontSize:14, fontFamily:"Sora,sans-serif",
+    outline:"none", boxSizing:"border-box",
+  };
+  const lbl = { display:"block", color:"#9A9AB0", fontSize:12, fontWeight:600, marginBottom:5, marginTop:16 };
+  const sec = { fontWeight:700, color:"#E8E8F0", fontSize:15, margin:"28px 0 4px", paddingBottom:10, borderBottom:"1px solid #2A2D45" };
+
+  if (done) return (
+    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",display:"flex",alignItems:"center",justifyContent:"center",padding:24 }}>
+      <div style={{ maxWidth:480,textAlign:"center" }}>
+        <div style={{ fontSize:64,marginBottom:20 }}>🎉</div>
+        <h1 style={{ fontSize:26,fontWeight:800,color:"#E8E8F0",marginBottom:12 }}>Demande enregistrée !</h1>
+        <div style={{ background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:16,padding:24,marginBottom:28 }}>
+          <p style={{ color:COLOR,fontWeight:700,fontSize:16,marginBottom:8 }}>✅ Paiement confirmé</p>
+          <p style={{ color:"#B8B8CC",lineHeight:1.8,fontSize:15 }}>
+            Votre vitrine <strong style={{ color:"#E8E8F0" }}>{form.name}</strong> sera visible sur MarchéduRoi en moins de <strong style={{ color:COLOR }}>3 heures</strong> après validation par notre équipe.
+          </p>
+          <p style={{ color:"#9A9AB0",fontSize:13,marginTop:12 }}>
+            Vous recevrez un message WhatsApp avec le lien de votre vitrine dès qu'elle sera en ligne.
+          </p>
+        </div>
+        <button onClick={()=>navigate("/")} style={{ background:`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:"#fff",padding:"14px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+          ← Retour à MarchéduRoi
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",color:"#E8E8F0" }}>
+
+      {/* Navbar */}
+      <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(8px)" }}>
+        <div style={{ cursor:"pointer" }} onClick={()=>navigate("/")}>
+          <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,objectFit:"contain" }}/>
+        </div>
+        <button onClick={()=>navigate("/")} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+          ← Retour
+        </button>
+      </div>
+
+      <div style={{ maxWidth:620,margin:"0 auto",padding:"32px 24px 64px" }}>
+
+        {/* En-tête */}
+        <div style={{ textAlign:"center",marginBottom:36 }}>
+          <div style={{ width:72,height:72,borderRadius:18,background:`linear-gradient(135deg,${COLOR},#059669)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,margin:"0 auto 16px" }}>🏛️</div>
+          <h1 style={{ fontSize:26,fontWeight:800,marginBottom:8 }}>Créez votre VitrineWeb</h1>
+          <p style={{ color:"#9A9AB0",fontSize:15,lineHeight:1.7 }}>Donnez une présence numérique à votre structure sur MarchéduRoi.</p>
+
+          {/* Prix */}
+          <div style={{ display:"inline-flex",gap:16,marginTop:16,flexWrap:"wrap",justifyContent:"center" }}>
+            <div style={{ background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:12,padding:"10px 20px" }}>
+              <p style={{ color:COLOR,fontWeight:800,fontSize:18,margin:0 }}>15 000 FCFA</p>
+              <p style={{ color:"#9A9AB0",fontSize:12,margin:"2px 0 0" }}>Création (unique)</p>
+            </div>
+            <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:12,padding:"10px 20px" }}>
+              <p style={{ color:"#6C63FF",fontWeight:800,fontSize:18,margin:0 }}>18 000 FCFA/an</p>
+              <p style={{ color:"#9A9AB0",fontSize:12,margin:"2px 0 0" }}>Renouvellement annuel</p>
+            </div>
+          </div>
+        </div>
+
+        {/* IDENTITÉ */}
+        <p style={sec}>🏛️ Identité de votre structure</p>
+        <label style={lbl}>Nom officiel *</label>
+        <input style={inp} value={form.name} onChange={e=>handleName(e.target.value)} placeholder="École Sainte-Marie de Cotonou"/>
+        {slug && <p style={{ color:"#9A9AB0",fontSize:11,marginTop:4 }}>URL : <span style={{ color:COLOR }}>marcheduroi.com/structure/{slug}</span></p>}
+
+        <label style={lbl}>Type de structure *</label>
+        <select style={{...inp,cursor:"pointer"}} value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value}))}>
+          {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+        </select>
+
+        <label style={lbl}>Slogan / Mission</label>
+        <input style={inp} value={form.slogan} onChange={e=>setForm(f=>({...f,slogan:e.target.value}))} placeholder="Former les leaders de demain"/>
+
+        <label style={lbl}>Description de votre structure</label>
+        <textarea style={{...inp,minHeight:90,resize:"vertical"}} value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} placeholder="Présentez votre structure en quelques phrases…"/>
+
+        {/* LOCALISATION */}
+        <p style={sec}>📍 Localisation</p>
+
+        {/* Bouton GPS */}
+        <button type="button" onClick={()=>{
+          if (!navigator.geolocation) { setError("GPS non disponible sur cet appareil."); return; }
+          navigator.geolocation.getCurrentPosition(
+            pos => { setForm(f=>({...f, gps_lat:pos.coords.latitude.toString(), gps_lng:pos.coords.longitude.toString()})); },
+            ()  => { setError("Impossible d'accéder au GPS. Vérifiez les permissions du navigateur."); }
+          );
+        }} style={{ width:"100%",padding:"12px",background:form.gps_lat?"rgba(16,185,129,0.12)":"rgba(255,105,180,0.08)",border:`1px solid ${form.gps_lat?"rgba(16,185,129,0.4)":"rgba(255,105,180,0.3)"}`,borderRadius:10,color:form.gps_lat?"#10B981":"#FF69B4",fontWeight:700,fontSize:13,cursor:"pointer",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+          {form.gps_lat ? "✅ Position GPS capturée !" : "📍 Capturer ma position GPS (fortement recommandé)"}
+        </button>
+        {!form.gps_lat && <p style={{ color:"#FF8C00",fontSize:11,marginBottom:12,textAlign:"center" }}>⚠️ Sans GPS votre vitrine n'apparaîtra pas dans les résultats "Près de moi"</p>}
+
+        <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+          <div>
+            <label style={lbl}>Ville *</label>
+            <input style={inp} value={form.ville} onChange={e=>setForm(f=>({...f,ville:e.target.value}))} placeholder="Cotonou"/>
+          </div>
+          <div>
+            <label style={lbl}>Quartier</label>
+            <input style={inp} value={form.quartier} onChange={e=>setForm(f=>({...f,quartier:e.target.value}))} placeholder="Akpakpa"/>
+          </div>
+        </div>
+        <label style={lbl}>Von (point de repère)</label>
+        <input style={inp} value={form.von} onChange={e=>setForm(f=>({...f,von:e.target.value}))} placeholder="Von de la cathédrale"/>
+
+        {/* CONTACTS */}
+        <p style={sec}>📞 Contacts</p>
+        <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+          <div>
+            <label style={lbl}>Téléphone principal *</label>
+            <input style={inp} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="+2290100000000"/>
+          </div>
+          <div>
+            <label style={lbl}>WhatsApp</label>
+            <input style={inp} value={form.whatsapp} onChange={e=>setForm(f=>({...f,whatsapp:e.target.value}))} placeholder="+2290100000000"/>
+          </div>
+          <div>
+            <label style={lbl}>Email</label>
+            <input style={inp} type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} placeholder="contact@mastructure.bj"/>
+          </div>
+          <div>
+            <label style={lbl}>Facebook</label>
+            <input style={inp} value={form.facebook} onChange={e=>setForm(f=>({...f,facebook:e.target.value}))} placeholder="https://facebook.com/mastructure"/>
+          </div>
+        </div>
+
+        {/* INFOS PRATIQUES */}
+        <p style={sec}>🕐 Infos pratiques</p>
+        <label style={lbl}>Horaires d'ouverture</label>
+        <textarea style={{...inp,minHeight:70,resize:"vertical"}} value={form.hours} onChange={e=>setForm(f=>({...f,hours:e.target.value}))} placeholder={"Lun–Ven : 7h30–17h00\nSam : 8h00–12h00"}/>
+        <label style={lbl}>Services proposés</label>
+        <textarea style={{...inp,minHeight:70,resize:"vertical"}} value={form.services} onChange={e=>setForm(f=>({...f,services:e.target.value}))} placeholder="Consultations, urgences 24h/24, maternité…"/>
+
+        {/* MÉDIAS */}
+        <p style={sec}>🖼️ Médias <span style={{ color:"#9A9AB0",fontSize:12,fontWeight:400 }}>(optionnel — modifiable après)</span></p>
+        <label style={lbl}>Logo (lien URL)</label>
+        <input style={inp} value={form.logo_url} onChange={e=>setForm(f=>({...f,logo_url:e.target.value}))} placeholder="https://i.ibb.co/.../logo.png"/>
+        <label style={lbl}>Photo de couverture (lien URL)</label>
+        <input style={inp} value={form.cover_url} onChange={e=>setForm(f=>({...f,cover_url:e.target.value}))} placeholder="https://i.ibb.co/.../banniere.jpg"/>
+        <label style={lbl}>Photos galerie — un lien par ligne</label>
+        <textarea style={{...inp,minHeight:80,resize:"vertical",fontFamily:"monospace",fontSize:12}} value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))} placeholder={"https://i.ibb.co/.../photo1.jpg\nhttps://i.ibb.co/.../photo2.jpg"}/>
+        <label style={lbl}>Vidéo YouTube (lien)</label>
+        <input style={inp} value={form.video} onChange={e=>setForm(f=>({...f,video:e.target.value}))} placeholder="https://www.youtube.com/watch?v=..."/>
+
+        <div style={{ background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.15)",borderRadius:12,padding:14,marginTop:16 }}>
+          <p style={{ color:"#9A9AB0",fontSize:12,margin:0,lineHeight:1.7 }}>
+            💡 <strong style={{ color:"#E8E8F0" }}>Pour les médias :</strong> hébergez vos photos sur <strong style={{ color:COLOR }}>imgbb.com</strong> (gratuit) et copiez les liens ici. Vous pourrez les modifier à tout moment après activation.
+          </p>
+        </div>
+
+        {/* Erreur */}
+        {error && (
+          <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:12,padding:14,marginTop:20 }}>
+            <p style={{ margin:0,color:"#FF4757",fontWeight:600,fontSize:14 }}>❌ {error}</p>
+          </div>
+        )}
+
+        {/* Récapitulatif + paiement */}
+        <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:16,padding:24,marginTop:28 }}>
+          <p style={{ fontWeight:700,color:"#E8E8F0",marginBottom:14,fontSize:15 }}>📋 Récapitulatif du paiement</p>
+          <div style={{ display:"flex",justifyContent:"space-between",marginBottom:8 }}>
+            <span style={{ color:"#9A9AB0" }}>Création de la vitrine</span>
+            <span style={{ fontWeight:700,color:COLOR }}>15 000 FCFA</span>
+          </div>
+          <div style={{ display:"flex",justifyContent:"space-between",marginBottom:16,paddingBottom:16,borderBottom:"1px solid #2A2D45" }}>
+            <span style={{ color:"#9A9AB0",fontSize:13 }}>Renouvellement (dans 12 mois)</span>
+            <span style={{ color:"#9A9AB0",fontSize:13 }}>18 000 FCFA/an</span>
+          </div>
+          <div style={{ display:"flex",gap:8,flexWrap:"wrap",marginBottom:16 }}>
+            {["MTN Money","Moov Money","Carte bancaire"].map(m=>(
+              <span key={m} style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.2)",color:"#9A9AB0",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:600 }}>{m}</span>
+            ))}
+          </div>
+          <button onClick={launchPayment} disabled={paying}
+            style={{ width:"100%",padding:16,background:paying?"#2A2D45":`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:paying?"#9A9AB0":"#fff",borderRadius:12,fontWeight:800,fontSize:16,cursor:paying?"not-allowed":"pointer",transition:"all 0.2s" }}>
+            {paying ? "Enregistrement…" : "💳 Payer 15 000 FCFA et créer ma vitrine"}
+          </button>
+          <p style={{ textAlign:"center",color:"#9A9AB0",fontSize:11,marginTop:12,lineHeight:1.6 }}>
+            Paiement sécurisé · En payant vous acceptez les CGU de MarchéduRoi<br/>
+            Votre vitrine sera visible en moins de 3h après validation
+          </p>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+
 function VitrinePayment({ structure, token, onDone }) {
   const COLOR = "#10B981";
   const [tokenValid,  setTokenValid]  = React.useState(false);
@@ -9873,17 +10239,20 @@ function PersistentLayout() {
   const segments = location.pathname.split("/").filter(Boolean);
   const validTypes = ["annonce","boutique","atelier","resto","beaute"];
   const isDetail    = segments.length >= 2 && validTypes.includes(segments[0]) && segments[1] && segments[1] !== "undefined";
-  const isStructure = segments[0] === "structure" && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
+  const isStructure    = segments[0] === "structure" && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
+  const isVitrineReq   = segments[0] === "vitrine" && segments.length === 1;
   return (
     <>
       {/* AppContent toujours monté — ne se démonte jamais */}
-      <div style={{ display: (isDetail || isStructure) ? "none" : "block" }}>
+      <div style={{ display: (isDetail || isStructure || isVitrineReq) ? "none" : "block" }}>
         <AppContent/>
       </div>
       {/* Fiche annonce / boutique / resto… */}
       {isDetail && <AnnonceDetail/>}
       {/* Vitrine d'une structure (VitrineWeb) */}
       {isStructure && <VitrineDetail/>}
+      {/* Formulaire public de création VitrineWeb */}
+      {isVitrineReq && <VitrineRequest/>}
     </>
   );
 }
