@@ -9522,6 +9522,18 @@ function VitrineRequest() {
 
       <div style={{ maxWidth:620,margin:"0 auto",padding:"32px 24px 64px" }}>
 
+        {/* Bandeau exemple */}
+        <div style={{ background:"rgba(255,140,0,0.08)",border:"1px solid rgba(255,140,0,0.25)",borderRadius:14,padding:16,marginBottom:28,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
+          <div>
+            <p style={{ fontWeight:700,color:"#FF8C00",margin:"0 0 4px",fontSize:14 }}>👀 Vous voulez voir à quoi ressemble une vitrine ?</p>
+            <p style={{ color:"#9A9AB0",fontSize:13,margin:0 }}>Consultez l'exemple de démonstration avant de vous lancer.</p>
+          </div>
+          <a href="/structure/restaurant-chez-tante-rosine-calavi" target="_blank" rel="noopener noreferrer"
+            style={{ background:"rgba(255,140,0,0.15)",border:"1px solid rgba(255,140,0,0.4)",color:"#FF8C00",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",flexShrink:0,whiteSpace:"nowrap" }}>
+            Voir un exemple →
+          </a>
+        </div>
+
         {/* En-tête */}
         <div style={{ textAlign:"center",marginBottom:36 }}>
           <div style={{ width:72,height:72,borderRadius:18,background:`linear-gradient(135deg,${COLOR},#059669)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,margin:"0 auto 16px" }}>🏛️</div>
