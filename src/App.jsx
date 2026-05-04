@@ -9009,6 +9009,48 @@ function AdminVitrineWeb({ theme, notify }) {
                     </div>
                   </div>
 
+                  {/* Instructions sous-domaine */}
+                  <div style={{ background:"rgba(108,99,255,0.05)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:10,padding:14,marginBottom:8 }}>
+                    <p style={{ color:"#6C63FF",fontSize:12,fontWeight:700,margin:"0 0 10px" }}>🌐 SOUS-DOMAINE VITRINE</p>
+                    <p style={{ color:"#9A9AB0",fontSize:12,margin:"0 0 8px" }}>
+                      URL finale : <code style={{ color:"#E8E8F0",fontFamily:"monospace" }}>{s.slug}.vitrine.marcheduroi.com</code>
+                    </p>
+                    <p style={{ color:"#9A9AB0",fontSize:11,fontWeight:700,margin:"8px 0 4px" }}>1. Dans Namecheap → Advanced DNS :</p>
+                    <div style={{ background:"#0D0F1A",borderRadius:8,padding:"8px 12px",marginBottom:8,fontFamily:"monospace",fontSize:11 }}>
+                      <p style={{ color:"#10B981",margin:"2px 0" }}>Type : CNAME</p>
+                      <p style={{ color:"#10B981",margin:"2px 0" }}>Host : <strong style={{ color:"#E8E8F0" }}>{s.slug}.vitrine</strong></p>
+                      <p style={{ color:"#10B981",margin:"2px 0" }}>Value : <strong style={{ color:"#E8E8F0" }}>cname.vercel-dns.com</strong></p>
+                    </div>
+                    <p style={{ color:"#9A9AB0",fontSize:11,fontWeight:700,margin:"8px 0 4px" }}>2. Dans Vercel → Settings → Domains :</p>
+                    <div style={{ background:"#0D0F1A",borderRadius:8,padding:"8px 12px",marginBottom:10,fontFamily:"monospace",fontSize:11 }}>
+                      <p style={{ color:"#E8E8F0",margin:0 }}>{s.slug}.vitrine.marcheduroi.com</p>
+                    </div>
+                    <div style={{ display:"flex",gap:8,alignItems:"center",flexWrap:"wrap" }}>
+                      <button onClick={()=>{ navigator.clipboard.writeText(s.slug+".vitrine"); notify("Host CNAME copié !"); }}
+                        style={{ background:"rgba(108,99,255,0.12)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"5px 10px",borderRadius:7,fontSize:11,fontWeight:700,cursor:"pointer" }}>
+                        Copier le Host
+                      </button>
+                      <button onClick={()=>{ navigator.clipboard.writeText(s.slug+".vitrine.marcheduroi.com"); notify("Domaine Vercel copié !"); }}
+                        style={{ background:"rgba(108,99,255,0.12)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"5px 10px",borderRadius:7,fontSize:11,fontWeight:700,cursor:"pointer" }}>
+                        Copier le domaine Vercel
+                      </button>
+                      {/* Bouton activer/désactiver le sous-domaine */}
+                      <button onClick={async()=>{
+                        const newDomain = s.domain_active ? null : s.slug+".vitrine.marcheduroi.com";
+                        const { error } = await supabase.from("structures").update({
+                          custom_domain: newDomain,
+                          domain_active: !s.domain_active
+                        }).eq("id", s.id);
+                        if (!error) {
+                          setStructures(prev => prev.map(x => x.id===s.id ? {...x, domain_active:!s.domain_active, custom_domain:newDomain} : x));
+                          notify(s.domain_active ? "Sous-domaine désactivé" : "✅ Sous-domaine activé !");
+                        }
+                      }} style={{ background:s.domain_active?"rgba(16,185,129,0.15)":"rgba(255,215,0,0.1)",border:`1px solid ${s.domain_active?"rgba(16,185,129,0.4)":"rgba(255,215,0,0.3)"}`,color:s.domain_active?"#10B981":"#FFD700",padding:"5px 12px",borderRadius:7,fontSize:11,fontWeight:700,cursor:"pointer" }}>
+                        {s.domain_active ? "✅ Sous-domaine actif" : "⚡ Marquer comme actif"}
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Lien de paiement */}
                   {!s.paid_at && (
                     <div style={{ background:"rgba(255,215,0,0.05)",border:"1px solid rgba(255,215,0,0.2)",borderRadius:10,padding:12,marginBottom:8 }}>
@@ -9875,6 +9917,7 @@ function VitrineEdit({ structure, token, onDone }) {
       title:   form.news_title,
       content: form.news_content,
       date:    new Date().toLocaleDateString("fr-FR"),
+      type:    form.news_type || "Actualité",
     };
     setNews(prev => [entry, ...prev]);
     setForm(f => ({ ...f, news_title: "", news_content: "" }));
@@ -9980,7 +10023,14 @@ function VitrineEdit({ structure, token, onDone }) {
         <label style={labelStyle}>Titre de l'actualité</label>
         <input style={inputStyle} value={form.news_title}
           onChange={e=>setForm(f=>({...f,news_title:e.target.value}))}
-          placeholder="Inscriptions 2026–2027 ouvertes"/>
+          placeholder="Menu du jour · Nouvelle recette · Promotion · Événement…"/>
+        <label style={labelStyle}>Type</label>
+        <select style={{...inputStyle,cursor:"pointer"}} value={form.news_type||"Actualité"}
+          onChange={e=>setForm(f=>({...f,news_type:e.target.value}))}>
+          {["Actualité","Promotion","Nouveauté","Événement","Offre d'emploi"].map(t=>(
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
         <label style={labelStyle}>Contenu</label>
         <textarea style={{...inputStyle,minHeight:70,resize:"vertical"}} value={form.news_content}
           onChange={e=>setForm(f=>({...f,news_content:e.target.value}))}
@@ -10041,10 +10091,16 @@ function VitrineDetail() {
   const location  = useLocation();
   const pathname  = window.location.pathname;
   const segments  = pathname.split("/").filter(Boolean);
+
+  // Détection sous-domaine : complexe-scolaire.vitrine.marcheduroi.com
+  const hostname      = window.location.hostname;
+  const isSubdomain   = hostname.includes(".vitrine.marcheduroi.com");
+  const subdomainSlug = isSubdomain ? hostname.split(".vitrine.marcheduroi.com")[0] : null;
+
   // segments[0] = "structure", segments[1] = slug, segments[2] = "modifier" ou "payer" (optionnel)
-  const slug         = segments[1];
-  const isEditMode   = segments[2] === "modifier";
-  const isPayMode    = segments[2] === "payer";
+  const slug         = subdomainSlug || segments[1];
+  const isEditMode   = !isSubdomain && segments[2] === "modifier";
+  const isPayMode    = !isSubdomain && segments[2] === "payer";
   const tokenFromUrl = new URLSearchParams(window.location.search).get("token");
 
   const [structure, setStructure] = useState(null);
@@ -10055,7 +10111,6 @@ function VitrineDetail() {
     if (!slug) return;
     const load = async () => {
       setLoading(true);
-      // En mode édition ou paiement on charge sans filtre active
       let query = supabase.from("structures").select("*").eq("slug", slug);
       if (!isEditMode && !isPayMode) query = query.eq("active", true);
       const { data, error } = await query.single();
@@ -10067,7 +10122,10 @@ function VitrineDetail() {
   }, [slug, isEditMode, isPayMode]);
 
   const handleShare = () => {
-    const url  = window.location.origin + "/structure/" + slug;
+    // Partager le sous-domaine s'il est actif, sinon l'URL classique
+    const url = (structure?.domain_active && structure?.custom_domain)
+      ? "https://" + structure.custom_domain
+      : window.location.origin + "/structure/" + slug;
     const text = (structure?.name || "Structure") + " sur MarchéduRoi 👑\n" + url;
     if (navigator.share) navigator.share({ title: structure?.name, text, url });
     else { navigator.clipboard.writeText(url); alert("Lien copié !"); }
@@ -10291,17 +10349,35 @@ function VitrineDetail() {
         {/* ---- Actualités ---- */}
         {news.length > 0 && (
           <div style={{ marginBottom:28 }}>
-            <p style={{ fontWeight:700,marginBottom:14,color:"#E8E8F0" }}>📰 Actualités</p>
+            <p style={{ fontWeight:700,marginBottom:14,color:"#E8E8F0" }}>📰 Actualités & Promotions</p>
             <div style={{ display:"flex",flexDirection:"column",gap:12 }}>
-              {news.map((item, i) => (
-                <div key={i} style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:12,padding:16 }}>
-                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6,gap:8 }}>
-                    <p style={{ fontWeight:700,color:"#E8E8F0",margin:0,fontSize:15,flex:1 }}>{item.title}</p>
-                    {item.date && <span style={{ color:"#9A9AB0",fontSize:12,flexShrink:0 }}>{item.date}</span>}
+              {news.map((item, i) => {
+                // Couleur selon le type
+                const typeColors = {
+                  "Promotion":  { bg:"rgba(255,71,87,0.08)",  border:"rgba(255,71,87,0.3)",  text:"#FF4757", icon:"🔥" },
+                  "Nouveauté":  { bg:"rgba(16,185,129,0.08)", border:"rgba(16,185,129,0.3)", text:COLOR,     icon:"🆕" },
+                  "Événement":  { bg:"rgba(108,99,255,0.08)", border:"rgba(108,99,255,0.3)", text:"#6C63FF", icon:"🎉" },
+                  "Offre d'emploi": { bg:"rgba(255,215,0,0.06)", border:"rgba(255,215,0,0.25)", text:"#FFD700", icon:"💼" },
+                  "Actualité":  { bg:"rgba(255,255,255,0.03)", border:"#2A2D45",             text:"#9A9AB0", icon:"📢" },
+                };
+                const style = typeColors[item.type] || typeColors["Actualité"];
+                return (
+                  <div key={i} style={{ background:style.bg, border:`1px solid ${style.border}`, borderRadius:12, padding:16 }}>
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,gap:8 }}>
+                      <div style={{ display:"flex",alignItems:"center",gap:8,flex:1 }}>
+                        {item.type && (
+                          <span style={{ background:style.bg,border:`1px solid ${style.border}`,color:style.text,padding:"2px 10px",borderRadius:20,fontSize:11,fontWeight:700,flexShrink:0 }}>
+                            {style.icon} {item.type}
+                          </span>
+                        )}
+                        <p style={{ fontWeight:700,color:"#E8E8F0",margin:0,fontSize:15 }}>{item.title}</p>
+                      </div>
+                      {item.date && <span style={{ color:"#9A9AB0",fontSize:12,flexShrink:0 }}>{item.date}</span>}
+                    </div>
+                    {item.content && <p style={{ color:"#B8B8CC",margin:0,lineHeight:1.75,fontSize:14,whiteSpace:"pre-line" }}>{item.content}</p>}
                   </div>
-                  {item.content && <p style={{ color:"#9A9AB0",margin:0,lineHeight:1.7,fontSize:14 }}>{item.content}</p>}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -10336,23 +10412,24 @@ function VitrineDetail() {
 
 
 function PersistentLayout() {
-  const location = useLocation();
-  const segments = location.pathname.split("/").filter(Boolean);
-  const validTypes = ["annonce","boutique","atelier","resto","beaute"];
-  const isDetail    = segments.length >= 2 && validTypes.includes(segments[0]) && segments[1] && segments[1] !== "undefined";
-  const isStructure    = segments[0] === "structure" && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
-  const isVitrineReq   = segments[0] === "vitrine" && segments.length === 1;
+  const location   = useLocation();
+  const segments   = location.pathname.split("/").filter(Boolean);
+  const hostname   = window.location.hostname;
+
+  const validTypes   = ["annonce","boutique","atelier","resto","beaute"];
+  const isDetail     = segments.length >= 2 && validTypes.includes(segments[0]) && segments[1] && segments[1] !== "undefined";
+  const isStructure  = segments[0] === "structure" && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
+  const isVitrineReq = segments[0] === "vitrine" && segments.length === 1;
+  // Sous-domaine : slug.vitrine.marcheduroi.com
+  const isVitrineSub = hostname.includes(".vitrine.marcheduroi.com");
+
   return (
     <>
-      {/* AppContent toujours monté — ne se démonte jamais */}
-      <div style={{ display: (isDetail || isStructure || isVitrineReq) ? "none" : "block" }}>
+      <div style={{ display: (isDetail || isStructure || isVitrineReq || isVitrineSub) ? "none" : "block" }}>
         <AppContent/>
       </div>
-      {/* Fiche annonce / boutique / resto… */}
       {isDetail && <AnnonceDetail/>}
-      {/* Vitrine d'une structure (VitrineWeb) */}
-      {isStructure && <VitrineDetail/>}
-      {/* Formulaire public de création VitrineWeb */}
+      {(isStructure || isVitrineSub) && <VitrineDetail/>}
       {isVitrineReq && <VitrineRequest/>}
     </>
   );
