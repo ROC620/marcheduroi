@@ -9234,6 +9234,16 @@ function VitrineRequest() {
   const [done,    setDone]    = React.useState(false);
   const [error,   setError]   = React.useState(null);
   const [slug,    setSlug]    = React.useState("");
+  const [authChecked, setAuthChecked] = React.useState(false);
+  const [isLoggedIn,  setIsLoggedIn]  = React.useState(false);
+
+  // Vérifier si l'utilisateur est connecté
+  React.useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+      setAuthChecked(true);
+    });
+  }, []);
 
   // Auto-slug depuis le nom
   const toSlug = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\s-]/g,"").trim().replace(/\s+/g,"-");
@@ -9342,6 +9352,39 @@ function VitrineRequest() {
   };
   const lbl = { display:"block", color:"#9A9AB0", fontSize:12, fontWeight:600, marginBottom:5, marginTop:16 };
   const sec = { fontWeight:700, color:"#E8E8F0", fontSize:15, margin:"28px 0 4px", paddingBottom:10, borderBottom:"1px solid #2A2D45" };
+
+  if (!authChecked) return (
+    <div style={{ display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0D0F1A",fontFamily:"Sora,sans-serif" }}>
+      <div style={{ textAlign:"center" }}>
+        <div style={{ width:40,height:40,border:"4px solid #2A2D45",borderTop:"4px solid #10B981",borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 12px" }}/>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <p style={{ color:"#9A9AB0",fontSize:14 }}>Vérification…</p>
+      </div>
+    </div>
+  );
+
+  if (!isLoggedIn) return (
+    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",display:"flex",alignItems:"center",justifyContent:"center",padding:24 }}>
+      <div style={{ maxWidth:420,textAlign:"center" }}>
+        <div style={{ fontSize:56,marginBottom:16 }}>🔐</div>
+        <h2 style={{ fontSize:22,fontWeight:800,color:"#E8E8F0",marginBottom:12 }}>Connexion requise</h2>
+        <p style={{ color:"#9A9AB0",lineHeight:1.75,marginBottom:28,fontSize:15 }}>
+          Vous devez être inscrit et connecté à MarchéduRoi pour créer une VitrineWeb.
+        </p>
+        <div style={{ display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap" }}>
+          <button onClick={()=>navigate("/")} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+            Se connecter
+          </button>
+          <button onClick={()=>navigate("/")} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+            ← Retour
+          </button>
+        </div>
+        <p style={{ color:"#9A9AB0",fontSize:12,marginTop:20 }}>
+          Pas encore de compte ? L'inscription est <strong style={{ color:"#10B981" }}>gratuite</strong> sur MarchéduRoi.
+        </p>
+      </div>
+    </div>
+  );
 
   if (done) return (
     <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",display:"flex",alignItems:"center",justifyContent:"center",padding:24 }}>
