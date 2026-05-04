@@ -5154,6 +5154,9 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
             </div>
           )}
 
+          {/* VitrineWeb — section admin */}
+          <AdminVitrineWeb theme={theme} notify={notify} />
+
           {/* Barre de recherche unifiée + boutons navigation rapide */}
           <div style={{ ...cardStyle,borderRadius:14,padding:16,marginBottom:24 }}>
             <div style={{ position:"relative",marginBottom:12 }}>
@@ -5169,6 +5172,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 { label:"🔧 Ateliers", id:"admin-ateliers", color:"#43C6AC", count:ateliers.length },
                 { label:"🍽️ Restos", id:"admin-restos", color:"#FF8C00", count:restos.length },
                 { label:"💇 Beauté", id:"admin-beaute", color:"#FF69B4", count:beaute.length },
+                { label:"🏛️ VitrineWeb", id:"admin-vitrines", color:"#10B981", count:0 },
               ].map(s=>(
                 <button key={s.id} onClick={()=>document.getElementById(s.id)?.scrollIntoView({behavior:"smooth",block:"start"})} style={{ background:`rgba(${s.color.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.1)`,border:`1px solid ${s.color}44`,color:s.color,padding:"6px 14px",borderRadius:20,fontWeight:700,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
                   {s.label} <span style={{ background:`${s.color}22`,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>
@@ -8604,19 +8608,1038 @@ function AnnonceDetail() {
 }
 
 // Layout persistant — AppContent reste monté en permanence
+
+
+function AdminVitrineWeb({ theme, notify }) {
+  const COLOR = "#10B981";
+
+  // ---- Onglet actif : "liste" ou "creer" ----
+  const [tab, setTab] = React.useState("liste");
+
+  // ---- Liste des structures ----
+  const [structures, setStructures] = React.useState([]);
+  const [loadingList, setLoadingList] = React.useState(false);
+  const [expandedId, setExpandedId] = React.useState(null);
+
+  // ---- Formulaire de création ----
+  const emptyForm = {
+    slug:"", name:"", type:"École", slogan:"", description:"",
+    logo_url:"", cover_url:"", photos:"", video:"",
+    address:"", ville:"", quartier:"", von:"",
+    gps_lat:"", gps_lng:"",
+    phone:"", phone2:"", whatsapp:"", email:"",
+    website:"", facebook:"", instagram:"",
+    hours:"", languages:"", services:"",
+    verified: false, active: true,
+  };
+  const [form,    setForm]    = React.useState(emptyForm);
+  const [saving,  setSaving]  = React.useState(false);
+  const [saveMsg, setSaveMsg] = React.useState(null);
+
+  // ---- Chargement de la liste ----
+  const loadStructures = React.useCallback(async () => {
+    setLoadingList(true);
+    const { data, error } = await supabase
+      .from("structures")
+      .select("id, slug, name, type, verified, active, created_at, edit_token, ville, phone")
+      .order("created_at", { ascending: false });
+    if (!error && data) setStructures(data);
+    setLoadingList(false);
+  }, []);
+
+  React.useEffect(() => { loadStructures(); }, [loadStructures]);
+
+  // ---- Auto-génération du slug depuis le nom ----
+  const toSlug = (str) =>
+    str.toLowerCase()
+       .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+       .replace(/[^a-z0-9\s-]/g,"")
+       .trim().replace(/\s+/g,"-");
+
+  const handleNameChange = (val) => {
+    setForm(f => ({ ...f, name: val, slug: toSlug(val) }));
+  };
+
+  // ---- Copier le lien de modification client ----
+  const copyEditLink = (structure) => {
+    const url = window.location.origin + "/structure/" + structure.slug + "/modifier?token=" + structure.edit_token;
+    navigator.clipboard.writeText(url);
+    notify("🔗 Lien de modification copié !");
+  };
+
+  // ---- Copier le lien public ----
+  const copyPublicLink = (structure) => {
+    const url = window.location.origin + "/structure/" + structure.slug;
+    navigator.clipboard.writeText(url);
+    notify("🔗 Lien public copié !");
+  };
+
+  // ---- Activer / Désactiver ----
+  const toggleActive = async (s) => {
+    const { error } = await supabase.from("structures").update({ active: !s.active }).eq("id", s.id);
+    if (!error) {
+      setStructures(prev => prev.map(x => x.id === s.id ? { ...x, active: !s.active } : x));
+      notify(s.active ? "⛔ Vitrine désactivée" : "✅ Vitrine activée");
+    }
+  };
+
+  // ---- Toggler Vérifié ----
+  const toggleVerified = async (s) => {
+    const { error } = await supabase.from("structures").update({ verified: !s.verified }).eq("id", s.id);
+    if (!error) {
+      setStructures(prev => prev.map(x => x.id === s.id ? { ...x, verified: !s.verified } : x));
+      notify(s.verified ? "Badge Vérifié retiré" : "✅ Badge Vérifié ajouté !");
+    }
+  };
+
+  // ---- Supprimer ----
+  const deleteStructure = async (s) => {
+    if (!window.confirm(`Supprimer définitivement "${s.name}" ? Cette action est irréversible.`)) return;
+    const { error } = await supabase.from("structures").delete().eq("id", s.id);
+    if (!error) {
+      setStructures(prev => prev.filter(x => x.id !== s.id));
+      notify("🗑️ Vitrine supprimée");
+    }
+  };
+
+  // ---- Créer une nouvelle structure ----
+  const handleCreate = async () => {
+    // Validations basiques
+    if (!form.name.trim()) { setSaveMsg({ type:"error", text:"Le nom est obligatoire." }); return; }
+    if (!form.slug.trim()) { setSaveMsg({ type:"error", text:"Le slug est obligatoire." }); return; }
+    if (!form.type.trim()) { setSaveMsg({ type:"error", text:"Le type est obligatoire." }); return; }
+
+    setSaving(true); setSaveMsg(null);
+
+    const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean);
+
+    const payload = {
+      slug:        form.slug.trim(),
+      name:        form.name.trim(),
+      type:        form.type.trim(),
+      slogan:      form.slogan   || null,
+      description: form.description || null,
+      logo_url:    form.logo_url || null,
+      cover_url:   form.cover_url || null,
+      photos:      photosArray,
+      video:       form.video    || null,
+      address:     form.address  || null,
+      ville:       form.ville    || null,
+      quartier:    form.quartier || null,
+      von:         form.von      || null,
+      gps_lat:     form.gps_lat  ? parseFloat(form.gps_lat)  : null,
+      gps_lng:     form.gps_lng  ? parseFloat(form.gps_lng)  : null,
+      phone:       form.phone    || null,
+      phone2:      form.phone2   || null,
+      whatsapp:    form.whatsapp || null,
+      email:       form.email    || null,
+      website:     form.website  || null,
+      facebook:    form.facebook || null,
+      instagram:   form.instagram || null,
+      hours:       form.hours    || null,
+      languages:   form.languages || null,
+      services:    form.services || null,
+      news:        [],
+      verified:    form.verified,
+      active:      form.active,
+    };
+
+    const { data, error } = await supabase.from("structures").insert(payload).select().single();
+
+    if (error) {
+      const msg = error.code === "23505"
+        ? "Ce slug existe déjà. Modifie le slug pour le rendre unique."
+        : "Erreur : " + error.message;
+      setSaveMsg({ type:"error", text: msg });
+    } else {
+      setSaveMsg({ type:"success", text:"✅ Vitrine créée ! Copie le lien de modification à envoyer au client." });
+      setStructures(prev => [data, ...prev]);
+      // Garder le formulaire visible pour copier le lien
+      setForm(emptyForm);
+      // Basculer sur la liste après 2 secondes
+      setTimeout(() => { setTab("liste"); setSaveMsg(null); }, 3000);
+    }
+    setSaving(false);
+  };
+
+  // ---- Styles réutilisables ----
+  const inputStyle = {
+    width:"100%", background: theme.card || "#1A1D30",
+    border:`1px solid ${theme.border || "#2A2D45"}`,
+    borderRadius:10, padding:"11px 14px",
+    color: theme.text || "#E8E8F0", fontSize:14,
+    fontFamily:"Sora,sans-serif", outline:"none", boxSizing:"border-box",
+  };
+  const labelStyle = {
+    display:"block", color: theme.sub || "#9A9AB0",
+    fontSize:12, fontWeight:600, marginBottom:5, marginTop:14,
+  };
+  const sectionTitleStyle = {
+    fontWeight:700, color: theme.text || "#E8E8F0",
+    fontSize:14, margin:"22px 0 2px",
+    paddingBottom:8, borderBottom:`1px solid ${theme.border || "#2A2D45"}`,
+  };
+
+  const TYPES = ["École","Clinique","Pharmacie","Cabinet médical","ONG","Association","Mairie","Paroisse / Église","Mosquée","Hôtel","Fondation","Cabinet d'avocats","Bureau d'études","Agence immobilière","Autre"];
+
+  return (
+    <div id="admin-vitrines" style={{ scrollMarginTop:80, marginBottom:32 }}>
+
+      {/* En-tête section */}
+      <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:8 }}>
+        <h3 style={{ fontWeight:800,fontSize:18,color:COLOR,margin:0,display:"flex",alignItems:"center",gap:8 }}>
+          🏛️ VitrineWeb
+          <span style={{ background:`rgba(16,185,129,0.12)`,color:COLOR,borderRadius:20,padding:"2px 10px",fontSize:12,fontWeight:700 }}>
+            {structures.length}
+          </span>
+        </h3>
+        <div style={{ display:"flex",gap:8 }}>
+          <button onClick={()=>setTab("liste")}
+            style={{ background:tab==="liste"?`rgba(16,185,129,0.15)`:"transparent", border:`1px solid ${tab==="liste"?COLOR:theme.border||"#2A2D45"}`, color:tab==="liste"?COLOR:theme.sub||"#9A9AB0", padding:"7px 16px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+            📋 Liste
+          </button>
+          <button onClick={()=>{ setTab("creer"); setSaveMsg(null); }}
+            style={{ background:tab==="creer"?`rgba(16,185,129,0.15)`:"transparent", border:`1px solid ${tab==="creer"?COLOR:theme.border||"#2A2D45"}`, color:tab==="creer"?COLOR:theme.sub||"#9A9AB0", padding:"7px 16px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+            + Créer une vitrine
+          </button>
+        </div>
+      </div>
+
+      {/* ========== ONGLET LISTE ========== */}
+      {tab === "liste" && (
+        <div>
+          {loadingList && (
+            <p style={{ color:theme.sub||"#9A9AB0",fontSize:13,padding:"16px 0" }}>Chargement…</p>
+          )}
+          {!loadingList && structures.length === 0 && (
+            <div style={{ background:theme.card||"#1A1D30",border:`1px solid ${theme.border||"#2A2D45"}`,borderRadius:14,padding:32,textAlign:"center" }}>
+              <p style={{ fontSize:32,marginBottom:8 }}>🏗️</p>
+              <p style={{ color:theme.sub||"#9A9AB0",fontSize:14 }}>Aucune vitrine créée pour l'instant.</p>
+              <button onClick={()=>setTab("creer")} style={{ marginTop:12,background:`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:"#fff",padding:"10px 24px",borderRadius:10,fontWeight:700,cursor:"pointer" }}>
+                Créer la première vitrine
+              </button>
+            </div>
+          )}
+          {!loadingList && structures.map(s => (
+            <div key={s.id} style={{ background:theme.card||"#1A1D30",border:`1px solid ${theme.border||"#2A2D45"}`,borderRadius:14,marginBottom:10,overflow:"hidden" }}>
+
+              {/* Ligne principale */}
+              <div style={{ padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexWrap:"wrap" }}>
+                <div style={{ display:"flex",alignItems:"center",gap:12,flex:1,minWidth:0 }}>
+                  {/* Icône type */}
+                  <div style={{ width:40,height:40,borderRadius:10,background:`rgba(16,185,129,0.12)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0 }}>
+                    🏛️
+                  </div>
+                  <div style={{ minWidth:0 }}>
+                    <div style={{ display:"flex",alignItems:"center",gap:6,flexWrap:"wrap" }}>
+                      <p style={{ fontWeight:700,color:theme.text||"#E8E8F0",margin:0,fontSize:14 }}>{s.name}</p>
+                      {s.verified && <span style={{ background:"rgba(255,215,0,0.12)",color:"#FFD700",padding:"1px 8px",borderRadius:10,fontSize:10,fontWeight:700 }}>✅ Vérifié</span>}
+                      {!s.active  && <span style={{ background:"rgba(255,71,87,0.12)", color:"#FF4757", padding:"1px 8px",borderRadius:10,fontSize:10,fontWeight:700 }}>⛔ Inactif</span>}
+                    </div>
+                    <p style={{ color:theme.sub||"#9A9AB0",fontSize:12,margin:"2px 0 0" }}>
+                      {s.type} · {s.ville||"—"} · <span style={{ fontFamily:"monospace" }}>/{s.slug}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display:"flex",gap:6,flexWrap:"wrap",flexShrink:0 }}>
+                  <button onClick={()=>copyPublicLink(s)}
+                    style={{ background:`rgba(16,185,129,0.1)`,border:`1px solid rgba(16,185,129,0.3)`,color:COLOR,padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}
+                    title="Lien public">🔗</button>
+                  <button onClick={()=>copyEditLink(s)}
+                    style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}
+                    title="Lien de modification client">✏️</button>
+                  <button onClick={()=>toggleVerified(s)}
+                    style={{ background:s.verified?"rgba(255,215,0,0.15)":"rgba(255,215,0,0.05)",border:`1px solid ${s.verified?"#FFD70044":"rgba(255,215,0,0.15)"}`,color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}
+                    title={s.verified?"Retirer le badge Vérifié":"Ajouter le badge Vérifié"}>
+                    {s.verified ? "✅" : "☑️"}
+                  </button>
+                  <button onClick={()=>toggleActive(s)}
+                    style={{ background:s.active?"rgba(67,198,172,0.1)":"rgba(255,71,87,0.1)",border:`1px solid ${s.active?"rgba(67,198,172,0.3)":"rgba(255,71,87,0.3)"}`,color:s.active?"#43C6AC":"#FF4757",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}
+                    title={s.active?"Désactiver la vitrine":"Activer la vitrine"}>
+                    {s.active ? "👁️" : "🚫"}
+                  </button>
+                  <button onClick={()=>setExpandedId(expandedId===s.id?null:s.id)}
+                    style={{ background:"transparent",border:`1px solid ${theme.border||"#2A2D45"}`,color:theme.sub||"#9A9AB0",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}>
+                    {expandedId===s.id ? "▲" : "▼"}
+                  </button>
+                  <button onClick={()=>deleteStructure(s)}
+                    style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}
+                    title="Supprimer">🗑️</button>
+                </div>
+              </div>
+
+              {/* Détails dépliés */}
+              {expandedId === s.id && (
+                <div style={{ borderTop:`1px solid ${theme.border||"#2A2D45"}`,padding:"14px 16px",background:"rgba(16,185,129,0.03)" }}>
+                  <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12,fontSize:13 }}>
+                    <div>
+                      <span style={{ color:theme.sub||"#9A9AB0" }}>📞 Téléphone : </span>
+                      <span style={{ color:theme.text||"#E8E8F0",fontWeight:600 }}>{s.phone||"—"}</span>
+                    </div>
+                    <div>
+                      <span style={{ color:theme.sub||"#9A9AB0" }}>📅 Créée le : </span>
+                      <span style={{ color:theme.text||"#E8E8F0",fontWeight:600 }}>{s.created_at?.slice(0,10)||"—"}</span>
+                    </div>
+                  </div>
+
+                  {/* Lien public */}
+                  <div style={{ background:theme.card||"#1A1D30",border:`1px solid ${theme.border||"#2A2D45"}`,borderRadius:10,padding:12,marginBottom:8 }}>
+                    <p style={{ color:theme.sub||"#9A9AB0",fontSize:11,fontWeight:700,margin:"0 0 4px" }}>🔗 LIEN PUBLIC (à partager)</p>
+                    <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+                      <code style={{ color:COLOR,fontSize:12,flex:1,wordBreak:"break-all",background:"transparent",fontFamily:"monospace" }}>
+                        {window.location.origin}/structure/{s.slug}
+                      </code>
+                      <button onClick={()=>copyPublicLink(s)} style={{ background:`rgba(16,185,129,0.12)`,border:`1px solid rgba(16,185,129,0.3)`,color:COLOR,padding:"5px 10px",borderRadius:7,fontWeight:700,fontSize:11,cursor:"pointer",flexShrink:0 }}>
+                        Copier
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Lien de modification */}
+                  <div style={{ background:"rgba(108,99,255,0.06)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:10,padding:12 }}>
+                    <p style={{ color:"#9A9AB0",fontSize:11,fontWeight:700,margin:"0 0 4px" }}>✏️ LIEN DE MODIFICATION (à envoyer au client)</p>
+                    <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+                      <code style={{ color:"#6C63FF",fontSize:11,flex:1,wordBreak:"break-all",background:"transparent",fontFamily:"monospace" }}>
+                        {window.location.origin}/structure/{s.slug}/modifier?token={s.edit_token}
+                      </code>
+                      <button onClick={()=>copyEditLink(s)} style={{ background:"rgba(108,99,255,0.12)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"5px 10px",borderRadius:7,fontWeight:700,fontSize:11,cursor:"pointer",flexShrink:0 }}>
+                        Copier
+                      </button>
+                    </div>
+                    <p style={{ color:"#9A9AB0",fontSize:11,margin:"6px 0 0" }}>⚠️ Garde ce lien confidentiel — il permet au client de modifier sa vitrine.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ========== ONGLET CRÉER ========== */}
+      {tab === "creer" && (
+        <div style={{ background:theme.card||"#1A1D30",border:`1px solid ${theme.border||"#2A2D45"}`,borderRadius:16,padding:24 }}>
+
+          {/* IDENTITÉ */}
+          <p style={sectionTitleStyle}>🏛️ Identité de la structure</p>
+
+          <label style={labelStyle}>Nom officiel *</label>
+          <input style={inputStyle} value={form.name}
+            onChange={e=>handleNameChange(e.target.value)}
+            placeholder="École Sainte-Marie de Cotonou"/>
+
+          <label style={labelStyle}>Slug (URL) *</label>
+          <div style={{ position:"relative" }}>
+            <input style={{...inputStyle,fontFamily:"monospace",fontSize:13}} value={form.slug}
+              onChange={e=>setForm(f=>({...f,slug:e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,"")}))}
+              placeholder="ecole-sainte-marie-cotonou"/>
+          </div>
+          <p style={{ color:theme.sub||"#9A9AB0",fontSize:11,margin:"4px 0 0" }}>
+            URL finale : <code style={{ color:COLOR }}>{window.location.origin}/structure/{form.slug||"..."}</code>
+          </p>
+
+          <label style={labelStyle}>Type *</label>
+          <select style={{...inputStyle,cursor:"pointer"}} value={form.type}
+            onChange={e=>setForm(f=>({...f,type:e.target.value}))}>
+            {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+          </select>
+
+          <label style={labelStyle}>Slogan / Mission</label>
+          <input style={inputStyle} value={form.slogan}
+            onChange={e=>setForm(f=>({...f,slogan:e.target.value}))}
+            placeholder="Former les leaders de demain"/>
+
+          <label style={labelStyle}>Description</label>
+          <textarea style={{...inputStyle,minHeight:80,resize:"vertical"}} value={form.description}
+            onChange={e=>setForm(f=>({...f,description:e.target.value}))}
+            placeholder="Présentation complète de la structure…"/>
+
+          {/* MÉDIAS */}
+          <p style={sectionTitleStyle}>🖼️ Médias</p>
+
+          <label style={labelStyle}>Logo (lien URL)</label>
+          <input style={inputStyle} value={form.logo_url}
+            onChange={e=>setForm(f=>({...f,logo_url:e.target.value}))}
+            placeholder="https://i.ibb.co/.../logo.png"/>
+
+          <label style={labelStyle}>Photo de couverture / bannière (lien URL)</label>
+          <input style={inputStyle} value={form.cover_url}
+            onChange={e=>setForm(f=>({...f,cover_url:e.target.value}))}
+            placeholder="https://i.ibb.co/.../banniere.jpg"/>
+
+          <label style={labelStyle}>Photos galerie — un lien par ligne</label>
+          <textarea style={{...inputStyle,minHeight:90,resize:"vertical",fontFamily:"monospace",fontSize:12}}
+            value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))}
+            placeholder={"https://i.ibb.co/.../photo1.jpg\nhttps://i.ibb.co/.../photo2.jpg"}/>
+
+          <label style={labelStyle}>Vidéo YouTube (lien)</label>
+          <input style={inputStyle} value={form.video}
+            onChange={e=>setForm(f=>({...f,video:e.target.value}))}
+            placeholder="https://www.youtube.com/watch?v=..."/>
+
+          {/* CONTACTS */}
+          <p style={sectionTitleStyle}>📞 Contacts</p>
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+            <div>
+              <label style={labelStyle}>Téléphone principal</label>
+              <input style={inputStyle} value={form.phone}
+                onChange={e=>setForm(f=>({...f,phone:e.target.value}))}
+                placeholder="+2290100000000"/>
+            </div>
+            <div>
+              <label style={labelStyle}>Téléphone secondaire</label>
+              <input style={inputStyle} value={form.phone2}
+                onChange={e=>setForm(f=>({...f,phone2:e.target.value}))}
+                placeholder="+2290100000000"/>
+            </div>
+            <div>
+              <label style={labelStyle}>WhatsApp</label>
+              <input style={inputStyle} value={form.whatsapp}
+                onChange={e=>setForm(f=>({...f,whatsapp:e.target.value}))}
+                placeholder="+2290100000000"/>
+            </div>
+            <div>
+              <label style={labelStyle}>Email</label>
+              <input style={inputStyle} type="email" value={form.email}
+                onChange={e=>setForm(f=>({...f,email:e.target.value}))}
+                placeholder="contact@structure.bj"/>
+            </div>
+            <div>
+              <label style={labelStyle}>Site web</label>
+              <input style={inputStyle} value={form.website}
+                onChange={e=>setForm(f=>({...f,website:e.target.value}))}
+                placeholder="https://www.mastructure.bj"/>
+            </div>
+            <div>
+              <label style={labelStyle}>Facebook</label>
+              <input style={inputStyle} value={form.facebook}
+                onChange={e=>setForm(f=>({...f,facebook:e.target.value}))}
+                placeholder="https://facebook.com/mastructure"/>
+            </div>
+          </div>
+
+          {/* LOCALISATION */}
+          <p style={sectionTitleStyle}>📍 Localisation</p>
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+            <div>
+              <label style={labelStyle}>Ville</label>
+              <input style={inputStyle} value={form.ville}
+                onChange={e=>setForm(f=>({...f,ville:e.target.value}))}
+                placeholder="Cotonou"/>
+            </div>
+            <div>
+              <label style={labelStyle}>Quartier</label>
+              <input style={inputStyle} value={form.quartier}
+                onChange={e=>setForm(f=>({...f,quartier:e.target.value}))}
+                placeholder="Akpakpa"/>
+            </div>
+          </div>
+          <label style={labelStyle}>Von (point de repère)</label>
+          <input style={inputStyle} value={form.von}
+            onChange={e=>setForm(f=>({...f,von:e.target.value}))}
+            placeholder="Von de la cathédrale Notre-Dame"/>
+          <label style={labelStyle}>Adresse complète</label>
+          <input style={inputStyle} value={form.address}
+            onChange={e=>setForm(f=>({...f,address:e.target.value}))}
+            placeholder="123 rue de l'Indépendance"/>
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+            <div>
+              <label style={labelStyle}>GPS — Latitude</label>
+              <input style={inputStyle} type="number" step="any" value={form.gps_lat}
+                onChange={e=>setForm(f=>({...f,gps_lat:e.target.value}))}
+                placeholder="6.3654"/>
+            </div>
+            <div>
+              <label style={labelStyle}>GPS — Longitude</label>
+              <input style={inputStyle} type="number" step="any" value={form.gps_lng}
+                onChange={e=>setForm(f=>({...f,gps_lng:e.target.value}))}
+                placeholder="2.4183"/>
+            </div>
+          </div>
+          <p style={{ color:theme.sub||"#9A9AB0",fontSize:11,margin:"4px 0 0" }}>
+            💡 Pour obtenir les coordonnées GPS : Google Maps → clic droit sur le lieu → copie latitude/longitude
+          </p>
+
+          {/* INFOS PRATIQUES */}
+          <p style={sectionTitleStyle}>🕐 Infos pratiques</p>
+          <label style={labelStyle}>Horaires d'ouverture</label>
+          <textarea style={{...inputStyle,minHeight:70,resize:"vertical"}} value={form.hours}
+            onChange={e=>setForm(f=>({...f,hours:e.target.value}))}
+            placeholder={"Lun–Ven : 7h30–17h00\nSam : 8h00–12h00"}/>
+          <label style={labelStyle}>Services proposés</label>
+          <textarea style={{...inputStyle,minHeight:70,resize:"vertical"}} value={form.services}
+            onChange={e=>setForm(f=>({...f,services:e.target.value}))}
+            placeholder="Consultations, urgences 24h/24, maternité, pédiatrie…"/>
+          <label style={labelStyle}>Langues parlées</label>
+          <input style={inputStyle} value={form.languages}
+            onChange={e=>setForm(f=>({...f,languages:e.target.value}))}
+            placeholder="Français, Fon, Yoruba, Anglais"/>
+
+          {/* OPTIONS */}
+          <p style={sectionTitleStyle}>⚙️ Options</p>
+          <div style={{ display:"flex",gap:20,flexWrap:"wrap",marginTop:8 }}>
+            <label style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer",color:theme.text||"#E8E8F0",fontSize:14 }}>
+              <input type="checkbox" checked={form.verified} onChange={e=>setForm(f=>({...f,verified:e.target.checked}))}
+                style={{ width:16,height:16,accentColor:COLOR }}/>
+              ✅ Marquer comme Vérifié EDENPORTAIL
+            </label>
+            <label style={{ display:"flex",alignItems:"center",gap:8,cursor:"pointer",color:theme.text||"#E8E8F0",fontSize:14 }}>
+              <input type="checkbox" checked={form.active} onChange={e=>setForm(f=>({...f,active:e.target.checked}))}
+                style={{ width:16,height:16,accentColor:COLOR }}/>
+              👁️ Vitrine active (visible publiquement)
+            </label>
+          </div>
+
+          {/* Messages d'état */}
+          {saveMsg && (
+            <div style={{ marginTop:20,background:saveMsg.type==="error"?"rgba(255,71,87,0.1)":"rgba(16,185,129,0.1)",border:`1px solid ${saveMsg.type==="error"?"rgba(255,71,87,0.3)":"rgba(16,185,129,0.3)"}`,borderRadius:10,padding:14 }}>
+              <p style={{ margin:0,color:saveMsg.type==="error"?"#FF4757":COLOR,fontWeight:600,fontSize:14 }}>{saveMsg.text}</p>
+            </div>
+          )}
+
+          {/* Bouton créer */}
+          <div style={{ display:"flex",gap:12,marginTop:24 }}>
+            <button onClick={()=>{ setForm(emptyForm); setSaveMsg(null); setTab("liste"); }}
+              style={{ flex:1,padding:14,background:"transparent",border:`1px solid ${theme.border||"#2A2D45"}`,color:theme.sub||"#9A9AB0",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+              Annuler
+            </button>
+            <button onClick={handleCreate} disabled={saving}
+              style={{ flex:2,padding:14,background:saving?"#1A1D30":`linear-gradient(135deg,${COLOR},#059669)`,border:saving?`1px solid ${theme.border||"#2A2D45"}`:"none",color:saving?theme.sub||"#9A9AB0":"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:saving?"not-allowed":"pointer",transition:"all 0.2s" }}>
+              {saving ? "Création en cours…" : "🏛️ Créer la vitrine"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// -----------------------------------------------
+// VitrineEdit — Page de modification client
+// (rendu depuis VitrineDetail si isEditMode=true)
+// -----------------------------------------------
+function VitrineEdit({ structure, token, onDone }) {
+  const [form, setForm] = React.useState({
+    phone:    structure.phone    || "",
+    phone2:   structure.phone2   || "",
+    whatsapp: structure.whatsapp || "",
+    email:    structure.email    || "",
+    facebook: structure.facebook || "",
+    hours:    structure.hours    || "",
+    video:    structure.video    || "",
+    photos:   (structure.photos  || []).join("\n"),
+    services: structure.services || "",
+    news_title:   "",
+    news_content: "",
+  });
+  const [news,         setNews]         = React.useState(structure.news || []);
+  const [saving,       setSaving]       = React.useState(false);
+  const [saved,        setSaved]        = React.useState(false);
+  const [saveError,    setSaveError]    = React.useState(null);
+  const [tokenValid,   setTokenValid]   = React.useState(false);
+  const [checkingTok,  setCheckingTok]  = React.useState(true);
+
+  React.useEffect(() => {
+    if (!token || !structure) { setCheckingTok(false); return; }
+    setTokenValid(String(structure.edit_token) === String(token));
+    setCheckingTok(false);
+  }, [token, structure]);
+
+  const handleSave = async () => {
+    setSaving(true); setSaveError(null);
+    const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean);
+    const { error } = await supabase.from("structures").update({
+      phone:      form.phone,
+      phone2:     form.phone2,
+      whatsapp:   form.whatsapp,
+      email:      form.email,
+      facebook:   form.facebook,
+      hours:      form.hours,
+      video:      form.video,
+      photos:     photosArray,
+      services:   form.services,
+      news,
+      updated_at: new Date().toISOString(),
+    }).eq("id", structure.id).eq("edit_token", token);
+    if (error) setSaveError("Erreur lors de la sauvegarde. Réessayez.");
+    else { setSaved(true); setTimeout(onDone, 1800); }
+    setSaving(false);
+  };
+
+  const addNews = () => {
+    if (!form.news_title.trim()) return;
+    const entry = {
+      title:   form.news_title,
+      content: form.news_content,
+      date:    new Date().toLocaleDateString("fr-FR"),
+    };
+    setNews(prev => [entry, ...prev]);
+    setForm(f => ({ ...f, news_title: "", news_content: "" }));
+  };
+
+  if (checkingTok) return (
+    <div style={{ display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0D0F1A",fontFamily:"Sora,sans-serif",color:"#9A9AB0" }}>
+      Vérification du lien…
+    </div>
+  );
+
+  if (!tokenValid) return (
+    <div style={{ textAlign:"center",padding:"80px 24px",fontFamily:"Sora,sans-serif",background:"#0D0F1A",minHeight:"100vh",color:"#E8E8F0" }}>
+      <p style={{ fontSize:48,marginBottom:16 }}>🔒</p>
+      <h2 style={{ fontSize:22,fontWeight:700,marginBottom:12 }}>Lien non valide</h2>
+      <p style={{ color:"#9A9AB0",marginBottom:24 }}>Ce lien de modification est incorrect ou a expiré.<br/>Contactez EDENPORTAIL pour obtenir un nouveau lien.</p>
+    </div>
+  );
+
+  const COLOR = "#10B981";
+  const inputStyle = {
+    width:"100%", background:"#1A1D30", border:"1px solid #2A2D45", borderRadius:10,
+    padding:"12px 14px", color:"#E8E8F0", fontSize:14, fontFamily:"Sora,sans-serif",
+    outline:"none", boxSizing:"border-box",
+  };
+  const labelStyle = {
+    display:"block", color:"#9A9AB0", fontSize:13, fontWeight:600,
+    marginBottom:6, marginTop:16,
+  };
+  const sectionStyle = { fontWeight:700, color:"#E8E8F0", margin:"28px 0 4px", fontSize:15 };
+
+  return (
+    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",color:"#E8E8F0" }}>
+      {/* Navbar */}
+      <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100 }}>
+        <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,objectFit:"contain" }}/>
+        <span style={{ color:COLOR,fontWeight:700,fontSize:14 }}>✏️ Modifier ma vitrine</span>
+      </div>
+
+      <div style={{ maxWidth:620,margin:"0 auto",padding:"24px 24px 48px" }}>
+
+        {/* Bandeau info */}
+        <div style={{ background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:12,padding:16,marginBottom:24 }}>
+          <p style={{ margin:0,fontWeight:700,color:COLOR }}>✏️ {structure.name}</p>
+          <p style={{ margin:"6px 0 0",color:"#9A9AB0",fontSize:13,lineHeight:1.6 }}>
+            Vous pouvez mettre à jour vos contacts, photos, horaires et actualités.<br/>
+            Pour modifier le nom ou l'adresse, contactez <strong style={{ color:"#E8E8F0" }}>EDENPORTAIL</strong>.
+          </p>
+        </div>
+
+        {/* CONTACTS */}
+        <p style={sectionStyle}>📞 Contacts</p>
+        <label style={labelStyle}>Téléphone principal</label>
+        <input style={inputStyle} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="+2290100000000"/>
+        <label style={labelStyle}>Téléphone secondaire (optionnel)</label>
+        <input style={inputStyle} value={form.phone2} onChange={e=>setForm(f=>({...f,phone2:e.target.value}))} placeholder="+2290100000000"/>
+        <label style={labelStyle}>WhatsApp</label>
+        <input style={inputStyle} value={form.whatsapp} onChange={e=>setForm(f=>({...f,whatsapp:e.target.value}))} placeholder="+2290100000000"/>
+        <label style={labelStyle}>Email</label>
+        <input style={inputStyle} type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} placeholder="contact@mastructure.bj"/>
+        <label style={labelStyle}>Facebook (URL ou nom de page)</label>
+        <input style={inputStyle} value={form.facebook} onChange={e=>setForm(f=>({...f,facebook:e.target.value}))} placeholder="https://facebook.com/mastructure"/>
+
+        {/* HORAIRES */}
+        <p style={sectionStyle}>🕐 Horaires d'ouverture</p>
+        <label style={labelStyle}>Horaires (texte libre, Entrée pour retour à la ligne)</label>
+        <textarea style={{...inputStyle,minHeight:90,resize:"vertical"}} value={form.hours}
+          onChange={e=>setForm(f=>({...f,hours:e.target.value}))}
+          placeholder={"Lun–Ven : 7h30–17h00\nSam : 8h00–12h00\nDim : Fermé"}/>
+
+        {/* PHOTOS */}
+        <p style={sectionStyle}>🖼️ Photos</p>
+        <label style={labelStyle}>Liens photos — un lien par ligne</label>
+        <textarea style={{...inputStyle,minHeight:130,resize:"vertical",fontFamily:"monospace",fontSize:12}}
+          value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))}
+          placeholder={"https://i.ibb.co/xyz/facade.jpg\nhttps://i.ibb.co/abc/salle-classe.jpg\nhttps://i.ibb.co/def/equipe.jpg"}/>
+        <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:10,padding:12,marginTop:8 }}>
+          <p style={{ margin:0,color:"#9A9AB0",fontSize:12,lineHeight:1.7 }}>
+            💡 <strong style={{ color:"#E8E8F0" }}>Comment héberger vos photos :</strong><br/>
+            1. Allez sur <strong style={{ color:COLOR }}>imgbb.com</strong> ou <strong style={{ color:COLOR }}>postimages.org</strong><br/>
+            2. Uploadez votre photo → copiez le <em>lien direct</em><br/>
+            3. Collez le lien ici<br/>
+            ⚠️ Ne supprimez jamais vos photos de ImgBB, sinon elles disparaissent de votre vitrine.
+          </p>
+        </div>
+
+        {/* VIDÉO */}
+        <p style={sectionStyle}>🎬 Vidéo de présentation</p>
+        <label style={labelStyle}>Lien YouTube</label>
+        <input style={inputStyle} value={form.video}
+          onChange={e=>setForm(f=>({...f,video:e.target.value}))}
+          placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX"/>
+
+        {/* SERVICES */}
+        <p style={sectionStyle}>✅ Services proposés</p>
+        <label style={labelStyle}>Décrivez vos services</label>
+        <textarea style={{...inputStyle,minHeight:80,resize:"vertical"}} value={form.services}
+          onChange={e=>setForm(f=>({...f,services:e.target.value}))}
+          placeholder="Consultations générales, pédiatrie, maternité, urgences 24h/24…"/>
+
+        {/* ACTUALITÉS */}
+        <p style={sectionStyle}>📰 Actualités</p>
+        <label style={labelStyle}>Titre de l'actualité</label>
+        <input style={inputStyle} value={form.news_title}
+          onChange={e=>setForm(f=>({...f,news_title:e.target.value}))}
+          placeholder="Inscriptions 2026–2027 ouvertes"/>
+        <label style={labelStyle}>Contenu</label>
+        <textarea style={{...inputStyle,minHeight:70,resize:"vertical"}} value={form.news_content}
+          onChange={e=>setForm(f=>({...f,news_content:e.target.value}))}
+          placeholder="Les inscriptions sont ouvertes du 1er juin au 31 juillet…"/>
+        <button onClick={addNews} style={{ marginTop:10,background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.3)",color:COLOR,padding:"10px 20px",borderRadius:10,fontWeight:600,cursor:"pointer",fontSize:14 }}>
+          + Ajouter l'actualité à la liste
+        </button>
+
+        {/* Liste des actualités existantes */}
+        {news.length > 0 && (
+          <div style={{ marginTop:12,display:"flex",flexDirection:"column",gap:8 }}>
+            {news.map((n, i) => (
+              <div key={i} style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:10,padding:12,display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8 }}>
+                <div style={{ flex:1 }}>
+                  <p style={{ margin:0,fontWeight:700,fontSize:14 }}>{n.title}</p>
+                  <p style={{ margin:"2px 0 0",color:"#9A9AB0",fontSize:12 }}>{n.date}</p>
+                  {n.content && <p style={{ margin:"4px 0 0",color:"#9A9AB0",fontSize:13,lineHeight:1.5 }}>{n.content}</p>}
+                </div>
+                <button onClick={()=>setNews(prev=>prev.filter((_,j)=>j!==i))}
+                  style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"6px 12px",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600,flexShrink:0 }}>
+                  Supprimer
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Messages d'état */}
+        {saveError && (
+          <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:10,padding:14,marginTop:20 }}>
+            <p style={{ margin:0,color:"#FF4757",fontWeight:600 }}>❌ {saveError}</p>
+          </div>
+        )}
+        {saved && (
+          <div style={{ background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:10,padding:14,marginTop:20 }}>
+            <p style={{ margin:0,color:COLOR,fontWeight:600 }}>✅ Vitrine mise à jour avec succès ! Redirection en cours…</p>
+          </div>
+        )}
+
+        {/* Bouton enregistrer */}
+        <button onClick={handleSave} disabled={saving}
+          style={{ width:"100%",marginTop:28,padding:16,background:saving?"#1A1D30":"linear-gradient(135deg,#10B981,#059669)",border:saving?"1px solid #2A2D45":"none",color:saving?"#9A9AB0":"#fff",borderRadius:12,fontWeight:700,fontSize:16,cursor:saving?"not-allowed":"pointer",transition:"all 0.2s" }}>
+          {saving ? "Enregistrement en cours…" : "💾 Enregistrer les modifications"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+// -----------------------------------------------
+// VitrineDetail — Page publique d'une structure
+// Route : /structure/:slug
+// Route modifier : /structure/:slug/modifier?token=XXX
+// -----------------------------------------------
+function VitrineDetail() {
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const pathname  = window.location.pathname;
+  const segments  = pathname.split("/").filter(Boolean);
+  // segments[0] = "structure", segments[1] = slug, segments[2] = "modifier" (optionnel)
+  const slug        = segments[1];
+  const isEditMode  = segments[2] === "modifier";
+  const tokenFromUrl = new URLSearchParams(window.location.search).get("token");
+
+  const [structure, setStructure] = useState(null);
+  const [loading,   setLoading]   = useState(true);
+  const [notFound,  setNotFound]  = useState(false);
+
+  useEffect(() => {
+    if (!slug) return;
+    const load = async () => {
+      setLoading(true);
+      // En mode édition on charge sans filtre active pour que le client puisse quand même modifier
+      let query = supabase.from("structures").select("*").eq("slug", slug);
+      if (!isEditMode) query = query.eq("active", true);
+      const { data, error } = await query.single();
+      if (error || !data) setNotFound(true);
+      else setStructure(data);
+      setLoading(false);
+    };
+    load();
+  }, [slug, isEditMode]);
+
+  const handleShare = () => {
+    const url  = window.location.origin + "/structure/" + slug;
+    const text = (structure?.name || "Structure") + " sur MarchéduRoi 👑\n" + url;
+    if (navigator.share) navigator.share({ title: structure?.name, text, url });
+    else { navigator.clipboard.writeText(url); alert("Lien copié !"); }
+  };
+
+  const COLOR = "#10B981";
+
+  /* ---- États de chargement / erreur ---- */
+  if (loading) return (
+    <div style={{ display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0D0F1A",fontFamily:"Sora,sans-serif" }}>
+      <div style={{ textAlign:"center" }}>
+        <div style={{ width:48,height:48,border:"4px solid #2A2D45",borderTop:`4px solid ${COLOR}`,borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 16px" }}/>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <p style={{ color:"#9A9AB0",fontSize:14 }}>Chargement de la vitrine…</p>
+      </div>
+    </div>
+  );
+
+  if (notFound) return (
+    <div style={{ textAlign:"center",padding:"80px 24px",fontFamily:"Sora,sans-serif",background:"#0D0F1A",minHeight:"100vh",color:"#E8E8F0" }}>
+      <p style={{ fontSize:48,marginBottom:16 }}>🏗️</p>
+      <h2 style={{ fontSize:24,fontWeight:700,marginBottom:12 }}>Vitrine introuvable</h2>
+      <p style={{ color:"#9A9AB0",marginBottom:24 }}>Cette structure n'existe pas ou n'est plus active sur MarchéduRoi.</p>
+      <button onClick={()=>navigate("/")} style={{ background:`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:"#fff",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+        ← Retour à l'accueil
+      </button>
+    </div>
+  );
+
+  /* ---- Mode modification ---- */
+  if (isEditMode) return (
+    <VitrineEdit
+      structure={structure}
+      token={tokenFromUrl}
+      onDone={() => navigate("/structure/" + slug)}
+    />
+  );
+
+  /* ---- Page publique ---- */
+  const photos = structure.photos || [];
+  const news   = structure.news   || [];
+
+  // Extraire l'ID YouTube si présent
+  const ytMatch = structure.video
+    ? structure.video.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
+    : null;
+
+  return (
+    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",color:"#E8E8F0" }}>
+
+      {/* ---- Navbar ---- */}
+      <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(8px)" }}>
+        <div style={{ cursor:"pointer" }} onClick={()=>navigate("/")}>
+          <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,objectFit:"contain" }}/>
+        </div>
+        <div style={{ display:"flex",gap:8 }}>
+          <button onClick={handleShare} style={{ background:`rgba(16,185,129,0.12)`,border:`1px solid rgba(16,185,129,0.3)`,color:COLOR,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+            🔗 Partager
+          </button>
+          <button onClick={()=>navigate("/")} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+            ← Retour
+          </button>
+        </div>
+      </div>
+
+      {/* ---- Bannière de couverture ---- */}
+      {structure.cover_url && (
+        <div style={{ width:"100%",height:220,overflow:"hidden",position:"relative" }}>
+          <img src={structure.cover_url} alt="couverture" style={{ width:"100%",height:"100%",objectFit:"cover" }} onError={e=>e.target.style.display="none"}/>
+          <div style={{ position:"absolute",inset:0,background:"linear-gradient(to bottom, transparent 40%, #0D0F1A)" }}/>
+        </div>
+      )}
+
+      <div style={{ maxWidth:750,margin:"0 auto",padding:`0 24px 48px` }}>
+
+        {/* ---- Logo + Identité ---- */}
+        <div style={{ display:"flex",alignItems:"flex-end",gap:16,marginTop:structure.cover_url ? -40 : 28,marginBottom:20,position:"relative",zIndex:1 }}>
+          {structure.logo_url ? (
+            <img src={structure.logo_url} alt="logo"
+              style={{ width:84,height:84,borderRadius:18,objectFit:"cover",border:"3px solid #2A2D45",background:"#1A1D30",flexShrink:0 }}
+              onError={e=>{e.target.style.display="none";}}/>
+          ) : (
+            <div style={{ width:84,height:84,borderRadius:18,background:`linear-gradient(135deg,${COLOR},#059669)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:34,flexShrink:0,border:"3px solid #2A2D45" }}>
+              🏛️
+            </div>
+          )}
+          <div style={{ flex:1,paddingBottom:4 }}>
+            <div style={{ display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:6 }}>
+              <span style={{ background:`rgba(16,185,129,0.15)`,color:COLOR,padding:"3px 12px",borderRadius:20,fontSize:12,fontWeight:700 }}>
+                {structure.type}
+              </span>
+              {structure.verified && (
+                <span style={{ background:"rgba(255,215,0,0.12)",color:"#FFD700",padding:"3px 12px",borderRadius:20,fontSize:12,fontWeight:700 }}>
+                  ✅ Vérifié EDENPORTAIL
+                </span>
+              )}
+            </div>
+            <h1 style={{ fontSize:22,fontWeight:800,margin:0,lineHeight:1.2,color:"#E8E8F0" }}>{structure.name}</h1>
+            {structure.slogan && (
+              <p style={{ color:"#9A9AB0",fontSize:13,margin:"5px 0 0",fontStyle:"italic" }}>"{structure.slogan}"</p>
+            )}
+          </div>
+        </div>
+
+        {/* ---- Description ---- */}
+        {structure.description && (
+          <p style={{ color:"#B8B8CC",lineHeight:1.85,marginBottom:24,fontSize:15 }}>{structure.description}</p>
+        )}
+
+        {/* ---- Services ---- */}
+        {structure.services && (
+          <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:16,marginBottom:16 }}>
+            <p style={{ fontWeight:700,marginBottom:8,color:"#E8E8F0",margin:"0 0 8px" }}>✅ Services proposés</p>
+            <p style={{ color:"#9A9AB0",lineHeight:1.75,margin:0 }}>{structure.services}</p>
+          </div>
+        )}
+
+        {/* ---- Contacts ---- */}
+        <div style={{ display:"flex",flexDirection:"column",gap:10,marginBottom:20 }}>
+          {structure.phone && (
+            <a href={"tel:"+structure.phone} style={{ display:"flex",alignItems:"center",gap:12,background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:12,padding:16,color:"#6C63FF",textDecoration:"none",fontWeight:600,fontSize:15 }}>
+              📞 {structure.phone}
+            </a>
+          )}
+          {structure.phone2 && (
+            <a href={"tel:"+structure.phone2} style={{ display:"flex",alignItems:"center",gap:12,background:"rgba(108,99,255,0.07)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:12,padding:16,color:"#6C63FF",textDecoration:"none",fontWeight:600,fontSize:15 }}>
+              📞 {structure.phone2}
+            </a>
+          )}
+          {structure.whatsapp && (
+            <a href={"https://wa.me/"+structure.whatsapp.replace(/[^\d]/g,"")} target="_blank" rel="noopener noreferrer"
+              style={{ display:"flex",alignItems:"center",gap:12,background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:12,padding:16,color:"#25D366",textDecoration:"none",fontWeight:600,fontSize:15 }}>
+              💬 WhatsApp : {structure.whatsapp}
+            </a>
+          )}
+          {structure.email && (
+            <a href={"mailto:"+structure.email} style={{ display:"flex",alignItems:"center",gap:12,background:`rgba(16,185,129,0.08)`,border:`1px solid rgba(16,185,129,0.25)`,borderRadius:12,padding:16,color:COLOR,textDecoration:"none",fontWeight:600,fontSize:15 }}>
+              📧 {structure.email}
+            </a>
+          )}
+          {structure.facebook && (
+            <a href={structure.facebook.startsWith("http")?structure.facebook:"https://facebook.com/"+structure.facebook} target="_blank" rel="noopener noreferrer"
+              style={{ display:"flex",alignItems:"center",gap:12,background:"rgba(24,119,242,0.1)",border:"1px solid rgba(24,119,242,0.3)",borderRadius:12,padding:16,color:"#1877F2",textDecoration:"none",fontWeight:600,fontSize:15 }}>
+              📘 Page Facebook
+            </a>
+          )}
+          {structure.website && (
+            <a href={structure.website.startsWith("http")?structure.website:"https://"+structure.website} target="_blank" rel="noopener noreferrer"
+              style={{ display:"flex",alignItems:"center",gap:12,background:"rgba(255,215,0,0.07)",border:"1px solid rgba(255,215,0,0.2)",borderRadius:12,padding:16,color:"#FFD700",textDecoration:"none",fontWeight:600,fontSize:15 }}>
+              🌐 Site web
+            </a>
+          )}
+        </div>
+
+        {/* ---- Localisation ---- */}
+        {(structure.ville || structure.quartier || structure.address) && (
+          <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:16,marginBottom:16 }}>
+            <p style={{ fontWeight:700,marginBottom:8,color:"#E8E8F0",margin:"0 0 8px" }}>📍 Localisation</p>
+            <p style={{ color:"#9A9AB0",margin:structure.gps_lat?"0 0 4px":"0",lineHeight:1.6 }}>
+              {[structure.address, structure.quartier, structure.ville].filter(Boolean).join(", ")}
+            </p>
+            {structure.von && (
+              <p style={{ color:"#9A9AB0",fontSize:13,margin:`${structure.gps_lat?"0 0 8px":"0"}` }}>📌 {structure.von}</p>
+            )}
+            {structure.gps_lat && structure.gps_lng && (
+              <a href={`https://www.google.com/maps?q=${structure.gps_lat},${structure.gps_lng}`} target="_blank" rel="noopener noreferrer"
+                style={{ display:"inline-flex",alignItems:"center",gap:6,color:"#4285F4",fontWeight:600,fontSize:14,textDecoration:"none",marginTop:4 }}>
+                🗺️ Voir sur Google Maps →
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* ---- Horaires ---- */}
+        {structure.hours && (
+          <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:16,marginBottom:16 }}>
+            <p style={{ fontWeight:700,color:"#E8E8F0",margin:"0 0 8px" }}>🕐 Horaires d'ouverture</p>
+            <p style={{ color:"#9A9AB0",margin:0,lineHeight:1.8,whiteSpace:"pre-line",fontSize:14 }}>{structure.hours}</p>
+          </div>
+        )}
+
+        {/* ---- Galerie photos ---- */}
+        {photos.length > 0 && (
+          <div style={{ marginBottom:24 }}>
+            <p style={{ fontWeight:700,marginBottom:12,color:"#E8E8F0" }}>🖼️ Galerie</p>
+            <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:8 }}>
+              {photos.map((url, i) => (
+                <img key={i} src={url} alt={"photo "+i}
+                  style={{ width:"100%",aspectRatio:"4/3",objectFit:"cover",borderRadius:10,border:"1px solid #2A2D45",cursor:"pointer" }}
+                  onError={e=>{ e.target.parentElement.style.display="none"; }}
+                  onClick={()=>window.open(url,"_blank")}/>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ---- Vidéo YouTube ---- */}
+        {ytMatch && (
+          <div style={{ marginBottom:24 }}>
+            <p style={{ fontWeight:700,marginBottom:12,color:"#E8E8F0" }}>🎬 Vidéo de présentation</p>
+            <div style={{ borderRadius:14,overflow:"hidden",aspectRatio:"16/9",border:"1px solid #2A2D45" }}>
+              <iframe
+                width="100%" height="100%"
+                src={`https://www.youtube.com/embed/${ytMatch[1]}`}
+                title="Vidéo de présentation" frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen style={{ display:"block" }}/>
+            </div>
+          </div>
+        )}
+
+        {/* ---- Actualités ---- */}
+        {news.length > 0 && (
+          <div style={{ marginBottom:28 }}>
+            <p style={{ fontWeight:700,marginBottom:14,color:"#E8E8F0" }}>📰 Actualités</p>
+            <div style={{ display:"flex",flexDirection:"column",gap:12 }}>
+              {news.map((item, i) => (
+                <div key={i} style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:12,padding:16 }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6,gap:8 }}>
+                    <p style={{ fontWeight:700,color:"#E8E8F0",margin:0,fontSize:15,flex:1 }}>{item.title}</p>
+                    {item.date && <span style={{ color:"#9A9AB0",fontSize:12,flexShrink:0 }}>{item.date}</span>}
+                  </div>
+                  {item.content && <p style={{ color:"#9A9AB0",margin:0,lineHeight:1.7,fontSize:14 }}>{item.content}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ---- Partage ---- */}
+        <div style={{ display:"flex",gap:10,marginBottom:24,flexWrap:"wrap" }}>
+          <a href={"https://wa.me/?text="+encodeURIComponent((structure.name||"")+" — MarchéduRoi 👑\n"+window.location.origin+"/structure/"+slug)}
+            target="_blank" rel="noopener noreferrer"
+            style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:12,padding:12,color:"#25D366",textDecoration:"none",fontWeight:700,fontSize:14,minWidth:120 }}>
+            💬 WhatsApp
+          </a>
+          <a href={"https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(window.location.origin+"/structure/"+slug)}
+            target="_blank" rel="noopener noreferrer"
+            style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"rgba(24,119,242,0.1)",border:"1px solid rgba(24,119,242,0.3)",borderRadius:12,padding:12,color:"#1877F2",textDecoration:"none",fontWeight:700,fontSize:14,minWidth:120 }}>
+            📘 Facebook
+          </a>
+          <button onClick={handleShare}
+            style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:`rgba(16,185,129,0.1)`,border:`1px solid rgba(16,185,129,0.3)`,borderRadius:12,padding:12,color:COLOR,fontWeight:700,fontSize:14,cursor:"pointer",minWidth:120 }}>
+            🔗 Copier le lien
+          </button>
+        </div>
+
+        <button onClick={()=>navigate("/")}
+          style={{ width:"100%",padding:15,background:`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+          ← Retour à MarchéduRoi
+        </button>
+
+      </div>
+    </div>
+  );
+}
+
+
 function PersistentLayout() {
   const location = useLocation();
   const segments = location.pathname.split("/").filter(Boolean);
   const validTypes = ["annonce","boutique","atelier","resto","beaute"];
-  const isDetail = segments.length >= 2 && validTypes.includes(segments[0]) && segments[1] && segments[1] !== "undefined";
+  const isDetail    = segments.length >= 2 && validTypes.includes(segments[0]) && segments[1] && segments[1] !== "undefined";
+  const isStructure = segments[0] === "structure" && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
   return (
     <>
       {/* AppContent toujours monté — ne se démonte jamais */}
-      <div style={{ display: isDetail ? "none" : "block" }}>
+      <div style={{ display: (isDetail || isStructure) ? "none" : "block" }}>
         <AppContent/>
       </div>
-      {/* AnnonceDetail affiché uniquement quand l'id est valide */}
+      {/* Fiche annonce / boutique / resto… */}
       {isDetail && <AnnonceDetail/>}
+      {/* Vitrine d'une structure (VitrineWeb) */}
+      {isStructure && <VitrineDetail/>}
     </>
   );
 }
