@@ -10018,7 +10018,7 @@ function VitrinePayment({ structure, token, onDone }) {
 }
 
 
-function VitrineEdit({ structure, token, onDone }) {
+function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
   const T = getThemeFromStorage();
   const COLOR = "#10B981";
 
@@ -10048,7 +10048,17 @@ function VitrineEdit({ structure, token, onDone }) {
 
   React.useEffect(() => {
     if (!token || !structure) { setCheckingTok(false); return; }
-    // Vérifier le token directement en base — plus fiable qu'une comparaison en mémoire
+    // Si le token a déjà été validé lors du chargement (VitrineDetail), on skip la 2ème vérification
+    if (tokenPreValidated) {
+      setTokenValid(true);
+      if (structure.last_edit_date) {
+        const today = new Date().toISOString().slice(0,10);
+        if (structure.last_edit_date === today) setEditBlocked(true);
+      }
+      setCheckingTok(false);
+      return;
+    }
+    // Vérifier le token directement en base
     supabase.from("structures")
       .select("id, last_edit_date")
       .eq("id", structure.id)
@@ -10062,7 +10072,7 @@ function VitrineEdit({ structure, token, onDone }) {
         }
         setCheckingTok(false);
       });
-  }, [token, structure]);
+  }, [token, structure, tokenPreValidated]);
 
   const handleSave = async () => {
     setSaving(true); setSaveError(null);
@@ -10417,6 +10427,7 @@ function VitrineDetail() {
     <VitrineEdit
       structure={structure}
       token={tokenFromUrl}
+      tokenPreValidated={true}
       onDone={() => navigate("/vitrine/" + slug)}
     />
   );
