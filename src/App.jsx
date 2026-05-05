@@ -8852,6 +8852,17 @@ function AdminVitrineWeb({ theme, notify }) {
     notify("🔗 Lien public copié !");
   };
 
+  // ---- Se définir propriétaire de la vitrine ----
+  const setAsOwner = async (s) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    const { error } = await supabase.from("structures").update({ owner_id: session.user.id }).eq("id", s.id);
+    if (!error) {
+      setStructures(prev => prev.map(x => x.id === s.id ? { ...x, owner_id: session.user.id } : x));
+      notify("✅ Vous êtes maintenant propriétaire de cette vitrine !");
+    }
+  };
+
   // ---- Activer / Désactiver ----
   const toggleActive = async (s) => {
     const { error } = await supabase.from("structures").update({ active: !s.active }).eq("id", s.id);
@@ -8922,7 +8933,7 @@ function AdminVitrineWeb({ theme, notify }) {
       active:      form.free_activation ? true : form.active,
       paid_at:     form.free_activation ? new Date().toISOString() : null,
       expires_at:  form.free_activation ? new Date(Date.now() + 365*24*60*60*1000).toISOString() : null,
-      owner_id:    null, // L'admin peut renseigner manuellement via Supabase si besoin
+      owner_id:    (await supabase.auth.getSession()).data?.session?.user?.id || null,
     };
 
     const { data, error } = await supabase.from("structures").insert(payload).select().single();
@@ -9165,6 +9176,19 @@ function AdminVitrineWeb({ theme, notify }) {
                         {s.domain_active ? "✅ Sous-domaine actif" : "⚡ Marquer comme actif"}
                       </button>
                     </div>
+                  </div>
+
+                  {/* Propriétaire */}
+                  <div style={{ background:"rgba(16,185,129,0.05)",border:"1px solid rgba(16,185,129,0.15)",borderRadius:10,padding:12,marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexWrap:"wrap" }}>
+                    <p style={{ color:"#9A9AB0",fontSize:11,margin:0 }}>
+                      👤 Propriétaire : <span style={{ color: s.owner_id ? "#10B981" : "#FF4757",fontWeight:700 }}>{s.owner_id ? "Défini" : "Non défini"}</span>
+                    </p>
+                    {!s.owner_id && (
+                      <button onClick={()=>setAsOwner(s)}
+                        style={{ background:"rgba(16,185,129,0.12)",border:"1px solid rgba(16,185,129,0.3)",color:"#10B981",padding:"5px 12px",borderRadius:7,fontSize:11,fontWeight:700,cursor:"pointer" }}>
+                        👤 Me définir propriétaire
+                      </button>
+                    )}
                   </div>
 
                   {/* Lien de paiement */}
