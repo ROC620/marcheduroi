@@ -8814,7 +8814,7 @@ function AdminVitrineWeb({ theme, notify }) {
     setLoadingList(true);
     const { data, error } = await supabase
       .from("structures")
-      .select("id, slug, name, type, verified, active, created_at, edit_token, ville, phone")
+      .select("id, slug, name, type, verified, active, created_at, edit_token, ville, phone, owner_id, paid_at, expires_at, domain_active, custom_domain")
       .order("created_at", { ascending: false });
     if (!error && data) setStructures(data);
     setLoadingList(false);
