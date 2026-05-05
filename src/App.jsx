@@ -8695,7 +8695,7 @@ function AnnonceDetail() {
 function AdminVitrineWeb({ theme, notify }) {
   const COLOR = "#10B981";
 
-  // ---- Onglet actif : "liste" ou "creer" ----
+  // ---- Onglet actif : "liste", "creer" ou "modifier" ----
   const [tab, setTab] = React.useState("liste");
 
   // ---- Liste des structures ----
@@ -8703,7 +8703,10 @@ function AdminVitrineWeb({ theme, notify }) {
   const [loadingList, setLoadingList] = React.useState(false);
   const [expandedId, setExpandedId] = React.useState(null);
 
-  // ---- Formulaire de création ----
+  // ---- Structure en cours d'édition ----
+  const [editingId, setEditingId] = React.useState(null);
+
+  // ---- Formulaire création / modification ----
   const emptyForm = {
     slug:"", name:"", type:"Restaurant", slogan:"", description:"",
     logo_url:"", cover_url:"", photos:"", video:"",
@@ -8717,6 +8720,93 @@ function AdminVitrineWeb({ theme, notify }) {
   const [form,    setForm]    = React.useState(emptyForm);
   const [saving,  setSaving]  = React.useState(false);
   const [saveMsg, setSaveMsg] = React.useState(null);
+
+  // ---- Ouvrir le formulaire de modification ----
+  const openEdit = async (s) => {
+    setSaveMsg(null);
+    // Charger la structure complète
+    const { data } = await supabase.from("structures").select("*").eq("id", s.id).single();
+    if (!data) return;
+    setEditingId(data.id);
+    setForm({
+      slug:       data.slug       || "",
+      name:       data.name       || "",
+      type:       data.type       || "Restaurant",
+      slogan:     data.slogan     || "",
+      description:data.description|| "",
+      logo_url:   data.logo_url   || "",
+      cover_url:  data.cover_url  || "",
+      photos:     (data.photos    || []).join("\n"),
+      video:      data.video      || "",
+      address:    data.address    || "",
+      ville:      data.ville      || "",
+      quartier:   data.quartier   || "",
+      von:        data.von        || "",
+      gps_lat:    data.gps_lat    ? String(data.gps_lat) : "",
+      gps_lng:    data.gps_lng    ? String(data.gps_lng) : "",
+      phone:      data.phone      || "",
+      phone2:     data.phone2     || "",
+      whatsapp:   data.whatsapp   || "",
+      email:      data.email      || "",
+      website:    data.website    || "",
+      facebook:   data.facebook   || "",
+      instagram:  data.instagram  || "",
+      hours:      data.hours      || "",
+      languages:  data.languages  || "",
+      services:   data.services   || "",
+      verified:   data.verified   || false,
+      active:     data.active     || false,
+      free_activation: false,
+    });
+    setTab("modifier");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // ---- Enregistrer les modifications admin ----
+  const handleUpdate = async () => {
+    if (!form.name.trim()) { setSaveMsg({ type:"error", text:"Le nom est obligatoire." }); return; }
+    if (!form.slug.trim()) { setSaveMsg({ type:"error", text:"Le slug est obligatoire." }); return; }
+    setSaving(true); setSaveMsg(null);
+    const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean);
+    const { error } = await supabase.from("structures").update({
+      slug:        form.slug.trim(),
+      name:        form.name.trim(),
+      type:        form.type,
+      slogan:      form.slogan     || null,
+      description: form.description|| null,
+      logo_url:    form.logo_url   || null,
+      cover_url:   form.cover_url  || null,
+      photos:      photosArray,
+      video:       form.video      || null,
+      address:     form.address    || null,
+      ville:       form.ville      || null,
+      quartier:    form.quartier   || null,
+      von:         form.von        || null,
+      gps_lat:     form.gps_lat    ? parseFloat(form.gps_lat)  : null,
+      gps_lng:     form.gps_lng    ? parseFloat(form.gps_lng)  : null,
+      phone:       form.phone      || null,
+      phone2:      form.phone2     || null,
+      whatsapp:    form.whatsapp   || null,
+      email:       form.email      || null,
+      website:     form.website    || null,
+      facebook:    form.facebook   || null,
+      instagram:   form.instagram  || null,
+      hours:       form.hours      || null,
+      languages:   form.languages  || null,
+      services:    form.services   || null,
+      verified:    form.verified,
+      active:      form.active,
+      updated_at:  new Date().toISOString(),
+    }).eq("id", editingId);
+    if (error) {
+      setSaveMsg({ type:"error", text: error.code === "23505" ? "Ce slug existe déjà." : "Erreur : " + error.message });
+    } else {
+      setSaveMsg({ type:"success", text:"✅ Vitrine mise à jour avec succès !" });
+      await loadStructures();
+      setTimeout(() => { setTab("liste"); setSaveMsg(null); setEditingId(null); }, 2000);
+    }
+    setSaving(false);
+  };
 
   // ---- Chargement de la liste ----
   const loadStructures = React.useCallback(async () => {
@@ -8883,14 +8973,19 @@ function AdminVitrineWeb({ theme, notify }) {
           </span>
         </h3>
         <div style={{ display:"flex",gap:8 }}>
-          <button onClick={()=>setTab("liste")}
+          <button onClick={()=>{ setTab("liste"); setSaveMsg(null); }}
             style={{ background:tab==="liste"?`rgba(16,185,129,0.15)`:"transparent", border:`1px solid ${tab==="liste"?COLOR:theme.border||"#2A2D45"}`, color:tab==="liste"?COLOR:theme.sub||"#9A9AB0", padding:"7px 16px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>
             📋 Liste
           </button>
-          <button onClick={()=>{ setTab("creer"); setSaveMsg(null); }}
+          <button onClick={()=>{ setTab("creer"); setSaveMsg(null); setEditingId(null); setForm(emptyForm); }}
             style={{ background:tab==="creer"?`rgba(16,185,129,0.15)`:"transparent", border:`1px solid ${tab==="creer"?COLOR:theme.border||"#2A2D45"}`, color:tab==="creer"?COLOR:theme.sub||"#9A9AB0", padding:"7px 16px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>
             + Créer une vitrine
           </button>
+          {tab==="modifier" && (
+            <button style={{ background:"rgba(255,140,0,0.15)",border:"1px solid rgba(255,140,0,0.4)",color:"#FF8C00",padding:"7px 16px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"default" }}>
+              ✏️ Modification en cours
+            </button>
+          )}
         </div>
       </div>
 
@@ -8980,6 +9075,9 @@ function AdminVitrineWeb({ theme, notify }) {
 
                 {/* Actions */}
                 <div style={{ display:"flex",gap:6,flexWrap:"wrap",flexShrink:0 }}>
+                  <button onClick={()=>openEdit(s)}
+                    style={{ background:"rgba(255,140,0,0.1)",border:"1px solid rgba(255,140,0,0.3)",color:"#FF8C00",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}
+                    title="Modifier la vitrine">✏️</button>
                   {!s.active && !s.paid_at && (
                     <button onClick={()=>copyPayLink(s)}
                       style={{ background:"rgba(255,215,0,0.12)",border:"1px solid rgba(255,215,0,0.4)",color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}
@@ -8990,7 +9088,7 @@ function AdminVitrineWeb({ theme, notify }) {
                     title="Lien public">🔗</button>
                   <button onClick={()=>copyEditLink(s)}
                     style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}
-                    title="Lien de modification client">✏️</button>
+                    title="Lien de modification client">🔑</button>
                   <button onClick={()=>toggleVerified(s)}
                     style={{ background:s.verified?"rgba(255,215,0,0.15)":"rgba(255,215,0,0.05)",border:`1px solid ${s.verified?"#FFD70044":"rgba(255,215,0,0.15)"}`,color:"#FFD700",padding:"6px 10px",borderRadius:8,fontWeight:600,fontSize:12,cursor:"pointer" }}
                     title={s.verified?"Retirer le badge Vérifié":"Ajouter le badge Vérifié"}>
@@ -9121,9 +9219,17 @@ function AdminVitrineWeb({ theme, notify }) {
         </div>
       )}
 
-      {/* ========== ONGLET CRÉER ========== */}
-      {tab === "creer" && (
-        <div style={{ background:theme.card||"#1A1D30",border:`1px solid ${theme.border||"#2A2D45"}`,borderRadius:16,padding:24 }}>
+      {/* ========== ONGLET CRÉER / MODIFIER ========== */}
+      {(tab === "creer" || tab === "modifier") && (
+        <div style={{ background:theme.card||"#1A1D30",border:`1px solid ${tab==="modifier"?"rgba(255,140,0,0.3)":theme.border||"#2A2D45"}`,borderRadius:16,padding:24 }}>
+
+          {/* Bandeau mode modification */}
+          {tab === "modifier" && (
+            <div style={{ background:"rgba(255,140,0,0.08)",border:"1px solid rgba(255,140,0,0.25)",borderRadius:12,padding:14,marginBottom:20 }}>
+              <p style={{ margin:0,fontWeight:700,color:"#FF8C00",fontSize:14 }}>✏️ Modification de la vitrine</p>
+              <p style={{ margin:"4px 0 0",color:theme.sub||"#9A9AB0",fontSize:13 }}>Tous les champs sont modifiables. Les modifications sont appliquées immédiatement.</p>
+            </div>
+          )}
 
           {/* IDENTITÉ */}
           <p style={sectionTitleStyle}>🏛️ Identité de la structure</p>
@@ -9307,15 +9413,15 @@ function AdminVitrineWeb({ theme, notify }) {
             </div>
           )}
 
-          {/* Bouton créer */}
+          {/* Boutons créer / modifier */}
           <div style={{ display:"flex",gap:12,marginTop:24 }}>
-            <button onClick={()=>{ setForm(emptyForm); setSaveMsg(null); setTab("liste"); }}
+            <button onClick={()=>{ setForm(emptyForm); setSaveMsg(null); setEditingId(null); setTab("liste"); }}
               style={{ flex:1,padding:14,background:"transparent",border:`1px solid ${theme.border||"#2A2D45"}`,color:theme.sub||"#9A9AB0",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
               Annuler
             </button>
-            <button onClick={handleCreate} disabled={saving}
-              style={{ flex:2,padding:14,background:saving?"#1A1D30":`linear-gradient(135deg,${COLOR},#059669)`,border:saving?`1px solid ${theme.border||"#2A2D45"}`:"none",color:saving?theme.sub||"#9A9AB0":"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:saving?"not-allowed":"pointer",transition:"all 0.2s" }}>
-              {saving ? "Création en cours…" : "🏛️ Créer la vitrine"}
+            <button onClick={tab==="modifier" ? handleUpdate : handleCreate} disabled={saving}
+              style={{ flex:2,padding:14,background:saving?"#1A1D30":tab==="modifier"?"linear-gradient(135deg,#FF8C00,#e67e00)":`linear-gradient(135deg,${COLOR},#059669)`,border:saving?`1px solid ${theme.border||"#2A2D45"}`:"none",color:saving?theme.sub||"#9A9AB0":"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:saving?"not-allowed":"pointer",transition:"all 0.2s" }}>
+              {saving ? (tab==="modifier"?"Enregistrement…":"Création en cours…") : tab==="modifier" ? "✏️ Enregistrer les modifications" : "🏛️ Créer la vitrine"}
             </button>
           </div>
         </div>
