@@ -9828,8 +9828,15 @@ function VitrinePayment({ structure, token, onDone }) {
 
   React.useEffect(() => {
     if (!token || !structure) { setChecking(false); return; }
-    setTokenValid(String(structure.edit_token) === String(token));
-    setChecking(false);
+    supabase.from("structures")
+      .select("id")
+      .eq("id", structure.id)
+      .eq("edit_token", token)
+      .single()
+      .then(({ data }) => {
+        setTokenValid(!!data);
+        setChecking(false);
+      });
   }, [token, structure]);
 
   // Charger FedaPay
@@ -10041,11 +10048,20 @@ function VitrineEdit({ structure, token, onDone }) {
 
   React.useEffect(() => {
     if (!token || !structure) { setCheckingTok(false); return; }
-    setTokenValid(String(structure.edit_token) === String(token));
-    // Vérifier si déjà modifié aujourd'hui
-    const today = new Date().toISOString().slice(0,10);
-    if (structure.last_edit_date === today) setEditBlocked(true);
-    setCheckingTok(false);
+    // Vérifier le token directement en base — plus fiable qu'une comparaison en mémoire
+    supabase.from("structures")
+      .select("id, last_edit_date")
+      .eq("id", structure.id)
+      .eq("edit_token", token)
+      .single()
+      .then(({ data }) => {
+        setTokenValid(!!data);
+        if (data?.last_edit_date) {
+          const today = new Date().toISOString().slice(0,10);
+          if (data.last_edit_date === today) setEditBlocked(true);
+        }
+        setCheckingTok(false);
+      });
   }, [token, structure]);
 
   const handleSave = async () => {
