@@ -10048,12 +10048,20 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
 
   React.useEffect(() => {
     if (!token || !structure) { setCheckingTok(false); return; }
-    // Comparer directement avec structure.edit_token (déjà chargé depuis la base)
-    const isValid = String(structure.edit_token) === String(token);
+    // DEBUG — à supprimer après résolution
+    console.log("=== DEBUG VITRINE EDIT ===");
+    console.log("Clés de structure:", Object.keys(structure));
+    console.log("edit_token:", structure.edit_token);
+    console.log("editToken:", structure.editToken);
+    console.log("token URL:", token);
+    // Supabase peut retourner edit_token ou editToken selon la config client
+    const storedToken = structure.edit_token ?? structure.editToken ?? "";
+    const isValid = String(storedToken).toLowerCase().trim() === String(token).toLowerCase().trim();
     setTokenValid(isValid);
-    if (isValid && structure.last_edit_date) {
+    if (isValid && (structure.last_edit_date || structure.lastEditDate)) {
       const today = new Date().toISOString().slice(0,10);
-      if (structure.last_edit_date === today) setEditBlocked(true);
+      const lastEdit = structure.last_edit_date || structure.lastEditDate;
+      if (lastEdit === today) setEditBlocked(true);
     }
     setCheckingTok(false);
   }, [token, structure]);
