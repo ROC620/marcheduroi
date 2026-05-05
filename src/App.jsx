@@ -10314,8 +10314,13 @@ function VitrineDetail() {
     if (!slug) return;
     const load = async () => {
       setLoading(true);
-      let query = supabase.from("structures").select("*").eq("slug", slug);
-      if (!isEditMode && !isPayMode) query = query.eq("active", true);
+      let query;
+      if ((isEditMode || isPayMode) && tokenFromUrl) {
+        // En mode modifier/payer : charger par token (bypass filtre active)
+        query = supabase.from("structures").select("*").eq("slug", slug).eq("edit_token", tokenFromUrl);
+      } else {
+        query = supabase.from("structures").select("*").eq("slug", slug).eq("active", true);
+      }
       const { data, error } = await query.single();
       if (error || !data) setNotFound(true);
       else {
