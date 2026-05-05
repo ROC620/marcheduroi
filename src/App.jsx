@@ -6644,7 +6644,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               num:"15",
               title:"Service VitrineWeb",
               icon:"🏛️",
-              content:`DESCRIPTION DU SERVICE : VitrineWeb est un service proposé par EDENPORTAIL permettant à toute structure (école, clinique, ONG, mairie, association, cabinet, etc.) de disposer d'une page de présentation numérique hébergée sur MarchéduRoi, accessible à l'adresse marcheduroi.com/structure/nom-de-la-structure. TARIFICATION : Frais de création : 15 000 FCFA (paiement unique, non remboursable). Abonnement annuel de maintenance et d'hébergement : 18 000 FCFA/an (soit 1 500 FCFA/mois). La vitrine est mise en ligne uniquement après confirmation du paiement des frais de création. L'abonnement annuel est dû 12 mois après la date de mise en ligne. En cas de non-renouvellement, la vitrine est désactivée automatiquement sans suppression des données pendant 90 jours. MISE EN LIGNE : La vitrine est créée par EDENPORTAIL sur la base des informations fournies par le client. Elle est activée et rendue publique uniquement après réception du paiement confirmé. RESPONSABILITÉ DU CLIENT SUR LES MÉDIAS : Le client est seul responsable de l'hébergement de ses photos et vidéos sur des plateformes tierces (ImgBB, Google Photos, YouTube, Cloudinary, etc.). MarchéduRoi ne stocke pas les médias et ne peut être tenu responsable de leur disparition en cas de suppression par le client sur la plateforme d'hébergement tierce. Il appartient au client de ne jamais supprimer ses médias sans mettre à jour sa vitrine. MODIFICATION PAR LE CLIENT : Le client dispose d'un lien privé sécurisé lui permettant de mettre à jour ses informations (contacts, photos, horaires, actualités) à tout moment, sans intervention d'EDENPORTAIL. RÉSILIATION : Le client peut demander la suppression de sa vitrine à tout moment en contactant contact@marcheduroi.com. Aucun remboursement ne sera effectué sur les sommes déjà réglées. EDENPORTAIL se réserve le droit de désactiver toute vitrine contenant des informations fausses, trompeuses ou contraires aux lois béninoises en vigueur.`
+              content:`DESCRIPTION DU SERVICE : VitrineWeb est un service proposé par EDENPORTAIL permettant à toute structure (école, clinique, ONG, mairie, association, cabinet, etc.) de disposer d'une page de présentation numérique hébergée sur MarchéduRoi, accessible à l'adresse marcheduroi.com/vitrine/nom-de-la-structure. TARIFICATION : Frais de création : 15 000 FCFA (paiement unique, non remboursable). Abonnement annuel de maintenance et d'hébergement : 18 000 FCFA/an (soit 1 500 FCFA/mois). La vitrine est mise en ligne uniquement après confirmation du paiement des frais de création. L'abonnement annuel est dû 12 mois après la date de mise en ligne. En cas de non-renouvellement, la vitrine est désactivée automatiquement sans suppression des données pendant 90 jours. MISE EN LIGNE : La vitrine est créée par EDENPORTAIL sur la base des informations fournies par le client. Elle est activée et rendue publique uniquement après réception du paiement confirmé. RESPONSABILITÉ DU CLIENT SUR LES MÉDIAS : Le client est seul responsable de l'hébergement de ses photos et vidéos sur des plateformes tierces (ImgBB, Google Photos, YouTube, Cloudinary, etc.). MarchéduRoi ne stocke pas les médias et ne peut être tenu responsable de leur disparition en cas de suppression par le client sur la plateforme d'hébergement tierce. Il appartient au client de ne jamais supprimer ses médias sans mettre à jour sa vitrine. MODIFICATION PAR LE CLIENT : Le client dispose d'un lien privé sécurisé lui permettant de mettre à jour ses informations (contacts, photos, horaires, actualités) à tout moment, sans intervention d'EDENPORTAIL. RÉSILIATION : Le client peut demander la suppression de sa vitrine à tout moment en contactant contact@marcheduroi.com. Aucun remboursement ne sera effectué sur les sommes déjà réglées. EDENPORTAIL se réserve le droit de désactiver toute vitrine contenant des informations fausses, trompeuses ou contraires aux lois béninoises en vigueur.`
             },
             {
               num:"16",
@@ -8922,6 +8922,7 @@ function AdminVitrineWeb({ theme, notify }) {
       active:      form.free_activation ? true : form.active,
       paid_at:     form.free_activation ? new Date().toISOString() : null,
       expires_at:  form.free_activation ? new Date(Date.now() + 365*24*60*60*1000).toISOString() : null,
+      owner_id:    null, // L'admin peut renseigner manuellement via Supabase si besoin
     };
 
     const { data, error } = await supabase.from("structures").insert(payload).select().single();
@@ -9506,6 +9507,8 @@ function VitrineRequest() {
     const finalSlug = slug || toSlug(form.name) + "-" + Date.now();
     const photos = form.photos.split("\n").map(l=>l.trim()).filter(Boolean);
     const now = new Date();
+    // Récupérer l'ID de l'utilisateur connecté
+    const { data: { session } } = await supabase.auth.getSession();
     const { error: dbErr } = await supabase.from("structures").insert({
       slug:        finalSlug,
       name:        form.name.trim(),
@@ -9534,6 +9537,7 @@ function VitrineRequest() {
       paid_at:     now.toISOString(),
       creation_amount: 15000,
       renewal_amount:  18000,
+      owner_id:    session?.user?.id || null,
     });
     if (dbErr) {
       setError("Paiement reçu mais enregistrement échoué. Contactez-nous : contact@marcheduroi.com");
@@ -10018,6 +10022,25 @@ function VitrinePayment({ structure, token, onDone }) {
 }
 
 
+// Section accordéon pour VitrineEdit — défini HORS du composant pour éviter les re-renders
+function VitrineSection({ id, icon, title, children, openSection, setOpenSection, COLOR, T }) {
+  const open = openSection === id;
+  return (
+    <div style={{ border:`1px solid ${open ? COLOR+"55" : T.border}`,borderRadius:14,marginBottom:10,overflow:"hidden",transition:"all 0.2s" }}>
+      <div onClick={()=>setOpenSection(open ? null : id)}
+        style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",cursor:"pointer",background:open?`rgba(16,185,129,0.06)`:T.card }}>
+        <span style={{ fontWeight:700,color:open?COLOR:T.text,fontSize:14 }}>{icon} {title}</span>
+        <span style={{ color:T.sub,fontSize:18,fontWeight:300 }}>{open ? "▲" : "▼"}</span>
+      </div>
+      {open && (
+        <div style={{ padding:"4px 16px 16px",background:T.bg }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
   const T = getThemeFromStorage();
   const COLOR = "#10B981";
@@ -10123,25 +10146,6 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
   const inp = { width:"100%",background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:"12px 14px",color:T.text,fontSize:14,fontFamily:"Sora,sans-serif",outline:"none",boxSizing:"border-box" };
   const lbl = { display:"block",color:T.sub,fontSize:12,fontWeight:600,marginBottom:5,marginTop:14 };
 
-  // Accordéon — rendu d'une section
-  const Section = ({ id, icon, title, children }) => {
-    const open = openSection === id;
-    return (
-      <div style={{ border:`1px solid ${open ? COLOR+"55" : T.border}`,borderRadius:14,marginBottom:10,overflow:"hidden",transition:"all 0.2s" }}>
-        <div onClick={()=>setOpenSection(open ? null : id)}
-          style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",cursor:"pointer",background:open?`rgba(16,185,129,0.06)`:T.card }}>
-          <span style={{ fontWeight:700,color:open?COLOR:T.text,fontSize:14 }}>{icon} {title}</span>
-          <span style={{ color:T.sub,fontSize:18,fontWeight:300 }}>{open ? "▲" : "▼"}</span>
-        </div>
-        {open && (
-          <div style={{ padding:"4px 16px 16px",background:T.bg }}>
-            {children}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div style={{ background:T.bg,minHeight:"100vh",fontFamily:"Sora,sans-serif",color:T.text }}>
       {/* Navbar */}
@@ -10175,7 +10179,7 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
         )}
 
         {/* Sections accordéon */}
-        <Section id="contacts" icon="📞" title="Contacts">
+        <VitrineSection id="contacts" icon="📞" title="Contacts" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
           <label style={lbl}>Téléphone principal</label>
           <input style={inp} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="+229 0100000000" disabled={editBlocked}/>
           <label style={lbl}>Téléphone secondaire</label>
@@ -10186,22 +10190,22 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
           <input style={inp} type="email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} placeholder="contact@mastructure.bj" disabled={editBlocked}/>
           <label style={lbl}>Facebook</label>
           <input style={inp} value={form.facebook} onChange={e=>setForm(f=>({...f,facebook:e.target.value}))} placeholder="https://facebook.com/mastructure" disabled={editBlocked}/>
-        </Section>
+        </VitrineSection>
 
-        <Section id="horaires" icon="🕐" title="Horaires d'ouverture">
+        <VitrineSection id="horaires" icon="🕐" title="Horaires d'ouverture" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
           <label style={lbl}>Horaires (Entrée pour retour à la ligne)</label>
           <textarea style={{...inp,minHeight:90,resize:"vertical"}} value={form.hours}
             onChange={e=>setForm(f=>({...f,hours:e.target.value}))}
             placeholder={"Lun–Ven : 7h30–17h00\nSam : 8h00–12h00\nDim : Fermé"} disabled={editBlocked}/>
-        </Section>
+        </VitrineSection>
 
-        <Section id="services" icon="✅" title="Services proposés">
+        <VitrineSection id="services" icon="✅" title="Services proposés" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
           <textarea style={{...inp,minHeight:80,resize:"vertical"}} value={form.services}
             onChange={e=>setForm(f=>({...f,services:e.target.value}))}
             placeholder="Consultations générales, urgences 24h/24…" disabled={editBlocked}/>
-        </Section>
+        </VitrineSection>
 
-        <Section id="photos" icon="🖼️" title="Photos">
+        <VitrineSection id="photos" icon="🖼️" title="Photos" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
           <label style={lbl}>Un lien par ligne</label>
           <textarea style={{...inp,minHeight:130,resize:"vertical",fontFamily:"monospace",fontSize:12}}
             value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))}
@@ -10212,16 +10216,16 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
               ⚠️ Ne supprimez jamais vos photos de ImgBB.
             </p>
           </div>
-        </Section>
+        </VitrineSection>
 
-        <Section id="video" icon="🎬" title="Vidéo YouTube">
+        <VitrineSection id="video" icon="🎬" title="Vidéo YouTube" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
           <label style={lbl}>Lien YouTube</label>
           <input style={inp} value={form.video}
             onChange={e=>setForm(f=>({...f,video:e.target.value}))}
             placeholder="https://www.youtube.com/watch?v=..." disabled={editBlocked}/>
-        </Section>
+        </VitrineSection>
 
-        <Section id="news" icon="📰" title="Actualités & Promotions">
+        <VitrineSection id="news" icon="📰" title="Actualités & Promotions" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
           <label style={lbl}>Type</label>
           <select style={{...inp,cursor:"pointer"}} value={form.news_type}
             onChange={e=>setForm(f=>({...f,news_type:e.target.value}))} disabled={editBlocked}>
@@ -10259,7 +10263,7 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
               ))}
             </div>
           )}
-        </Section>
+        </VitrineSection>
 
         {saveError && (
           <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:10,padding:14,marginTop:16 }}>
@@ -10305,6 +10309,16 @@ function VitrineDetail() {
   const [structure, setStructure] = useState(null);
   const [loading,   setLoading]   = useState(true);
   const [notFound,  setNotFound]  = useState(false);
+  const [isOwner,   setIsOwner]   = useState(false);
+
+  // Vérifier si l'utilisateur connecté est le propriétaire
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.id && structure?.owner_id) {
+        setIsOwner(session.user.id === structure.owner_id);
+      }
+    });
+  }, [structure]);
 
   useEffect(() => {
     if (!slug) return;
@@ -10631,17 +10645,26 @@ function VitrineDetail() {
           </div>
         )}
 
-        {/* ---- Bouton Ajouter une actualité ---- */}
-        <div style={{ background:"rgba(255,140,0,0.07)",border:"1px solid rgba(255,140,0,0.25)",borderRadius:14,padding:16,marginBottom:20,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
-          <div>
-            <p style={{ fontWeight:700,color:"#FF8C00",margin:"0 0 4px",fontSize:14 }}>📢 Vous gérez cette structure ?</p>
-            <p style={{ color:"#9A9AB0",fontSize:13,margin:0 }}>Ajoutez une promotion, un menu du jour, une actualité…</p>
+        {/* ---- Vous gérez cette structure ? ---- */}
+        {isOwner ? (
+          <div style={{ background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:14,padding:16,marginBottom:20,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
+            <div>
+              <p style={{ fontWeight:700,color:COLOR,margin:"0 0 4px",fontSize:14 }}>✅ Vous gérez cette vitrine</p>
+              <p style={{ color:"#9A9AB0",fontSize:13,margin:0 }}>Modifiez vos infos, ajoutez une actualité, mettez à jour vos photos…</p>
+            </div>
+            <a href={`/vitrine/${slug}/modifier?token=${structure.edit_token}&section=contacts`}
+              style={{ background:`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",flexShrink:0,whiteSpace:"nowrap" }}>
+              ✏️ Modifier ma vitrine
+            </a>
           </div>
-          <a href={`/vitrine/${structure.slug}/modifier?token=&section=news`}
-            style={{ background:"rgba(255,140,0,0.15)",border:"1px solid rgba(255,140,0,0.4)",color:"#FF8C00",padding:"10px 18px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",flexShrink:0,whiteSpace:"nowrap" }}>
-            + Ajouter une actualité
-          </a>
-        </div>
+        ) : (
+          <div style={{ background:"rgba(108,99,255,0.06)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:14,padding:16,marginBottom:20 }}>
+            <p style={{ fontWeight:700,color:"#6C63FF",margin:"0 0 4px",fontSize:14 }}>🔑 Vous gérez cette structure ?</p>
+            <p style={{ color:"#9A9AB0",fontSize:13,margin:0,lineHeight:1.7 }}>
+              Connectez-vous avec le compte utilisé lors de la création pour accéder aux options de modification.
+            </p>
+          </div>
+        )}
 
         {/* ---- Partage ---- */}
         <div style={{ display:"flex",gap:10,marginBottom:24,flexWrap:"wrap" }}>
