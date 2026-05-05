@@ -10048,31 +10048,15 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
 
   React.useEffect(() => {
     if (!token || !structure) { setCheckingTok(false); return; }
-    // Si le token a déjà été validé lors du chargement (VitrineDetail), on skip la 2ème vérification
-    if (tokenPreValidated) {
-      setTokenValid(true);
-      if (structure.last_edit_date) {
-        const today = new Date().toISOString().slice(0,10);
-        if (structure.last_edit_date === today) setEditBlocked(true);
-      }
-      setCheckingTok(false);
-      return;
+    // Comparer directement avec structure.edit_token (déjà chargé depuis la base)
+    const isValid = String(structure.edit_token) === String(token);
+    setTokenValid(isValid);
+    if (isValid && structure.last_edit_date) {
+      const today = new Date().toISOString().slice(0,10);
+      if (structure.last_edit_date === today) setEditBlocked(true);
     }
-    // Vérifier le token directement en base
-    supabase.from("structures")
-      .select("id, last_edit_date")
-      .eq("id", structure.id)
-      .eq("edit_token", token)
-      .single()
-      .then(({ data }) => {
-        setTokenValid(!!data);
-        if (data?.last_edit_date) {
-          const today = new Date().toISOString().slice(0,10);
-          if (data.last_edit_date === today) setEditBlocked(true);
-        }
-        setCheckingTok(false);
-      });
-  }, [token, structure, tokenPreValidated]);
+    setCheckingTok(false);
+  }, [token, structure]);
 
   const handleSave = async () => {
     setSaving(true); setSaveError(null);
@@ -10324,13 +10308,8 @@ function VitrineDetail() {
     if (!slug) return;
     const load = async () => {
       setLoading(true);
-      let query;
-      if ((isEditMode || isPayMode) && tokenFromUrl) {
-        // En mode modifier/payer : charger par token (bypass filtre active)
-        query = supabase.from("structures").select("*").eq("slug", slug).eq("edit_token", tokenFromUrl);
-      } else {
-        query = supabase.from("structures").select("*").eq("slug", slug).eq("active", true);
-      }
+      let query = supabase.from("structures").select("*").eq("slug", slug);
+      if (!isEditMode && !isPayMode) query = query.eq("active", true);
       const { data, error } = await query.single();
       if (error || !data) setNotFound(true);
       else {
