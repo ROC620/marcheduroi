@@ -8835,19 +8835,19 @@ function AdminVitrineWeb({ theme, notify }) {
 
   // ---- Copier le lien de paiement ----
   const copyPayLink = (structure) => {
-    const url = window.location.origin + "/structure/" + structure.slug + "/payer?token=" + structure.edit_token;
+    const url = window.location.origin + "/vitrine/" + structure.slug + "/payer?token=" + structure.edit_token;
     navigator.clipboard.writeText(url);
     notify("💳 Lien de paiement copié !");
   };
   const copyEditLink = (structure) => {
-    const url = window.location.origin + "/structure/" + structure.slug + "/modifier?token=" + structure.edit_token;
+    const url = window.location.origin + "/vitrine/" + structure.slug + "/modifier?token=" + structure.edit_token;
     navigator.clipboard.writeText(url);
     notify("🔗 Lien de modification copié !");
   };
 
   // ---- Copier le lien public ----
   const copyPublicLink = (structure) => {
-    const url = window.location.origin + "/structure/" + structure.slug;
+    const url = window.location.origin + "/vitrine/" + structure.slug;
     navigator.clipboard.writeText(url);
     notify("🔗 Lien public copié !");
   };
@@ -9024,7 +9024,7 @@ function AdminVitrineWeb({ theme, notify }) {
                       ✅ Valider
                     </button>
                     {/* Envoyer WhatsApp */}
-                    <a href={"https://wa.me/"+( s.phone||s.whatsapp||"").replace(/[^\d]/g,"")+"?text="+encodeURIComponent(`Bonjour ! 👋\nVotre vitrine *${s.name}* est maintenant en ligne sur MarchéduRoi.\n\n🔗 Voici votre lien : ${window.location.origin}/structure/${s.slug}\n\nVous pouvez le partager sur WhatsApp, Facebook, ou l'imprimer sur vos cartes de visite.\n\nMerci de votre confiance — EDENPORTAIL 👑`)}
+                    <a href={"https://wa.me/"+( s.phone||s.whatsapp||"").replace(/[^\d]/g,"")+"?text="+encodeURIComponent(`Bonjour ! 👋\nVotre vitrine *${s.name}* est maintenant en ligne sur MarchéduRoi.\n\n🔗 Voici votre lien : ${window.location.origin}/vitrine/${s.slug}\n\nVous pouvez le partager sur WhatsApp, Facebook, ou l'imprimer sur vos cartes de visite.\n\nMerci de votre confiance — EDENPORTAIL 👑`)}
                       target="_blank" rel="noopener noreferrer"
                       style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",color:"#25D366",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",display:"flex",alignItems:"center",gap:6 }}>
                       📱 WhatsApp client
@@ -9172,7 +9172,7 @@ function AdminVitrineWeb({ theme, notify }) {
                       <p style={{ color:"#9A9AB0",fontSize:11,fontWeight:700,margin:"0 0 4px" }}>💳 LIEN DE PAIEMENT (à envoyer au client pour activer la vitrine)</p>
                       <div style={{ display:"flex",alignItems:"center",gap:8 }}>
                         <code style={{ color:"#FFD700",fontSize:11,flex:1,wordBreak:"break-all",background:"transparent",fontFamily:"monospace" }}>
-                          {window.location.origin}/structure/{s.slug}/payer?token={s.edit_token}
+                          {window.location.origin}/vitrine/{s.slug}/payer?token={s.edit_token}
                         </code>
                         <button onClick={()=>copyPayLink(s)} style={{ background:"rgba(255,215,0,0.12)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"5px 10px",borderRadius:7,fontWeight:700,fontSize:11,cursor:"pointer",flexShrink:0 }}>
                           Copier
@@ -9192,7 +9192,7 @@ function AdminVitrineWeb({ theme, notify }) {
                     <p style={{ color:theme.sub||"#9A9AB0",fontSize:11,fontWeight:700,margin:"0 0 4px" }}>🔗 LIEN PUBLIC (à partager)</p>
                     <div style={{ display:"flex",alignItems:"center",gap:8 }}>
                       <code style={{ color:COLOR,fontSize:12,flex:1,wordBreak:"break-all",background:"transparent",fontFamily:"monospace" }}>
-                        {window.location.origin}/structure/{s.slug}
+                        {window.location.origin}/vitrine/{s.slug}
                       </code>
                       <button onClick={()=>copyPublicLink(s)} style={{ background:`rgba(16,185,129,0.12)`,border:`1px solid rgba(16,185,129,0.3)`,color:COLOR,padding:"5px 10px",borderRadius:7,fontWeight:700,fontSize:11,cursor:"pointer",flexShrink:0 }}>
                         Copier
@@ -9205,7 +9205,7 @@ function AdminVitrineWeb({ theme, notify }) {
                     <p style={{ color:"#9A9AB0",fontSize:11,fontWeight:700,margin:"0 0 4px" }}>✏️ LIEN DE MODIFICATION (à envoyer au client)</p>
                     <div style={{ display:"flex",alignItems:"center",gap:8 }}>
                       <code style={{ color:"#6C63FF",fontSize:11,flex:1,wordBreak:"break-all",background:"transparent",fontFamily:"monospace" }}>
-                        {window.location.origin}/structure/{s.slug}/modifier?token={s.edit_token}
+                        {window.location.origin}/vitrine/{s.slug}/modifier?token={s.edit_token}
                       </code>
                       <button onClick={()=>copyEditLink(s)} style={{ background:"rgba(108,99,255,0.12)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"5px 10px",borderRadius:7,fontWeight:700,fontSize:11,cursor:"pointer",flexShrink:0 }}>
                         Copier
@@ -9247,7 +9247,7 @@ function AdminVitrineWeb({ theme, notify }) {
               placeholder="ecole-sainte-marie-cotonou"/>
           </div>
           <p style={{ color:theme.sub||"#9A9AB0",fontSize:11,margin:"4px 0 0" }}>
-            URL finale : <code style={{ color:COLOR }}>{window.location.origin}/structure/{form.slug||"..."}</code>
+            URL finale : <code style={{ color:COLOR }}>{window.location.origin}/vitrine/{form.slug||"..."}</code>
           </p>
 
           <label style={labelStyle}>Type *</label>
@@ -9438,7 +9438,7 @@ function AdminVitrineWeb({ theme, notify }) {
 // -----------------------------------------------
 // -----------------------------------------------
 // VitrinePayment — Page de paiement client
-// Route : /structure/:slug/payer?token=XXX
+// Route : /vitrine/:slug/payer?token=XXX
 // -----------------------------------------------
 // -----------------------------------------------
 // VitrineRequest — Formulaire public de création
@@ -9664,7 +9664,7 @@ function VitrineRequest() {
             <p style={{ fontWeight:700,color:"#FF8C00",margin:"0 0 4px",fontSize:14 }}>👀 Vous voulez voir à quoi ressemble une vitrine ?</p>
             <p style={{ color:T.sub,fontSize:13,margin:0 }}>Consultez l'exemple de démonstration avant de vous lancer.</p>
           </div>
-          <a href="/structure/restaurant-chez-tante-rosine-calavi" target="_blank" rel="noopener noreferrer"
+          <a href="/vitrine/restaurant-chez-tante-rosine-calavi" target="_blank" rel="noopener noreferrer"
             style={{ background:"rgba(255,140,0,0.15)",border:"1px solid rgba(255,140,0,0.4)",color:"#FF8C00",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",flexShrink:0,whiteSpace:"nowrap" }}>
             Voir un exemple →
           </a>
@@ -9693,7 +9693,7 @@ function VitrineRequest() {
         <p style={sec}>🏛️ Identité de votre structure</p>
         <label style={lbl}>Nom officiel *</label>
         <input style={inp} value={form.name} onChange={e=>handleName(e.target.value)} placeholder="École Sainte-Marie de Cotonou"/>
-        {slug && <p style={{ color:T.sub,fontSize:11,marginTop:4 }}>URL : <span style={{ color:COLOR }}>marcheduroi.com/structure/{slug}</span></p>}
+        {slug && <p style={{ color:T.sub,fontSize:11,marginTop:4 }}>URL : <span style={{ color:COLOR }}>marcheduroi.com/vitrine/{slug}</span></p>}
 
         <label style={lbl}>Type de structure *</label>
         <select style={{...inp,cursor:"pointer"}} value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value}))}>
@@ -10270,8 +10270,8 @@ function VitrineEdit({ structure, token, onDone }) {
 }
 // -----------------------------------------------
 // VitrineDetail — Page publique d'une structure
-// Route : /structure/:slug
-// Route modifier : /structure/:slug/modifier?token=XXX
+// Route : /vitrine/:slug
+// Route modifier : /vitrine/:slug/modifier?token=XXX
 // -----------------------------------------------
 function VitrineDetail() {
   const navigate  = useNavigate();
@@ -10284,7 +10284,7 @@ function VitrineDetail() {
   const isSubdomain   = hostname.includes(".vitrine.marcheduroi.com");
   const subdomainSlug = isSubdomain ? hostname.split(".vitrine.marcheduroi.com")[0] : null;
 
-  // segments[0] = "structure", segments[1] = slug, segments[2] = "modifier" ou "payer" (optionnel)
+  // segments[0] = "vitrine", segments[1] = slug, segments[2] = "modifier" ou "payer" (optionnel)
   const slug         = subdomainSlug || segments[1];
   const isEditMode   = !isSubdomain && segments[2] === "modifier";
   const isPayMode    = !isSubdomain && segments[2] === "payer";
@@ -10307,7 +10307,7 @@ function VitrineDetail() {
         // ---- SEO dynamique ----
         const pageUrl = data.domain_active && data.custom_domain
           ? "https://" + data.custom_domain
-          : window.location.origin + "/structure/" + data.slug;
+          : window.location.origin + "/vitrine/" + data.slug;
         const image = data.cover_url || data.logo_url || data.photos?.[0] || window.location.origin + "/icons/icon-512x512.png";
         const desc  = (data.description || `${data.type} à ${data.ville||"Bénin"} — ${data.slogan||""}`)?.slice(0,160);
 
@@ -10361,7 +10361,7 @@ function VitrineDetail() {
     // Partager le sous-domaine s'il est actif, sinon l'URL classique
     const url = (structure?.domain_active && structure?.custom_domain)
       ? "https://" + structure.custom_domain
-      : window.location.origin + "/structure/" + slug;
+      : window.location.origin + "/vitrine/" + slug;
     const text = (structure?.name || "Structure") + " sur MarchéduRoi 👑\n" + url;
     if (navigator.share) navigator.share({ title: structure?.name, text, url });
     else { navigator.clipboard.writeText(url); alert("Lien copié !"); }
@@ -10396,7 +10396,7 @@ function VitrineDetail() {
     <VitrineEdit
       structure={structure}
       token={tokenFromUrl}
-      onDone={() => navigate("/structure/" + slug)}
+      onDone={() => navigate("/vitrine/" + slug)}
     />
   );
 
@@ -10405,7 +10405,7 @@ function VitrineDetail() {
     <VitrinePayment
       structure={structure}
       token={tokenFromUrl}
-      onDone={() => navigate("/structure/" + slug)}
+      onDone={() => navigate("/vitrine/" + slug)}
     />
   );
 
@@ -10624,7 +10624,7 @@ function VitrineDetail() {
             <p style={{ fontWeight:700,color:"#FF8C00",margin:"0 0 4px",fontSize:14 }}>📢 Vous gérez cette structure ?</p>
             <p style={{ color:"#9A9AB0",fontSize:13,margin:0 }}>Ajoutez une promotion, un menu du jour, une actualité…</p>
           </div>
-          <a href={`/structure/${structure.slug}/modifier?token=&section=news`}
+          <a href={`/vitrine/${structure.slug}/modifier?token=&section=news`}
             style={{ background:"rgba(255,140,0,0.15)",border:"1px solid rgba(255,140,0,0.4)",color:"#FF8C00",padding:"10px 18px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",flexShrink:0,whiteSpace:"nowrap" }}>
             + Ajouter une actualité
           </a>
@@ -10632,12 +10632,12 @@ function VitrineDetail() {
 
         {/* ---- Partage ---- */}
         <div style={{ display:"flex",gap:10,marginBottom:24,flexWrap:"wrap" }}>
-          <a href={"https://wa.me/?text="+encodeURIComponent((structure.name||"")+" — MarchéduRoi 👑\n"+window.location.origin+"/structure/"+slug)}
+          <a href={"https://wa.me/?text="+encodeURIComponent((structure.name||"")+" — MarchéduRoi 👑\n"+window.location.origin+"/vitrine/"+slug)}
             target="_blank" rel="noopener noreferrer"
             style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:12,padding:12,color:"#25D366",textDecoration:"none",fontWeight:700,fontSize:14,minWidth:120 }}>
             💬 WhatsApp
           </a>
-          <a href={"https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(window.location.origin+"/structure/"+slug)}
+          <a href={"https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(window.location.origin+"/vitrine/"+slug)}
             target="_blank" rel="noopener noreferrer"
             style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"rgba(24,119,242,0.1)",border:"1px solid rgba(24,119,242,0.3)",borderRadius:12,padding:12,color:"#1877F2",textDecoration:"none",fontWeight:700,fontSize:14,minWidth:120 }}>
             📘 Facebook
@@ -10652,11 +10652,11 @@ function VitrineDetail() {
         <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:20,marginBottom:20,textAlign:"center" }}>
           <p style={{ fontWeight:700,color:"#E8E8F0",marginBottom:12,fontSize:14 }}>📱 QR Code de cette vitrine</p>
           <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent((structure.domain_active&&structure.custom_domain)?"https://"+structure.custom_domain:window.location.origin+"/structure/"+slug)}&bgcolor=1A1D30&color=10B981&margin=10`}
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent((structure.domain_active&&structure.custom_domain)?"https://"+structure.custom_domain:window.location.origin+"/vitrine/"+slug)}&bgcolor=1A1D30&color=10B981&margin=10`}
             alt="QR Code"
             style={{ borderRadius:10,width:160,height:160,display:"block",margin:"0 auto 12px" }}/>
           <p style={{ color:"#9A9AB0",fontSize:12,marginBottom:12 }}>Imprimez-le sur vos cartes de visite, affiches et menus</p>
-          <a href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent((structure.domain_active&&structure.custom_domain)?"https://"+structure.custom_domain:window.location.origin+"/structure/"+slug)}&bgcolor=ffffff&color=059669&margin=20`}
+          <a href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent((structure.domain_active&&structure.custom_domain)?"https://"+structure.custom_domain:window.location.origin+"/vitrine/"+slug)}&bgcolor=ffffff&color=059669&margin=20`}
             download={`qrcode-${slug}.png`} target="_blank" rel="noopener noreferrer"
             style={{ display:"inline-flex",alignItems:"center",gap:6,background:"rgba(16,185,129,0.12)",border:"1px solid rgba(16,185,129,0.3)",color:COLOR,padding:"8px 18px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none" }}>
             ⬇️ Télécharger le QR Code
@@ -10765,7 +10765,7 @@ function VitrineDirectory() {
 
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(260px,1fr))", gap:16 }}>
           {filtered.map(s => (
-            <div key={s.id} onClick={()=>navigate("/structure/"+s.slug)}
+            <div key={s.id} onClick={()=>navigate("/vitrine/"+s.slug)}
               style={{ background:T.card, border:`1px solid ${T.border}`, borderRadius:16, overflow:"hidden", cursor:"pointer", transition:"transform 0.2s, box-shadow 0.2s" }}
               onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-3px)"; e.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.3)"; }}
               onMouseLeave={e=>{ e.currentTarget.style.transform="none"; e.currentTarget.style.boxShadow="none"; }}>
@@ -10843,23 +10843,26 @@ function PersistentLayout() {
   const segments   = location.pathname.split("/").filter(Boolean);
   const hostname   = window.location.hostname;
 
-  const validTypes   = ["annonce","boutique","atelier","resto","beaute"];
-  const isDetail     = segments.length >= 2 && validTypes.includes(segments[0]) && segments[1] && segments[1] !== "undefined";
-  const isStructure  = segments[0] === "structure" && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
-  const isVitrineReq = segments[0] === "vitrine"  && segments.length === 1;
-  const isVitrineDir = segments[0] === "vitrines" && segments.length === 1;
+  const validTypes    = ["annonce","boutique","atelier","resto","beaute"];
+  const isDetail      = segments.length >= 2 && validTypes.includes(segments[0]) && segments[1] && segments[1] !== "undefined";
+  // /vitrine seul → formulaire création
+  const isVitrineReq  = segments[0] === "vitrine"  && segments.length === 1;
+  // /vitrine/slug (+ /modifier ou /payer optionnel) → page publique
+  const isVitrineSlug = segments[0] === "vitrine"  && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
+  // /vitrines → annuaire
+  const isVitrineDir  = segments[0] === "vitrines" && segments.length === 1;
   // Sous-domaine : slug.vitrine.marcheduroi.com
-  const isVitrineSub = hostname.includes(".vitrine.marcheduroi.com");
+  const isVitrineSub  = hostname.includes(".vitrine.marcheduroi.com");
 
   return (
     <>
-      <div style={{ display: (isDetail || isStructure || isVitrineReq || isVitrineSub || isVitrineDir) ? "none" : "block" }}>
+      <div style={{ display: (isDetail || isVitrineReq || isVitrineSlug || isVitrineSub || isVitrineDir) ? "none" : "block" }}>
         <AppContent/>
       </div>
-      {isDetail && <AnnonceDetail/>}
-      {(isStructure || isVitrineSub) && <VitrineDetail/>}
-      {isVitrineReq  && <VitrineRequest/>}
-      {isVitrineDir  && <VitrineDirectory/>}
+      {isDetail                        && <AnnonceDetail/>}
+      {(isVitrineSlug || isVitrineSub) && <VitrineDetail/>}
+      {isVitrineReq                    && <VitrineRequest/>}
+      {isVitrineDir                    && <VitrineDirectory/>}
     </>
   );
 }
