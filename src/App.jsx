@@ -3570,6 +3570,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 { label:"🎨 "+t.theme, action:()=>{setShowBgPicker(p=>!p);setShowMoreMenu(false);} },
               ] : []),
               { label:"📢 Tableau de demandes", action:()=>{ window.open("https://marcheduroi.com/demandes","_blank"); setShowMoreMenu(false); } },
+              { label:"🏛️ Annuaire VitrineWeb", action:()=>{ setShowMoreMenu(false); navigate("/vitrines"); } },
               { label:"🏛️ Créer ma vitrine", action:()=>{ setShowMoreMenu(false); navigate("/vitrine"); } },
               { label:"📖 Exemples de publications", action:()=>{ window.open("https://marcheduroi.com/exemples.html","_blank"); setShowMoreMenu(false); } },
               { label:"📞 Support WhatsApp", action:()=>{ window.open("https://wa.me/2290140906020","_blank"); setShowMoreMenu(false); } },
@@ -10301,7 +10302,56 @@ function VitrineDetail() {
       if (!isEditMode && !isPayMode) query = query.eq("active", true);
       const { data, error } = await query.single();
       if (error || !data) setNotFound(true);
-      else setStructure(data);
+      else {
+        setStructure(data);
+        // ---- SEO dynamique ----
+        const pageUrl = data.domain_active && data.custom_domain
+          ? "https://" + data.custom_domain
+          : window.location.origin + "/structure/" + data.slug;
+        const image = data.cover_url || data.logo_url || data.photos?.[0] || window.location.origin + "/icons/icon-512x512.png";
+        const desc  = (data.description || `${data.type} à ${data.ville||"Bénin"} — ${data.slogan||""}`)?.slice(0,160);
+
+        // Title + meta
+        document.title = `${data.name} — ${data.type} à ${data.ville||"Bénin"} | MarchéduRoi`;
+        const setMeta = (sel, attr, val) => { const el = document.querySelector(sel); if(el) el.setAttribute(attr, val); };
+        setMeta('meta[name="description"]',          "content", desc);
+        setMeta('meta[property="og:title"]',         "content", `${data.name} | MarchéduRoi`);
+        setMeta('meta[property="og:description"]',   "content", desc);
+        setMeta('meta[property="og:image"]',         "content", image);
+        setMeta('meta[property="og:url"]',           "content", pageUrl);
+        setMeta('meta[property="og:type"]',          "content", "local.business");
+        setMeta('meta[name="twitter:title"]',        "content", `${data.name} | MarchéduRoi`);
+        setMeta('meta[name="twitter:description"]',  "content", desc);
+        setMeta('meta[name="twitter:image"]',        "content", image);
+
+        // JSON-LD structuré pour Google
+        let ld = document.getElementById("vitrine-jsonld");
+        if (!ld) { ld = document.createElement("script"); ld.id = "vitrine-jsonld"; ld.type = "application/ld+json"; document.head.appendChild(ld); }
+        ld.textContent = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type":    "LocalBusiness",
+          "name":     data.name,
+          "description": data.description || data.slogan || "",
+          "url":      pageUrl,
+          "image":    image,
+          "telephone": data.phone || "",
+          "email":    data.email  || "",
+          "address":  {
+            "@type":           "PostalAddress",
+            "streetAddress":   data.address  || "",
+            "addressLocality": data.quartier || "",
+            "addressRegion":   data.ville    || "",
+            "addressCountry":  "BJ"
+          },
+          ...(data.gps_lat && data.gps_lng ? {
+            "geo": { "@type":"GeoCoordinates", "latitude": data.gps_lat, "longitude": data.gps_lng }
+          } : {}),
+          ...(data.hours ? { "openingHours": data.hours } : {}),
+          "sameAs": [data.facebook, data.website, data.instagram].filter(Boolean),
+          "priceRange": "FCFA",
+          "servesCuisine": data.type === "Restaurant" ? (data.services || "") : undefined,
+        });
+      }
       setLoading(false);
     };
     load();
@@ -10598,11 +10648,190 @@ function VitrineDetail() {
           </button>
         </div>
 
+        {/* ---- QR Code ---- */}
+        <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:20,marginBottom:20,textAlign:"center" }}>
+          <p style={{ fontWeight:700,color:"#E8E8F0",marginBottom:12,fontSize:14 }}>📱 QR Code de cette vitrine</p>
+          <img
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent((structure.domain_active&&structure.custom_domain)?"https://"+structure.custom_domain:window.location.origin+"/structure/"+slug)}&bgcolor=1A1D30&color=10B981&margin=10`}
+            alt="QR Code"
+            style={{ borderRadius:10,width:160,height:160,display:"block",margin:"0 auto 12px" }}/>
+          <p style={{ color:"#9A9AB0",fontSize:12,marginBottom:12 }}>Imprimez-le sur vos cartes de visite, affiches et menus</p>
+          <a href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent((structure.domain_active&&structure.custom_domain)?"https://"+structure.custom_domain:window.location.origin+"/structure/"+slug)}&bgcolor=ffffff&color=059669&margin=20`}
+            download={`qrcode-${slug}.png`} target="_blank" rel="noopener noreferrer"
+            style={{ display:"inline-flex",alignItems:"center",gap:6,background:"rgba(16,185,129,0.12)",border:"1px solid rgba(16,185,129,0.3)",color:COLOR,padding:"8px 18px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none" }}>
+            ⬇️ Télécharger le QR Code
+          </a>
+        </div>
+
         <button onClick={()=>navigate("/")}
           style={{ width:"100%",padding:15,background:`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
           ← Retour à MarchéduRoi
         </button>
 
+      </div>
+    </div>
+  );
+}
+
+
+// -----------------------------------------------
+// VitrineDirectory — Annuaire public /vitrines
+// -----------------------------------------------
+function VitrineDirectory() {
+  const navigate  = useNavigate();
+  const COLOR     = "#10B981";
+  const T         = getThemeFromStorage();
+
+  const [structures, setStructures] = React.useState([]);
+  const [loading,    setLoading]    = React.useState(true);
+  const [search,     setSearch]     = React.useState("");
+  const [filterType, setFilterType] = React.useState("Tous");
+  const [filterVille,setFilterVille]= React.useState("Toutes");
+
+  React.useEffect(() => {
+    document.title = "Annuaire VitrineWeb — Structures & Établissements | MarchéduRoi";
+    const el = document.querySelector('meta[name="description"]');
+    if (el) el.setAttribute("content", "Découvrez toutes les structures, restaurants, écoles, cliniques et commerces référencés sur MarchéduRoi au Bénin et en Afrique.");
+    supabase.from("structures").select("id,slug,name,type,ville,quartier,slogan,logo_url,cover_url,verified,phone,whatsapp,services")
+      .eq("active", true).order("created_at", { ascending: false })
+      .then(({ data }) => { if (data) setStructures(data); setLoading(false); });
+  }, []);
+
+  // Filtres dynamiques
+  const types  = ["Tous",  ...new Set(structures.map(s=>s.type).filter(Boolean))];
+  const villes = ["Toutes",...new Set(structures.map(s=>s.ville).filter(Boolean))];
+
+  const filtered = structures.filter(s => {
+    const q = search.toLowerCase();
+    const matchSearch = !q || s.name?.toLowerCase().includes(q) || s.type?.toLowerCase().includes(q) || s.ville?.toLowerCase().includes(q) || s.services?.toLowerCase().includes(q);
+    const matchType   = filterType  === "Tous"   || s.type  === filterType;
+    const matchVille  = filterVille === "Toutes" || s.ville === filterVille;
+    return matchSearch && matchType && matchVille;
+  });
+
+  const inp = { background:T.card, border:`1px solid ${T.border}`, borderRadius:10, padding:"11px 14px", color:T.text, fontSize:14, fontFamily:"Sora,sans-serif", outline:"none" };
+
+  return (
+    <div style={{ background:T.bg, minHeight:"100vh", fontFamily:"Sora,sans-serif", color:T.text }}>
+
+      {/* Navbar */}
+      <div style={{ background:T.bg+"EE", borderBottom:`1px solid ${T.border}`, padding:"0 24px", height:64, display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:100, backdropFilter:"blur(8px)" }}>
+        <div style={{ cursor:"pointer" }} onClick={()=>navigate("/")}>
+          <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52, objectFit:"contain" }}/>
+        </div>
+        <div style={{ display:"flex", gap:8 }}>
+          <button onClick={()=>navigate("/vitrine")}
+            style={{ background:`rgba(16,185,129,0.12)`, border:`1px solid rgba(16,185,129,0.3)`, color:COLOR, padding:"8px 14px", borderRadius:8, fontWeight:700, fontSize:13, cursor:"pointer" }}>
+            + Créer ma vitrine
+          </button>
+          <button onClick={()=>navigate("/")}
+            style={{ background:"transparent", border:`1px solid ${T.border}`, color:T.sub, padding:"8px 14px", borderRadius:8, fontWeight:600, fontSize:13, cursor:"pointer" }}>
+            ← Retour
+          </button>
+        </div>
+      </div>
+
+      <div style={{ maxWidth:900, margin:"0 auto", padding:"32px 24px 64px" }}>
+
+        {/* En-tête */}
+        <div style={{ textAlign:"center", marginBottom:32 }}>
+          <h1 style={{ fontSize:28, fontWeight:800, marginBottom:8 }}>🏛️ Annuaire VitrineWeb</h1>
+          <p style={{ color:T.sub, fontSize:15 }}>Toutes les structures référencées sur MarchéduRoi au Bénin et en Afrique</p>
+          <p style={{ color:COLOR, fontWeight:700, fontSize:18, margin:"12px 0 0" }}>{structures.length} structure{structures.length>1?"s":""} référencée{structures.length>1?"s":""}</p>
+        </div>
+
+        {/* Barre de recherche + filtres */}
+        <div style={{ display:"flex", gap:10, marginBottom:24, flexWrap:"wrap" }}>
+          <input style={{ ...inp, flex:2, minWidth:200 }} value={search}
+            onChange={e=>setSearch(e.target.value)}
+            placeholder="🔍 Rechercher par nom, type, ville…"/>
+          <select style={{ ...inp, cursor:"pointer", flex:1, minWidth:140 }} value={filterType} onChange={e=>setFilterType(e.target.value)}>
+            {types.map(t=><option key={t} value={t}>{t}</option>)}
+          </select>
+          <select style={{ ...inp, cursor:"pointer", flex:1, minWidth:140 }} value={filterVille} onChange={e=>setFilterVille(e.target.value)}>
+            {villes.map(v=><option key={v} value={v}>{v}</option>)}
+          </select>
+        </div>
+
+        {/* Résultats */}
+        {loading && <p style={{ color:T.sub, textAlign:"center", padding:32 }}>Chargement…</p>}
+
+        {!loading && filtered.length === 0 && (
+          <div style={{ textAlign:"center", padding:48 }}>
+            <p style={{ fontSize:32, marginBottom:8 }}>🔍</p>
+            <p style={{ color:T.sub }}>Aucune structure trouvée pour cette recherche.</p>
+          </div>
+        )}
+
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(260px,1fr))", gap:16 }}>
+          {filtered.map(s => (
+            <div key={s.id} onClick={()=>navigate("/structure/"+s.slug)}
+              style={{ background:T.card, border:`1px solid ${T.border}`, borderRadius:16, overflow:"hidden", cursor:"pointer", transition:"transform 0.2s, box-shadow 0.2s" }}
+              onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-3px)"; e.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.3)"; }}
+              onMouseLeave={e=>{ e.currentTarget.style.transform="none"; e.currentTarget.style.boxShadow="none"; }}>
+
+              {/* Couverture ou dégradé */}
+              <div style={{ height:90, background: s.cover_url ? `url(${s.cover_url}) center/cover` : `linear-gradient(135deg, rgba(16,185,129,0.3), rgba(108,99,255,0.3))`, position:"relative" }}>
+                {/* Logo */}
+                <div style={{ position:"absolute", bottom:-24, left:16 }}>
+                  {s.logo_url ? (
+                    <img src={s.logo_url} alt={s.name}
+                      style={{ width:48, height:48, borderRadius:12, objectFit:"cover", border:`3px solid ${T.card}`, background:T.card }}
+                      onError={e=>e.target.style.display="none"}/>
+                  ) : (
+                    <div style={{ width:48, height:48, borderRadius:12, background:`linear-gradient(135deg,${COLOR},#059669)`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, border:`3px solid ${T.card}` }}>
+                      🏛️
+                    </div>
+                  )}
+                </div>
+                {/* Badge vérifié */}
+                {s.verified && (
+                  <div style={{ position:"absolute", top:8, right:8, background:"rgba(255,215,0,0.9)", borderRadius:20, padding:"2px 8px", fontSize:10, fontWeight:700, color:"#000" }}>
+                    ✅ Vérifié
+                  </div>
+                )}
+              </div>
+
+              {/* Contenu */}
+              <div style={{ padding:"28px 14px 14px" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:6, flexWrap:"wrap" }}>
+                  <span style={{ background:`rgba(16,185,129,0.1)`, color:COLOR, padding:"2px 8px", borderRadius:20, fontSize:11, fontWeight:700 }}>{s.type}</span>
+                  {s.ville && <span style={{ color:T.sub, fontSize:11 }}>📍 {s.ville}</span>}
+                </div>
+                <p style={{ fontWeight:700, fontSize:15, color:T.text, margin:"0 0 4px" }}>{s.name}</p>
+                {s.slogan && <p style={{ color:T.sub, fontSize:12, margin:0, lineHeight:1.5, fontStyle:"italic" }}>"{s.slogan}"</p>}
+
+                {/* Contact rapide */}
+                {(s.phone || s.whatsapp) && (
+                  <div style={{ marginTop:10, display:"flex", gap:6 }}>
+                    {s.phone && (
+                      <a href={"tel:"+s.phone} onClick={e=>e.stopPropagation()}
+                        style={{ flex:1, textAlign:"center", background:"rgba(108,99,255,0.1)", border:"1px solid rgba(108,99,255,0.2)", borderRadius:8, padding:"6px 4px", color:"#6C63FF", fontSize:11, fontWeight:700, textDecoration:"none" }}>
+                        📞 Appeler
+                      </a>
+                    )}
+                    {s.whatsapp && (
+                      <a href={"https://wa.me/"+s.whatsapp.replace(/[^\d]/g,"")} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()}
+                        style={{ flex:1, textAlign:"center", background:"rgba(37,211,102,0.1)", border:"1px solid rgba(37,211,102,0.2)", borderRadius:8, padding:"6px 4px", color:"#25D366", fontSize:11, fontWeight:700, textDecoration:"none" }}>
+                        💬 WhatsApp
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA bas de page */}
+        <div style={{ textAlign:"center", marginTop:48, padding:32, background:`rgba(16,185,129,0.06)`, border:`1px solid rgba(16,185,129,0.2)`, borderRadius:16 }}>
+          <p style={{ fontSize:20, fontWeight:800, marginBottom:8 }}>Votre structure n'est pas encore référencée ?</p>
+          <p style={{ color:T.sub, marginBottom:20 }}>Créez votre VitrineWeb dès aujourd'hui pour 15 000 FCFA.</p>
+          <button onClick={()=>navigate("/vitrine")}
+            style={{ background:`linear-gradient(135deg,${COLOR},#059669)`, border:"none", color:"#fff", padding:"14px 36px", borderRadius:12, fontWeight:800, fontSize:16, cursor:"pointer" }}>
+            🏛️ Créer ma vitrine
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -10617,18 +10846,20 @@ function PersistentLayout() {
   const validTypes   = ["annonce","boutique","atelier","resto","beaute"];
   const isDetail     = segments.length >= 2 && validTypes.includes(segments[0]) && segments[1] && segments[1] !== "undefined";
   const isStructure  = segments[0] === "structure" && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
-  const isVitrineReq = segments[0] === "vitrine" && segments.length === 1;
+  const isVitrineReq = segments[0] === "vitrine"  && segments.length === 1;
+  const isVitrineDir = segments[0] === "vitrines" && segments.length === 1;
   // Sous-domaine : slug.vitrine.marcheduroi.com
   const isVitrineSub = hostname.includes(".vitrine.marcheduroi.com");
 
   return (
     <>
-      <div style={{ display: (isDetail || isStructure || isVitrineReq || isVitrineSub) ? "none" : "block" }}>
+      <div style={{ display: (isDetail || isStructure || isVitrineReq || isVitrineSub || isVitrineDir) ? "none" : "block" }}>
         <AppContent/>
       </div>
       {isDetail && <AnnonceDetail/>}
       {(isStructure || isVitrineSub) && <VitrineDetail/>}
-      {isVitrineReq && <VitrineRequest/>}
+      {isVitrineReq  && <VitrineRequest/>}
+      {isVitrineDir  && <VitrineDirectory/>}
     </>
   );
 }
