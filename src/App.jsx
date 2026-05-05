@@ -10048,12 +10048,6 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
 
   React.useEffect(() => {
     if (!token || !structure) { setCheckingTok(false); return; }
-    // DEBUG — à supprimer après résolution
-    console.log("=== DEBUG VITRINE EDIT ===");
-    console.log("Clés de structure:", Object.keys(structure));
-    console.log("edit_token:", structure.edit_token);
-    console.log("editToken:", structure.editToken);
-    console.log("token URL:", token);
     // Supabase peut retourner edit_token ou editToken selon la config client
     const storedToken = structure.edit_token ?? structure.editToken ?? "";
     const isValid = String(storedToken).toLowerCase().trim() === String(token).toLowerCase().trim();
@@ -10306,7 +10300,7 @@ function VitrineDetail() {
   const slug         = subdomainSlug || segments[1];
   const isEditMode   = !isSubdomain && segments[2] === "modifier";
   const isPayMode    = !isSubdomain && segments[2] === "payer";
-  const tokenFromUrl = new URLSearchParams(window.location.search).get("token");
+  const tokenFromUrl = new URLSearchParams(location.search).get("token");
 
   const [structure, setStructure] = useState(null);
   const [loading,   setLoading]   = useState(true);
