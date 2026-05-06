@@ -9484,6 +9484,19 @@ function VitrineRequest() {
     logo_url:"", cover_url:"", photos:"", video:"",
     hours:"", services:"",
   });
+
+  const NEWS_TYPES = ["Actualité","Promotion","Nouveauté","Événement","Offre d'emploi"];
+  const emptyNews  = { type:"Actualité", title:"", content:"" };
+  const [initialNews, setInitialNews] = React.useState([
+    { ...emptyNews },
+    { ...emptyNews },
+    { ...emptyNews },
+    { ...emptyNews },
+  ]);
+
+  const updateNews = (i, field, val) => {
+    setInitialNews(prev => prev.map((n,j) => j===i ? {...n,[field]:val} : n));
+  };
   const [paying,  setPaying]  = React.useState(false);
   const [done,    setDone]    = React.useState(false);
   const [error,   setError]   = React.useState(null);
@@ -9555,7 +9568,12 @@ function VitrineRequest() {
       video:       form.video || null,
       hours:       form.hours || null,
       services:    form.services || null,
-      news:        [],
+      news:        initialNews.filter(n => n.title.trim()).map(n => ({
+        title:   n.title.trim(),
+        content: n.content.trim(),
+        type:    n.type,
+        date:    new Date().toLocaleDateString("fr-FR"),
+      })),
       active:      false,
       verified:    false,
       paid_at:     now.toISOString(),
@@ -9813,6 +9831,38 @@ function VitrineRequest() {
             <p style={{ margin:0,color:"#FF4757",fontWeight:600,fontSize:14 }}>❌ {error}</p>
           </div>
         )}
+
+        {/* Actualités initiales */}
+        <p style={sec}>📰 Actualités & Promotions <span style={{ color:T.sub,fontSize:12,fontWeight:400 }}>(optionnel)</span></p>
+        <p style={{ color:T.sub,fontSize:13,marginBottom:16,lineHeight:1.6 }}>
+          Ajoutez jusqu'à 4 actualités visibles sur votre vitrine dès la mise en ligne : menu du jour, promotion, événement, nouveauté…
+        </p>
+        {initialNews.map((n, i) => (
+          <div key={i} style={{ background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:14,marginBottom:10 }}>
+            <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10 }}>
+              <span style={{ background:`rgba(16,185,129,0.1)`,color:"#10B981",padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700,flexShrink:0 }}>
+                #{i+1}
+              </span>
+              <input style={{...inp,padding:"8px 12px",fontSize:13}} list={`news-types-${i}`}
+                value={n.type} onChange={e=>updateNews(i,"type",e.target.value)}
+                placeholder="Type d'actualité…"/>
+              <datalist id={`news-types-${i}`}>
+                {NEWS_TYPES.map(t=><option key={t} value={t}/>)}
+              </datalist>
+            </div>
+            <input style={{...inp,marginBottom:8}} value={n.title}
+              onChange={e=>updateNews(i,"title",e.target.value)}
+              placeholder={
+                i===0 ? "Ex: Menu du jour — Amiwo sauce graine 1 500 FCFA" :
+                i===1 ? "Ex: Promotion — -20% sur toutes les formules" :
+                i===2 ? "Ex: Nouvelle spécialité disponible ce week-end" :
+                        "Ex: Ouvert le dimanche de 8h à 20h"
+              }/>
+            <textarea style={{...inp,minHeight:60,resize:"vertical"}} value={n.content}
+              onChange={e=>updateNews(i,"content",e.target.value)}
+              placeholder="Détails supplémentaires (optionnel)…"/>
+          </div>
+        ))}
 
         {/* Récapitulatif + paiement */}
         <div style={{ background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:24,marginTop:28 }}>
@@ -10251,12 +10301,12 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
 
         <VitrineSection id="news" icon="📰" title="Actualités & Promotions" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
           <label style={lbl}>Type</label>
-          <select style={{...inp,cursor:"pointer"}} value={form.news_type}
-            onChange={e=>setForm(f=>({...f,news_type:e.target.value}))} disabled={editBlocked}>
-            {["Actualité","Promotion","Nouveauté","Événement","Offre d'emploi"].map(t=>(
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
+          <input style={inp} list="vitrine-edit-news-types" value={form.news_type||"Actualité"}
+            onChange={e=>setForm(f=>({...f,news_type:e.target.value}))}
+            placeholder="Type d'actualité…" disabled={editBlocked}/>
+          <datalist id="vitrine-edit-news-types">
+            {["Actualité","Promotion","Nouveauté","Événement","Offre d'emploi","Menu du jour","Spécialité","Annonce"].map(t=><option key={t} value={t}/>)}
+          </datalist>
           <label style={lbl}>Titre</label>
           <input style={inp} value={form.news_title}
             onChange={e=>setForm(f=>({...f,news_title:e.target.value}))}
