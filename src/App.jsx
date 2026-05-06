@@ -11026,17 +11026,18 @@ function VitrineDetail() {
                 const style = typeColors[item.type] || typeColors["Actualité"];
                 return (
                   <div key={i} style={{ background:style.bg, border:`1px solid ${style.border}`, borderRadius:12, padding:16 }}>
-                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,gap:8 }}>
-                      <div style={{ display:"flex",alignItems:"center",gap:8,flex:1 }}>
-                        {item.type && (
-                          <span style={{ background:style.bg,border:`1px solid ${style.border}`,color:style.text,padding:"2px 10px",borderRadius:20,fontSize:11,fontWeight:700,flexShrink:0 }}>
-                            {style.icon} {item.type}
-                          </span>
-                        )}
-                        <p style={{ fontWeight:700,color:VT.text,margin:0,fontSize:15 }}>{item.title}</p>
-                      </div>
-                      {item.date && <span style={{ color:VT.sub,fontSize:12,flexShrink:0 }}>{item.date}</span>}
+                    {/* Ligne 1 : Badge type (gauche) + Date (droite) */}
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8 }}>
+                      {item.type ? (
+                        <span style={{ background:style.bg,border:`1px solid ${style.border}`,color:style.text,padding:"2px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>
+                          {style.icon} {item.type}
+                        </span>
+                      ) : <span/>}
+                      {item.date && <span style={{ color:VT.sub,fontSize:12 }}>{item.date}</span>}
                     </div>
+                    {/* Ligne 2 : Titre */}
+                    <p style={{ fontWeight:700,color:VT.text,margin:"0 0 8px",fontSize:15,lineHeight:1.4 }}>{item.title}</p>
+                    {/* Ligne 3 : Contenu */}
                     {item.content && <p style={{ color:"#B8B8CC",margin:0,lineHeight:1.75,fontSize:14,whiteSpace:"pre-line" }}>{item.content}</p>}
                   </div>
                 );
