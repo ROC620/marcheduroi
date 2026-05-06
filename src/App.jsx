@@ -10130,6 +10130,8 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
     photos:   (structure.photos  || []).join("\n"),
     services: structure.services || "",
     news_title:"", news_content:"", news_type:"Actualité",
+    theme:    structure.theme    || "dark",
+    bg_image: structure.bg_image || "",
   });
 
   const [news,        setNews]        = React.useState(structure.news || []);
@@ -10166,6 +10168,8 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
       email: form.email, facebook: form.facebook, hours: form.hours,
       video: form.video, photos: photosArray, services: form.services,
       news, updated_at: new Date().toISOString(),
+      theme:    form.theme    || "dark",
+      bg_image: form.bg_image || null,
       last_edit_date: today,
     }).eq("id", structure.id).eq("edit_token", token);
     if (error) setSaveError("Erreur lors de la sauvegarde. Réessayez.");
@@ -10253,6 +10257,35 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
         )}
 
         {/* Sections accordéon */}
+        <VitrineSection id="apparence" icon="🎨" title="Apparence de la vitrine" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
+          <label style={lbl}>Thème de couleur</label>
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:16 }}>
+            {Object.entries(VITRINE_THEMES).map(([key, val]) => (
+              <div key={key} onClick={()=>!editBlocked&&setForm(f=>({...f,theme:key}))}
+                style={{ borderRadius:12,padding:"10px 8px",textAlign:"center",cursor:editBlocked?"not-allowed":"pointer",border:`2px solid ${form.theme===key?val.accent:T.border}`,background:val.bg,transition:"all 0.2s",opacity:editBlocked?0.5:1 }}>
+                <div style={{ width:24,height:24,borderRadius:"50%",background:val.accent,margin:"0 auto 6px" }}/>
+                <p style={{ margin:0,fontSize:11,fontWeight:700,color:val.text }}>{val.label}</p>
+              </div>
+            ))}
+          </div>
+          <label style={lbl}>Image de fond (lien URL) — optionnel</label>
+          <input style={inp} value={form.bg_image}
+            onChange={e=>setForm(f=>({...f,bg_image:e.target.value}))}
+            placeholder="https://i.ibb.co/.../fond.jpg" disabled={editBlocked}/>
+          <p style={{ color:T.sub,fontSize:11,margin:"6px 0 0",lineHeight:1.6 }}>
+            💡 L'image de fond s'affiche en arrière-plan avec le thème sélectionné. Utilisez une image haute résolution (min. 1920x1080px).
+          </p>
+          {/* Aperçu du thème */}
+          {form.theme && (
+            <div style={{ marginTop:14,borderRadius:12,padding:16,background:VITRINE_THEMES[form.theme]?.bg,border:`1px solid ${VITRINE_THEMES[form.theme]?.border}` }}>
+              <p style={{ margin:0,fontWeight:700,color:VITRINE_THEMES[form.theme]?.accent,fontSize:13 }}>
+                Aperçu — {VITRINE_THEMES[form.theme]?.label}
+              </p>
+              <p style={{ margin:"4px 0 0",color:VITRINE_THEMES[form.theme]?.text,fontSize:12 }}>Voici à quoi ressemblera le fond de votre vitrine.</p>
+            </div>
+          )}
+        </VitrineSection>
+
         <VitrineSection id="contacts" icon="📞" title="Contacts" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
           <label style={lbl}>Téléphone principal</label>
           <input style={inp} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="+229 0100000000" disabled={editBlocked}/>
@@ -10363,6 +10396,21 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
 // Route : /vitrine/:slug
 // Route modifier : /vitrine/:slug/modifier?token=XXX
 // -----------------------------------------------
+// Thèmes disponibles pour les vitrines
+const VITRINE_THEMES = {
+  dark:   { label:"🌑 Sombre",   bg:"#0D0F1A", card:"#1A1D30", text:"#E8E8F0", sub:"#9A9AB0", border:"#2A2D45", accent:"#10B981" },
+  light:  { label:"☀️ Clair",    bg:"#F8FAFC", card:"#FFFFFF", text:"#1A1D30", sub:"#6B7280", border:"#E2E8F0", accent:"#10B981" },
+  ocean:  { label:"🌊 Océan",    bg:"#0A1628", card:"#112240", text:"#E6F1FF", sub:"#8892B0", border:"#1E3A5F", accent:"#38BDF8" },
+  nature: { label:"🌿 Nature",   bg:"#0D1F14", card:"#1A3122", text:"#E8F5E9", sub:"#81C784", border:"#2E7D32", accent:"#4ADE80" },
+  royal:  { label:"👑 Royal",    bg:"#0F0A1A", card:"#1E1432", text:"#EDE7F6", sub:"#B39DDB", border:"#4A148C", accent:"#A78BFA" },
+  sunset: { label:"🌅 Coucher",  bg:"#1A0F0A", card:"#2D1B10", text:"#FFF3E0", sub:"#FFAB76", border:"#5D2E0C", accent:"#FB923C" },
+};
+
+const getVitrineTheme = (structure) => {
+  const t = VITRINE_THEMES[structure?.theme] || VITRINE_THEMES.dark;
+  return t;
+};
+
 function VitrineDetail() {
   const navigate  = useNavigate();
   const location  = useLocation();
@@ -10467,13 +10515,11 @@ function VitrineDetail() {
     else { navigator.clipboard.writeText(url); alert("Lien copié !"); }
   };
 
-  const COLOR = "#10B981";
-
   /* ---- États de chargement / erreur ---- */
   if (loading) return (
     <div style={{ display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0D0F1A",fontFamily:"Sora,sans-serif" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ width:48,height:48,border:"4px solid #2A2D45",borderTop:`4px solid ${COLOR}`,borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 16px" }}/>
+        <div style={{ width:48,height:48,border:"4px solid #2A2D45",borderTop:`4px solid #10B981`,borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 16px" }}/>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
         <p style={{ color:"#9A9AB0",fontSize:14 }}>Chargement de la vitrine…</p>
       </div>
@@ -10485,7 +10531,7 @@ function VitrineDetail() {
       <p style={{ fontSize:48,marginBottom:16 }}>🏗️</p>
       <h2 style={{ fontSize:24,fontWeight:700,marginBottom:12 }}>Vitrine introuvable</h2>
       <p style={{ color:"#9A9AB0",marginBottom:24 }}>Cette structure n'existe pas ou n'est plus active sur MarchéduRoi.</p>
-      <button onClick={()=>navigate("/")} style={{ background:`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:"#fff",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
+      <button onClick={()=>navigate("/")} style={{ background:`linear-gradient(135deg,#10B981,#059669)`,border:"none",color:"#fff",padding:"12px 28px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>
         ← Retour à l'accueil
       </button>
     </div>
@@ -10511,6 +10557,8 @@ function VitrineDetail() {
   );
 
   /* ---- Page publique ---- */
+  const VT     = getVitrineTheme(structure);
+  const COLOR  = VT.accent;
   const photos = structure.photos || [];
   const news   = structure.news   || [];
 
@@ -10520,10 +10568,10 @@ function VitrineDetail() {
     : null;
 
   return (
-    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",color:"#E8E8F0" }}>
+    <div style={{ background: structure.bg_image ? `linear-gradient(${VT.bg}CC,${VT.bg}CC), url(${structure.bg_image}) center/cover fixed` : VT.bg, minHeight:"100vh",fontFamily:"Sora,sans-serif",color:VT.text }}>
 
       {/* ---- Navbar ---- */}
-      <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(8px)" }}>
+      <div style={{ background:VT.bg+"EE",borderBottom:`1px solid ${VT.border}`,padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(8px)" }}>
         <div style={{ cursor:"pointer" }} onClick={()=>navigate("/")}>
           <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,objectFit:"contain" }}/>
         </div>
@@ -10531,7 +10579,7 @@ function VitrineDetail() {
           <button onClick={handleShare} style={{ background:`rgba(16,185,129,0.12)`,border:`1px solid rgba(16,185,129,0.3)`,color:COLOR,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             🔗 Partager
           </button>
-          <button onClick={()=>navigate("/")} style={{ background:"transparent",border:"1px solid #2A2D45",color:"#9A9AB0",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+          <button onClick={()=>navigate("/")} style={{ background:"transparent",border:`1px solid ${VT.border}`,color:VT.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             ← Retour
           </button>
         </div>
@@ -10551,7 +10599,7 @@ function VitrineDetail() {
         <div style={{ display:"flex",alignItems:"flex-end",gap:16,marginTop:structure.cover_url ? -40 : 28,marginBottom:20,position:"relative",zIndex:1 }}>
           {structure.logo_url ? (
             <img src={structure.logo_url} alt="logo"
-              style={{ width:84,height:84,borderRadius:18,objectFit:"cover",border:"3px solid #2A2D45",background:"#1A1D30",flexShrink:0 }}
+              style={{ width:84,height:84,borderRadius:18,objectFit:"cover",border:"3px solid #2A2D45",background:VT.card,flexShrink:0 }}
               onError={e=>{e.target.style.display="none";}}/>
           ) : (
             <div style={{ width:84,height:84,borderRadius:18,background:`linear-gradient(135deg,${COLOR},#059669)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:34,flexShrink:0,border:"3px solid #2A2D45" }}>
@@ -10569,9 +10617,9 @@ function VitrineDetail() {
                 </span>
               )}
             </div>
-            <h1 style={{ fontSize:22,fontWeight:800,margin:0,lineHeight:1.2,color:"#E8E8F0" }}>{structure.name}</h1>
+            <h1 style={{ fontSize:22,fontWeight:800,margin:0,lineHeight:1.2,color:VT.text }}>{structure.name}</h1>
             {structure.slogan && (
-              <p style={{ color:"#9A9AB0",fontSize:13,margin:"5px 0 0",fontStyle:"italic" }}>"{structure.slogan}"</p>
+              <p style={{ color:VT.sub,fontSize:13,margin:"5px 0 0",fontStyle:"italic" }}>"{structure.slogan}"</p>
             )}
           </div>
         </div>
@@ -10583,9 +10631,9 @@ function VitrineDetail() {
 
         {/* ---- Services ---- */}
         {structure.services && (
-          <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:16,marginBottom:16 }}>
-            <p style={{ fontWeight:700,marginBottom:8,color:"#E8E8F0",margin:"0 0 8px" }}>✅ Services proposés</p>
-            <p style={{ color:"#9A9AB0",lineHeight:1.75,margin:0 }}>{structure.services}</p>
+          <div style={{ background:VT.card,border:`1px solid ${VT.border}`,borderRadius:14,padding:16,marginBottom:16 }}>
+            <p style={{ fontWeight:700,marginBottom:8,color:VT.text,margin:"0 0 8px" }}>✅ Services proposés</p>
+            <p style={{ color:VT.sub,lineHeight:1.75,margin:0 }}>{structure.services}</p>
           </div>
         )}
 
@@ -10628,13 +10676,13 @@ function VitrineDetail() {
 
         {/* ---- Localisation ---- */}
         {(structure.ville || structure.quartier || structure.address) && (
-          <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:16,marginBottom:16 }}>
-            <p style={{ fontWeight:700,marginBottom:8,color:"#E8E8F0",margin:"0 0 8px" }}>📍 Localisation</p>
-            <p style={{ color:"#9A9AB0",margin:structure.gps_lat?"0 0 4px":"0",lineHeight:1.6 }}>
+          <div style={{ background:VT.card,border:`1px solid ${VT.border}`,borderRadius:14,padding:16,marginBottom:16 }}>
+            <p style={{ fontWeight:700,marginBottom:8,color:VT.text,margin:"0 0 8px" }}>📍 Localisation</p>
+            <p style={{ color:VT.sub,margin:structure.gps_lat?"0 0 4px":"0",lineHeight:1.6 }}>
               {[structure.address, structure.quartier, structure.ville].filter(Boolean).join(", ")}
             </p>
             {structure.von && (
-              <p style={{ color:"#9A9AB0",fontSize:13,margin:`${structure.gps_lat?"0 0 8px":"0"}` }}>📌 {structure.von}</p>
+              <p style={{ color:VT.sub,fontSize:13,margin:`${structure.gps_lat?"0 0 8px":"0"}` }}>📌 {structure.von}</p>
             )}
             {structure.gps_lat && structure.gps_lng && (
               <a href={`https://www.google.com/maps?q=${structure.gps_lat},${structure.gps_lng}`} target="_blank" rel="noopener noreferrer"
@@ -10647,20 +10695,20 @@ function VitrineDetail() {
 
         {/* ---- Horaires ---- */}
         {structure.hours && (
-          <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:16,marginBottom:16 }}>
-            <p style={{ fontWeight:700,color:"#E8E8F0",margin:"0 0 8px" }}>🕐 Horaires d'ouverture</p>
-            <p style={{ color:"#9A9AB0",margin:0,lineHeight:1.8,whiteSpace:"pre-line",fontSize:14 }}>{structure.hours}</p>
+          <div style={{ background:VT.card,border:`1px solid ${VT.border}`,borderRadius:14,padding:16,marginBottom:16 }}>
+            <p style={{ fontWeight:700,color:VT.text,margin:"0 0 8px" }}>🕐 Horaires d'ouverture</p>
+            <p style={{ color:VT.sub,margin:0,lineHeight:1.8,whiteSpace:"pre-line",fontSize:14 }}>{structure.hours}</p>
           </div>
         )}
 
         {/* ---- Galerie photos ---- */}
         {photos.length > 0 && (
           <div style={{ marginBottom:24 }}>
-            <p style={{ fontWeight:700,marginBottom:12,color:"#E8E8F0" }}>🖼️ Galerie</p>
+            <p style={{ fontWeight:700,marginBottom:12,color:VT.text }}>🖼️ Galerie</p>
             <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:8 }}>
               {photos.map((url, i) => (
                 <img key={i} src={url} alt={"photo "+i}
-                  style={{ width:"100%",aspectRatio:"4/3",objectFit:"cover",borderRadius:10,border:"1px solid #2A2D45",cursor:"pointer" }}
+                  style={{ width:"100%",aspectRatio:"4/3",objectFit:"cover",borderRadius:10,border:`1px solid ${VT.border}`,cursor:"pointer" }}
                   onError={e=>{ e.target.parentElement.style.display="none"; }}
                   onClick={()=>window.open(url,"_blank")}/>
               ))}
@@ -10671,8 +10719,8 @@ function VitrineDetail() {
         {/* ---- Vidéo YouTube ---- */}
         {ytMatch && (
           <div style={{ marginBottom:24 }}>
-            <p style={{ fontWeight:700,marginBottom:12,color:"#E8E8F0" }}>🎬 Vidéo de présentation</p>
-            <div style={{ borderRadius:14,overflow:"hidden",aspectRatio:"16/9",border:"1px solid #2A2D45" }}>
+            <p style={{ fontWeight:700,marginBottom:12,color:VT.text }}>🎬 Vidéo de présentation</p>
+            <div style={{ borderRadius:14,overflow:"hidden",aspectRatio:"16/9",border:`1px solid ${VT.border}` }}>
               <iframe
                 width="100%" height="100%"
                 src={`https://www.youtube.com/embed/${ytMatch[1]}`}
@@ -10686,7 +10734,7 @@ function VitrineDetail() {
         {/* ---- Actualités ---- */}
         {news.length > 0 && (
           <div style={{ marginBottom:28 }}>
-            <p style={{ fontWeight:700,marginBottom:14,color:"#E8E8F0" }}>📰 Actualités & Promotions</p>
+            <p style={{ fontWeight:700,marginBottom:14,color:VT.text }}>📰 Actualités & Promotions</p>
             <div style={{ display:"flex",flexDirection:"column",gap:12 }}>
               {news.map((item, i) => {
                 // Couleur selon le type
@@ -10695,7 +10743,7 @@ function VitrineDetail() {
                   "Nouveauté":  { bg:"rgba(16,185,129,0.08)", border:"rgba(16,185,129,0.3)", text:COLOR,     icon:"🆕" },
                   "Événement":  { bg:"rgba(108,99,255,0.08)", border:"rgba(108,99,255,0.3)", text:"#6C63FF", icon:"🎉" },
                   "Offre d'emploi": { bg:"rgba(255,215,0,0.06)", border:"rgba(255,215,0,0.25)", text:"#FFD700", icon:"💼" },
-                  "Actualité":  { bg:"rgba(255,255,255,0.03)", border:"#2A2D45",             text:"#9A9AB0", icon:"📢" },
+                  "Actualité":  { bg:"rgba(255,255,255,0.03)", border:VT.border,             text:VT.sub, icon:"📢" },
                 };
                 const style = typeColors[item.type] || typeColors["Actualité"];
                 return (
@@ -10707,9 +10755,9 @@ function VitrineDetail() {
                             {style.icon} {item.type}
                           </span>
                         )}
-                        <p style={{ fontWeight:700,color:"#E8E8F0",margin:0,fontSize:15 }}>{item.title}</p>
+                        <p style={{ fontWeight:700,color:VT.text,margin:0,fontSize:15 }}>{item.title}</p>
                       </div>
-                      {item.date && <span style={{ color:"#9A9AB0",fontSize:12,flexShrink:0 }}>{item.date}</span>}
+                      {item.date && <span style={{ color:VT.sub,fontSize:12,flexShrink:0 }}>{item.date}</span>}
                     </div>
                     {item.content && <p style={{ color:"#B8B8CC",margin:0,lineHeight:1.75,fontSize:14,whiteSpace:"pre-line" }}>{item.content}</p>}
                   </div>
@@ -10724,7 +10772,7 @@ function VitrineDetail() {
           <div style={{ background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:14,padding:16,marginBottom:20,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap" }}>
             <div>
               <p style={{ fontWeight:700,color:COLOR,margin:"0 0 4px",fontSize:14 }}>✅ Vous gérez cette vitrine</p>
-              <p style={{ color:"#9A9AB0",fontSize:13,margin:0 }}>Modifiez vos infos, ajoutez une actualité, mettez à jour vos photos…</p>
+              <p style={{ color:VT.sub,fontSize:13,margin:0 }}>Modifiez vos infos, ajoutez une actualité, mettez à jour vos photos…</p>
             </div>
             <a href={`/vitrine/${slug}/modifier?token=${structure.edit_token}&section=contacts`}
               style={{ background:`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",flexShrink:0,whiteSpace:"nowrap" }}>
@@ -10734,7 +10782,7 @@ function VitrineDetail() {
         ) : (
           <div style={{ background:"rgba(108,99,255,0.06)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:14,padding:16,marginBottom:20 }}>
             <p style={{ fontWeight:700,color:"#6C63FF",margin:"0 0 4px",fontSize:14 }}>🔑 Vous gérez cette structure ?</p>
-            <p style={{ color:"#9A9AB0",fontSize:13,margin:0,lineHeight:1.7 }}>
+            <p style={{ color:VT.sub,fontSize:13,margin:0,lineHeight:1.7 }}>
               Connectez-vous avec le compte utilisé lors de la création pour accéder aux options de modification.
             </p>
           </div>
@@ -10759,13 +10807,13 @@ function VitrineDetail() {
         </div>
 
         {/* ---- QR Code ---- */}
-        <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:14,padding:20,marginBottom:20,textAlign:"center" }}>
-          <p style={{ fontWeight:700,color:"#E8E8F0",marginBottom:12,fontSize:14 }}>📱 QR Code de cette vitrine</p>
+        <div style={{ background:VT.card,border:`1px solid ${VT.border}`,borderRadius:14,padding:20,marginBottom:20,textAlign:"center" }}>
+          <p style={{ fontWeight:700,color:VT.text,marginBottom:12,fontSize:14 }}>📱 QR Code de cette vitrine</p>
           <img
             src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent((structure.domain_active&&structure.custom_domain)?"https://"+structure.custom_domain:window.location.origin+"/vitrine/"+slug)}&bgcolor=1A1D30&color=10B981&margin=10`}
             alt="QR Code"
             style={{ borderRadius:10,width:160,height:160,display:"block",margin:"0 auto 12px" }}/>
-          <p style={{ color:"#9A9AB0",fontSize:12,marginBottom:12 }}>Imprimez-le sur vos cartes de visite, affiches et menus</p>
+          <p style={{ color:VT.sub,fontSize:12,marginBottom:12 }}>Imprimez-le sur vos cartes de visite, affiches et menus</p>
           <a href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent((structure.domain_active&&structure.custom_domain)?"https://"+structure.custom_domain:window.location.origin+"/vitrine/"+slug)}&bgcolor=ffffff&color=059669&margin=20`}
             download={`qrcode-${slug}.png`} target="_blank" rel="noopener noreferrer"
             style={{ display:"inline-flex",alignItems:"center",gap:6,background:"rgba(16,185,129,0.12)",border:"1px solid rgba(16,185,129,0.3)",color:COLOR,padding:"8px 18px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none" }}>
