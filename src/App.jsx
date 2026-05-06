@@ -10971,13 +10971,8 @@ function VitrineDetail() {
         {photos.length > 0 && (
           <div style={{ marginBottom:24 }}>
             <p style={{ fontWeight:700,marginBottom:12,color:VT.text }}>🖼️ Galerie</p>
-            <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:8 }}>
-              {photos.map((url, i) => (
-                <img key={i} src={url} alt={"photo "+i}
-                  style={{ width:"100%",aspectRatio:"4/3",objectFit:"cover",borderRadius:10,border:`1px solid ${VT.border}`,cursor:"pointer" }}
-                  onError={e=>{ e.target.parentElement.style.display="none"; }}
-                  onClick={()=>window.open(url,"_blank")}/>
-              ))}
+            <div style={{ borderRadius:14,overflow:"hidden",border:`1px solid ${VT.border}` }}>
+              <PhotoCarousel photos={photos}/>
             </div>
           </div>
         )}
