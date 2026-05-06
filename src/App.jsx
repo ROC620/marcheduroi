@@ -10134,6 +10134,9 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
     bg_image: structure.bg_image || "",
   });
 
+  const [customFields, setCustomFields] = React.useState(structure.custom_fields || []);
+  const [newField, setNewField]         = React.useState({ label:"", value:"" });
+
   const [news,        setNews]        = React.useState(structure.news || []);
   const [saving,      setSaving]      = React.useState(false);
   const [saved,       setSaved]       = React.useState(false);
@@ -10168,8 +10171,9 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
       email: form.email, facebook: form.facebook, hours: form.hours,
       video: form.video, photos: photosArray, services: form.services,
       news, updated_at: new Date().toISOString(),
-      theme:    form.theme    || "dark",
-      bg_image: form.bg_image || null,
+      theme:         form.theme    || "dark",
+      bg_image:      form.bg_image || null,
+      custom_fields: customFields,
       last_edit_date: today,
     }).eq("id", structure.id).eq("edit_token", token);
     if (error) setSaveError("Erreur lors de la sauvegarde. Réessayez.");
@@ -10368,6 +10372,62 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+        </VitrineSection>
+
+        {/* ---- Champs personnalisés ---- */}
+        <VitrineSection id="custom" icon="⚙️" title="Champs personnalisés" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
+          <p style={{ color:T.sub,fontSize:13,marginBottom:14,lineHeight:1.6 }}>
+            Ajoutez vos propres rubriques : Tarifs, Équipe, Témoignages, Conditions, Partenaires…
+          </p>
+
+          {/* Champs existants */}
+          {customFields.length > 0 && (
+            <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:16 }}>
+              {customFields.map((f,i) => (
+                <div key={i} style={{ background:T.bg,border:`1px solid ${T.border}`,borderRadius:10,padding:12 }}>
+                  {/* Label modifiable */}
+                  <input style={{...inp,marginBottom:6,fontWeight:700}}
+                    value={f.label}
+                    onChange={e=>{ const updated=[...customFields]; updated[i]={...updated[i],label:e.target.value}; setCustomFields(updated); }}
+                    placeholder="Nom du champ (ex: Tarifs)" disabled={editBlocked}/>
+                  {/* Valeur modifiable */}
+                  <div style={{ display:"flex",gap:8 }}>
+                    <textarea style={{...inp,minHeight:60,resize:"vertical",flex:1}}
+                      value={f.value}
+                      onChange={e=>{ const updated=[...customFields]; updated[i]={...updated[i],value:e.target.value}; setCustomFields(updated); }}
+                      placeholder="Contenu du champ…" disabled={editBlocked}/>
+                    <button onClick={()=>!editBlocked&&setCustomFields(prev=>prev.filter((_,j)=>j!==i))}
+                      disabled={editBlocked}
+                      style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"8px 12px",borderRadius:8,cursor:editBlocked?"not-allowed":"pointer",fontWeight:700,fontSize:13,flexShrink:0,alignSelf:"flex-start" }}>
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Ajouter un nouveau champ */}
+          {!editBlocked && (
+            <div style={{ background:`rgba(16,185,129,0.05)`,border:`1px solid rgba(16,185,129,0.2)`,borderRadius:12,padding:14 }}>
+              <p style={{ color:COLOR,fontWeight:700,fontSize:13,margin:"0 0 10px" }}>+ Nouveau champ</p>
+              <input style={{...inp,marginBottom:8}}
+                value={newField.label}
+                onChange={e=>setNewField(f=>({...f,label:e.target.value}))}
+                placeholder="Nom du champ (ex: Spécialités, Équipe, Témoignages…)"/>
+              <textarea style={{...inp,minHeight:70,resize:"vertical",marginBottom:10}}
+                value={newField.value}
+                onChange={e=>setNewField(f=>({...f,value:e.target.value}))}
+                placeholder="Contenu…"/>
+              <button onClick={()=>{
+                if (!newField.label.trim()) return;
+                setCustomFields(prev=>[...prev,{label:newField.label.trim(),value:newField.value.trim()}]);
+                setNewField({label:"",value:""});
+              }} style={{ background:`rgba(16,185,129,0.15)`,border:`1px solid rgba(16,185,129,0.3)`,color:COLOR,padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:14,cursor:"pointer" }}>
+                + Ajouter ce champ
+              </button>
             </div>
           )}
         </VitrineSection>
@@ -10728,6 +10788,18 @@ function VitrineDetail() {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen style={{ display:"block" }}/>
             </div>
+          </div>
+        )}
+
+        {/* ---- Champs personnalisés ---- */}
+        {(structure.custom_fields || []).length > 0 && (
+          <div style={{ marginBottom:24 }}>
+            {(structure.custom_fields || []).map((f, i) => f.label && (
+              <div key={i} style={{ background:VT.card,border:`1px solid ${VT.border}`,borderRadius:14,padding:16,marginBottom:12 }}>
+                <p style={{ fontWeight:700,color:VT.text,margin:"0 0 8px",fontSize:15 }}>{f.label}</p>
+                <p style={{ color:VT.sub,margin:0,lineHeight:1.8,fontSize:14,whiteSpace:"pre-line" }}>{f.value}</p>
+              </div>
+            ))}
           </div>
         )}
 
