@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Sitemap dynamique — mis à jour automatiquement
+Sitemap: https://marcheduroi.com/api/sitemap.xml
+
+# Bloquer les pages privées
+Disallow: /vitrine/*/modifier
+Disallow: /vitrine/*/payer
+Disallow: /vitrine/*/renouveler
