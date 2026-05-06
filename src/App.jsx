@@ -9002,52 +9002,111 @@ function AdminVitrineWeb({ theme, notify }) {
         </div>
       </div>
 
-      {/* ========== DEMANDES EN ATTENTE ========== */}
+      {/* ========== ALERTES : EN ATTENTE / EXPIRANT / EXPIRÉES ========== */}
       {tab === "liste" && (() => {
-        const pending = structures.filter(s => s.paid_at && !s.active);
-        if (pending.length === 0) return null;
+        const now      = new Date();
+        const in30     = new Date(now.getTime() + 30*24*60*60*1000);
+        const pending  = structures.filter(s => s.paid_at && !s.active);
+        const expiring = structures.filter(s => s.active && s.expires_at && new Date(s.expires_at) > now && new Date(s.expires_at) <= in30);
+        const expired  = structures.filter(s => s.active && s.expires_at && new Date(s.expires_at) <= now);
+        if (!pending.length && !expiring.length && !expired.length) return null;
         return (
-          <div style={{ background:"rgba(255,215,0,0.05)",border:"2px solid rgba(255,215,0,0.3)",borderRadius:14,padding:16,marginBottom:20 }}>
-            <p style={{ fontWeight:800,color:"#FFD700",fontSize:14,marginBottom:12,display:"flex",alignItems:"center",gap:8 }}>
-              ⏳ En attente de validation
-              <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:20,height:20,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700 }}>
-                {pending.length}
-              </span>
-            </p>
-            {pending.map(s => (
-              <div key={s.id} style={{ background:"#1A1D30",border:"1px solid rgba(255,215,0,0.2)",borderRadius:12,padding:14,marginBottom:10 }}>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8,flexWrap:"wrap",marginBottom:10 }}>
-                  <div>
-                    <p style={{ fontWeight:700,color:"#E8E8F0",margin:"0 0 4px",fontSize:15 }}>{s.name}</p>
-                    <p style={{ color:"#9A9AB0",fontSize:12,margin:0 }}>{s.type} · {s.ville||"—"} · Payé le {s.paid_at ? new Date(s.paid_at).toLocaleDateString("fr-FR") : "—"}</p>
-                    <p style={{ color:"#9A9AB0",fontSize:11,margin:"4px 0 0",fontFamily:"monospace" }}>/{s.slug}</p>
+          <>
+            {/* En attente */}
+            {pending.length > 0 && (
+              <div style={{ background:"rgba(255,215,0,0.05)",border:"2px solid rgba(255,215,0,0.3)",borderRadius:14,padding:16,marginBottom:20 }}>
+                <p style={{ fontWeight:800,color:"#FFD700",fontSize:14,marginBottom:12,display:"flex",alignItems:"center",gap:8 }}>
+                  ⏳ En attente de validation
+                  <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:20,height:20,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700 }}>{pending.length}</span>
+                </p>
+                {pending.map(s => (
+                  <div key={s.id} style={{ background:theme.card||"#1A1D30",border:"1px solid rgba(255,215,0,0.2)",borderRadius:12,padding:14,marginBottom:10 }}>
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8,flexWrap:"wrap" }}>
+                      <div>
+                        <p style={{ fontWeight:700,color:theme.text||"#E8E8F0",margin:"0 0 4px",fontSize:15 }}>{s.name}</p>
+                        <p style={{ color:theme.sub||"#9A9AB0",fontSize:12,margin:0 }}>{s.type} · {s.ville||"—"} · Payé le {s.paid_at ? new Date(s.paid_at).toLocaleDateString("fr-FR") : "—"}</p>
+                        <p style={{ color:theme.sub||"#9A9AB0",fontSize:11,margin:"4px 0 0",fontFamily:"monospace" }}>/{s.slug}</p>
+                      </div>
+                      <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+                        <button onClick={async()=>{
+                          const exp = new Date(); exp.setFullYear(exp.getFullYear()+1);
+                          const { error } = await supabase.from("structures").update({ active:true, expires_at:exp.toISOString() }).eq("id",s.id);
+                          if (!error) { setStructures(prev=>prev.map(x=>x.id===s.id?{...x,active:true,expires_at:exp.toISOString()}:x)); notify("✅ Vitrine validée !"); }
+                        }} style={{ background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.4)",color:"#10B981",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                          ✅ Valider
+                        </button>
+                        <a href={"https://wa.me/"+(s.phone||s.whatsapp||"").replace(/[^\d]/g,"")+"?text="+encodeURIComponent(`Bonjour ! 👋\nVotre vitrine *${s.name}* est maintenant en ligne sur MarchéduRoi.\n\n🔗 ${window.location.origin}/vitrine/${s.slug}\n\nMerci — EDENPORTAIL 👑`)}
+                          target="_blank" rel="noopener noreferrer"
+                          style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",color:"#25D366",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none" }}>
+                          📱 WhatsApp
+                        </a>
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
-                    {/* Valider */}
-                    <button onClick={async()=>{
-                      const now = new Date();
-                      const exp = new Date(now); exp.setFullYear(exp.getFullYear()+1);
-                      const { error } = await supabase.from("structures").update({ active:true, expires_at:exp.toISOString() }).eq("id",s.id);
-                      if (!error) {
-                        setStructures(prev => prev.map(x => x.id===s.id ? {...x, active:true, expires_at:exp.toISOString()} : x));
-                        notify("✅ Vitrine validée et mise en ligne !");
-                      }
-                    }} style={{ background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.4)",color:"#10B981",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer" }}>
-                      ✅ Valider
-                    </button>
-                    {/* Envoyer WhatsApp */}
-                    <a href={"https://wa.me/"+( s.phone||s.whatsapp||"").replace(/[^\d]/g,"")+"?text="+encodeURIComponent(`Bonjour ! 👋\nVotre vitrine *${s.name}* est maintenant en ligne sur MarchéduRoi.\n\n🔗 Voici votre lien : ${window.location.origin}/vitrine/${s.slug}\n\nVous pouvez le partager sur WhatsApp, Facebook, ou l'imprimer sur vos cartes de visite.\n\nMerci de votre confiance — EDENPORTAIL 👑`)}
-                      target="_blank" rel="noopener noreferrer"
-                      style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",color:"#25D366",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",display:"flex",alignItems:"center",gap:6 }}>
-                      📱 WhatsApp client
-                    </a>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+
+            {/* Expirant bientôt */}
+            {expiring.length > 0 && (
+              <div style={{ background:"rgba(255,140,0,0.05)",border:"2px solid rgba(255,140,0,0.3)",borderRadius:14,padding:16,marginBottom:20 }}>
+                <p style={{ fontWeight:800,color:"#FF8C00",fontSize:14,marginBottom:12,display:"flex",alignItems:"center",gap:8 }}>
+                  ⚠️ Expirant dans 30 jours
+                  <span style={{ background:"#FF8C00",color:"#fff",borderRadius:"50%",width:20,height:20,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700 }}>{expiring.length}</span>
+                </p>
+                {expiring.map(s => (
+                  <div key={s.id} style={{ background:theme.card||"#1A1D30",border:"1px solid rgba(255,140,0,0.2)",borderRadius:12,padding:14,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,flexWrap:"wrap" }}>
+                    <div>
+                      <p style={{ fontWeight:700,color:theme.text||"#E8E8F0",margin:"0 0 4px",fontSize:14 }}>{s.name}</p>
+                      <p style={{ color:"#FF8C00",fontSize:12,margin:0,fontWeight:600 }}>Expire le {new Date(s.expires_at).toLocaleDateString("fr-FR")} · {Math.ceil((new Date(s.expires_at)-now)/(24*60*60*1000))} jours</p>
+                    </div>
+                    <div style={{ display:"flex",gap:8 }}>
+                      <a href={"https://wa.me/"+(s.phone||s.whatsapp||"").replace(/[^\d]/g,"")+"?text="+encodeURIComponent(`Bonjour ! 👋\nVotre vitrine *${s.name}* expire le ${new Date(s.expires_at).toLocaleDateString("fr-FR")}.\n\nPour renouveler (18 000 FCFA/an) :\n${window.location.origin}/vitrine/${s.slug}/renouveler?token=${s.edit_token}\n\nMerci — EDENPORTAIL 👑`)}
+                        target="_blank" rel="noopener noreferrer"
+                        style={{ background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",color:"#25D366",padding:"7px 12px",borderRadius:8,fontWeight:700,fontSize:12,textDecoration:"none" }}>
+                        📱 Rappel WhatsApp
+                      </a>
+                      <button onClick={()=>{ navigator.clipboard.writeText(window.location.origin+"/vitrine/"+s.slug+"/renouveler?token="+s.edit_token); notify("🔗 Lien renouvellement copié !"); }}
+                        style={{ background:"rgba(255,140,0,0.1)",border:"1px solid rgba(255,140,0,0.3)",color:"#FF8C00",padding:"7px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                        🔗 Lien renouvellement
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Expirées */}
+            {expired.length > 0 && (
+              <div style={{ background:"rgba(255,71,87,0.05)",border:"2px solid rgba(255,71,87,0.25)",borderRadius:14,padding:16,marginBottom:20 }}>
+                <p style={{ fontWeight:800,color:"#FF4757",fontSize:14,marginBottom:12,display:"flex",alignItems:"center",gap:8 }}>
+                  🔴 Vitrines expirées
+                  <span style={{ background:"#FF4757",color:"#fff",borderRadius:"50%",width:20,height:20,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700 }}>{expired.length}</span>
+                </p>
+                {expired.map(s => (
+                  <div key={s.id} style={{ background:theme.card||"#1A1D30",border:"1px solid rgba(255,71,87,0.2)",borderRadius:12,padding:14,marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,flexWrap:"wrap" }}>
+                    <div>
+                      <p style={{ fontWeight:700,color:theme.text||"#E8E8F0",margin:"0 0 4px",fontSize:14 }}>{s.name}</p>
+                      <p style={{ color:"#FF4757",fontSize:12,margin:0,fontWeight:600 }}>Expirée le {new Date(s.expires_at).toLocaleDateString("fr-FR")}</p>
+                    </div>
+                    <div style={{ display:"flex",gap:8 }}>
+                      <button onClick={()=>{ navigator.clipboard.writeText(window.location.origin+"/vitrine/"+s.slug+"/renouveler?token="+s.edit_token); notify("🔗 Lien renouvellement copié !"); }}
+                        style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"7px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                        🔗 Renouveler
+                      </button>
+                      <button onClick={async()=>{ const { error } = await supabase.from("structures").update({ active:false }).eq("id",s.id); if (!error) { setStructures(prev=>prev.map(x=>x.id===s.id?{...x,active:false}:x)); notify("Vitrine désactivée"); } }}
+                        style={{ background:"transparent",border:`1px solid ${theme.border||"#2A2D45"}`,color:theme.sub||"#9A9AB0",padding:"7px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer" }}>
+                        ⛔ Désactiver
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         );
       })()}
+
 
       {/* ========== ONGLET LISTE ========== */}
       {tab === "liste" && (
@@ -9896,6 +9955,143 @@ function VitrineRequest() {
 }
 
 
+// -----------------------------------------------
+// VitrineRenewal — Page de renouvellement
+// Route : /vitrine/:slug/renouveler?token=XXX
+// -----------------------------------------------
+function VitrineRenewal({ structure, token, onDone }) {
+  const COLOR = "#10B981";
+  const [tokenValid, setTokenValid] = React.useState(false);
+  const [checking,   setChecking]   = React.useState(true);
+  const [paying,     setPaying]     = React.useState(false);
+  const [done,       setDone]       = React.useState(false);
+  const [error,      setError]      = React.useState(null);
+
+  React.useEffect(() => {
+    if (!token || !structure) { setChecking(false); return; }
+    const storedToken = structure.edit_token ?? structure.editToken ?? "";
+    setTokenValid(String(storedToken).toLowerCase().trim() === String(token).toLowerCase().trim());
+    setChecking(false);
+  }, [token, structure]);
+
+  const handleSuccess = async () => {
+    setPaying(true);
+    const now = new Date();
+    // Renouveler depuis today ou depuis expires_at (si pas encore expirée)
+    const base = structure.expires_at && new Date(structure.expires_at) > now
+      ? new Date(structure.expires_at)
+      : now;
+    const newExpiry = new Date(base);
+    newExpiry.setFullYear(newExpiry.getFullYear() + 1);
+    const { error } = await supabase.from("structures").update({
+      active:     true,
+      expires_at: newExpiry.toISOString(),
+      paid_at:    now.toISOString(),
+    }).eq("id", structure.id);
+    if (error) setError("Paiement reçu mais erreur d'activation. Contactez contact@marcheduroi.com");
+    else { setDone(true); setTimeout(onDone, 2500); }
+    setPaying(false);
+  };
+
+  const launchPayment = async () => {
+    setError(null);
+    try {
+      if (!window.FedaPay) {
+        const s = document.createElement("script");
+        s.src = "https://cdn.fedapay.com/checkout.js?v=1.1.7";
+        await new Promise((res,rej) => { s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+      }
+      window.FedaPay.init({
+        public_key: import.meta.env.VITE_FEDAPAY_PUBLIC_KEY || "pk_sandbox_VOTRE_CLE_ICI",
+        transaction: { amount: structure.renewal_amount || 18000, description: `Renouvellement vitrine — ${structure.name}` },
+        customer:    { email: structure.email || "client@marcheduroi.com" },
+        onComplete(resp, reason) {
+          const ok = reason === window.FedaPay.TRANSACTION_APPROVED || reason === "transaction_approved" || reason === "approved";
+          if (ok) handleSuccess();
+          else setError("Paiement annulé. Réessayez.");
+        }
+      }).open();
+    } catch { setError("Module de paiement non chargé. Vérifiez votre connexion."); }
+  };
+
+  if (checking) return (
+    <div style={{ display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0D0F1A",fontFamily:"Sora,sans-serif",color:"#9A9AB0" }}>Vérification…</div>
+  );
+
+  if (!tokenValid) return (
+    <div style={{ textAlign:"center",padding:"80px 24px",fontFamily:"Sora,sans-serif",background:"#0D0F1A",minHeight:"100vh",color:"#E8E8F0" }}>
+      <p style={{ fontSize:48,marginBottom:16 }}>🔒</p>
+      <h2 style={{ fontSize:22,fontWeight:700 }}>Lien non valide</h2>
+      <p style={{ color:"#9A9AB0" }}>Contactez EDENPORTAIL pour obtenir un nouveau lien.</p>
+    </div>
+  );
+
+  if (done) return (
+    <div style={{ textAlign:"center",padding:"80px 24px",fontFamily:"Sora,sans-serif",background:"#0D0F1A",minHeight:"100vh",color:"#E8E8F0" }}>
+      <p style={{ fontSize:56,marginBottom:16 }}>🎉</p>
+      <h2 style={{ fontSize:24,fontWeight:800,color:COLOR,marginBottom:12 }}>Renouvellement confirmé !</h2>
+      <p style={{ color:"#9A9AB0" }}>Votre vitrine <strong style={{ color:"#E8E8F0" }}>{structure.name}</strong> est active pour une nouvelle année.</p>
+    </div>
+  );
+
+  const isExpired  = structure.expires_at && new Date(structure.expires_at) <= new Date();
+  const base       = structure.expires_at && !isExpired ? new Date(structure.expires_at) : new Date();
+  const newExpiry  = new Date(base); newExpiry.setFullYear(newExpiry.getFullYear()+1);
+
+  return (
+    <div style={{ background:"#0D0F1A",minHeight:"100vh",fontFamily:"Sora,sans-serif",color:"#E8E8F0" }}>
+      <div style={{ background:"#0D0F1AEE",borderBottom:"1px solid #2A2D45",padding:"0 24px",height:64,display:"flex",alignItems:"center",position:"sticky",top:0,zIndex:100 }}>
+        <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ height:52,objectFit:"contain" }}/>
+      </div>
+      <div style={{ maxWidth:480,margin:"0 auto",padding:"40px 24px" }}>
+        <div style={{ textAlign:"center",marginBottom:32 }}>
+          <div style={{ width:72,height:72,borderRadius:18,background:`linear-gradient(135deg,${COLOR},#059669)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,margin:"0 auto 16px" }}>🔄</div>
+          <h1 style={{ fontSize:24,fontWeight:800,marginBottom:8 }}>Renouveler votre vitrine</h1>
+          <p style={{ color:"#9A9AB0",fontSize:15 }}>{structure.name}</p>
+        </div>
+
+        {/* Statut actuel */}
+        <div style={{ background:isExpired?"rgba(255,71,87,0.08)":"rgba(255,140,0,0.08)", border:`1px solid ${isExpired?"rgba(255,71,87,0.3)":"rgba(255,140,0,0.3)"}`, borderRadius:12,padding:16,marginBottom:20,textAlign:"center" }}>
+          <p style={{ fontWeight:700,color:isExpired?"#FF4757":"#FF8C00",margin:"0 0 4px" }}>
+            {isExpired ? "⛔ Vitrine expirée" : "⚠️ Vitrine expirant bientôt"}
+          </p>
+          <p style={{ color:"#9A9AB0",fontSize:13,margin:0 }}>
+            {isExpired
+              ? `Expirée le ${new Date(structure.expires_at).toLocaleDateString("fr-FR")}`
+              : `Expire le ${new Date(structure.expires_at).toLocaleDateString("fr-FR")}`}
+          </p>
+        </div>
+
+        {/* Récapitulatif */}
+        <div style={{ background:"#1A1D30",border:"1px solid #2A2D45",borderRadius:16,padding:20,marginBottom:24 }}>
+          <p style={{ fontWeight:700,color:"#E8E8F0",marginBottom:14 }}>📋 Récapitulatif</p>
+          <div style={{ display:"flex",justifyContent:"space-between",marginBottom:8 }}>
+            <span style={{ color:"#9A9AB0" }}>Renouvellement annuel</span>
+            <span style={{ fontWeight:700,color:COLOR,fontSize:16 }}>{(structure.renewal_amount||18000).toLocaleString("fr-FR")} FCFA</span>
+          </div>
+          <div style={{ display:"flex",justifyContent:"space-between",borderTop:"1px solid #2A2D45",paddingTop:10,marginTop:6 }}>
+            <span style={{ color:"#9A9AB0",fontSize:13 }}>Nouvelle expiration</span>
+            <span style={{ color:COLOR,fontWeight:700,fontSize:13 }}>{newExpiry.toLocaleDateString("fr-FR")}</span>
+          </div>
+        </div>
+
+        {error && (
+          <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:12,padding:14,marginBottom:16 }}>
+            <p style={{ margin:0,color:"#FF4757",fontWeight:600 }}>❌ {error}</p>
+          </div>
+        )}
+
+        <button onClick={launchPayment} disabled={paying}
+          style={{ width:"100%",padding:18,background:paying?"#1A1D30":`linear-gradient(135deg,${COLOR},#059669)`,border:paying?"1px solid #2A2D45":"none",color:paying?"#9A9AB0":"#fff",borderRadius:14,fontWeight:800,fontSize:17,cursor:paying?"not-allowed":"pointer" }}>
+          {paying ? "Activation…" : `💳 Payer ${(structure.renewal_amount||18000).toLocaleString("fr-FR")} FCFA`}
+        </button>
+        <p style={{ textAlign:"center",color:"#9A9AB0",fontSize:11,marginTop:12 }}>Paiement sécurisé · EDENPORTAIL</p>
+      </div>
+    </div>
+  );
+}
+
+
 function VitrinePayment({ structure, token, onDone }) {
   const COLOR = "#10B981";
   const [tokenValid,  setTokenValid]  = React.useState(false);
@@ -10482,10 +10678,11 @@ function VitrineDetail() {
   const isSubdomain   = hostname.includes(".vitrine.marcheduroi.com");
   const subdomainSlug = isSubdomain ? hostname.split(".vitrine.marcheduroi.com")[0] : null;
 
-  // segments[0] = "vitrine", segments[1] = slug, segments[2] = "modifier" ou "payer" (optionnel)
+  // segments[0] = "vitrine", segments[1] = slug, segments[2] = "modifier", "payer" ou "renouveler" (optionnel)
   const slug         = subdomainSlug || segments[1];
   const isEditMode   = !isSubdomain && segments[2] === "modifier";
   const isPayMode    = !isSubdomain && segments[2] === "payer";
+  const isRenewMode  = !isSubdomain && segments[2] === "renouveler";
   const tokenFromUrl = new URLSearchParams(location.search).get("token");
 
   const [structure, setStructure] = useState(null);
@@ -10507,7 +10704,7 @@ function VitrineDetail() {
     const load = async () => {
       setLoading(true);
       let query = supabase.from("structures").select("*").eq("slug", slug);
-      if (!isEditMode && !isPayMode) query = query.eq("active", true);
+      if (!isEditMode && !isPayMode && !isRenewMode) query = query.eq("active", true);
       const { data, error } = await query.single();
       if (error || !data) setNotFound(true);
       else {
@@ -10610,6 +10807,15 @@ function VitrineDetail() {
   /* ---- Mode paiement ---- */
   if (isPayMode) return (
     <VitrinePayment
+      structure={structure}
+      token={tokenFromUrl}
+      onDone={() => navigate("/vitrine/" + slug)}
+    />
+  );
+
+  /* ---- Mode renouvellement ---- */
+  if (isRenewMode) return (
+    <VitrineRenewal
       structure={structure}
       token={tokenFromUrl}
       onDone={() => navigate("/vitrine/" + slug)}
