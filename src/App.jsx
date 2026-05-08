@@ -718,8 +718,18 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
             animation:"slideFromRight 0.5s cubic-bezier(0.25,0.46,0.45,0.94)" },
   };
 
-  const SponsoredCard = ({ item }) => (
-    <div onClick={() => { sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); sessionStorage.setItem("mdr_back_view",view||"home"); navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`, { state:{ fromView:view||"home", scrollPos:window.scrollY } }); }}
+  const SponsoredCard = ({ item }) => {
+    let touchStartY = 0;
+    const handleNav = () => {
+      sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY));
+      sessionStorage.setItem("mdr_back_view",view||"home");
+      navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`, { state:{ fromView:view||"home", scrollPos:window.scrollY } });
+    };
+    return (
+    <div
+      onTouchStart={e=>{ touchStartY = e.touches[0].clientY; }}
+      onTouchEnd={e=>{ if(Math.abs(e.changedTouches[0].clientY - touchStartY) < 8){ e.preventDefault(); handleNav(); } }}
+      onClick={handleNav}
       style={{ flex:`0 0 ${cardW}px`, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
       <div style={{ width:"100%",height:windowWidth<=500?100:130,background:"linear-gradient(135deg,#1a1d30,#2a2d45)",position:"relative",overflow:"hidden" }}>
         {item.photos&&item.photos[0]
@@ -734,7 +744,8 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
         {item.ville&&<p style={{ fontSize:11,color:theme.sub }}>{item.ville}{item.quartier?` · ${item.quartier}`:""}</p>}
       </div>
     </div>
-  );
+    );
+  };
 
   return (
     <div style={{ marginBottom:24,width:"100%" }}>
@@ -3632,14 +3643,22 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               { label:"⚡ Show Faster", action:()=>{setModal({type:"showFaster"});setShowMoreMenu(false);} },
               { label:t.apropos, action:()=>{setView("about");setShowMoreMenu(false);} },
               { label:t.cgu, action:()=>{setView("terms");setShowMoreMenu(false);} },
-            ].map((item,i,arr)=>(
+            ].map((item,i,arr)=>{
+              // Détecter si c'est un scroll ou un tap
+              let touchStartY = 0;
+              return (
               <button key={item.label}
-                onTouchEnd={e=>{ e.preventDefault(); e.stopPropagation(); item.action(); }}
+                onTouchStart={e=>{ touchStartY = e.touches[0].clientY; }}
+                onTouchEnd={e=>{
+                  const diff = Math.abs(e.changedTouches[0].clientY - touchStartY);
+                  if (diff < 8) { e.preventDefault(); e.stopPropagation(); item.action(); }
+                }}
                 onClick={e=>{ e.stopPropagation(); item.action(); }}
-                style={{ width:"100%",padding:"14px 20px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:i<arr.length-1?`1px solid ${theme.border}`:"none",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>
+                style={{ width:"100%",padding:"14px 20px",background:"transparent",border:"none",color:theme.text,fontWeight:600,fontSize:14,cursor:"pointer",textAlign:"left",borderBottom:i<arr.length-1?`1px solid ${theme.border}`:"none",WebkitTapHighlightColor:"transparent",touchAction:"pan-y" }}>
                 {item.label}
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -4177,9 +4196,6 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     style={{ position:"absolute",right:-14,top:"50%",transform:"translateY(-50%)",zIndex:10,width:30,height:30,borderRadius:"50%",background:theme.card,border:`1px solid ${theme.border}`,color:theme.text,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18,fontWeight:700,boxShadow:"0 2px 8px rgba(0,0,0,0.2)",WebkitTapHighlightColor:"transparent",touchAction:"manipulation" }}>›</button>
                 )}
               <a href={ad.lien||"#"} target="_blank" rel="noopener noreferrer"
-                onTouchStart={()=>setAdPaused(true)}
-                onTouchEnd={()=>setAdPaused(false)}
-                onTouchCancel={()=>setAdPaused(false)}
                 style={{ textDecoration:"none",display:"block",width:"100%" }}>
                 <div style={{ borderRadius:16,overflow:"hidden",border:`1px solid ${theme.border}`,background:`linear-gradient(135deg,${ad.couleur1||"#6C63FF"}22,${ad.couleur2||"#8B84FF"}22)`,transition:"transform 0.3s",cursor:"pointer" }}
                   onMouseEnter={e=>e.currentTarget.style.transform="scale(1.01)"}
