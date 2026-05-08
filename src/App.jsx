@@ -671,52 +671,8 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
 
   if (allSponsored.length === 0) return null;
 
-  const perPage   = windowWidth <= 500 ? 2 : 3;
-  const cardW     = windowWidth <= 500 ? 155 : windowWidth <= 800 ? 185 : 215;
-  const GAP       = 12;
-  const totalGroups = Math.ceil(allSponsored.length / perPage);
-
-  const [groupIdx, setGroupIdx] = React.useState(() => Math.floor(sessionSeed * totalGroups) % totalGroups);
-  const [slide, setSlide]       = React.useState("idle"); // "idle" | "out" | "in"
-  const timerRef = React.useRef(null);
-
-  const advance = (nextIdx) => {
-    // 1. Sortie : glisse vers la gauche (disparaît)
-    setSlide("out");
-    setTimeout(() => {
-      setGroupIdx(((nextIdx % totalGroups) + totalGroups) % totalGroups);
-      // 2. Entrée : arrive de la droite
-      setSlide("in");
-      setTimeout(() => setSlide("idle"), 500);
-    }, 400);
-  };
-
-  const startTimer = () => {
-    clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setGroupIdx(prev => { advance(prev + 1); return prev; });
-    }, 4800);
-  };
-
-  React.useEffect(() => {
-    if (totalGroups <= 1) return;
-    startTimer();
-    return () => clearInterval(timerRef.current);
-  }, [totalGroups]);
-
-  const handlePrev = () => { clearInterval(timerRef.current); advance(groupIdx - 1); startTimer(); };
-  const handleNext = () => { clearInterval(timerRef.current); advance(groupIdx + 1); startTimer(); };
-
-  const group = Array.from({ length: perPage }, (_, i) =>
-    allSponsored[(groupIdx * perPage + i) % allSponsored.length]);
-
-  // Styles de glissement
-  const slideStyle = {
-    idle: { transform:"translateX(0)",     opacity:1, transition:"transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s" },
-    out:  { transform:"translateX(-60px)", opacity:0, transition:"transform 0.4s ease-in, opacity 0.4s ease-in" },
-    in:   { transform:"translateX(0)",     opacity:1, transition:"transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s",
-            animation:"slideFromRight 0.5s cubic-bezier(0.25,0.46,0.45,0.94)" },
-  };
+  const cardW = windowWidth <= 500 ? 155 : windowWidth <= 800 ? 185 : 215;
+  const GAP   = 12;
 
   const SponsoredCard = ({ item }) => {
     let touchStartY = 0;
@@ -749,37 +705,17 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
 
   return (
     <div style={{ marginBottom:24,width:"100%" }}>
-      <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12 }}>
-        <div style={{ display:"flex",alignItems:"center",gap:8 }}>
-          <span style={{ fontSize:windowWidth<=500?16:20 }}>🌟</span>
-          <p style={{ fontWeight:800,fontSize:windowWidth<=500?14:16,color:"#FFD700",letterSpacing:0.5 }}>SPONSORISÉES</p>
-          <span style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700",borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700 }}>{allSponsored.length}</span>
-        </div>
-        {totalGroups > 1 && (
-          <div style={{ display:"flex",gap:6,alignItems:"center" }}>
-            <button onClick={handlePrev} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",width:28,height:28,borderRadius:"50%",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center" }}>‹</button>
-            <span style={{ fontSize:11,color:theme.sub }}>{groupIdx+1}/{totalGroups}</span>
-            <button onClick={handleNext} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",width:28,height:28,borderRadius:"50%",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center" }}>›</button>
-          </div>
-        )}
+      <div style={{ display:"flex",alignItems:"center",marginBottom:12 }}>
+        <span style={{ fontSize:windowWidth<=500?16:20 }}>🌟</span>
+        <p style={{ fontWeight:800,fontSize:windowWidth<=500?14:16,color:"#FFD700",letterSpacing:0.5,marginLeft:8 }}>SPONSORISÉES</p>
+        <span style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700",borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,marginLeft:8 }}>{allSponsored.length}</span>
       </div>
 
-      {/* Cartes avec glissement droite→gauche */}
-      <div style={{ overflow:"hidden",width:"100%" }}>
-        <div style={{ display:"flex",gap:GAP, ...slideStyle[slide] }}>
-          {group.map((item,i) => <SponsoredCard key={item.id+"-sp-"+groupIdx+"-"+i} item={item}/>)}
-        </div>
+      {/* Scroll natif horizontal — même principe que le carousel urgent */}
+      <div style={{ display:"flex",overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",gap:GAP,paddingBottom:4 }}>
+        {allSponsored.map((item,i) => <SponsoredCard key={item.id+"-sp-"+i} item={item}/>)}
       </div>
 
-      {/* Dots */}
-      {totalGroups > 1 && (
-        <div style={{ display:"flex",justifyContent:"center",gap:5,marginTop:10 }}>
-          {Array.from({length:totalGroups}).map((_,i)=>(
-            <div key={i} onClick={()=>{ clearInterval(timerRef.current); advance(i); startTimer(); }}
-              style={{ width:i===groupIdx?18:6,height:6,borderRadius:3,background:i===groupIdx?"#FFD700":"rgba(255,215,0,0.25)",transition:"all 0.3s",cursor:"pointer" }}/>
-          ))}
-        </div>
-      )}
       <div style={{ borderBottom:`1px solid ${theme.border}`,marginTop:14 }}/>
     </div>
   );
@@ -1709,11 +1645,23 @@ function AppContent() {
   useEffect(() => {
     if (!showMoreMenu) return;
     const close = () => setShowMoreMenu(false);
+    let touchStartY = 0;
+    const onTouchStart = (e) => { touchStartY = e.touches[0].clientY; };
+    const onTouchEnd = (e) => {
+      // Ne fermer que si c'est un vrai tap (pas un scroll)
+      if (Math.abs(e.changedTouches[0].clientY - touchStartY) < 8) close();
+    };
     const t = setTimeout(() => {
       document.addEventListener('click', close, { once: true });
-      document.addEventListener('touchend', close, { once: true });
+      document.addEventListener('touchstart', onTouchStart, { passive: true });
+      document.addEventListener('touchend', onTouchEnd);
     }, 50);
-    return () => { clearTimeout(t); document.removeEventListener('click', close); document.removeEventListener('touchend', close); };
+    return () => {
+      clearTimeout(t);
+      document.removeEventListener('click', close);
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
   }, [showMoreMenu]);
   const [adminSearch, setAdminSearch] = useState("");
   const [lang, setLang] = useState(() => localStorage.getItem("mf_lang") || "fr");
