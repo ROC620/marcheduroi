@@ -660,7 +660,7 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
   );
 }
 
-function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed }) {
+function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed, view }) {
   const allSponsored = [
     ...posts.filter(p => p.sponsored && p.sponsoredUntil && new Date(p.sponsoredUntil) > new Date()).map(p => ({...p, _type:"annonce", _icon:"📋", _label:"Annonce"})),
     ...boutiques.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"boutique", _icon:"🛍️", _label:"Boutique"})),
@@ -4450,7 +4450,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
           {/* Bandeau Urgent — EN CE MOMENT */}
           <UrgentBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed}/>
-          <SponsoredBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed}/>
+          <SponsoredBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed} view={view}/>
 
           {/* Barre catégories sticky — reste visible pendant le scroll du fil */}
           <div style={{ position:"sticky",top:0,zIndex:20,background:theme.bg,paddingTop:8,paddingBottom:8,marginBottom:8,borderBottom:`1px solid ${theme.border}` }}>
