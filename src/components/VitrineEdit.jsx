@@ -4,6 +4,12 @@ import { supabase } from "../supabase";
 import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } from "../vitrineConstants";
 import { VitrineCarousel, VitrineSection } from "./VitrineCarousel";
 
+const getThemeFromStorage = () => {
+  const t = localStorage.getItem("mdr_theme");
+  const themes = { dark:{bg:"#0D0F1A",card:"#1A1D30",text:"#E8E8F0",sub:"#9A9AB0",border:"#2A2D45"}, light:{bg:"#F8FAFC",card:"#FFFFFF",text:"#1A1D30",sub:"#6B7280",border:"#E2E8F0"} };
+  return themes[t] || themes.dark;
+};
+
 function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
   const T = getThemeFromStorage();
   const COLOR = "#10B981";
