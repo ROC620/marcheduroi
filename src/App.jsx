@@ -1999,9 +1999,17 @@ function AppContent() {
     window.addEventListener("beforeinstallprompt", handleInstallPrompt);
 
     // Bouton Retour mobile — restaurer la vue précédente
-    // NE PAS intercepter les popstate : le useEffect([appLocation.state]) s'en charge
     const handlePopState = (e) => {
-      // Ne rien faire — React Router + useEffect([appLocation.state]) gèrent tout
+      if (e.state?.view) {
+        setViewState(e.state.view);
+        window.scrollTo(0, 0);
+      } else {
+        setViewState("home");
+      }
+      // Fermer les menus ouverts
+      setShowMoreMenu(false);
+      setShowPublishMenu(false);
+      setModal(null);
     };
     window.addEventListener("popstate", handlePopState);
 
@@ -3599,7 +3607,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
           onTouchStart={e=>{ if(e.target===e.currentTarget) setShowMoreMenu(false); }}
           onClick={e=>{ if(e.target===e.currentTarget) setShowMoreMenu(false); }}
           style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:500 }}>
-          <div style={{ position:"fixed",right:0,top:0,bottom:0,width:Math.min(280,window.innerWidth),background:theme.card,boxShadow:"-20px 0 60px rgba(0,0,0,0.3)",display:"flex",flexDirection:"column",zIndex:501,overflowY:"auto" }}>
+          <div style={{ position:"fixed",right:0,top:0,bottom:0,width:Math.min(280,window.innerWidth),background:theme.card,boxShadow:"-20px 0 60px rgba(0,0,0,0.3)",display:"flex",flexDirection:"column",zIndex:501,overflowY:"auto",WebkitOverflowScrolling:"touch",maxHeight:"100vh",paddingBottom:"env(safe-area-inset-bottom,16px)" }}>
             <div style={{ padding:"20px 20px 16px",borderBottom:`1px solid ${theme.border}`,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
               <h3 style={{ fontWeight:800,fontSize:18,color:theme.text }}>Menu</h3>
               <button onTouchEnd={e=>{ e.preventDefault(); setShowMoreMenu(false); }} onClick={()=>setShowMoreMenu(false)} style={{ background:"transparent",border:"none",color:theme.sub,cursor:"pointer",padding:8 }}><Icon name="x" size={20}/></button>
@@ -4297,9 +4305,6 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                         },
                         { icon:"🏛️", label:"Créer ma vitrine", badge:"15 000 FCFA", badgeColor:"#10B981", badgeBg:"rgba(16,185,129,0.12)",
                           action:()=>{ setShowPublishMenu(false); navigate("/vitrine"); }
-                        },
-                        { icon:"🎁", label:"Pack Pro + Vitrine", badge:"20 000 FCFA", badgeColor:"#FFD700", badgeBg:"rgba(255,215,0,0.1)",
-                          action:()=>{ setShowPublishMenu(false); navigate("/vitrine?pack=pro"); }
                         },
                       ].map((opt,i) => (
                         <button key={i} onClick={opt.action}
