@@ -15,11 +15,15 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
   const COLOR = "#10B981";
 
   const [form, setForm] = React.useState({
+    slogan:   structure.slogan      || "",
+    description: structure.description || "",
     phone:    structure.phone    || "",
     phone2:   structure.phone2   || "",
     whatsapp: structure.whatsapp || "",
     email:    structure.email    || "",
     facebook: structure.facebook || "",
+    instagram: structure.instagram || "",
+    website:  structure.website  || "",
     hours:    structure.hours    || "",
     video:    structure.video    || "",
     photos:   (structure.photos  || []).join("\n"),
@@ -73,8 +77,10 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
     const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean).slice(0,10);
     const today = new Date().toISOString().slice(0,10);
     const { error } = await supabase.from("structures").update({
+      slogan: form.slogan || null, description: form.description || null,
       phone: form.phone, phone2: form.phone2, whatsapp: form.whatsapp,
-      email: form.email, facebook: form.facebook, hours: form.hours,
+      email: form.email, facebook: form.facebook, instagram: form.instagram || null,
+      website: form.website || null, hours: form.hours,
       video: form.video, photos: photosArray, services: form.services,
       news, updated_at: new Date().toISOString(),
       theme:         form.theme    || "dark",
@@ -194,6 +200,33 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
               <p style={{ margin:"4px 0 0",color:VITRINE_THEMES[form.theme]?.text,fontSize:12 }}>Voici à quoi ressemblera le fond de votre vitrine.</p>
             </div>
           )}
+        </VitrineSection>
+
+        {/* ---- Section Identité ---- */}
+        <VitrineSection id="identite" icon="✏️" title="Présentation" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
+          <label style={lbl}>Slogan / Mission en une phrase</label>
+          <input style={inp} value={form.slogan}
+            onChange={e=>setForm(f=>({...f,slogan:e.target.value}))}
+            placeholder="Ex: La vraie cuisine béninoise, comme à la maison"
+            disabled={editBlocked} maxLength={120}/>
+
+          <label style={lbl}>Description complète</label>
+          <textarea style={{...inp,minHeight:100,resize:"vertical"}} value={form.description}
+            onChange={e=>setForm(f=>({...f,description:e.target.value}))}
+            placeholder="Décrivez votre structure, votre histoire, vos spécialités…"
+            disabled={editBlocked}/>
+
+          <label style={lbl}>Site web</label>
+          <input style={inp} value={form.website}
+            onChange={e=>setForm(f=>({...f,website:e.target.value}))}
+            placeholder="https://www.votresite.com"
+            disabled={editBlocked}/>
+
+          <label style={lbl}>Instagram</label>
+          <input style={inp} value={form.instagram}
+            onChange={e=>setForm(f=>({...f,instagram:e.target.value}))}
+            placeholder="https://www.instagram.com/votre_compte"
+            disabled={editBlocked}/>
         </VitrineSection>
 
         <VitrineSection id="contacts" icon="📞" title="Contacts" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
