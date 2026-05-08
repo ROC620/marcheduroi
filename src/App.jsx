@@ -675,18 +675,14 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
   const GAP   = 12;
 
   const SponsoredCard = ({ item }) => {
-    let touchStartY = 0;
     const handleNav = () => {
       sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY));
       sessionStorage.setItem("mdr_back_view",view||"home");
       navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`, { state:{ fromView:view||"home", scrollPos:window.scrollY } });
     };
     return (
-    <div
-      onTouchStart={e=>{ touchStartY = e.touches[0].clientY; }}
-      onTouchEnd={e=>{ if(Math.abs(e.changedTouches[0].clientY - touchStartY) < 8){ e.preventDefault(); handleNav(); } }}
-      onClick={handleNav}
-      style={{ flex:`0 0 ${cardW}px`, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
+    <div onClick={handleNav}
+      style={{ flexShrink:0, width:cardW, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
       <div style={{ width:"100%",height:windowWidth<=500?100:130,background:"linear-gradient(135deg,#1a1d30,#2a2d45)",position:"relative",overflow:"hidden" }}>
         {item.photos&&item.photos[0]
           ? <img src={item.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
