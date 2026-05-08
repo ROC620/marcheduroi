@@ -621,7 +621,7 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
   const UrgentCard = ({ post, idx }) => (
     <div onClick={() => navigate(`/${post._urgentType==="annonce"?"annonce":post._urgentType}/${post.id}`)}
       style={{ flexShrink:0, width:cardW, marginRight:GAP, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FF4757", background:theme.card, position:"relative" }}>
-      <div style={{ width:"100%", height:windowWidth<=500?100:130, background:"linear-gradient(135deg,#1a1d30,#2a2d45)", position:"relative", overflow:"hidden" }}>
+      <div style={{ width:"100%", aspectRatio:"4/3", background:"linear-gradient(135deg,#1a1d30,#2a2d45)", position:"relative", overflow:"hidden" }}>
         {post.photos&&post.photos[0] ? <img src={post.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/> : <div style={{ width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32 }}>📦</div>}
         <div style={{ position:"absolute",top:8,left:8,background:"#FF4757",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800 }}>🔥 URGENT</div>
         {post._urgentType!=="annonce"&&<div style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700 }}>{post._urgentIcon} {post._urgentLabel}</div>}
@@ -714,7 +714,7 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
   const SponsoredCard = ({ item }) => (
     <div onClick={() => { sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); sessionStorage.setItem("mdr_back_view",view||"home"); navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`, { state:{ fromView:view||"home", scrollPos:window.scrollY } }); }}
       style={{ flexShrink:0, width:cardW, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
-      <div style={{ width:"100%",height:windowWidth<=500?100:130,background:"linear-gradient(135deg,#1a1d30,#2a2d45)",position:"relative",overflow:"hidden" }}>
+      <div style={{ width:"100%",aspectRatio:"4/3",background:"linear-gradient(135deg,#1a1d30,#2a2d45)",position:"relative",overflow:"hidden" }}>
         {item.photos&&item.photos[0]
           ? <img src={item.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
           : <div style={{ width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32 }}>📦</div>}
@@ -6057,7 +6057,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 <div style={{ position:"relative" }}>
                   {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!b.video && b.photos&&b.photos.length>0 && (
-                    <div style={{ width:"100%",height:180,overflow:"hidden",background:"#1a1d30",position:"relative" }}>
+                    <div style={{ width:"100%",aspectRatio:"4/3",overflow:"hidden",background:"#1a1d30",position:"relative" }}>
                       <img src={b.photos[0]} alt={b.name} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
                         onError={e=>{ e.target.style.display="none"; }}/>
                       {b.photos.length>1 && <span style={{ position:"absolute",bottom:6,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>+{b.photos.length-1}</span>}
@@ -6159,7 +6159,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 <div style={{ position:"relative" }}>
                   {a.video && <VideoCardPlayer video={a.video?.url||a.video} photos={a.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!a.video && a.photos&&a.photos.length>0 && (
-                    <div style={{ width:"100%",height:180,overflow:"hidden",background:"#1a1d30",position:"relative" }}>
+                    <div style={{ width:"100%",aspectRatio:"4/3",overflow:"hidden",background:"#1a1d30",position:"relative" }}>
                       <img src={a.photos[0]} alt={a.name} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
                         onError={e=>{ e.target.style.display="none"; }}/>
                       {a.photos.length>1 && <span style={{ position:"absolute",bottom:6,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>+{a.photos.length-1}</span>}
@@ -6274,7 +6274,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 <div style={{ position:"relative" }}>
                   {r.video && <VideoCardPlayer video={r.video?.url||r.video} photos={r.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!r.video && r.photos&&r.photos.length>0 && (
-                    <div style={{ width:"100%",height:180,overflow:"hidden",background:"#1a1d30",position:"relative" }}>
+                    <div style={{ width:"100%",aspectRatio:"4/3",overflow:"hidden",background:"#1a1d30",position:"relative" }}>
                       <img src={r.photos[0]} alt={r.name} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
                         onError={e=>{ e.target.style.display="none"; }}/>
                       {r.photos.length>1 && <span style={{ position:"absolute",bottom:6,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>+{r.photos.length-1}</span>}
@@ -6393,7 +6393,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 <div style={{ position:"relative" }}>
                   {b.video && <VideoCardPlayer video={b.video?.url||b.video} photos={b.photos||[]} maxSeconds={120} autoPlay={windowWidth<=600}/>}
                   {!b.video && b.photos&&b.photos.length>0 && (
-                    <div style={{ width:"100%",height:180,overflow:"hidden",background:"#1a1d30",position:"relative" }}>
+                    <div style={{ width:"100%",aspectRatio:"4/3",overflow:"hidden",background:"#1a1d30",position:"relative" }}>
                       <img src={b.photos[0]} alt={b.name} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }}
                         onError={e=>{ e.target.style.display="none"; }}/>
                       {b.photos.length>1 && <span style={{ position:"absolute",bottom:6,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>+{b.photos.length-1}</span>}
@@ -6788,6 +6788,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   </select>
                 </div>
 
+
+                <div style={{ background:"rgba(67,198,172,0.06)",border:"1px solid rgba(67,198,172,0.2)",borderRadius:10,padding:12,marginBottom:8 }}>
+                  <p style={{ color:"#43C6AC",fontWeight:700,fontSize:12,margin:"0 0 4px" }}>📐 Dimensions recommandées</p>
+                  <p style={{ color:"#9A9AB0",fontSize:11,margin:0,lineHeight:1.7 }}>
+                    Photos : <strong style={{color:"#E8E8F0"}}>800×600px</strong> (ratio 4:3) ou <strong style={{color:"#E8E8F0"}}>1200×900px</strong> · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong> (gratuit) puis copiez le lien direct
+                  </p>
+                </div>
                 <PhotoUploader photos={postPhotos} setPhotos={setPostPhotos} theme={theme} folder="annonces"/>
 
                 {/* Lien vidéo annonce classique */}
@@ -7350,6 +7357,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     📖 Voir des exemples de salons beauté
                   </button>
                 )}
+
+                <div style={{ background:"rgba(108,99,255,0.06)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:10,padding:12,marginBottom:8 }}>
+                  <p style={{ color:"#6C63FF",fontWeight:700,fontSize:12,margin:"0 0 4px" }}>📐 Dimensions recommandées</p>
+                  <p style={{ color:"#9A9AB0",fontSize:11,margin:0,lineHeight:1.7 }}>
+                    Couverture : <strong style={{color:"#E8E8F0"}}>1200×800px</strong> (ratio 3:2) · Galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3) · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong> (gratuit)
+                  </p>
+                </div>
                 <PhotoUploader photos={shopPhotos} setPhotos={setShopPhotos} theme={theme} folder="beaute"/>
 
                 {/* Lien vidéo salon beauté */}
@@ -7540,6 +7554,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     </div>
                   );
                 })()}
+
+                <div style={{ background:"rgba(108,99,255,0.06)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:10,padding:12,marginBottom:8 }}>
+                  <p style={{ color:"#6C63FF",fontWeight:700,fontSize:12,margin:"0 0 4px" }}>📐 Dimensions recommandées</p>
+                  <p style={{ color:"#9A9AB0",fontSize:11,margin:0,lineHeight:1.7 }}>
+                    Couverture : <strong style={{color:"#E8E8F0"}}>1200×800px</strong> (ratio 3:2) · Galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3) · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong> (gratuit)
+                  </p>
+                </div>
                 <PhotoUploader photos={shopPhotos} setPhotos={setShopPhotos} theme={theme} folder="restos"/>
 
                 <div style={{ marginBottom:16 }}>
@@ -7692,6 +7713,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     </div>
                   );
                 })()}
+
+                <div style={{ background:"rgba(108,99,255,0.06)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:10,padding:12,marginBottom:8 }}>
+                  <p style={{ color:"#6C63FF",fontWeight:700,fontSize:12,margin:"0 0 4px" }}>📐 Dimensions recommandées</p>
+                  <p style={{ color:"#9A9AB0",fontSize:11,margin:0,lineHeight:1.7 }}>
+                    Couverture : <strong style={{color:"#E8E8F0"}}>1200×800px</strong> (ratio 3:2) · Galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3) · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong> (gratuit)
+                  </p>
+                </div>
                 <PhotoUploader photos={shopPhotos} setPhotos={setShopPhotos} theme={theme} folder={shopMode==="boutique"?"boutiques":"ateliers"}/>
 
                 {/* Type */}
@@ -9378,6 +9406,14 @@ function AdminVitrineWeb({ theme, notify }) {
             placeholder="https://i.ibb.co/.../banniere.jpg"/>
 
           <label style={labelStyle}>Photos galerie — un lien par ligne (max 10)</label>
+          <div style={{ background:"rgba(108,99,255,0.06)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:10,padding:12,marginTop:-4,marginBottom:8 }}>
+            <p style={{ color:"#6C63FF",fontWeight:700,fontSize:12,margin:"0 0 4px" }}>📐 Dimensions recommandées</p>
+            <p style={{ color:"#9A9AB0",fontSize:11,margin:0,lineHeight:1.7 }}>
+              • Photo couverture boutique : <strong style={{color:"#E8E8F0"}}>1200×800px</strong> (ratio 3:2)<br/>
+              • Photos galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3)<br/>
+              • Hébergez vos photos sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong> (gratuit) puis copiez le lien direct
+            </p>
+          </div>
           <textarea style={{...inputStyle,minHeight:90,resize:"vertical",fontFamily:"monospace",fontSize:12}}
             value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))}
             placeholder={"https://i.ibb.co/.../photo1.jpg\nhttps://i.ibb.co/.../photo2.jpg"}/>
@@ -9894,6 +9930,9 @@ function VitrineRequest() {
         <label style={lbl}>Photo de couverture (lien URL)</label>
         <input style={inp} value={form.cover_url} onChange={e=>setForm(f=>({...f,cover_url:e.target.value}))} placeholder="https://i.ibb.co/.../banniere.jpg"/>
         <label style={lbl}>Photos galerie — un lien par ligne (max 10)</label>
+          <p style={{ color:"#9A9AB0",fontSize:11,margin:"4px 0 8px",lineHeight:1.7 }}>
+            📐 <strong style={{color:"#10B981"}}>Dimensions recommandées</strong> — Logo : <strong style={{color:"#E8E8F0"}}>400×400px</strong> (carré) · Couverture : <strong style={{color:"#E8E8F0"}}>1920×600px</strong> · Galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3) · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong>
+          </p>
         <textarea style={{...inp,minHeight:80,resize:"vertical",fontFamily:"monospace",fontSize:12}} value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))} placeholder={"https://i.ibb.co/.../photo1.jpg\nhttps://i.ibb.co/.../photo2.jpg"}/>
         <label style={lbl}>Vidéo YouTube (lien)</label>
         <input style={inp} value={form.video} onChange={e=>setForm(f=>({...f,video:e.target.value}))} placeholder="https://www.youtube.com/watch?v=..."/>
@@ -10681,6 +10720,9 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
 
         <VitrineSection id="photos" icon="🖼️" title="Photos" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
           <label style={lbl}>Un lien par ligne (max 10)</label>
+          <p style={{ color:"#9A9AB0",fontSize:11,margin:"4px 0 8px",lineHeight:1.7 }}>
+            📐 <strong style={{color:"#10B981"}}>Dimensions recommandées</strong> — Logo : <strong style={{color:"#E8E8F0"}}>400×400px</strong> (carré) · Couverture : <strong style={{color:"#E8E8F0"}}>1920×600px</strong> · Galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3) · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong>
+          </p>
           <textarea style={{...inp,minHeight:130,resize:"vertical",fontFamily:"monospace",fontSize:12}}
             value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))}
             placeholder={"https://i.ibb.co/xyz/facade.jpg\nhttps://i.ibb.co/abc/salle.jpg"} disabled={editBlocked}/>
