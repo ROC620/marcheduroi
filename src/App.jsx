@@ -673,15 +673,46 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
 
   const cardW = windowWidth <= 500 ? 155 : windowWidth <= 800 ? 185 : 215;
   const GAP   = 12;
+  const perPage = windowWidth <= 500 ? 2 : 3;
 
-  const SponsoredCard = ({ item }) => {
-    const handleNav = () => {
-      sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY));
-      sessionStorage.setItem("mdr_back_view",view||"home");
-      navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`, { state:{ fromView:view||"home", scrollPos:window.scrollY } });
-    };
-    return (
-    <div onClick={handleNav}
+  const [groupIdx, setGroupIdx] = React.useState(() => Math.floor(sessionSeed * Math.ceil(allSponsored.length/perPage)) % Math.ceil(allSponsored.length/perPage));
+  const [slide,    setSlide]    = React.useState("idle");
+  const timerRef  = React.useRef(null);
+  const totalGroups = Math.ceil(allSponsored.length / perPage);
+
+  const advance = (nextIdx) => {
+    setSlide("out");
+    setTimeout(() => {
+      setGroupIdx(((nextIdx % totalGroups) + totalGroups) % totalGroups);
+      setSlide("in");
+      setTimeout(() => setSlide("idle"), 500);
+    }, 350);
+  };
+
+  const startTimer = () => {
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setGroupIdx(prev => { advance(prev + 1); return prev; });
+    }, 4800);
+  };
+
+  React.useEffect(() => {
+    if (totalGroups <= 1) return;
+    startTimer();
+    return () => clearInterval(timerRef.current);
+  }, [totalGroups]);
+
+  const group = Array.from({ length: perPage }, (_, i) =>
+    allSponsored[(groupIdx * perPage + i) % allSponsored.length]);
+
+  const slideStyle = {
+    idle: { transform:"translateX(0)", opacity:1, transition:"transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.4s", pointerEvents:"auto" },
+    out:  { transform:"translateX(-40px)", opacity:0, transition:"transform 0.35s ease-in, opacity 0.35s ease-in", pointerEvents:"none" },
+    in:   { transform:"translateX(0)", opacity:1, transition:"transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.4s", pointerEvents:"none" },
+  };
+
+  const SponsoredCard = ({ item }) => (
+    <div onClick={() => { sessionStorage.setItem("mdr_scroll_pos",String(window.scrollY)); sessionStorage.setItem("mdr_back_view",view||"home"); navigate(`/${item._type==="annonce"?"annonce":item._type}/${item.id}`, { state:{ fromView:view||"home", scrollPos:window.scrollY } }); }}
       style={{ flexShrink:0, width:cardW, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FFD700", background:theme.card, position:"relative" }}>
       <div style={{ width:"100%",height:windowWidth<=500?100:130,background:"linear-gradient(135deg,#1a1d30,#2a2d45)",position:"relative",overflow:"hidden" }}>
         {item.photos&&item.photos[0]
@@ -696,22 +727,42 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
         {item.ville&&<p style={{ fontSize:11,color:theme.sub }}>{item.ville}{item.quartier?` · ${item.quartier}`:""}</p>}
       </div>
     </div>
-    );
-  };
+  );
 
   return (
     <div style={{ marginBottom:24,width:"100%" }}>
-      <div style={{ display:"flex",alignItems:"center",marginBottom:12 }}>
-        <span style={{ fontSize:windowWidth<=500?16:20 }}>🌟</span>
-        <p style={{ fontWeight:800,fontSize:windowWidth<=500?14:16,color:"#FFD700",letterSpacing:0.5,marginLeft:8 }}>SPONSORISÉES</p>
-        <span style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700",borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,marginLeft:8 }}>{allSponsored.length}</span>
+      <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12 }}>
+        <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+          <span style={{ fontSize:windowWidth<=500?16:20 }}>🌟</span>
+          <p style={{ fontWeight:800,fontSize:windowWidth<=500?14:16,color:"#FFD700",letterSpacing:0.5 }}>SPONSORISÉES</p>
+          <span style={{ background:"rgba(255,215,0,0.15)",color:"#FFD700",borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700 }}>{allSponsored.length}</span>
+        </div>
+        {totalGroups > 1 && (
+          <div style={{ display:"flex",gap:6,alignItems:"center" }}>
+            <button onClick={()=>{ clearInterval(timerRef.current); advance(groupIdx-1); startTimer(); }}
+              style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",width:28,height:28,borderRadius:"50%",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center" }}>‹</button>
+            <span style={{ fontSize:11,color:theme.sub }}>{groupIdx+1}/{totalGroups}</span>
+            <button onClick={()=>{ clearInterval(timerRef.current); advance(groupIdx+1); startTimer(); }}
+              style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",width:28,height:28,borderRadius:"50%",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center" }}>›</button>
+          </div>
+        )}
       </div>
 
-      {/* Scroll natif horizontal — même principe que le carousel urgent */}
-      <div style={{ display:"flex",overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",gap:GAP,paddingBottom:4 }}>
-        {allSponsored.map((item,i) => <SponsoredCard key={item.id+"-sp-"+i} item={item}/>)}
+      {/* Cartes avec animation — pointerEvents:none pendant animation */}
+      <div style={{ overflow:"hidden",width:"100%" }}>
+        <div style={{ display:"flex",gap:GAP, ...slideStyle[slide] }}>
+          {group.map((item,i) => <SponsoredCard key={item.id+"-sp-"+groupIdx+"-"+i} item={item}/>)}
+        </div>
       </div>
 
+      {totalGroups > 1 && (
+        <div style={{ display:"flex",justifyContent:"center",gap:5,marginTop:10 }}>
+          {Array.from({length:totalGroups}).map((_,i)=>(
+            <div key={i} onClick={()=>{ clearInterval(timerRef.current); advance(i); startTimer(); }}
+              style={{ width:i===groupIdx?18:6,height:6,borderRadius:3,background:i===groupIdx?"#FFD700":"rgba(255,215,0,0.25)",transition:"all 0.3s",cursor:"pointer" }}/>
+          ))}
+        </div>
+      )}
       <div style={{ borderBottom:`1px solid ${theme.border}`,marginTop:14 }}/>
     </div>
   );
