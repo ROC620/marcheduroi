@@ -565,18 +565,19 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed }) {
+function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed, activeCategory }) {
   const scrollRef  = React.useRef(null);
-  const dirRef     = React.useRef(-1);   // -1 = droite→gauche (normal)
+  const dirRef     = React.useRef(-1);
   const rafRef     = React.useRef(null);
   const initDone   = React.useRef(false);
+  const cat = activeCategory || "Toutes";
 
   const allUrgents = [
-    ...posts.filter(p => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date()).map(p => ({...p, _urgentType:"annonce", _urgentIcon:"📋", _urgentLabel:"Annonce"})),
-    ...boutiques.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"boutique", _urgentIcon:"🛍️", _urgentLabel:"Boutique"})),
-    ...ateliers.filter(a => a.urgent && a.urgentUntil && new Date(a.urgentUntil) > new Date()).map(a => ({...a, title:a.name, _urgentType:"atelier", _urgentIcon:"🔧", _urgentLabel:"Atelier"})),
-    ...restos.filter(r => r.urgent && r.urgentUntil && new Date(r.urgentUntil) > new Date()).map(r => ({...r, title:r.name, _urgentType:"resto", _urgentIcon:"🍽️", _urgentLabel:"Restaurant"})),
-    ...beaute.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"beaute", _urgentIcon:"💇", _urgentLabel:"Beauté"})),
+    ...posts.filter(p => p.urgent && p.urgentUntil && new Date(p.urgentUntil) > new Date() && (cat==="Toutes"||p.category===cat)).map(p => ({...p, _urgentType:"annonce", _urgentIcon:"📋", _urgentLabel:"Annonce"})),
+    ...(cat==="Toutes" ? boutiques.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"boutique", _urgentIcon:"🛍️", _urgentLabel:"Boutique"})) : []),
+    ...(cat==="Toutes" ? ateliers.filter(a => a.urgent && a.urgentUntil && new Date(a.urgentUntil) > new Date()).map(a => ({...a, title:a.name, _urgentType:"atelier", _urgentIcon:"🔧", _urgentLabel:"Atelier"})) : []),
+    ...(cat==="Toutes" ? restos.filter(r => r.urgent && r.urgentUntil && new Date(r.urgentUntil) > new Date()).map(r => ({...r, title:r.name, _urgentType:"resto", _urgentIcon:"🍽️", _urgentLabel:"Restaurant"})) : []),
+    ...(cat==="Toutes" ? beaute.filter(b => b.urgent && b.urgentUntil && new Date(b.urgentUntil) > new Date()).map(b => ({...b, title:b.name, _urgentType:"beaute", _urgentIcon:"💇", _urgentLabel:"Beauté"})) : []),
   ].sort((a,b) => new Date(b.urgentActivatedAt||b.urgentUntil) - new Date(a.urgentActivatedAt||a.urgentUntil));
 
   const getTimeLeft = (until) => {
@@ -664,13 +665,14 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
   );
 }
 
-function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed, view }) {
+function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed, view, activeCategory }) {
+  const cat = activeCategory || "Toutes";
   const allSponsored = [
-    ...posts.filter(p => p.sponsored && p.sponsoredUntil && new Date(p.sponsoredUntil) > new Date()).map(p => ({...p, _type:"annonce", _icon:"📋", _label:"Annonce"})),
-    ...boutiques.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"boutique", _icon:"🛍️", _label:"Boutique"})),
-    ...ateliers.filter(a => a.sponsored && a.sponsoredUntil && new Date(a.sponsoredUntil) > new Date()).map(a => ({...a, title:a.name, _type:"atelier", _icon:"🔧", _label:"Atelier"})),
-    ...restos.filter(r => r.sponsored && r.sponsoredUntil && new Date(r.sponsoredUntil) > new Date()).map(r => ({...r, title:r.name, _type:"resto", _icon:"🍽️", _label:"Restaurant"})),
-    ...beaute.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"beaute", _icon:"💇", _label:"Beauté"})),
+    ...posts.filter(p => p.sponsored && p.sponsoredUntil && new Date(p.sponsoredUntil) > new Date() && (cat==="Toutes"||p.category===cat)).map(p => ({...p, _type:"annonce", _icon:"📋", _label:"Annonce"})),
+    ...(cat==="Toutes" ? boutiques.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"boutique", _icon:"🛍️", _label:"Boutique"})) : []),
+    ...(cat==="Toutes" ? ateliers.filter(a => a.sponsored && a.sponsoredUntil && new Date(a.sponsoredUntil) > new Date()).map(a => ({...a, title:a.name, _type:"atelier", _icon:"🔧", _label:"Atelier"})) : []),
+    ...(cat==="Toutes" ? restos.filter(r => r.sponsored && r.sponsoredUntil && new Date(r.sponsoredUntil) > new Date()).map(r => ({...r, title:r.name, _type:"resto", _icon:"🍽️", _label:"Restaurant"})) : []),
+    ...(cat==="Toutes" ? beaute.filter(b => b.sponsored && b.sponsoredUntil && new Date(b.sponsoredUntil) > new Date()).map(b => ({...b, title:b.name, _type:"beaute", _icon:"💇", _label:"Beauté"})) : []),
   ].sort((a, b) => new Date(b.sponsoredUntil) - new Date(a.sponsoredUntil));
 
   if (allSponsored.length === 0) return null;
@@ -4453,8 +4455,8 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
           
 
           {/* Bandeau Urgent — EN CE MOMENT */}
-          <UrgentBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed}/>
-          <SponsoredBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed} view={view}/>
+          <UrgentBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed} activeCategory={category}/>
+          <SponsoredBanner posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed} view={view} activeCategory={category}/>
 
           {/* Barre catégories sticky — reste visible pendant le scroll du fil */}
           <div style={{ position:"sticky",top:0,zIndex:20,background:theme.bg,paddingTop:8,paddingBottom:8,marginBottom:8,borderBottom:`1px solid ${theme.border}` }}>
