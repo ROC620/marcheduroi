@@ -430,12 +430,12 @@ function VitrineDetail() {
 
         {/* ---- Partage ---- */}
         <div style={{ display:"flex",gap:10,marginBottom:24,flexWrap:"wrap" }}>
-          <a href={"https://wa.me/?text="+encodeURIComponent(window.location.origin+"/vitrine/"+slug)}
+          <a href={"https://wa.me/?text="+encodeURIComponent(`https://marcheduroi.com/api/vitrine-og?slug=${slug}`)}
             target="_blank" rel="noopener noreferrer"
             style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:12,padding:12,color:"#25D366",textDecoration:"none",fontWeight:700,fontSize:14,minWidth:120 }}>
             💬 WhatsApp
           </a>
-          <a href={"https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(window.location.origin+"/vitrine/"+slug)}
+          <a href={"https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(`https://marcheduroi.com/api/vitrine-og?slug=${slug}`)}
             target="_blank" rel="noopener noreferrer"
             style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"rgba(24,119,242,0.1)",border:"1px solid rgba(24,119,242,0.3)",borderRadius:12,padding:12,color:"#1877F2",textDecoration:"none",fontWeight:700,fontSize:14,minWidth:120 }}>
             📘 Facebook
