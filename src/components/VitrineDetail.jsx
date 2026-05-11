@@ -120,11 +120,8 @@ function VitrineDetail() {
   }, [slug, isEditMode, isPayMode]);
 
   const handleShare = () => {
-    const ogUrl   = `https://marcheduroi.com/api/vitrine-og?slug=${slug}`;
-    const realUrl = (structure?.domain_active && structure?.custom_domain)
-      ? "https://" + structure.custom_domain
-      : `https://marcheduroi.com/vitrine/${slug}`;
-    const text = (structure?.name || "Structure") + " est sur MarchéduRoi 👑\n" + ogUrl;
+    const ogUrl = `https://marcheduroi.com/api/vitrine-og?slug=${slug}`;
+    const text  = (structure?.name || "Structure") + " est sur MarchéduRoi 👑";
     if (navigator.share) navigator.share({ title: structure?.name, text, url: ogUrl });
     else { navigator.clipboard.writeText(ogUrl); alert("Lien copié !"); }
   };

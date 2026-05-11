@@ -65,12 +65,16 @@ export default async function handler(req) {
   <meta name="twitter:title"       content="${title}"/>
   <meta name="twitter:description" content="${description}"/>
   <meta name="twitter:image"       content="${image}"/>
-  <meta http-equiv="refresh" content="0; url=${url}"/>
   <link rel="canonical" href="${url}"/>
+  <!-- Redirection douce pour les visiteurs humains uniquement -->
+  <script>
+    var ua = navigator.userAgent || '';
+    var isScraper = /facebookexternalhit|Facebot|WhatsApp|Twitterbot|LinkedInBot|Slackbot/i.test(ua);
+    if (!isScraper) window.location.replace("${url}");
+  </script>
 </head>
 <body>
-  <script>window.location.replace("${url}");</script>
-  <p>Redirection vers <a href="${url}">${title}</a>...</p>
+  <p><a href="${url}">${title}</a></p>
 </body>
 </html>`;
 
