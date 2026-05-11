@@ -120,13 +120,13 @@ function VitrineDetail() {
   }, [slug, isEditMode, isPayMode]);
 
   const handleShare = () => {
-    // Partager le sous-domaine s'il est actif, sinon l'URL classique
-    const url = (structure?.domain_active && structure?.custom_domain)
+    const ogUrl  = `https://marcheduroi.com/api/vitrine-og?slug=${slug}`;
+    const realUrl = (structure?.domain_active && structure?.custom_domain)
       ? "https://" + structure.custom_domain
-      : window.location.origin + "/vitrine/" + slug;
-    const text = (structure?.name || "Structure") + " sur MarchéduRoi 👑\n" + url;
-    if (navigator.share) navigator.share({ title: structure?.name, text, url });
-    else { navigator.clipboard.writeText(url); alert("Lien copié !"); }
+      : `https://marcheduroi.com/vitrine/${slug}`;
+    const text = (structure?.name || "Structure") + " est sur MarchéduRoi 👑\n" + ogUrl;
+    if (navigator.share) navigator.share({ title: structure?.name, text, url: ogUrl });
+    else { navigator.clipboard.writeText(realUrl); alert("Lien copié !"); }
   };
 
   /* ---- États de chargement / erreur ---- */
