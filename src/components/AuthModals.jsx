@@ -10,6 +10,8 @@ export default function AuthModals({ view, theme, authForm, setAuthForm,
   const [showPassword, setShowPassword] = useState(false);
   const [loginError,   setLoginError]   = useState(null);
   const turnstileRef = useRef(null);
+  const maxLen   = (v, n) => v.slice(0, n);
+  const cleanText = (v, n=200) => maxLen(v.replace(/[<>{}[\]\\]/g, ""), n);
 
   // Pré-remplir le code téléphone selon le pays détecté
   useEffect(() => {
