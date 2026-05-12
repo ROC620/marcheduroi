@@ -1,4 +1,5 @@
 import React from "react";
+import PhotoCarousel from "./PhotoCarousel";
 
 function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false }) {
   const [playing, setPlaying] = React.useState(false);
