@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 function VitrineCarousel({ photos, borderColor }) {
   const COLOR = "#10B981";

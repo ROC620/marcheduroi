@@ -4833,7 +4833,6 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
         />
       )}
       {/* À PROPOS */}
-      {(view==="login"||view==="register")&&(
       {/* LOGIN */}
       {view==="login"&&(
         <div style={{ maxWidth:420,margin:"60px auto",padding:"0 24px",animation:"fadeIn 0.4s ease" }}>
@@ -5058,6 +5057,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
 
       {/* À PROPOS */}
+      {view==="about"&&(
         <div style={{ width:"100%",animation:"fadeIn 0.4s ease" }}>
           <div style={{ textAlign:"center",padding:"80px 40px 48px",background:`linear-gradient(180deg,${theme.card},transparent)` }}>
             <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:120,height:120,borderRadius:20,boxShadow:"0 8px 32px rgba(108,99,255,0.4)",margin:"0 auto 20px",display:"block" }}/>
