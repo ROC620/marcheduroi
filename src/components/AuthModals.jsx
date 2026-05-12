@@ -1,11 +1,146 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../supabase";
 
 export default function AuthModals({ view, theme, authForm, setAuthForm,
-  detectedCountry, setView, notify, cardStyle, inputStyle, windowWidth, user, setUser, t }) {
+  detectedCountry, setView, notify, cardStyle, inputStyle, windowWidth, user, setUser, t,
+  turnstileToken, setTurnstileToken }) {
 
-  const [authError,   setAuthError]   = useState(null);
-  const [authLoading, setAuthLoading] = useState(false);
+  const [authError,    setAuthError]    = useState(null);
+  const [authLoading,  setAuthLoading]  = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError,   setLoginError]   = useState(null);
+  const turnstileRef = useRef(null);
+
+  // Pré-remplir le code téléphone selon le pays détecté
+  useEffect(() => {
+    if (view === "register" && !authForm.phone && detectedCountry) {
+      const PHONE_CODES = {"BJ":"+229 ","TG":"+228 ","CI":"+225 ","SN":"+221 ","ML":"+223 ","BF":"+226 ","NE":"+227 ","GN":"+224 ","NG":"+234 ","CM":"+237 ","CG":"+242 ","CD":"+243 ","GA":"+241 ","MG":"+261 ","RW":"+250 ","BI":"+257 ","TD":"+235 ","MR":"+222 ","FR":"+33 ","BE":"+32 ","CH":"+41 ","CA":"+1 "};
+      if (PHONE_CODES[detectedCountry]) {
+        setAuthForm(a => ({...a, phone: PHONE_CODES[detectedCountry], country: detectedCountry}));
+      }
+    }
+  }, [view, detectedCountry]);
+
+  const login = async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });
+    if (error) {
+      // Vérifier si l'email existe dans la base
+      const { count } = await supabase.from("profiles").select("email", {count:"exact", head:true}).eq("email", authForm.email.toLowerCase().trim());
+      if (count === 0) {
+        setLoginError("unknown_email");
+      } else {
+        setLoginError("wrong_password");
+      }
+      return;
+    }
+    setLoginError(null);
+
+    // Bloquer si email non confirmé
+    if (!data.user.email_confirmed_at) {
+      await supabase.auth.signOut();
+      notify("📧 Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte mail.", "error");
+      return;
+    }
+
+    const { data: profile } = await supabase.from("profiles").select("*").eq("id",data.user.id).maybeSingle();
+    if (profile) {
+      setUser({ id:data.user.id, name:profile.name, role:profile.role||"user", emailConfirmed:true });
+    } else {
+      // Récupérer le vrai nom depuis les métadonnées Supabase Auth si disponible
+      const realName = data.user.user_metadata?.name || data.user.email.split("@")[0];
+      await supabase.from("profiles").insert({ id:data.user.id, name:realName, role:"user", country:"BJ", email:data.user.email.toLowerCase() });
+      setUser({ id:data.user.id, name:realName, role:"user" });
+    }
+    const pendingRef = localStorage.getItem("mdr_ref");
+    if (pendingRef && pendingRef !== data.user.id) {
+      await processReferral(pendingRef, data.user.id);
+      localStorage.removeItem("mdr_ref");
+    }
+    setView("home"); notify("Bienvenue !");
+    addNotification("Bienvenue sur MarchéduRoi ! Vos notifications apparaissent ici.", "info");
+  };
+
+const PHONE_REGEX = {
+  BJ: /^\+229\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  TG: /^\+228\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  CI: /^\+225\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  SN: /^\+221\s?[0-9]{2}\s?[0-9]{3}\s?[0-9]{2}\s?[0-9]{2}$/,
+  ML: /^\+223\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  BF: /^\+226\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  NE: /^\+227\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  GN: /^\+224\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/,
+  NG: /^\+234\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{4}$/,
+  CM: /^\+237\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/,
+  CG: /^\+242\s?[0-9]{2}\s?[0-9]{3}\s?[0-9]{4}$/,
+  CD: /^\+243\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/,
+  GA: /^\+241\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  MG: /^\+261\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{3}\s?[0-9]{2}$/,
+  RW: /^\+250\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/,
+  BI: /^\+257\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{4}$/,
+  TD: /^\+235\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  MR: /^\+222\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  FR: /^\+33\s?[0-9]\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  BE: /^\+32\s?[0-9]{3}\s?[0-9]{2}\s?[0-9]{2}\s?[0-9]{2}$/,
+  CH: /^\+41\s?[0-9]{2}\s?[0-9]{3}\s?[0-9]{2}\s?[0-9]{2}$/,
+  CA: /^\+1\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{4}$/,
+};
+const PHONE_EXAMPLE = {
+  BJ:"+229 01 23 45 67 89",TG:"+228 90 12 34 56",CI:"+225 01 23 45 67 89",
+  SN:"+221 77 123 45 67",ML:"+223 76 12 34 56",BF:"+226 70 12 34 56",
+  NE:"+227 96 12 34 56",GN:"+224 622 123 456",NG:"+234 801 234 5678",
+  CM:"+237 677 123 456",CG:"+242 06 123 4567",CD:"+243 812 345 678",
+  GA:"+241 07 12 34 56",MG:"+261 32 123 45 67",RW:"+250 788 123 456",
+  BI:"+257 79 123456",TD:"+235 66 12 34 56",MR:"+222 22 12 34 56",
+  FR:"+33 6 12 34 56 78",BE:"+32 470 12 34 56",CH:"+41 76 123 45 67",
+  CA:"+1 514 123 4567",
+};
+
+
+  const register = async () => {
+    if (!authForm.name||!authForm.email||!authForm.password||!authForm.phone) { notify("Tous les champs sont obligatoires","error"); return; }
+    if (!turnstileToken) { notify("Veuillez compléter la vérification de sécurité","error"); return; }
+    if (authForm.password.length < 6) { notify("Le mot de passe doit faire au moins 6 caractères","error"); return; }
+    const phoneRx = PHONE_REGEX[authForm.country];
+    if (phoneRx && !phoneRx.test(authForm.phone.trim())) {
+      notify("Numéro invalide pour ce pays — ex: "+(PHONE_EXAMPLE[authForm.country]||"+XXX XX XX XX XX"), "error"); return;
+    }
+
+    const refFromUrl = new URLSearchParams(window.location.search).get("ref");
+    if (refFromUrl) localStorage.setItem("mdr_ref", refFromUrl);
+
+    const { data, error } = await supabase.auth.signUp({
+      email: authForm.email,
+      password: authForm.password,
+      options: {
+        emailRedirectTo: "https://marcheduroi.com",
+        data: { name: authForm.name }
+      }
+    });
+    if (error) {
+      const msg = error.message||"";
+      if (msg.includes("already registered") || msg.includes("already been registered") || msg.includes("User already")) {
+        notify("📧 Vous êtes déjà inscrit avec cet email. Connectez-vous ou réinitialisez votre mot de passe.", "error");
+        setTimeout(() => setAuthMode("login"), 1200);
+      } else {
+        notify("Erreur : "+msg, "error");
+      }
+      return;
+    }
+    if (!data.user) { notify("Erreur lors de la création du compte","error"); return; }
+
+    // Créer le profil
+    await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ", phone:authForm.phone||null, email:authForm.email.toLowerCase().trim() });
+
+    // NE PAS connecter l'utilisateur — attendre confirmation email
+    setTurnstileToken("");
+    const emailSent = authForm.email;
+    setAuthForm({ email:"",password:"",name:"",country:"BJ" });
+    setView("login");
+    setModal({ type:"emailConfirmation", email: emailSent });
+  };
+
+  // ─── SYSTÈME DE PARRAINAGE ───────────────────────────────────────────────────
+
 
   return (
     <>
@@ -59,7 +194,7 @@ export default function AuthModals({ view, theme, authForm, setAuthForm,
       )}
 
       {/* REGISTER */}
-      {view==="register"&&(()=>{ const PHONE_CODES={"BJ":"+229 ","TG":"+228 ","CI":"+225 ","SN":"+221 ","ML":"+223 ","BF":"+226 ","NE":"+227 ","GN":"+224 ","NG":"+234 ","CM":"+237 ","CG":"+242 ","CD":"+243 ","GA":"+241 ","MG":"+261 ","RW":"+250 ","BI":"+257 ","TD":"+235 ","MR":"+222 ","FR":"+33 ","BE":"+32 ","CH":"+41 ","CA":"+1 "}; if(!authForm.phone&&detectedCountry&&PHONE_CODES[detectedCountry]){ setAuthForm(a=>({...a,phone:PHONE_CODES[detectedCountry],country:detectedCountry})); } return true; })()&&(
+      {view==="register"&&(
         <div style={{ maxWidth:420,margin:"60px auto",padding:"0 24px",animation:"fadeIn 0.4s ease" }}>
           <div style={{ ...cardStyle,borderRadius:20,padding:36 }}>
             <h2 style={{ fontWeight:800,fontSize:26,marginBottom:6,color:theme.text }}>Créer un compte</h2>
