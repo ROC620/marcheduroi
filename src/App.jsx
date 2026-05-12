@@ -1,3 +1,4 @@
+// v2.0.1
 import React, { useState, useRef, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
 import { supabase } from "./supabase";
