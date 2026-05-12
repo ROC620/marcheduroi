@@ -276,7 +276,4 @@ function AnnonceDetail() {
   );
 }
 
-
-function PersistentLayout() {
-
 export default AnnonceDetail;
