@@ -6,9 +6,7 @@ import VideoCardPlayer from "./VideoCardPlayer";
 // Données de fallback (si Supabase indisponible)
 const INITIAL_POSTS = [];
 const INITIAL_BOUTIQUES = [];
-const INITIAL_ATELIERS = [];
 const INITIAL_RESTOS = [];
-const INITIAL_BEAUTE = [];
 
 // Données de fallback
 const INITIAL_BEAUTE = [
