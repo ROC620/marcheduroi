@@ -11,6 +11,7 @@ import RatingForm from "./components/RatingForm";
 import AdminVitrineWeb from "./components/AdminVitrineWeb";
 import AdminPanel from "./components/AdminPanel";
 import AnnonceDetail from "./components/AnnonceDetail";
+import VideoCardPlayer from "./components/VideoCardPlayer";
 import VitrineRequest from "./components/VitrineRequest";
 import VitrineDetail from "./components/VitrineDetail";
 import VitrineDirectory from "./components/VitrineDirectory";
