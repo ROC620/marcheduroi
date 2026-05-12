@@ -1,4 +1,7 @@
 import React from "react";
+const PHONE_CODES = {"BJ":"+229","TG":"+228","CI":"+225","SN":"+221","ML":"+223","BF":"+226","NE":"+227","GN":"+224","NG":"+234","CM":"+237","FR":"+33","BE":"+32","CH":"+41","CA":"+1","US":"+1","GB":"+44"};
+const getPhonePrefix = () => { const c = localStorage.getItem("mdr_country")||"BJ"; return PHONE_CODES[c]||"+"; };
+const BOUTIQUE_TYPES = ["Cosmétiques & Beauté","Alimentation & Restauration","Électronique & Informatique","Mode & Vêtements","Pharmacie & Santé","Matériaux & Construction","Agriculture & Élevage","Librairie & Papeterie","Sport & Loisirs","Autres Boutiques","Autre"];
 import { useNavigate } from "react-router-dom";
 import CertifiedBadge from "./CertifiedBadge";
 import Icon from "./Icon";

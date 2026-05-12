@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase";
+const PHONE_PLACEHOLDERS = {"BJ":"+229 0100000000","TG":"+228 90000000","CI":"+225 0100000000","SN":"+221 700000000","NG":"+234 8000000000","CM":"+237 600000000","FR":"+33 600000000"};
+const PHONE_CODES = {"BJ":"+229","TG":"+228","CI":"+225","SN":"+221","ML":"+223","BF":"+226","NE":"+227","GN":"+224","NG":"+234","CM":"+237","FR":"+33","BE":"+32"};
+const getPhonePlaceholder = () => { const c = localStorage.getItem("mdr_country")||"BJ"; return PHONE_PLACEHOLDERS[c]||(PHONE_CODES[c]?PHONE_CODES[c]+" votre numéro":"+indicatif votre numéro"); };
 import { VITRINE_TYPES, toSlug } from "../vitrineConstants";
 
 function AdminVitrineWeb({ theme, notify }) {

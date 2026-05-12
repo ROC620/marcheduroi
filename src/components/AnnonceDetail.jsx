@@ -3,6 +3,13 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { supabase } from "../supabase";
 import VideoCardPlayer from "./VideoCardPlayer";
 
+// Données de fallback (si Supabase indisponible)
+const INITIAL_POSTS = [];
+const INITIAL_BOUTIQUES = [];
+const INITIAL_ATELIERS = [];
+const INITIAL_RESTOS = [];
+const INITIAL_BEAUTE = [];
+
 // Données de fallback
 const INITIAL_BEAUTE = [
   { id:"beau1", name:"Salon Beauté Divine", type:"Salon de coiffure", specialite:"Tresses africaines et coiffures modernes", services:"Tresses, Locks, Tissages, Lissage, Coloration, Coupe, Soins capillaires", tarifs:"2 000 - 25 000 FCFA", rendezvous:"Les deux", produits:"L'Oréal, Dark & Lovely, Cantu", description:"Salon de coiffure professionnel spécialisé en tresses africaines et coiffures modernes. Accueil chaleureux.", ville:"Cotonou", quartier:"Cadjehoun", von:"Von du supermarché Erevan", horaires:"Lun-Sam 8h-20h · Dim 10h-17h", contact:"contact@marcheduroi.com", phone:"+2290147562640", author:"Nadège K.", authorId:"beau_u1", date:"2026-03-01", likes:42, photos:[], video:null, keywords:"tresses coiffure africaine lissage", expiresAt:null },
