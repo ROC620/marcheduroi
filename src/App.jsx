@@ -4842,6 +4842,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
           setView={setView} notify={notify}
           cardStyle={cardStyle} inputStyle={inputStyle}
           windowWidth={windowWidth} user={user} setUser={setUser} t={t}
+          turnstileToken={turnstileToken} setTurnstileToken={setTurnstileToken}
         />
       )}
       {view==="about"&&(
