@@ -4,7 +4,7 @@ import AdminVitrineWeb from "./AdminVitrineWeb";
 import CertifiedBadge from "./CertifiedBadge";
 import Icon from "./Icon";
 
-export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, setBoutiques, ateliers, setAteliers, restos, setRestos, beaute, setBeaute, user, windowWidth, t, setView, setModal, view, adRequests, setAdRequests, ads, setAds }) {
+export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, setBoutiques, ateliers, setAteliers, restos, setRestos, beaute, setBeaute, user, windowWidth, t, setView, setModal, view, adRequests, setAdRequests, ads, setAds, openEditPost }) {
   const [adminSearch,    setAdminSearch]    = useState("");
   const [reports,        setReports]        = useState([]);
   const [adForm,         setAdForm]         = useState({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
@@ -58,6 +58,7 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
     notify("🔥 Badge Urgent retiré ✅");
   };
   const openEdit = (post) => {
+    if (openEditPost) { openEditPost(post); return; }
     setModal({ type:"edit", data:post });
   };
   const openEditShop = (item, shopType) => {
