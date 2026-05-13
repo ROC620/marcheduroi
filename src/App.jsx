@@ -5216,6 +5216,10 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
           setView={setView} setModal={setModal} user={user}
           featuredPosts={featuredPosts} isCertified={isCertified} notify={notify}
           cardStyle={cardStyle} search={search} setSearch={setSearch}
+          openEditShop={openEditShop}
+          setShopMode={setShopMode} setShopForm={setShopForm}
+          setShopPhotos={setShopPhotos} setShopVideo={setShopVideo}
+          setMonths={setMonths}
         />
       )}
       {view==="stats"&&(

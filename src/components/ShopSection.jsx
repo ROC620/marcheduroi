@@ -6,11 +6,13 @@ import { useNavigate } from "react-router-dom";
 import CertifiedBadge from "./CertifiedBadge";
 import Icon from "./Icon";
 import VideoCardPlayer from "./VideoCardPlayer";
+import EstablishmentUrgentBanner from "./EstablishmentUrgentBanner";
 
 export default function ShopSection({ view, theme, boutiques, ateliers, restos, beaute,
   setBoutiques, setAteliers, setRestos, setBeaute,
   navigate, windowWidth, t, setView, setModal, user,
-  featuredPosts, isCertified, notify, cardStyle, search, setSearch }) {
+  featuredPosts, isCertified, notify, cardStyle, search, setSearch,
+  openEditShop, setShopMode, setShopForm, setShopPhotos, setShopVideo, setMonths }) {
 
   return (
     <>
