@@ -11,6 +11,7 @@
     { "source": "/resto/:id", "destination": "/api/og?id=:id&source=restos" },
     { "source": "/beaute/:id", "destination": "/api/og?id=:id&source=beaute" },
     { "source": "/demandes", "destination": "/demandes.html" },
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
