@@ -12,7 +12,7 @@ User-agent: WhatsApp
 Allow: /
 
 # Sitemap dynamique — mis à jour automatiquement
-Sitemap: https://marcheduroi.com/api/sitemap.xml
+Sitemap: https://marcheduroi.com/api/sitemap
 
 # Bloquer les pages privées
 Disallow: /vitrine/*/modifier
