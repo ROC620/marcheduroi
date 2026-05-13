@@ -40,6 +40,7 @@ export default function ShopSection({ view, theme, boutiques, ateliers, restos, 
   };
 
   const canEdit = user !== null;
+  const normalizeText = v => (v||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   const gridCols = windowWidth > 1200 ? "repeat(3,1fr)" : windowWidth > 800 ? "repeat(3,1fr)" : windowWidth > 500 ? "repeat(2,1fr)" : "1fr";
   const editShop   = (item) => openEditShop(item, "boutique");
   const editResto  = (item) => openEditShop(item, "resto");
