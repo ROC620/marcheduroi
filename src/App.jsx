@@ -2736,7 +2736,8 @@ const PHONE_EXAMPLE = {
   };
 
   const editPost = async () => {
-    const updatedPost = {...posts.find(p=>p.id===modal.data.id),...postForm,photos:postPhotos,video:postVideo||null,vehicle:isVehicle?vehicleForm:null};
+    const basePost = posts.find(p=>p.id===modal.data.id) || modal.data;
+    const updatedPost = {...basePost,...postForm,photos:postPhotos,video:postVideo||null,vehicle:isVehicle?vehicleForm:null};
     const { error, data } = await supabase.from("posts").update({
       title: updatedPost.title,
       category: updatedPost.category,
@@ -4831,6 +4832,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
           adRequests={adRequests} setAdRequests={setAdRequests}
           ads={ads} setAds={setAds}
           openEditPost={openEdit}
+          openEditShopFromApp={openEditShop}
         />
       )}
       {/* À PROPOS */}

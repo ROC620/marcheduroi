@@ -4,7 +4,7 @@ import AdminVitrineWeb from "./AdminVitrineWeb";
 import CertifiedBadge from "./CertifiedBadge";
 import Icon from "./Icon";
 
-export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, setBoutiques, ateliers, setAteliers, restos, setRestos, beaute, setBeaute, user, windowWidth, t, setView, setModal, view, adRequests, setAdRequests, ads, setAds, openEditPost }) {
+export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, setBoutiques, ateliers, setAteliers, restos, setRestos, beaute, setBeaute, user, windowWidth, t, setView, setModal, view, adRequests, setAdRequests, ads, setAds, openEditPost, openEditShopFromApp }) {
   const [adminSearch,    setAdminSearch]    = useState("");
   const [reports,        setReports]        = useState([]);
   const [adForm,         setAdForm]         = useState({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
@@ -62,6 +62,7 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
     setModal({ type:"edit", data:post });
   };
   const openEditShop = (item, shopType) => {
+    if (openEditShopFromApp) { openEditShopFromApp(item, shopType); return; }
     const modalType = shopType==="resto"?"addresto":shopType==="beaute"?"addbeaute":"addshop";
     setModal({ type:modalType, data:{...item, editing:true} });
   };
