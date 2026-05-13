@@ -12,7 +12,8 @@ export default function ShopSection({ view, theme, boutiques, ateliers, restos, 
   setBoutiques, setAteliers, setRestos, setBeaute,
   navigate, windowWidth, t, setView, setModal, user,
   featuredPosts, isCertified, notify, cardStyle, search, setSearch,
-  openEditShop, setShopMode, setShopForm, setShopPhotos, setShopVideo, setMonths }) {
+  openEditShop, setShopMode, setShopForm, setShopPhotos, setShopVideo, setMonths,
+  sessionSeed }) {
 
   return (
     <>

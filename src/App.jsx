@@ -5220,6 +5220,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
           setShopMode={setShopMode} setShopForm={setShopForm}
           setShopPhotos={setShopPhotos} setShopVideo={setShopVideo}
           setMonths={setMonths}
+          sessionSeed={sessionSeed}
         />
       )}
       {view==="stats"&&(
