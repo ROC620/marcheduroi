@@ -460,10 +460,10 @@ function VitrineDetail() {
           {currentUserId && !isOwner && !ratings.find(r=>r.user_id===currentUserId) && (
             <div style={{ background:`rgba(16,185,129,0.06)`,border:`1px solid rgba(16,185,129,0.2)`,borderRadius:12,padding:14,marginBottom:16 }}>
               <p style={{ color:VT.sub,fontSize:13,marginBottom:10 }}>Donnez votre avis :</p>
-              <div style={{ display:"flex",gap:8,marginBottom:10 }}>
+              <div style={{ display:"flex",gap:4,marginBottom:10,flexWrap:"wrap",alignItems:"center" }}>
                 {[1,2,3,4,5].map(n=>(
                   <button key={n} onClick={()=>setUserRating(n)}
-                    style={{ fontSize:28,background:"none",border:"none",cursor:"pointer",opacity:n<=userRating?1:0.3,transition:"all 0.15s" }}>
+                    style={{ fontSize:24,background:"none",border:"none",cursor:"pointer",opacity:n<=userRating?1:0.3,transition:"all 0.15s",padding:"2px",WebkitTapHighlightColor:"transparent" }}>
                     ⭐
                   </button>
                 ))}
