@@ -5223,6 +5223,9 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
           sessionSeed={sessionSeed}
           setActiveConv={setActiveConv}
           getAvgRating={getAvgRating}
+          likePost={likePost}
+          likedPosts={likedPosts}
+          getRatingCount={getRatingCount}
         />
       )}
       {view==="stats"&&(

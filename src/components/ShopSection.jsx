@@ -13,7 +13,8 @@ export default function ShopSection({ view, theme, boutiques, ateliers, restos, 
   navigate, windowWidth, t, setView, setModal, user,
   featuredPosts, isCertified, notify, cardStyle, search, setSearch,
   openEditShop, setShopMode, setShopForm, setShopPhotos, setShopVideo, setMonths,
-  sessionSeed, setActiveConv, getAvgRating }) {
+  sessionSeed, setActiveConv, getAvgRating,
+  likePost, likedPosts, getRatingCount }) {
 
   const [userLocation,      setUserLocation]      = React.useState(null);
   const [locationLoading,   setLocationLoading]   = React.useState(false);
@@ -37,6 +38,12 @@ export default function ShopSection({ view, theme, boutiques, ateliers, restos, 
     if (km < 1) return Math.round(km*1000)+" m";
     return km.toFixed(1)+" km";
   };
+
+  const canEdit = user !== null;
+  const gridCols = windowWidth > 1200 ? "repeat(3,1fr)" : windowWidth > 800 ? "repeat(3,1fr)" : windowWidth > 500 ? "repeat(2,1fr)" : "1fr";
+  const editShop   = (item) => openEditShop(item, "boutique");
+  const editResto  = (item) => openEditShop(item, "resto");
+  const editBeaute = (item) => openEditShop(item, "beaute");
 
   const getUserLocation = () => {
     setLocationLoading(true);
