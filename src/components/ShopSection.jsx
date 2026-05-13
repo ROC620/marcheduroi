@@ -10,7 +10,7 @@ import VideoCardPlayer from "./VideoCardPlayer";
 export default function ShopSection({ view, theme, boutiques, ateliers, restos, beaute,
   setBoutiques, setAteliers, setRestos, setBeaute,
   navigate, windowWidth, t, setView, setModal, user,
-  featuredPosts, isCertified, notify, cardStyle }) {
+  featuredPosts, isCertified, notify, cardStyle, search, setSearch }) {
 
   return (
     <>
