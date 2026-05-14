@@ -55,6 +55,21 @@ function VitrinePayment({ structure, token, onDone }) {
     if (error) {
       setError("Paiement reçu mais activation échouée. Contactez EDENPORTAIL : contact@marcheduroi.com");
     } else {
+      // Envoyer l'email de confirmation
+      if (structure.email) {
+        fetch("/api/send-vitrine-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name:      structure.name,
+            type:      structure.type,
+            email:     structure.email,
+            slug:      structure.slug,
+            token:     token,
+            expiresAt: expiresAt.toISOString(),
+          }),
+        }).catch(() => {}); // Silencieux — ne pas bloquer si email échoue
+      }
       setPaid(true);
       setTimeout(onDone, 3000);
     }
