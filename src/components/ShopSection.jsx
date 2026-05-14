@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-const PHONE_CODES = {"BJ":"+229","TG":"+228","CI":"+225","SN":"+221","ML":"+223","BF":"+226","NE":"+227","GN":"+224","NG":"+234","CM":"+237","FR":"+33","BE":"+32","CH":"+41","CA":"+1","US":"+1","GB":"+44"};
-const getPhonePrefix = () => { const c = localStorage.getItem("mdr_country")||"BJ"; return PHONE_CODES[c]||"+"; };
-const BOUTIQUE_TYPES = ["Cosmétiques & Beauté","Alimentation & Restauration","Électronique & Informatique","Mode & Vêtements","Pharmacie & Santé","Matériaux & Construction","Agriculture & Élevage","Librairie & Papeterie","Sport & Loisirs","Autres Boutiques","Autre"];
 import { useNavigate } from "react-router-dom";
 import CertifiedBadge from "./CertifiedBadge";
 import Icon from "./Icon";
 import VideoCardPlayer from "./VideoCardPlayer";
 import EstablishmentUrgentBanner from "./EstablishmentUrgentBanner";
+import { getPhonePrefix, normalizeText, getDistance, formatDistance, PHONE_CODES } from "../utils";
+
+const BOUTIQUE_TYPES = ["Cosmétiques & Beauté","Alimentation & Restauration","Électronique & Informatique","Mode & Vêtements","Pharmacie & Santé","Matériaux & Construction","Agriculture & Élevage","Librairie & Papeterie","Sport & Loisirs","Autres Boutiques","Autre"];
 
 export default function ShopSection({ view, theme, boutiques, ateliers, restos, beaute,
   setBoutiques, setAteliers, setRestos, setBeaute,
@@ -24,23 +24,7 @@ export default function ShopSection({ view, theme, boutiques, ateliers, restos, 
   const [visibleRestos,     setVisibleRestos]     = React.useState(12);
   const [visibleBeaute,     setVisibleBeaute]     = React.useState(12);
 
-  const getDistance = (lat1, lon1, lat2, lon2) => {
-    if (!lat1||!lon1||!lat2||!lon2) return null;
-    const R = 6371;
-    const dLat = (lat2-lat1)*Math.PI/180;
-    const dLon = (lon2-lon1)*Math.PI/180;
-    const a = Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
-    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-  };
-
-  const formatDistance = (km) => {
-    if (km === null || km === undefined) return null;
-    if (km < 1) return Math.round(km*1000)+" m";
-    return km.toFixed(1)+" km";
-  };
-
   const canEdit = user !== null;
-  const normalizeText = v => (v||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   const gridCols = windowWidth > 1200 ? "repeat(3,1fr)" : windowWidth > 800 ? "repeat(3,1fr)" : windowWidth > 500 ? "repeat(2,1fr)" : "1fr";
   const editShop   = (item) => openEditShop(item, "boutique");
   const editResto  = (item) => openEditShop(item, "resto");
