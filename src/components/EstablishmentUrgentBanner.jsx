@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 function EstablishmentUrgentBanner({ boutiques, ateliers, restos, beaute, theme, navigate, windowWidth, sessionSeed }) {
   const [groupIdx, setGroupIdx] = React.useState(0);

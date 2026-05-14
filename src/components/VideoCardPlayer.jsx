@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import PhotoCarousel from "./PhotoCarousel";
 
 function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false }) {
