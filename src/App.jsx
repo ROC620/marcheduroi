@@ -2021,12 +2021,24 @@ function AppContent() {
         if (window.location.pathname === "/reset-password") return;
         setTimeout(() => {
           supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
-            .then(({ data }) => {
+            .then(async ({ data }) => {
               if (data) {
                 setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
                 localStorage.setItem("mdr_user_role", data.role||"user");
                 setView("home");
                 if (event === "USER_UPDATED") notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
+              } else {
+                // Profil inexistant — le créer (nouvel utilisateur qui vient de confirmer son email)
+                const name = session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Utilisateur";
+                const { data: newProfile } = await supabase.from("profiles")
+                  .insert({ id:session.user.id, name, role:"user", email:session.user.email })
+                  .select().maybeSingle();
+                if (newProfile) {
+                  setUser({ id:session.user.id, name:newProfile.name, role:"user", emailConfirmed:true });
+                  localStorage.setItem("mdr_user_role", "user");
+                  setView("home");
+                  notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
+                }
               }
             });
         }, 500);
