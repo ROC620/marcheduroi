@@ -159,13 +159,21 @@ function VitrineDetail() {
   );
 
   /* ---- Mode paiement ---- */
-  if (isPayMode) return (
-    <VitrinePayment
-      structure={structure}
-      token={tokenFromUrl}
-      onDone={() => navigate("/vitrine/" + slug)}
-    />
-  );
+  if (isPayMode) {
+    if (!structure) return (
+      <div style={{ display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#0D0F1A" }}>
+        <div style={{ width:48,height:48,border:"4px solid #2A2D45",borderTop:"4px solid #10B981",borderRadius:"50%",animation:"spin 0.8s linear infinite" }}/>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      </div>
+    );
+    return (
+      <VitrinePayment
+        structure={structure}
+        token={tokenFromUrl}
+        onDone={() => navigate("/vitrine/" + slug)}
+      />
+    );
+  }
 
   /* ---- Mode renouvellement ---- */
   if (isRenewMode) return (
