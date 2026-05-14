@@ -12,6 +12,11 @@ import AdminVitrineWeb from "./components/AdminVitrineWeb";
 import AdminPanel from "./components/AdminPanel";
 import AnnonceDetail from "./components/AnnonceDetail";
 import ShopSection from "./components/ShopSection";
+import RecrutementSection from "./components/RecrutementSection";
+import AboutSection from "./components/AboutSection";
+import StatsSection from "./components/StatsSection";
+import TermsSection from "./components/TermsSection";
+import ParrainageSection from "./components/ParrainageSection";
 import VideoCardPlayer from "./components/VideoCardPlayer";
 import VitrineRequest from "./components/VitrineRequest";
 import VitrineDetail from "./components/VitrineDetail";
@@ -2021,24 +2026,12 @@ function AppContent() {
         if (window.location.pathname === "/reset-password") return;
         setTimeout(() => {
           supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
-            .then(async ({ data }) => {
+            .then(({ data }) => {
               if (data) {
                 setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
                 localStorage.setItem("mdr_user_role", data.role||"user");
                 setView("home");
                 if (event === "USER_UPDATED") notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
-              } else {
-                // Profil inexistant — le créer (nouvel utilisateur qui vient de confirmer son email)
-                const name = session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Utilisateur";
-                const { data: newProfile } = await supabase.from("profiles")
-                  .insert({ id:session.user.id, name, role:"user", email:session.user.email })
-                  .select().maybeSingle();
-                if (newProfile) {
-                  setUser({ id:session.user.id, name:newProfile.name, role:"user", emailConfirmed:true });
-                  localStorage.setItem("mdr_user_role", "user");
-                  setView("home");
-                  notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
-                }
               }
             });
         }, 500);
@@ -4963,258 +4956,17 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
       {/* ── RECRUTEMENT ── */}
       {view==="recrutement"&&(
-        <div style={{ animation:"fadeIn 0.4s ease",padding:"24px 20px",maxWidth:820,margin:"0 auto",width:"100%" }}>
-          <div style={{ textAlign:"center",marginBottom:28 }}>
-            <h1 style={{ fontSize:windowWidth<=600?28:40,fontWeight:800,color:theme.text,marginBottom:8 }}>
-              {"💼 "}
-              <span style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Recrutement</span>
-            </h1>
-            <p style={{ color:theme.sub,fontSize:14 }}>Offres d\'emploi et profils de candidats</p>
-          </div>
-          <div style={{ display:"flex",gap:8,marginBottom:24,background:theme.card,padding:4,borderRadius:14 }}>
-            {[{key:"offres",label:"💼 Offres d\'emploi"},{key:"cvs",label:"👤 Profils / CV"}].map(tab=>(
-              <button key={tab.key} onClick={()=>setRecrutTab(tab.key)}
-                style={{ flex:1,padding:"10px 16px",borderRadius:12,fontWeight:700,fontSize:13,cursor:"pointer",border:"none",
-                  background:recrutTab===tab.key?"linear-gradient(135deg,#43C6AC,#6C63FF)":"transparent",
-                  color:recrutTab===tab.key?"#fff":theme.sub,transition:"all 0.2s" }}>
-                {tab.label}
-              </button>
-            ))}
-          </div>
-          <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:20 }}>
-            {user && recrutTab==="offres" && (
-              <button onClick={()=>setModal({type:"addOffre"})} className="btn-glow"
-                style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:12,fontWeight:700,fontSize:13,cursor:"pointer" }}>
-                + Publier une offre
-              </button>
-            )}
-            {user && recrutTab==="cvs" && (
-              <button onClick={()=>setModal({type:"addCV"})} className="btn-glow"
-                style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"10px 20px",borderRadius:12,fontWeight:700,fontSize:13,cursor:"pointer" }}>
-                + Publier mon CV
-              </button>
-            )}
-          </div>
-          {recrutTab==="offres" && (()=>{
-            const offres = posts.filter(p=>p.category==="Offre d\'emploi").sort((a,b)=>new Date(b.date)-new Date(a.date));
-            if (offres.length===0) return (
-              <div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}>
-                <p style={{ fontSize:40,marginBottom:12 }}>{"💼"}</p>
-                <p style={{ fontWeight:600,marginBottom:8 }}>Aucune offre pour le moment</p>
-                <p style={{ fontSize:13 }}>1 500 FCFA / 30 jours · 3 500 FCFA / 90 jours</p>
-              </div>
-            );
-            return (
-              <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
-                {offres.map(o=>(
-                  <div key={o.id} style={{ ...cardStyle,borderRadius:16,padding:20,border:`1px solid ${theme.border}` }}>
-                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10,flexWrap:"wrap",gap:8 }}>
-                      <div>
-                        <p style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:4 }}>{o.title}</p>
-                        <p style={{ fontWeight:700,fontSize:13,color:"#43C6AC" }}>{"🏢 "}{o.contact}</p>
-                      </div>
-                      {o.price&&<span style={{ background:"rgba(67,198,172,0.12)",color:"#43C6AC",borderRadius:8,padding:"4px 12px",fontSize:13,fontWeight:700 }}>{"💰 "}{o.price} FCFA</span>}
-                    </div>
-                    <p style={{ color:theme.sub,fontSize:13,lineHeight:1.6,marginBottom:10 }}>{o.description}</p>
-                    <div style={{ display:"flex",gap:8,flexWrap:"wrap",alignItems:"center" }}>
-                      {o.ville&&<span style={{ fontSize:12,color:theme.sub }}>{"📍 "}{o.ville}</span>}
-                      <span style={{ fontSize:12,color:theme.sub }}>{"📅 "}{o.date}</span>
-                      {o.phone&&user&&user.id!==o.authorId&&(
-                        <a href={"https://wa.me/"+o.phone.replace(/[\s+()]/g,"")} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
-                          <div style={{ background:"rgba(37,211,102,0.15)",color:"#25D366",padding:"4px 10px",borderRadius:8,fontSize:12,fontWeight:700 }}>WA</div>
-                        </a>
-                      )}
-                      {user&&user.id!==o.authorId&&(
-                        <button onClick={()=>{ setActiveConv({postId:o.id,postTitle:o.title,postPrice:"",postPhoto:null,receiverId:o.authorId,receiverName:o.contact,messages:messages.filter(m=>(m.post_id===o.id)&&((m.sender_id===user.id&&m.receiver_id===o.authorId)||(m.receiver_id===user.id&&m.sender_id===o.authorId)))}); setShowMessages(true); }}
-                          style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"4px 10px",borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer" }}>{"💬 Postuler"}</button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-          {recrutTab==="cvs" && (()=>{
-            const cvs = posts.filter(p=>p.category==="Profil CV").sort((a,b)=>new Date(b.date)-new Date(a.date));
-            if (cvs.length===0) return (
-              <div style={{ textAlign:"center",padding:"60px 0",color:theme.sub }}>
-                <p style={{ fontSize:40,marginBottom:12 }}>{"👤"}</p>
-                <p style={{ fontWeight:600,marginBottom:8 }}>Aucun profil pour le moment</p>
-                <p style={{ fontSize:13 }}>Publication gratuite</p>
-              </div>
-            );
-            return (
-              <div style={{ display:"grid",gridTemplateColumns:windowWidth<=600?"1fr":windowWidth<=900?"1fr 1fr":"1fr 1fr 1fr",gap:14 }}>
-                {cvs.map(cv=>(
-                  <div key={cv.id} style={{ ...cardStyle,borderRadius:16,padding:18,border:`1px solid ${theme.border}` }}>
-                    <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:12 }}>
-                      <div style={{ width:44,height:44,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#43C6AC)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:700,color:"#fff",flexShrink:0 }}>{cv.contact?.[0]||"?"}</div>
-                      <div>
-                        <p style={{ fontWeight:800,fontSize:14,color:theme.text }}>{cv.contact}</p>
-                        <p style={{ fontSize:12,color:"#43C6AC",fontWeight:600 }}>{cv.title.split(" — ")[0]}</p>
-                      </div>
-                    </div>
-                    <p style={{ color:theme.sub,fontSize:12,lineHeight:1.6,marginBottom:10,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden" }}>{cv.description}</p>
-                    <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-                      {cv.ville&&<span style={{ fontSize:11,color:theme.sub }}>{"📍 "}{cv.ville}</span>}
-                      {user&&user.id!==cv.authorId&&(
-                        <button onClick={()=>{ setActiveConv({postId:cv.id,postTitle:cv.title,postPrice:"",postPhoto:null,receiverId:cv.authorId,receiverName:cv.contact,messages:messages.filter(m=>(m.post_id===cv.id)&&((m.sender_id===user.id&&m.receiver_id===cv.authorId)||(m.receiver_id===user.id&&m.sender_id===cv.authorId)))}); setShowMessages(true); }}
-                          style={{ background:"rgba(108,99,255,0.1)",border:"none",color:"#6C63FF",padding:"3px 8px",borderRadius:6,fontSize:11,fontWeight:700,cursor:"pointer" }}>{"💬 Contacter"}</button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-        </div>
+        <RecrutementSection
+          theme={theme} user={user} setModal={setModal} windowWidth={windowWidth} posts={posts} view={view}
+        />
       )}
 
 
       {/* À PROPOS */}
       {view==="about"&&(
-        <div style={{ width:"100%",animation:"fadeIn 0.4s ease" }}>
-          <div style={{ textAlign:"center",padding:"80px 40px 48px",background:`linear-gradient(180deg,${theme.card},transparent)` }}>
-            <img src="/marcheduRoi-icon.svg" alt="MarcheduRoi" style={{ width:120,height:120,borderRadius:20,boxShadow:"0 8px 32px rgba(108,99,255,0.4)",margin:"0 auto 20px",display:"block" }}/>
-            <h1 style={{ fontSize:windowWidth<=600?"clamp(28px,8vw,38px)":48,fontWeight:800,marginBottom:16,color:theme.text,textAlign:"center",wordBreak:"break-word" }}>À propos de <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>MarchéduRoi</span></h1>
-            <p style={{ color:theme.sub,fontSize:18,maxWidth:700,margin:"0 auto 12px",lineHeight:1.7 }}>La plateforme de petites annonces qui connecte commerçants, entreprises et particuliers au Bénin et au-delà des frontières.</p>
-            <p style={{ fontWeight:800,fontSize:20,color:"#FFD700",textAlign:"center",letterSpacing:0.5,fontStyle:"italic" }}>"Sur MarchéduRoi, vous êtes le Roi du Marché" 👑</p>
-          </div>
-
-          {/* Mission */}
-          <div style={{ maxWidth:900,margin:"0 auto 48px",display:"flex",flexDirection:windowWidth<=600?"column":"row",gap:24 }}>
-            <div style={{ ...{background:theme.card,border:`1px solid ${theme.border}`},borderRadius:20,padding:windowWidth<=600?20:32,flex:1 }}>
-              <div style={{ fontSize:40,marginBottom:16 }}>🎯</div>
-              <h2 style={{ fontWeight:800,fontSize:22,marginBottom:16,color:theme.text }}>Notre Mission</h2>
-              <p style={{ color:theme.sub,fontSize:15,lineHeight:1.8 }}>
-                Assister tous les commerçants formels et informels, ainsi que toutes personnes physiques et morales, à consulter et prendre des renseignements sur tous les produits, biens et services disponibles dans leur pays et au-delà de leurs frontières.
-              </p>
-            </div>
-            <div style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:20,padding:windowWidth<=600?20:32,flex:1 }}>
-              <div style={{ fontSize:40,marginBottom:16 }}>🌍</div>
-              <h2 style={{ fontWeight:800,fontSize:22,marginBottom:16,color:theme.text }}>Notre Vision</h2>
-              <p style={{ color:theme.sub,fontSize:15,lineHeight:1.8 }}>
-                Permettre à toute personne intéressée de publier n'importe quel produit, bien ou service pour le bonheur du monde. Une plateforme ouverte, accessible et utile à tous, partout en Afrique et dans le monde.
-              </p>
-            </div>
-          </div>
-
-          {/* Valeurs */}
-          <div style={{ maxWidth:900,margin:"0 auto 48px" }}>
-            <h2 style={{ fontWeight:800,fontSize:28,marginBottom:24,color:theme.text,textAlign:"center" }}>Nos Valeurs</h2>
-            <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16 }}>
-              {[
-                { icon:"🤝", title:"Confiance", desc:"Des annonceurs vérifiés et des vendeurs respectables" },
-                { icon:"💡", title:"Simplicité", desc:"Une interface claire et facile à utiliser pour tous" },
-                { icon:"🚀", title:"Innovation", desc:"Des fonctionnalités modernes adaptées à l'Afrique" },
-                { icon:"❤️", title:"Communauté", desc:"Relier les gens et favoriser les échanges locaux" },
-              ].map(v=>(
-                <div key={v.title} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:16,padding:24,textAlign:"center" }}>
-                  <div style={{ fontSize:32,marginBottom:12 }}>{v.icon}</div>
-                  <h3 style={{ fontWeight:700,fontSize:16,marginBottom:8,color:theme.text }}>{v.title}</h3>
-                  <p style={{ color:theme.sub,fontSize:13,lineHeight:1.6 }}>{v.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Entreprise */}
-          <div style={{ maxWidth:600,margin:"0 auto 48px" }}>
-            <div style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:20,padding:32,textAlign:"center" }}>
-              <div style={{ width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#FF6584)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:32,fontWeight:800,color:"#fff" }}>M</div>
-              <h2 style={{ fontWeight:800,fontSize:22,marginBottom:4,color:theme.text }}>MarchéduRoi</h2>
-              <p style={{ color:"#6C63FF",fontWeight:600,fontSize:14,marginBottom:16 }}>Ouidah, Bénin</p>
-              <p style={{ color:theme.sub,fontSize:14,lineHeight:1.7,marginBottom:20 }}>MarchéduRoi est une plateforme numérique multipolaire de petites annonces, créée et exploitée par EDENPORTAIL, établissement spécialisé dans la création et le référencement de sites internet, dont le siège social est établi à Ouidah, République du Bénin.</p>
-              <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
-                <a href="mailto:contact@marcheduroi.com" style={{ textDecoration:"none",display:"flex",alignItems:"center",gap:10,background:"rgba(67,198,172,0.1)",border:"1px solid rgba(67,198,172,0.3)",borderRadius:10,padding:"10px 16px" }}>
-                  <svg width="16" height="16" fill="none" stroke="#43C6AC" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  <span style={{ color:"#43C6AC",fontWeight:600,fontSize:14 }}>contact@marcheduroi.com</span>
-                </a>
-                <a href="mailto:support@marcheduroi.com" style={{ textDecoration:"none",display:"flex",alignItems:"center",gap:10,background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:10,padding:"10px 16px" }}>
-                  <svg width="16" height="16" fill="none" stroke="#6C63FF" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  <span style={{ color:"#6C63FF",fontWeight:600,fontSize:14 }}>support@marcheduroi.com</span>
-                </a>
-                <a href="https://wa.me/2290140906020" target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"flex",alignItems:"center",gap:10,background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:10,padding:"10px 16px" }}>
-                  <svg width="16" height="16" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-                  <span style={{ color:"#25D366",fontWeight:600,fontSize:14 }}>+229 01 40 90 60 20</span>
-                </a>
-                <div style={{ display:"flex",alignItems:"center",gap:10,background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:10,padding:"10px 16px" }}>
-                  <svg width="16" height="16" fill="none" stroke={theme.sub} strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span style={{ color:theme.sub,fontSize:14 }}>Ouidah, Bénin 🇧🇯</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bloc légal RCCM + IFU */}
-          <div style={{ maxWidth:700,margin:"0 auto 48px",padding:"0 16px" }}>
-            <div style={{ background:`linear-gradient(135deg,rgba(108,99,255,0.06),rgba(67,198,172,0.06))`,border:`2px solid rgba(108,99,255,0.25)`,borderRadius:20,padding:windowWidth<=600?24:36,position:"relative",overflow:"hidden" }}>
-              {/* Filigrane décoratif */}
-              <div style={{ position:"absolute",right:-20,top:-20,width:120,height:120,borderRadius:"50%",background:"rgba(108,99,255,0.06)",pointerEvents:"none" }}/>
-              <div style={{ position:"absolute",left:-30,bottom:-30,width:160,height:160,borderRadius:"50%",background:"rgba(67,198,172,0.05)",pointerEvents:"none" }}/>
-
-              {/* En-tête */}
-              <div style={{ display:"flex",alignItems:"center",gap:14,marginBottom:24 }}>
-                <div style={{ width:52,height:52,borderRadius:14,background:"linear-gradient(135deg,#6C63FF,#43C6AC)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:24 }}>🏛️</div>
-                <div>
-                  <p style={{ fontWeight:800,fontSize:18,color:theme.text,marginBottom:2 }}>Entreprise légalement enregistrée</p>
-                  <p style={{ color:theme.sub,fontSize:13 }}>République du Bénin · Afrique de l'Ouest</p>
-                </div>
-              </div>
-
-              {/* Séparateur */}
-              <div style={{ height:1,background:`linear-gradient(to right,rgba(108,99,255,0.3),transparent)`,marginBottom:20 }}/>
-
-              {/* Informations légales */}
-              <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
-                {/* Raison sociale */}
-                <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>Raison sociale</span>
-                  <span style={{ fontWeight:800,fontSize:15,color:theme.text }}>EDENPORTAIL</span>
-                </div>
-
-                {/* RCCM */}
-                <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>N° RCCM</span>
-                  <div style={{ display:"flex",alignItems:"center",gap:8 }}>
-                    <span style={{ fontWeight:800,fontSize:15,color:"#6C63FF",fontFamily:"monospace",letterSpacing:0.5 }}>RB/ABC/26 A 139457</span>
-                    <span style={{ background:"rgba(67,198,172,0.15)",color:"#43C6AC",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700 }}>✅ Vérifié</span>
-                  </div>
-                </div>
-
-                {/* IFU */}
-                <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>N° IFU</span>
-                  <span style={{ fontWeight:800,fontSize:15,color:"#43C6AC",fontFamily:"monospace",letterSpacing:0.5 }}>0202656155829</span>
-                </div>
-
-                {/* Siège */}
-                <div style={{ display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                  <span style={{ fontSize:11,fontWeight:700,color:theme.sub,textTransform:"uppercase",letterSpacing:1,minWidth:130 }}>Siège social</span>
-                  <span style={{ fontWeight:600,fontSize:14,color:theme.text }}>Ouidah, République du Bénin 🇧🇯</span>
-                </div>
-              </div>
-
-              {/* Séparateur */}
-              <div style={{ height:1,background:`linear-gradient(to right,rgba(67,198,172,0.3),transparent)`,margin:"20px 0" }}/>
-
-              {/* Mention de confiance */}
-              <p style={{ color:theme.sub,fontSize:12,lineHeight:1.7,fontStyle:"italic" }}>
-                EDENPORTAIL est un établissement spécialisé dans la création et le référencement de sites internet, 
-                légalement reconnu et enregistré auprès des autorités commerciales de la République du Bénin. 
-                MarchéduRoi est exploitée conformément aux lois et règlements en vigueur au Bénin et dans l'espace UEMOA.
-              </p>
-            </div>
-          </div>
-
-          {/* Footer about */}
-          <div style={{ textAlign:"center",padding:"32px 0",borderTop:`1px solid ${theme.border}` }}>
-            <p style={{ color:theme.sub,fontSize:14,marginBottom:16 }}>© 2026 MarchéduRoi · Tous droits réservés · Ouidah, Bénin</p>
-            <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 32px",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-              Voir les annonces →
-            </button>
-          </div>
-        </div>
+        <AboutSection
+          theme={theme} user={user} setView={setView} setModal={setModal} notify={notify} navigate={navigate} windowWidth={windowWidth} t={t} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} view={view} search={search} setSearch={setSearch} featuredPosts={featuredPosts} likedPosts={likedPosts} likePost={likePost} isCertified={isCertified}
+        />
       )}
 
 
@@ -5241,77 +4993,9 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
         />
       )}
       {view==="stats"&&(
-        <div style={{ width:"100%",maxWidth:900,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
-          <div style={{ textAlign:"center",marginBottom:48 }}>
-            <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>📊 MarchéduRoi en <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>chiffres</span></h1>
-            <p style={{ color:theme.sub,fontSize:16 }}>La plateforme qui grandit chaque jour au Bénin et en Afrique</p>
-          </div>
-          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:20,marginBottom:40 }}>
-            {[
-              { val:posts.length, label:"Annonces publiées", icon:"📋", color:"#6C63FF" },
-              { val:boutiques.length, label:"Boutiques", icon:"🛍️", color:"#FF6584" },
-              { val:ateliers.length, label:"Ateliers", icon:"🔧", color:"#43C6AC" },
-              { val:restos.length, label:"Restaurants & Bars", icon:"🍽️", color:"#FF8C00" },
-              { val:beaute.length, label:"Salons Beauté", icon:"💇", color:"#FF69B4" },
-              { val:posts.reduce((a,p)=>a+p.likes,0), label:"Likes totaux", icon:"❤️", color:"#FF6584" },
-              { val:CATEGORIES.length-1, label:"Catégories", icon:"🗂️", color:"#FFD700" },
-              { val:"18 pays 🌍", label:"Couverture Afrique", icon:"🌐", color:"#43C6AC" },
-            ].map(s=>(
-              <div key={s.label} className="card-hover" style={{ ...cardStyle,borderRadius:16,padding:28,textAlign:"center" }}>
-                <p style={{ fontSize:36,marginBottom:8 }}>{s.icon}</p>
-                <p style={{ fontSize:36,fontWeight:800,color:s.color,marginBottom:4 }}>{s.val}</p>
-                <p style={{ color:theme.sub,fontSize:13,fontWeight:600 }}>{s.label}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Carte Google Maps des annonces */}
-          <div style={{ ...cardStyle,borderRadius:16,marginBottom:24,overflow:"hidden" }}>
-            <div style={{ padding:"16px 20px",borderBottom:`1px solid ${theme.border}`,display:"flex",alignItems:"center",gap:8 }}>
-              <span style={{ fontSize:20 }}>🗺️</span>
-              <p style={{ fontWeight:700,fontSize:16,color:theme.text }}>Carte des annonces</p>
-              <span style={{ color:theme.sub,fontSize:13 }}>— Bénin & Afrique</span>
-            </div>
-            <div style={{ height:320,position:"relative" }}>
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1014574!2d2.3158!3d6.3654!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sfr!2sbj!4v1"
-                width="100%" height="320" style={{ border:0 }} allowFullScreen loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade" title="Carte MarchéduRoi"/>
-              <div style={{ position:"absolute",bottom:0,left:0,right:0,background:`linear-gradient(to top,${theme.bg}CC,transparent)`,padding:"16px 20px" }}>
-                <p style={{ color:theme.text,fontSize:13,fontWeight:600 }}>
-                  📍 {posts.filter(p=>p.lat&&p.lng).length} annonce{posts.filter(p=>p.lat&&p.lng).length>1?"s":""} géolocalisée{posts.filter(p=>p.lat&&p.lng).length>1?"s":""}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Activer les notifications push */}
-          {user && "Notification" in window && Notification.permission !== "granted" && (
-            <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24,display:"flex",gap:16,alignItems:"center",flexWrap:"wrap" }}>
-              <span style={{ fontSize:36 }}>🔔</span>
-              <div style={{ flex:1 }}>
-                <p style={{ fontWeight:700,fontSize:16,color:theme.text,marginBottom:4 }}>Activer les notifications</p>
-                <p style={{ color:theme.sub,fontSize:13 }}>Soyez alerté en temps réel — nouveaux messages, likes, expiration d'annonces.</p>
-              </div>
-              <button onClick={()=>{
-                Notification.requestPermission().then(perm=>{
-                  if (perm==="granted") notify("🔔 Notifications activées ! Vous serez alerté en temps réel.");
-                  else notify("Notifications refusées — vous pouvez les activer dans les paramètres du navigateur.","error");
-                });
-              }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 24px",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer",flexShrink:0 }}>
-                🔔 Activer
-              </button>
-            </div>
-          )}
-
-          <div style={{ ...cardStyle,borderRadius:16,padding:28,textAlign:"center" }}>
-            <p style={{ fontSize:18,fontWeight:700,color:theme.text,marginBottom:8 }}>🚀 Rejoignez la communauté MarchéduRoi</p>
-            <p style={{ color:theme.sub,marginBottom:20 }}>Publiez vos annonces et rejoignez des milliers de commerçants au Bénin</p>
-            <button onClick={()=>user?setModal({type:"add"}):setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"14px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",transition:"box-shadow 0.2s" }}>
-              {user?"Publier une annonce →":"Créer mon compte gratuitement →"}
-            </button>
-          </div>
-        </div>
+        <StatsSection
+          theme={theme} user={user} setView={setView} setModal={setModal} notify={notify} posts={posts} boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} view={view} cardStyle={cardStyle}
+        />
       )}
 
       {/* PAGE RÉINITIALISATION MOT DE PASSE */}
@@ -5369,170 +5053,15 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
       {/* CONDITIONS GÉNÉRALES D'UTILISATION */}
       {view==="terms"&&(
-        <div style={{ width:"100%",maxWidth:900,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
-
-          {/* Header */}
-          <div style={{ textAlign:"center",marginBottom:48 }}>
-            <div style={{ fontSize:56,marginBottom:16 }}>📋</div>
-            <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>Conditions Générales <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>d'Utilisation</span></h1>
-            <p style={{ color:theme.sub,fontSize:15 }}>Dernière mise à jour : Mai 2026 · MarchéduRoi, Ouidah, Bénin</p>
-            <p style={{ color:theme.sub,fontSize:13,marginTop:6 }}>Version 4.0 — Ces conditions remplacent toutes les versions antérieures.</p>
-          </div>
-
-          {/* Avertissement */}
-          <div style={{ background:"rgba(255,71,87,0.08)",border:"2px solid rgba(255,71,87,0.3)",borderRadius:16,padding:24,marginBottom:40,display:"flex",gap:16,alignItems:"flex-start" }}>
-            <span style={{ fontSize:28,flexShrink:0 }}>⚠️</span>
-            <div>
-              <p style={{ fontWeight:800,fontSize:16,color:"#FF4757",marginBottom:8 }}>Avertissement Important</p>
-              <p style={{ color:theme.sub,fontSize:14,lineHeight:1.8 }}>
-                En utilisant MarchéduRoi, vous acceptez pleinement et sans réserve les présentes conditions générales d'utilisation. Toute violation expose l'utilisateur à des poursuites judiciaires conformément aux lois en vigueur au Bénin et dans son pays de résidence, ainsi qu'aux conventions et traités internationaux applicables en matière de commerce électronique et de cybercriminalité.
-              </p>
-            </div>
-          </div>
-
-          {[
-            { num:"1", title:"Présentation de MarchéduRoi", icon:"🏢",
-              content:`MarchéduRoi est une plateforme numérique multipolaire de petites annonces, créée et exploitée par EDENPORTAIL, établissement spécialisé dans la création et le référencement de sites internet, dont le siège social est établi à Ouidah, République du Bénin. La plateforme permet à toute personne physique ou morale de consulter, publier et diffuser des annonces relatives à des produits, biens et services, au Bénin et dans toute l'Afrique francophone. Elle propose également le service VitrineWeb, un annuaire numérique permettant aux structures de disposer d'une page de présentation en ligne. L'accès et l'utilisation de la plateforme impliquent l'acceptation sans réserve des présentes conditions générales d'utilisation.`
-            },
-            { num:"2", title:"Conditions d'accès et d'inscription", icon:"👤",
-              content:`La consultation des annonces et des vitrines est entièrement gratuite et accessible à tous sans inscription préalable. La publication d'annonces et la création de vitrines sont réservées aux utilisateurs inscrits et ayant confirmé leur adresse email. Pour s'inscrire, l'utilisateur doit fournir des informations exactes, complètes et à jour. Toute inscription effectuée avec de fausses informations entraîne la suspension immédiate du compte. L'utilisateur est seul responsable de la confidentialité de ses identifiants de connexion et de toute activité effectuée depuis son compte.`
-            },
-            { num:"3", title:"Publication d'annonces et tarification", icon:"💰",
-              content:`ANNONCES CLASSIQUES : publication gratuite et illimitée pour tous les utilisateurs inscrits. Sponsoring : 500 FCFA/7j · 1 500 FCFA/30j · 3 500 FCFA/90j · 6 000 FCFA/180j. Badge URGENT : 500 FCFA/3j · 1 000 FCFA/7j. ÉTABLISSEMENTS PRO (boutiques, ateliers, restaurants, bars, salons beauté) : 4 jours gratuits/mois puis 1 500 FCFA/30j · 3 500 FCFA/90j · 6 000 FCFA/180j · 10 000 FCFA/360j (tarifs de lancement jusqu'à fin juin 2026 — tarifs normaux : 2 500/6 000/10 000/18 000 FCFA). OFFRES D'EMPLOI : 1 500 FCFA/30j · 3 500 FCFA/90j. BANNIÈRES PUBLICITAIRES : 5 000 FCFA/7j · 15 000 FCFA/30j · 35 000 FCFA/90j. PACK PRO + VITRINE : 20 000 FCFA (abonnement établissement 360j + vitrine 1 an — économie de 5 000 FCFA). MODIFICATION : Gratuite et illimitée pour les annonces classiques. Pour les établissements pro, les modifications sont incluses dans l'abonnement actif. MÉDIAS : Les photos et vidéos sont hébergées par l'utilisateur sur des services tiers (ImgBB, Google Photos, YouTube, etc.) via URL. MarchéduRoi n'héberge pas directement les médias. REMBOURSEMENTS : Tout paiement est définitif et non remboursable, sauf défaillance technique avérée. Réclamations : support@marcheduroi.com dans un délai de 7 jours ouvrables. Paiements via FedaPay (Mobile Money — zone UEMOA) ou Flutterwave (autres pays africains).`
-            },
-            { num:"4", title:"Contenus interdits", icon:"🚫",
-              content:`Il est formellement interdit de publier sur MarchéduRoi : des armes, munitions ou matériels militaires ; des stupéfiants ou substances illicites ; des contenus à caractère pornographique ou impliquant des mineurs de manière inappropriée ; des animaux protégés ; des médicaments sans autorisation ; des produits contrefaits ou volés ; des annonces frauduleuses ou mensongères ; des contenus incitant à la haine ; des contenus portant atteinte aux droits de propriété intellectuelle ; tout contenu violant les lois en vigueur. Toute annonce violant ces interdictions sera supprimée immédiatement et l'auteur signalé aux autorités compétentes.`
-            },
-            { num:"5", title:"Responsabilité des utilisateurs", icon:"⚖️",
-              content:`Chaque utilisateur est entièrement et personnellement responsable du contenu qu'il publie. L'utilisateur garantit que ses annonces sont conformes aux lois en vigueur. MarchéduRoi n'a pas l'obligation de vérifier l'exactitude des informations publiées. En cas de litige entre un acheteur et un vendeur, MarchéduRoi ne peut être partie au litige. L'utilisateur s'engage à utiliser la plateforme de manière loyale et à ne pas en perturber le fonctionnement technique.`
-            },
-            { num:"6", title:"Limitation de responsabilité de MarchéduRoi", icon:"🛡️",
-              content:`MarchéduRoi agit en qualité d'intermédiaire technique. MarchéduRoi ne peut être tenu responsable : des contenus publiés par les utilisateurs ; des transactions commerciales entre utilisateurs ; des pertes financières résultant d'une utilisation de la plateforme ; des interruptions temporaires de service ; des dommages indirects liés à l'utilisation du site. MarchéduRoi ne prend aucune commission sur les transactions entre acheteurs et vendeurs. Toute transaction se fait directement entre le vendeur et l'acheteur, sans intervention de MarchéduRoi. MarchéduRoi ne gère ni les transactions financières entre particuliers, ni la livraison des produits ou services. Il est vivement recommandé de vérifier l'identité du vendeur et l'état du produit avant tout paiement.`
-            },
-            { num:"7", title:"Collecte et protection des données personnelles", icon:"🔒",
-              content:`DONNÉES COLLECTÉES : adresse email, numéro de téléphone, coordonnées GPS (si autorisées par l'utilisateur), contenu des annonces et vitrines publiées. FINALITÉ : gestion des comptes, publication d'annonces et vitrines, communication avec les utilisateurs, prévention des fraudes et amélioration de la plateforme. HÉBERGEMENT : données hébergées sur les serveurs de Supabase (infrastructure sécurisée conforme aux standards internationaux). DROITS DE L'UTILISATEUR : droit d'accès, de rectification et de suppression en contactant contact@marcheduroi.com. COOKIES : MarchéduRoi utilise uniquement des cookies techniques (localStorage) pour mémoriser les préférences de navigation. Aucun cookie publicitaire ou de traçage commercial n'est utilisé. CONFORMITÉ : MarchéduRoi s'engage à se conformer aux dispositions de la loi n°2017-20 portant Code du Numérique au Bénin et aux obligations de déclaration à l'APDP.`
-            },
-            { num:"8", title:"Avis et notations des vitrines", icon:"⭐",
-              content:`MarchéduRoi permet aux utilisateurs inscrits de laisser un avis noté de 1 à 5 étoiles sur les vitrines VitrineWeb. Chaque utilisateur ne peut laisser qu'un seul avis par vitrine. Les avis doivent refléter une expérience réelle et honnête. Sont interdits : les faux avis, les avis commandités, les avis diffamatoires ou injurieux. MarchéduRoi se réserve le droit de supprimer tout avis qui violerait ces règles. Le propriétaire d'une vitrine ne peut pas noter sa propre vitrine. Les statistiques de vues sont des compteurs automatiques non modifiables.`
-            },
-            { num:"9", title:"Propriété intellectuelle", icon:"©️",
-              content:`La plateforme MarchéduRoi, son logo, sa charte graphique, son design, son code source, les noms commerciaux "MarchéduRoi" et "VitrineWeb", ainsi que l'ensemble de ses contenus originaux sont la propriété exclusive de EDENPORTAIL. Toute reproduction, modification, distribution ou utilisation commerciale sans autorisation écrite préalable est strictement interdite et constitue une contrefaçon passible de sanctions pénales et civiles. Les utilisateurs conservent l'entière propriété des contenus qu'ils publient et accordent à MarchéduRoi une licence d'affichage non exclusive, mondiale et gratuite, limitée à la durée de publication.`
-            },
-            { num:"10", title:"Suspension et sanctions", icon:"🔴",
-              content:`MarchéduRoi se réserve le droit de suspendre ou supprimer tout compte, sans préavis ni remboursement, en cas de : violation des présentes CGU ; publication de contenus illicites ou frauduleux ; comportement abusif ; usurpation d'identité ; tentative de piratage ; utilisation de fausses informations lors de l'inscription ; faux avis ou abus du système de notation. La suspension entraîne la désactivation immédiate de toutes les annonces et vitrines actives sans remboursement. L'utilisateur suspendu peut introduire un recours à contact@marcheduroi.com dans un délai de 15 jours.`
-            },
-            { num:"11", title:"Modification des conditions et préavis", icon:"📝",
-              content:`MarchéduRoi se réserve le droit de modifier les présentes CGU à tout moment, notamment pour refléter l'évolution des services proposés. En cas de modification substantielle, les utilisateurs seront informés par notification sur la plateforme et par email au moins 30 jours avant l'entrée en vigueur des nouvelles conditions. La poursuite de l'utilisation de MarchéduRoi après ce délai constitue une acceptation tacite des nouvelles conditions.`
-            },
-            { num:"12", title:"Droit applicable et juridiction", icon:"🏛️",
-              content:`Les présentes CGU sont régies par le droit béninois. En cas de litige, les parties s'engagent à rechercher une solution amiable dans un premier temps. À défaut d'accord amiable dans un délai de 30 jours, tout litige sera soumis à la compétence exclusive des tribunaux compétents de Cotonou, République du Bénin.`
-            },
-            { num:"13", title:"Programme de Parrainage", icon:"🎁",
-              content:`MarchéduRoi propose un programme de parrainage. L'utilisateur doit parrainer 10 nouveaux inscrits via son lien unique pour obtenir 1 mois de publication gratuit (valeur 1 500 FCFA) pour une annonce simple uniquement. Non applicable aux boutiques, ateliers, restaurants, bars, salons de beauté, ou au service VitrineWeb. Les crédits obtenus ne sont ni remboursables ni échangeables contre de l'argent. Toute tentative de fraude entraîne la suppression immédiate du compte et l'annulation de tous les crédits.`
-            },
-            { num:"14", title:"Service VitrineWeb", icon:"🏛️",
-              content:`DESCRIPTION : VitrineWeb est un service proposé par EDENPORTAIL permettant à toute structure de disposer d'une page de présentation numérique hébergée sur MarchéduRoi à l'adresse marcheduroi.com/vitrine/nom-de-la-structure. TARIFICATION : Création : 15 000 FCFA (paiement unique, non remboursable) · Pack Pro + Vitrine : 20 000 FCFA · Renouvellement annuel : 18 000 FCFA/an · Modification supplémentaire (2ème+ dans la journée) : 200 FCFA. CONTENU : photos (max 10), vidéo YouTube, GPS, horaires, services, actualités, promotions, champs personnalisés et thème visuel. MÉDIAS : Le client héberge ses photos sur des services tiers. MarchéduRoi ne stocke pas les médias et ne peut être tenu responsable de leur disparition. MODIFICATION : 1 modification gratuite par jour, 200 FCFA pour chaque modification supplémentaire dans la même journée. EXPIRATION : En cas de non-renouvellement, la vitrine est désactivée automatiquement. Les données sont conservées 90 jours. AVIS : Les visiteurs connectés peuvent noter la vitrine de 1 à 5 étoiles. Le propriétaire ne peut pas noter sa propre vitrine. RÉSILIATION : Le client peut demander la suppression à tout moment en contactant contact@marcheduroi.com. Aucun remboursement sur les sommes déjà réglées.`
-            },
-            { num:"15", title:"Localisation et données GPS", icon:"📍",
-              content:`MarchéduRoi propose des fonctionnalités basées sur la localisation : affichage par ville ou quartier, filtrage par distance ("Près de moi") dans l'annuaire VitrineWeb, affichage de carte Google Maps pour les vitrines géolocalisées. L'accès à la position GPS de l'utilisateur est demandé explicitement via le navigateur et n'est utilisé que le temps de la session de recherche. MarchéduRoi ne conserve pas la position GPS des visiteurs. Les coordonnées GPS des vitrines (fournies par le propriétaire) sont stockées et affichées publiquement. L'utilisateur peut refuser l'accès au GPS sans que cela n'affecte l'utilisation générale de la plateforme.`
-            },
-            { num:"16", title:"Contact et réclamations", icon:"📞",
-              content:`Pour toute question, réclamation ou signalement : Email général : contact@marcheduroi.com · Support technique : support@marcheduroi.com · WhatsApp Support : +229 01 40 90 60 20 · Adresse : EDENPORTAIL, Ouidah, République du Bénin. Délai de réponse garanti : 48 heures ouvrables pour les demandes générales, 24 heures pour les urgences techniques.`
-            },
-                    ].map(section=>(
-            <div key={section.num} style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:16,padding:28,marginBottom:16 }}>
-              <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:14 }}>
-                <div style={{ width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:14,flexShrink:0 }}>{section.num}</div>
-                <h2 style={{ fontWeight:700,fontSize:17,color:theme.text }}>{section.icon} {section.title}</h2>
-              </div>
-              <p style={{ color:theme.sub,fontSize:14,lineHeight:1.9,paddingLeft:48 }}>{section.content}</p>
-            </div>
-          ))}
-
-          {/* Signature */}
-          <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:16,padding:28,marginTop:32,textAlign:"center" }}>
-            <p style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:8 }}>En utilisant MarchéduRoi, vous confirmez avoir lu, compris et accepté l'intégralité des présentes conditions générales d'utilisation.</p>
-            <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>© 2026 MarchéduRoi · Ouidah, Bénin 🇧🇯 · contact@marcheduroi.com</p>
-            <p style={{ color:theme.sub,fontSize:12,marginBottom:20 }}>Version 2.0 — Mars 2026 · 15 articles</p>
-            <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 32px",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-              Retour aux annonces →
-            </button>
-          </div>
-        </div>
+        <TermsSection
+          theme={theme} setView={setView} boutiques={boutiques} ateliers={ateliers} view={view}
+        />
       )}
       {/* PARRAINAGE */}
       {view==="parrainage"&&(
-        <div style={{ width:"100%",maxWidth:700,margin:"0 auto",padding:"48px 40px",animation:"fadeIn 0.4s ease" }}>
-          <div style={{ textAlign:"center",marginBottom:40 }}>
-            <p style={{ fontSize:48,marginBottom:12 }}>🎁</p>
-            <h1 style={{ fontSize:38,fontWeight:800,marginBottom:12,color:theme.text }}>Programme de <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Parrainage</span></h1>
-            <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez <strong style={{ color:"#FFD700" }}>10 amis</strong> sur MarchéduRoi et gagnez <strong style={{ color:"#FFD700" }}>1 mois de publication gratuit</strong> !</p>
-            <div style={{ background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:12,padding:"12px 20px",marginTop:12,display:"inline-block" }}>
-              <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>🎁 10 parrainages = 1 annonce simple gratuite (valeur 1 000 FCFA)</p>
-              <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>⚠️ Valable uniquement pour les annonces simples · Non applicable aux boutiques, ateliers, restos et salons</p>
-            </div>
-          </div>
-          {/* Règles claires */}
-          <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24 }}>
-            <h3 style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:16 }}>📋 Comment ça marche ?</h3>
-            {[
-              { num:"1", text:"Partagez votre lien unique à vos amis et contacts" },
-              { num:"2", text:"Chaque ami qui s'inscrit via votre lien compte comme 1 parrainage" },
-              { num:"3", text:"Après 10 parrainages confirmés, vous gagnez 1 annonce simple gratuite (30 jours)" },
-              { num:"4", text:"Valable uniquement pour 1 annonce simple (valeur 1 000 FCFA)" },
-              { num:"5", text:"Non applicable aux boutiques, ateliers, restos et salons de beauté" },
-              { num:"6", text:"Les crédits ne sont pas transférables ni remboursables en argent" },
-            ].map(r=>(
-              <div key={r.num} style={{ display:"flex",gap:12,marginBottom:12,alignItems:"flex-start" }}>
-                <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#FFD700,#FFA500)",display:"flex",alignItems:"center",justifyContent:"center",color:"#000",fontWeight:800,fontSize:13,flexShrink:0 }}>{r.num}</div>
-                <p style={{ color:theme.sub,fontSize:14,lineHeight:1.5,paddingTop:4 }}>{r.text}</p>
-              </div>
-            ))}
-            <div style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:10,padding:"12px 16px",marginTop:8,textAlign:"center" }}>
-              <p style={{ color:"#FFD700",fontWeight:800,fontSize:16 }}>🎯 10 parrainages = 1 annonce gratuite (valeur 1 000 FCFA)</p>
-            </div>
-          </div>
-          {user ? (
-            <div style={{ ...cardStyle,borderRadius:20,padding:32 }}>
-              <p style={{ fontWeight:700,fontSize:16,color:theme.text,marginBottom:8 }}>Votre lien de parrainage :</p>
-              <div style={{ display:"flex",gap:8,marginBottom:20 }}>
-                <input readOnly value={`https://marcheduroi.com?ref=${user.id}`} style={{ ...inputStyle,flex:1,background:theme.bg }} onClick={e=>e.target.select()}/>
-                <button onClick={()=>{ navigator.clipboard.writeText(`https://marcheduroi.com?ref=${user.id}`); notify("Lien copié ! 📋"); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 16px",borderRadius:10,fontWeight:700,cursor:"pointer" }}>Copier</button>
-              </div>
-              <a href={`https://wa.me/?text=${encodeURIComponent("Rejoins-moi sur MarcheduRoi, la plateforme de petites annonces au Benin ! https://marcheduroi.com?ref="+user.id)}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none",display:"block" }}>
-                <button style={{ width:"100%",padding:"14px",background:"#25D366",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
-                  <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-                  Partager sur WhatsApp
-                </button>
-              </a>
-              <div style={{ marginTop:24,display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,textAlign:"center" }}>
-                {[
-                  {icon:"👥", val:referralStats.count, label:"Filleuls"},
-                  {icon:"🎁", val:referralStats.credits, label:"Crédits dispo"},
-                  {icon:"💰", val:referralStats.saved.toLocaleString()+" FCFA", label:"Économisé"},
-                ].map(s=>(
-                  <div key={s.label} style={{ background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:12,padding:16 }}>
-                    <p style={{ fontSize:24 }}>{s.icon}</p>
-                    <p style={{ fontWeight:800,color:"#FFD700",fontSize:20 }}>{s.val}</p>
-                    <p style={{ color:theme.sub,fontSize:11 }}>{s.label}</p>
-                  </div>
-                ))}
-              </div>
-              {referralStats.count > 0 && (
-                <div style={{ marginTop:16,background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:10,padding:"10px 16px",textAlign:"center" }}>
-                  <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>
-                    🎯 Plus que {10 - (referralStats.count % 10)} parrainage{10-(referralStats.count%10)>1?"s":""} pour gagner 1 mois gratuit !
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div style={{ textAlign:"center" }}>
-              <p style={{ color:theme.sub,marginBottom:20 }}>Connectez-vous pour accéder à votre lien de parrainage</p>
-              <button onClick={()=>setView("register")} className="btn-glow" style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",border:"none",color:"#000",padding:"14px 32px",borderRadius:12,fontWeight:700,fontSize:15,cursor:"pointer" }}>Créer un compte</button>
-            </div>
-          )}
-        </div>
+        <ParrainageSection
+          theme={theme} user={user} setView={setView} setModal={setModal} notify={notify} t={t} boutiques={boutiques} ateliers={ateliers} restos={restos} view={view} inputStyle={inputStyle} cardStyle={cardStyle}
+        />
       )}
 
       {/* MODALS */}
