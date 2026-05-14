@@ -1,4 +1,4 @@
-const CACHE_NAME = "marcheduroi-v12";
+const CACHE_NAME = "marcheduroi-v11";
 const STATIC_ASSETS = ["/", "/index.html"];
 self.addEventListener("install", (event) => {
   self.skipWaiting(); // Forcer remplacement immédiat
@@ -28,7 +28,7 @@ self.addEventListener("fetch", (event) => {
   const bypassRoutes = ["/demandes", "/api/"];
   if (bypassRoutes.some(r => url.pathname.startsWith(r))) return;
   // Routes SPA → toujours servir index.html
-  const spaRoutes = ["/annonce/", "/boutique/", "/atelier/", "/resto/", "/beaute/", "/structure/", "/vitrine/", "/vitrines", "/reset-password"];
+  const spaRoutes = ["/annonce/", "/boutique/", "/atelier/", "/resto/", "/beaute/", "/structure/", "/vitrine", "/vitrines", "/reset-password"];
   if (url.pathname === "/" || spaRoutes.some(r => url.pathname.startsWith(r))) {
     event.respondWith(
       caches.match("/index.html")
