@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { usePromo } from "../hooks/usePromo";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabase";
 import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } from "../vitrineConstants";
 
 function VitrinePayment({ structure, token, onDone }) {
   const COLOR = "#10B981";
+  const { applyPromo, promoLabel } = usePromo();
   const [tokenValid,  setTokenValid]  = React.useState(false);
   const [checking,    setChecking]    = React.useState(true);
   const [paying,      setPaying]      = React.useState(false);
@@ -85,7 +87,7 @@ function VitrinePayment({ structure, token, onDone }) {
         const FedaPay = window.FedaPay;
         FedaPay.init({
           public_key: import.meta.env.VITE_FEDAPAY_PUBLIC_KEY || "pk_sandbox_VOTRE_CLE_ICI",
-          transaction: { amount: structure.creation_amount || 15000, description: `VitrineWeb — Création de vitrine pour ${structure.name}` },
+          transaction: { amount: applyPromo(structure.creation_amount || 15000, "vitrine").prixFinal, description: `VitrineWeb — Création de vitrine pour ${structure.name}` },
           customer:    { email: structure.email || "client@marcheduroi.com" },
           onComplete(resp, reason) {
             const approved = reason === FedaPay.TRANSACTION_APPROVED || reason === "transaction_approved" || reason === "approved";
@@ -98,7 +100,7 @@ function VitrinePayment({ structure, token, onDone }) {
         window.FlutterwaveCheckout({
           public_key: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY || "FLWPUBK_TEST-VOTRE_CLE_ICI-X",
           tx_ref:     "vitrine-" + structure.id + "-" + Date.now(),
-          amount:     structure.creation_amount || 15000,
+          amount:     applyPromo(structure.creation_amount || 15000, "vitrine").prixFinal,
           currency:   "XOF",
           payment_options: "mobilemoney,card,ussd",
           customer:   { email: structure.email || "client@marcheduroi.com", name: structure.name },
@@ -169,7 +171,21 @@ function VitrinePayment({ structure, token, onDone }) {
           <p style={{ fontWeight:700,color:"#E8E8F0",marginBottom:16,fontSize:15 }}>📋 Récapitulatif</p>
           <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10 }}>
             <span style={{ color:"#9A9AB0",fontSize:14 }}>Création de la vitrine</span>
-            <span style={{ fontWeight:700,color:COLOR,fontSize:16 }}>{(structure.creation_amount||15000).toLocaleString("fr-FR")} FCFA</span>
+            <span style={{ display:"flex", alignItems:"center", gap:8 }}>
+              {applyPromo(structure.creation_amount||15000, "vitrine").prixOriginal && (
+                <span style={{ color:"#9A9AB0", fontSize:14, textDecoration:"line-through" }}>
+                  {(structure.creation_amount||15000).toLocaleString("fr-FR")} F
+                </span>
+              )}
+              <span style={{ fontWeight:800, color:COLOR, fontSize:18 }}>
+                {applyPromo(structure.creation_amount||15000, "vitrine").prixFinal.toLocaleString("fr-FR")} FCFA
+              </span>
+              {promoLabel("vitrine") && (
+                <span style={{ background:"#10B981", color:"#fff", fontSize:11, fontWeight:700, padding:"2px 8px", borderRadius:20 }}>
+                  {promoLabel("vitrine")}
+                </span>
+              )}
+            </span>
           </div>
           <div style={{ borderTop:"1px solid #2A2D45",paddingTop:12,marginTop:4 }}>
             <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
@@ -179,7 +195,10 @@ function VitrinePayment({ structure, token, onDone }) {
           </div>
           <div style={{ background:`rgba(16,185,129,0.08)`,border:`1px solid rgba(16,185,129,0.2)`,borderRadius:10,padding:12,marginTop:16 }}>
             <p style={{ margin:0,color:COLOR,fontSize:13,lineHeight:1.6 }}>
-              ✅ Paiement unique aujourd'hui : <strong>{(structure.creation_amount||15000).toLocaleString("fr-FR")} FCFA</strong><br/>
+              ✅ Paiement unique aujourd'hui : <strong>{applyPromo(structure.creation_amount||15000, "vitrine").prixFinal.toLocaleString("fr-FR")} FCFA</strong><br/>
+              {applyPromo(structure.creation_amount||15000, "vitrine").promo?.message && (
+                <span style={{ color:"#FFD700", fontWeight:700 }}>{applyPromo(structure.creation_amount||15000, "vitrine").promo.message}</span>
+              )}<br/>
               Votre vitrine sera mise en ligne immédiatement après confirmation.
             </p>
           </div>
@@ -205,7 +224,7 @@ function VitrinePayment({ structure, token, onDone }) {
         {/* Bouton payer */}
         <button onClick={launchPayment} disabled={paying}
           style={{ width:"100%",padding:18,background:paying?"#1A1D30":`linear-gradient(135deg,${COLOR},#059669)`,border:paying?"1px solid #2A2D45":"none",color:paying?"#9A9AB0":"#fff",borderRadius:14,fontWeight:800,fontSize:17,cursor:paying?"not-allowed":"pointer",transition:"all 0.2s" }}>
-          {paying ? "Activation en cours…" : `💳 Payer ${(structure.creation_amount||15000).toLocaleString("fr-FR")} FCFA`}
+          {paying ? "Activation en cours…" : `💳 Payer ${applyPromo(structure.creation_amount||15000, "vitrine").prixFinal.toLocaleString("fr-FR")} FCFA`}
         </button>
 
         <p style={{ textAlign:"center",color:"#9A9AB0",fontSize:12,marginTop:16,lineHeight:1.7 }}>

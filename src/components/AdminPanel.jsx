@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase";
 import AdminVitrineWeb from "./AdminVitrineWeb";
+import PromoManager from "./PromoManager";
 import CertifiedBadge from "./CertifiedBadge";
 import Icon from "./Icon";
 
@@ -400,6 +401,11 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
   {/* VitrineWeb — section admin */}
   <AdminVitrineWeb theme={theme} notify={notify} />
 
+  {/* Promotions */}
+  <div id="admin-promos" style={{ scrollMarginTop:80 }}>
+    <PromoManager theme={theme} notify={notify} />
+  </div>
+
   {/* Barre de recherche unifiée + boutons navigation rapide */}
   <div style={{ ...cardStyle,borderRadius:14,padding:16,marginBottom:24 }}>
     <div style={{ position:"relative",marginBottom:12 }}>
@@ -416,6 +422,7 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
         { label:"🍽️ Restos", id:"admin-restos", color:"#FF8C00", count:restos.length },
         { label:"💇 Beauté", id:"admin-beaute", color:"#FF69B4", count:beaute.length },
         { label:"🏛️ VitrineWeb", id:"admin-vitrines", color:"#10B981", count:0 },
+        { label:"🎁 Promotions", id:"admin-promos", color:"#FFD700", count:0 },
       ].map(s=>(
         <button key={s.id} onClick={()=>document.getElementById(s.id)?.scrollIntoView({behavior:"smooth",block:"start"})} style={{ background:`rgba(${s.color.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.1)`,border:`1px solid ${s.color}44`,color:s.color,padding:"6px 14px",borderRadius:20,fontWeight:700,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
           {s.label} <span style={{ background:`${s.color}22`,borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>
