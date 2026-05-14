@@ -6,11 +6,16 @@ import { supabase } from "../supabase";
 
 const CIBLES = [
   { value: "all",        label: "🌐 Tout (tous les paiements)" },
-  { value: "vitrine",    label: "🏪 VitrineWeb" },
-  { value: "sponsoring", label: "⭐ Sponsoring" },
+  { value: "vitrine",    label: "🏛️ VitrineWeb (création)" },
+  { value: "sponsoring", label: "⭐ Sponsoring annonces" },
   { value: "urgent",     label: "🔴 Badge URGENT" },
   { value: "pro",        label: "👑 Badge PRO" },
   { value: "demande",    label: "📢 Publication demande" },
+  { value: "boutique",   label: "🛍️ Boutique (abonnement)" },
+  { value: "atelier",    label: "🔧 Atelier (abonnement)" },
+  { value: "resto",      label: "🍽️ Restaurant (abonnement)" },
+  { value: "beaute",     label: "💇 Beauté (abonnement)" },
+  { value: "modification", label: "✏️ Modification d'annonce" },
 ];
 
 export default function PromoManager({ theme, notify }) {
