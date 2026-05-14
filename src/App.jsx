@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { usePromo } from "./hooks/usePromo";
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
 import { supabase } from "./supabase";
 import Icon from "./components/Icon";
@@ -932,6 +933,7 @@ function AppContent() {
   const [beaute, setBeaute] = useState(INITIAL_BEAUTE);
   const [suggestions, setSuggestions] = useState([{ id:1,text:"Ajouter un système de messagerie interne",author:"Visiteur anonyme",date:"2026-03-10",status:"en attente" }]);
   const [user, setUser] = useState(null);
+  const { applyPromo, getPromo } = usePromo();
   const [view, setViewState] = useState(() => {
     // Si on revient d'une fiche détail → restaurer la vue précédente
     const returnView = sessionStorage.getItem("mdr_back_view");
@@ -2546,8 +2548,11 @@ const PHONE_EXAMPLE = {
   };
 
   // Gestionnaire universel — vérifie d'abord les crédits parrainage, sinon FedaPay ou Flutterwave
-  const handlePayment = async (amountXOF, description, onSuccess) => {
+  const handlePayment = async (amountXOF, description, onSuccess, cible=null) => {
     if (user?.role === "admin") { onSuccess(); return; }
+    // Appliquer la promo si disponible
+    const { prixFinal } = cible ? applyPromo(amountXOF, cible) : { prixFinal: amountXOF };
+    const montant = prixFinal;
     // Vérifier si l'utilisateur a un crédit parrainage disponible
     const creditUsed = await useCredit();
     if (creditUsed) {
@@ -2558,9 +2563,9 @@ const PHONE_EXAMPLE = {
     // Sinon paiement selon le pays détecté
     const country = getUserCountry();
     if (FEDAPAY_COUNTRIES.includes(country)) {
-      handleFedaPayment(amountXOF, description, onSuccess);
+      handleFedaPayment(montant, description, onSuccess);
     } else {
-      handleFlutterwavePayment(amountXOF, description, onSuccess);
+      handleFlutterwavePayment(montant, description, onSuccess);
     }
   };
 
@@ -5787,7 +5792,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                           useFreeShop(); addBeaute(exp.toISOString().slice(0,10));
                         } else {
                           const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0];
-                          handlePayment(t.price,`Publication salon beauté ${t.label} sur MarchéduRoi`,addBeaute);
+                          handlePayment(t.price,`Publication salon beauté ${t.label} sur MarchéduRoi`,addBeaute, "beaute");
                         }
                       }
                   }
@@ -5945,7 +5950,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                           useFreeShop(); addResto(exp.toISOString().slice(0,10));
                         } else {
                           const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0];
-                          handlePayment(t.price,`Publication restaurant/bar ${t.label} sur MarchéduRoi`,addResto);
+                          handlePayment(t.price,`Publication restaurant/bar ${t.label} sur MarchéduRoi`,addResto, "resto");
                         }
                       }
                   }
@@ -6120,7 +6125,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
         addShop(exp.toISOString().slice(0,10));
       } else {
         const t=TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0];
-        handlePayment(t.price,`Publication ${shopMode==="boutique"?"boutique":"atelier"} ${t.label} sur MarchéduRoi`,addShop);
+        handlePayment(t.price,`Publication ${shopMode==="boutique"?"boutique":"atelier"} ${t.label} sur MarchéduRoi`,addShop, "boutique");
       }
     }
                   }
@@ -6401,14 +6406,20 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                         <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Sponsoring ${opt.label} sur MarchéduRoi`,async()=>{
                           await sponsorPost(modal.data.id,opt.dur);
                           setModal({type:"sponsor_success",data:modal.data,duration:opt.label});
-                        })} style={{ background:`linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,165,0,0.08))`,border:`2px solid ${opt.color}`,borderRadius:14,padding:16,cursor:"pointer",position:"relative",marginBottom:0 }}>
+                        }, "sponsoring")} style={{ background:`linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,165,0,0.08))`,border:`2px solid ${opt.color}`,borderRadius:14,padding:16,cursor:"pointer",position:"relative",marginBottom:0 }}>
                           {opt.popular && <div style={{ position:"absolute",top:-10,right:14,background:`linear-gradient(135deg,#FFD700,#FFA500)`,color:"#000",padding:"2px 10px",borderRadius:20,fontSize:10,fontWeight:800 }}>POPULAIRE</div>}
                           <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                             <div>
                               <p style={{ fontWeight:800,fontSize:15,color:opt.color,marginBottom:2 }}>🌟 {opt.label}</p>
                               <p style={{ color:theme.sub,fontSize:12 }}>En tête des résultats pendant {opt.days} jours</p>
                             </div>
-                            <span style={{ fontWeight:800,fontSize:18,color:opt.color }}>{opt.price.toLocaleString()} FCFA</span>
+                            <div style={{ textAlign:"right" }}>
+                              {applyPromo(opt.price,"sponsoring").prixOriginal && (
+                                <span style={{ color:theme.sub,fontSize:12,textDecoration:"line-through",display:"block" }}>{opt.price.toLocaleString()} F</span>
+                              )}
+                              <span style={{ fontWeight:800,fontSize:18,color:opt.color }}>{applyPromo(opt.price,"sponsoring").prixFinal.toLocaleString()} FCFA</span>
+                              {getPromo("sponsoring") && <span style={{ background:"#10B981",color:"#fff",fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:10,marginLeft:4 }}>PROMO</span>}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -6447,7 +6458,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   <p style={{ color:theme.sub,fontSize:13 }}>Un badge 🔥 URGENT rouge animé s'affiche sur votre annonce — visible par tous.</p>
                 </div>
                 <div style={{ display:"flex",flexDirection:"column",gap:12,marginBottom:20 }}>
-                  {[{dur:"3 jours",price:500,days:3},{dur:"7 jours",price:1000,days:7}].map(opt=>(
+                {[{dur:"3 jours",price:500,days:3},{dur:"7 jours",price:1000,days:7}].map(opt=>(
                     <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Badge Urgent ${opt.dur} sur MarchéduRoi`,async()=>{
                       const until = new Date(); until.setDate(until.getDate()+opt.days);
                       const urgent_until = until.toISOString();
@@ -6456,12 +6467,18 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                       if (error) { notify("Erreur activation badge urgent","error"); return; }
                       setPosts(p=>p.map(x=>x.id===modal.data.id?{...x,urgent:true,urgentUntil:urgent_until,urgentActivatedAt:urgent_activated_at}:x));
                       setModal(null); notify("🔥 Badge Urgent activé pour "+opt.dur+" !");
-                    })} style={{ background:theme.card,border:"2px solid #FF4757",borderRadius:14,padding:20,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                    }, "urgent")} style={{ background:theme.card,border:"2px solid #FF4757",borderRadius:14,padding:20,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
                       <div>
                         <p style={{ fontWeight:800,fontSize:15,color:"#FF4757",marginBottom:4 }}>🔥 Urgent {opt.dur}</p>
                         <p style={{ color:theme.sub,fontSize:13 }}>1ère position + badge animé rouge pendant {opt.dur}</p>
                       </div>
-                      <span style={{ fontWeight:800,fontSize:20,color:"#FF4757" }}>{opt.price} FCFA</span>
+                      <div style={{ textAlign:"right" }}>
+                        {applyPromo(opt.price,"urgent").prixOriginal && (
+                          <span style={{ color:theme.sub,fontSize:12,textDecoration:"line-through",display:"block" }}>{opt.price} F</span>
+                        )}
+                        <span style={{ fontWeight:800,fontSize:20,color:"#FF4757" }}>{applyPromo(opt.price,"urgent").prixFinal.toLocaleString()} FCFA</span>
+                        {getPromo("urgent") && <span style={{ background:"#10B981",color:"#fff",fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:10,marginLeft:4 }}>PROMO</span>}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -6578,7 +6595,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:5 }}>📸 Photo (optionnel)</label>
                   <PhotoUploader photos={promoPhotos} setPhotos={setPromoPhotos} theme={theme} folder="annonces"/>
                 </div>
-                <button onClick={()=>handlePayment(500,"Publication Promo/Nouveauté sur MarchéduRoi",()=>addPromo(modal.data, modal.shopType))}
+                <button onClick={()=>handlePayment(500,"Publication Promo/Nouveauté sur MarchéduRoi",()=>addPromo(modal.data, modal.shopType), "boutique")}
                   className="btn-glow"
                   style={{ width:"100%",padding:"13px",background:"linear-gradient(135deg,#FF8C00,#FFD700)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer" }}>
                   💳 Payer 500 FCFA et Publier
@@ -6671,7 +6688,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                       newExp.setDate(newExp.getDate()+tarif.days);
                       setPosts(p=>p.map(post=>post.id===modal.data.id?{...post,expiresAt:newExp.toISOString().slice(0,10),expired:false,expiringSoon:false}:post));
                       setModal(null); notify(`Annonce prolongée de ${tarif.label} !`);
-                    });
+                    }) // cible: "sponsoring"
                   }
                 }} className="btn-glow" style={{ width:"100%",marginTop:8,padding:"14px",background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
                   {selectedTarif===-1

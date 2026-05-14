@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { usePromo } from "../hooks/usePromo";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabase";
 import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } from "../vitrineConstants";
 
 function VitrineRenewal({ structure, token, onDone }) {
+  const { applyPromo, promoLabel } = usePromo();
   const COLOR = "#10B981";
   const [tokenValid, setTokenValid] = React.useState(false);
   const [checking,   setChecking]   = React.useState(true);
@@ -47,7 +49,7 @@ function VitrineRenewal({ structure, token, onDone }) {
       }
       window.FedaPay.init({
         public_key: import.meta.env.VITE_FEDAPAY_PUBLIC_KEY || "pk_sandbox_VOTRE_CLE_ICI",
-        transaction: { amount: structure.renewal_amount || 18000, description: `Renouvellement vitrine — ${structure.name}` },
+        transaction: { amount: applyPromo(structure.renewal_amount || 18000, "vitrine").prixFinal, description: `Renouvellement vitrine — ${structure.name}` },
         customer:    { email: structure.email || "client@marcheduroi.com" },
         onComplete(resp, reason) {
           const ok = reason === window.FedaPay.TRANSACTION_APPROVED || reason === "transaction_approved" || reason === "approved";
@@ -127,7 +129,7 @@ function VitrineRenewal({ structure, token, onDone }) {
 
         <button onClick={launchPayment} disabled={paying}
           style={{ width:"100%",padding:18,background:paying?"#1A1D30":`linear-gradient(135deg,${COLOR},#059669)`,border:paying?"1px solid #2A2D45":"none",color:paying?"#9A9AB0":"#fff",borderRadius:14,fontWeight:800,fontSize:17,cursor:paying?"not-allowed":"pointer" }}>
-          {paying ? "Activation…" : `💳 Payer ${(structure.renewal_amount||18000).toLocaleString("fr-FR")} FCFA`}
+          {paying ? "Activation…" : `💳 Payer ${applyPromo(structure.renewal_amount||18000, "vitrine").prixFinal.toLocaleString("fr-FR")} FCFA`}
         </button>
         <p style={{ textAlign:"center",color:"#9A9AB0",fontSize:11,marginTop:12 }}>Paiement sécurisé · EDENPORTAIL</p>
       </div>
