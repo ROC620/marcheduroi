@@ -1,13 +1,11 @@
-const CACHE_NAME = "marcheduroi-v10";
+const CACHE_NAME = "marcheduroi-v11";
 const STATIC_ASSETS = ["/", "/index.html"];
-
 self.addEventListener("install", (event) => {
   self.skipWaiting(); // Forcer remplacement immédiat
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
 });
-
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -15,13 +13,10 @@ self.addEventListener("activate", (event) => {
     ).then(() => self.clients.claim()) // Prendre le contrôle immédiatement
   );
 });
-
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
-
   // Ignorer les requêtes non-GET
   if (event.request.method !== "GET") return;
-
   // Ignorer les APIs externes
   const externalDomains = [
     "supabase.co", "fedapay.com", "flutterwave.com",
@@ -29,9 +24,11 @@ self.addEventListener("fetch", (event) => {
     "googleapis.com", "gstatic.com", "youtube.com", "youtu.be"
   ];
   if (externalDomains.some(d => url.hostname.includes(d))) return;
-
+  // URLs à laisser au réseau (pages HTML séparées, APIs Vercel)
+  const bypassRoutes = ["/demandes", "/api/"];
+  if (bypassRoutes.some(r => url.pathname.startsWith(r))) return;
   // Routes SPA → toujours servir index.html
-  const spaRoutes = ["/annonce/", "/boutique/", "/atelier/", "/resto/", "/beaute/", "/structure/", "/demandes", "/reset-password"];
+  const spaRoutes = ["/annonce/", "/boutique/", "/atelier/", "/resto/", "/beaute/", "/structure/", "/vitrine/", "/vitrines", "/reset-password"];
   if (url.pathname === "/" || spaRoutes.some(r => url.pathname.startsWith(r))) {
     event.respondWith(
       caches.match("/index.html")
@@ -40,7 +37,6 @@ self.addEventListener("fetch", (event) => {
     );
     return;
   }
-
   // Assets statiques → cache first, network fallback
   if (url.hostname === self.location.hostname) {
     event.respondWith(
