@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function RecrutementSection({ theme, user, setModal, windowWidth, posts, view, cardStyle }) {
+export default function RecrutementSection({ theme, user, setModal, windowWidth, posts, view, cardStyle, setActiveConv, notify }) {
   const [recrutTab, setRecrutTab] = useState("offres");
 
   return (

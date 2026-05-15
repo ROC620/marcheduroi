@@ -4962,7 +4962,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
       {/* ── RECRUTEMENT ── */}
       {view==="recrutement"&&(
         <RecrutementSection
-          theme={theme} user={user} setModal={setModal} windowWidth={windowWidth} posts={posts} view={view} cardStyle={cardStyle}
+          theme={theme} user={user} setModal={setModal} windowWidth={windowWidth} posts={posts} view={view} cardStyle={cardStyle} setActiveConv={setActiveConv} notify={notify}
         />
       )}
 
