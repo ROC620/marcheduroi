@@ -6,6 +6,7 @@ import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } fr
 import { VitrineCarousel, VitrineSection } from "./VitrineCarousel";
 
 import VitrineEdit from "./VitrineEdit";
+import VitrineDashboard from "./VitrineDashboard";
 import VitrinePayment from "./VitrinePayment";
 import VitrineRenewal from "./VitrineRenewal";
 
@@ -32,6 +33,7 @@ function VitrineDetail() {
   const { stats, liked, track, toggleLike } = useVitrineStats(structure?.id);
   const [notFound,  setNotFound]  = useState(false);
   const [isOwner,   setIsOwner]   = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [ratings,   setRatings]   = useState([]);
   const [userRating,setUserRating]= useState(0);
   const [ratingComment,setRatingComment] = useState("");
@@ -438,6 +440,10 @@ function VitrineDetail() {
               style={{ background:`linear-gradient(135deg,${COLOR},#059669)`,border:"none",color:"#fff",padding:"10px 20px",borderRadius:10,fontWeight:700,fontSize:13,textDecoration:"none",flexShrink:0,whiteSpace:"nowrap" }}>
               ✏️ Modifier ma vitrine
             </a>
+            <button onClick={()=>setShowDashboard(true)}
+              style={{ background:"rgba(16,185,129,0.1)", border:"1px solid rgba(16,185,129,0.3)", color:"#10B981", padding:"10px 16px", borderRadius:10, fontWeight:700, fontSize:13, cursor:"pointer" }}>
+              📊 Mes stats
+            </button>
           </div>
         ) : (
           <div style={{ background:"rgba(108,99,255,0.06)",border:"1px solid rgba(108,99,255,0.2)",borderRadius:14,padding:16,marginBottom:20 }}>
