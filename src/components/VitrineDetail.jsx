@@ -451,7 +451,7 @@ function VitrineDetail() {
         {/* ---- Partage ---- */}
         <div style={{ display:"flex",gap:10,marginBottom:24,flexWrap:"wrap" }}>
           {/* Suggérer à un ami via WhatsApp */}
-          <a href={"https://wa.me/?text="+encodeURIComponent(`👋 Hé ! J'ai pensé à toi en voyant cette vitrine sur MarchéduRoi 👑\n🏛️ ${structure.name}\n📍 ${structure.ville||""}\n👉 https://marcheduroi.com/api/vitrine-og?slug=${slug}`)}
+          <a href={"https://wa.me/?text="+encodeURIComponent(`👋 Hé ! J'ai pensé à toi en voyant cette vitrine sur MarchéduRoi 👑\n🏛️ ${structure.name}\n📍 ${structure.ville||""}\n👉 https://marcheduroi.com/vitrine/${slug}`)}
               onClick={()=>track("suggestion")}
             target="_blank" rel="noopener noreferrer"
             style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:"rgba(37,211,102,0.1)",border:"1px solid rgba(37,211,102,0.3)",borderRadius:12,padding:12,color:"#25D366",textDecoration:"none",fontWeight:700,fontSize:14,minWidth:140 }}>

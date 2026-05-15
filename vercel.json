@@ -1,29 +1,86 @@
 {
   "rewrites": [
-    { "source": "/api/og-image/annonce/:id", "destination": "/api/og-image?path=/annonce/:id" },
-    { "source": "/api/og-image/boutique/:id", "destination": "/api/og-image?path=/boutique/:id" },
-    { "source": "/api/og-image/atelier/:id", "destination": "/api/og-image?path=/atelier/:id" },
-    { "source": "/api/og-image/resto/:id", "destination": "/api/og-image?path=/resto/:id" },
-    { "source": "/api/og-image/beaute/:id", "destination": "/api/og-image?path=/beaute/:id" },
-    { "source": "/annonce/:id", "destination": "/api/og?id=:id&source=posts" },
-    { "source": "/boutique/:id", "destination": "/api/og?id=:id&source=boutiques" },
-    { "source": "/atelier/:id", "destination": "/api/og?id=:id&source=ateliers" },
-    { "source": "/resto/:id", "destination": "/api/og?id=:id&source=restos" },
-    { "source": "/beaute/:id", "destination": "/api/og?id=:id&source=beaute" },
-    { "source": "/demandes", "destination": "/demandes.html" },
-    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/api/og-image/annonce/:id",
+      "destination": "/api/og-image?path=/annonce/:id"
+    },
+    {
+      "source": "/api/og-image/boutique/:id",
+      "destination": "/api/og-image?path=/boutique/:id"
+    },
+    {
+      "source": "/api/og-image/atelier/:id",
+      "destination": "/api/og-image?path=/atelier/:id"
+    },
+    {
+      "source": "/api/og-image/resto/:id",
+      "destination": "/api/og-image?path=/resto/:id"
+    },
+    {
+      "source": "/api/og-image/beaute/:id",
+      "destination": "/api/og-image?path=/beaute/:id"
+    },
+    {
+      "source": "/annonce/:id",
+      "destination": "/api/og?id=:id&source=posts"
+    },
+    {
+      "source": "/boutique/:id",
+      "destination": "/api/og?id=:id&source=boutiques"
+    },
+    {
+      "source": "/atelier/:id",
+      "destination": "/api/og?id=:id&source=ateliers"
+    },
+    {
+      "source": "/resto/:id",
+      "destination": "/api/og?id=:id&source=restos"
+    },
+    {
+      "source": "/beaute/:id",
+      "destination": "/api/og?id=:id&source=beaute"
+    },
+    {
+      "source": "/demandes",
+      "destination": "/demandes.html"
+    },
+    {
+      "source": "/vitrine/:slug",
+      "destination": "/api/vitrine-redirect?slug=:slug"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(self)" },
-        { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(self)"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        }
       ]
     }
   ]
