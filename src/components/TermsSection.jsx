@@ -12,7 +12,7 @@ export default function TermsSection({ theme, setView, boutiques, ateliers, view
       <div style={{ fontSize:56,marginBottom:16 }}>📋</div>
       <h1 style={{ fontSize:42,fontWeight:800,marginBottom:12,color:theme.text }}>Conditions Générales <span style={{ background:"linear-gradient(135deg,#6C63FF,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>d'Utilisation</span></h1>
       <p style={{ color:theme.sub,fontSize:15 }}>Dernière mise à jour : Mars 2026 · MarchéduRoi, Ouidah, Bénin</p>
-      <p style={{ color:theme.sub,fontSize:13,marginTop:6 }}>Version 2.0 — Ces conditions remplacent toutes les versions antérieures.</p>
+      <p style={{ color:theme.sub,fontSize:13,marginTop:6 }}>Version 2.1 — Ces conditions remplacent toutes les versions antérieures.</p>
     </div>
 
     {/* Avertissement */}
@@ -61,7 +61,15 @@ export default function TermsSection({ theme, setView, boutiques, ateliers, view
         num:"6",
         title:"Limitation de responsabilité de MarchéduRoi",
         icon:"🛡️",
-        content:`MarchéduRoi agit en qualité d'intermédiaire technique hébergeant des contenus publiés par des tiers. MarchéduRoi ne peut être tenu responsable : des contenus publiés par les utilisateurs ; des transactions commerciales entre utilisateurs ; des pertes financières directes ou indirectes résultant d'une utilisation de la plateforme ; des interruptions temporaires de service pour raisons de maintenance ou de force majeure ; des dommages indirects, consécutifs ou imprévus liés à l'utilisation du site. MarchéduRoi ne prend aucune commission sur les transactions effectuées entre acheteurs et vendeurs. Toute transaction se fait directement entre le vendeur et l'acheteur, sans intervention de MarchéduRoi. MarchéduRoi ne gère ni les transactions financières entre particuliers, ni la livraison des produits ou services. Il est vivement recommandé à chaque utilisateur de vérifier l'identité du vendeur et l'état du produit ou service avant tout paiement. MarchéduRoi s'engage cependant à déployer tous les efforts raisonnables pour assurer la disponibilité, la sécurité et la qualité de la plateforme.`
+        content:`MarchéduRoi agit en qualité d'intermédiaire technique hébergeant des contenus publiés par des tiers. MarchéduRoi ne peut être tenu responsable : des contenus publiés par les utilisateurs ; des transactions commerciales entre utilisateurs ; des pertes financières directes ou indirectes résultant d'une utilisation de la plateforme ; des interruptions temporaires de service pour raisons de maintenance ou de force majeure ; des dommages indirects, consécutifs ou imprévus liés à l'utilisation du site. MarchéduRoi ne prend aucune commission sur les transactions effectuées entre acheteurs et vendeurs. Toute transaction se fait directement entre le vendeur et l'acheteur, sans intervention de MarchéduRoi. MarchéduRoi ne gère ni les transactions financières entre particuliers, ni la livraison des produits ou services. ⚠️ AVERTISSEMENT IMPORTANT : Quel que soit le montant de la transaction, même inférieur à 1 FCFA, il est OBLIGATOIRE de vérifier l'identité du vendeur, l'authenticité du produit ou service, et l'état réel du bien avant tout paiement, remise d'argent ou échange de valeur. MarchéduRoi décline toute responsabilité pour toute perte financière, arnaque, tromperie ou préjudice résultant d'une transaction entre utilisateurs, indépendamment du montant concerné. La prudence et la vérification systématique sont de la seule responsabilité des parties à la transaction. MarchéduRoi s'engage cependant à déployer tous les efforts raisonnables pour assurer la disponibilité, la sécurité et la qualité de la plateforme.`
+      },
+      {
+,
+      {
+        num:"6bis",
+        title:"Responsabilité concernant VitrineWeb",
+        icon:"🏛️",
+        content:\`MarchéduRoi héberge des pages VitrineWeb pour des établissements (restaurants, boutiques, écoles, cliniques, etc.). Les informations publiées sur ces pages (horaires, tarifs, services, contacts, localisation GPS) sont fournies exclusivement par les établissements concernés et placées sous leur entière responsabilité. MarchéduRoi ne vérifie pas l'exactitude, la complétude ou l'actualité de ces informations et ne saurait être tenu responsable de toute erreur, omission ou modification non signalée. Les avis clients publiés sur les vitrines reflètent les opinions personnelles de leurs auteurs. MarchéduRoi n'est pas responsable du contenu de ces avis, sauf en cas d'avis manifestement illicites signalés et non retirés dans un délai raisonnable.\`
       },
       {
         num:"7",
@@ -131,7 +139,7 @@ export default function TermsSection({ theme, setView, boutiques, ateliers, view
     <div style={{ background:"rgba(108,99,255,0.08)",border:"1px solid rgba(108,99,255,0.3)",borderRadius:16,padding:28,marginTop:32,textAlign:"center" }}>
       <p style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:8 }}>En utilisant MarchéduRoi, vous confirmez avoir lu, compris et accepté l'intégralité des présentes conditions générales d'utilisation.</p>
       <p style={{ color:theme.sub,fontSize:13,marginBottom:4 }}>© 2026 MarchéduRoi · Ouidah, Bénin 🇧🇯 · contact@marcheduroi.com</p>
-      <p style={{ color:theme.sub,fontSize:12,marginBottom:20 }}>Version 2.0 — Mars 2026 · 15 articles</p>
+      <p style={{ color:theme.sub,fontSize:12,marginBottom:20 }}>Version 2.1 — Mars 2026 · 15 articles</p>
       <button onClick={()=>setView("home")} className="btn-glow" style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"12px 32px",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
         Retour aux annonces →
       </button>
