@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { usePromo } from "../hooks/usePromo";
+import { useNotifyAdmin } from "../hooks/useNotifyAdmin";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabase";
 import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } from "../vitrineConstants";
@@ -7,6 +8,7 @@ import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } fr
 function VitrinePayment({ structure, token, onDone }) {
   const COLOR = "#10B981";
   const { applyPromo, promoLabel } = usePromo();
+  const { notifyAdmin } = useNotifyAdmin();
   const [tokenValid,  setTokenValid]  = React.useState(false);
   const [checking,    setChecking]    = React.useState(true);
   const [paying,      setPaying]      = React.useState(false);
@@ -72,6 +74,7 @@ function VitrinePayment({ structure, token, onDone }) {
           }),
         }).catch(() => {}); // Silencieux — ne pas bloquer si email échoue
       }
+      notifyAdmin({ type:"vitrine", nom:structure.name, montant:applyPromo(structure.creation_amount||15000,"vitrine").prixFinal, details:`Type: ${structure.type} — Ville: ${structure.ville||"—"}` });
       setPaid(true);
       setTimeout(onDone, 3000);
     }

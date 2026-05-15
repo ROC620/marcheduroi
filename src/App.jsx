@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { usePromo } from "./hooks/usePromo";
+import { useNotifyAdmin } from "./hooks/useNotifyAdmin";
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
 import { supabase } from "./supabase";
 import Icon from "./components/Icon";
@@ -935,6 +936,7 @@ function AppContent() {
   const [beaute, setBeaute] = useState(INITIAL_BEAUTE);
   const [user, setUser] = useState(null);
   const { applyPromo, getPromo } = usePromo();
+  const { notifyAdmin } = useNotifyAdmin();
   const [showFeedback, setShowFeedback] = useState(false);
   const [view, setViewState] = useState(() => {
     // Si on revient d'une fiche détail → restaurer la vue précédente
@@ -2557,15 +2559,21 @@ const PHONE_EXAMPLE = {
     const creditUsed = await useCredit();
     if (creditUsed) {
       notify("🎁 Crédit parrainage utilisé — Publication gratuite !");
+      notifyAdmin({ type: cible||"paiement", nom: user?.name||"Utilisateur", montant: 0, details: description + " (crédit parrainage)" });
       onSuccess();
       return;
     }
+    // Wrapper onSuccess pour notifier admin après paiement
+    const onSuccessWithNotif = (...args) => {
+      notifyAdmin({ type: cible||"paiement", nom: user?.name||"Utilisateur", montant, details: description });
+      onSuccess(...args);
+    };
     // Sinon paiement selon le pays détecté
     const country = getUserCountry();
     if (FEDAPAY_COUNTRIES.includes(country)) {
-      handleFedaPayment(montant, description, onSuccess);
+      handleFedaPayment(montant, description, onSuccessWithNotif);
     } else {
-      handleFlutterwavePayment(montant, description, onSuccess);
+      handleFlutterwavePayment(montant, description, onSuccessWithNotif);
     }
   };
 
