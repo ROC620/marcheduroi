@@ -18,6 +18,8 @@ import AboutSection from "./components/AboutSection";
 import StatsSection from "./components/StatsSection";
 import TermsSection from "./components/TermsSection";
 import ParrainageSection from "./components/ParrainageSection";
+import FeedbackModal from "./components/FeedbackModal";
+import FeedbackManager from "./components/FeedbackManager";
 import VideoCardPlayer from "./components/VideoCardPlayer";
 import VitrineRequest from "./components/VitrineRequest";
 import VitrineDetail from "./components/VitrineDetail";
@@ -931,9 +933,9 @@ function AppContent() {
   const [ateliers, setAteliers] = useState(INITIAL_ATELIERS);
   const [restos, setRestos] = useState(INITIAL_RESTOS);
   const [beaute, setBeaute] = useState(INITIAL_BEAUTE);
-  const [suggestions, setSuggestions] = useState([{ id:1,text:"Ajouter un système de messagerie interne",author:"Visiteur anonyme",date:"2026-03-10",status:"en attente" }]);
   const [user, setUser] = useState(null);
   const { applyPromo, getPromo } = usePromo();
+  const [showFeedback, setShowFeedback] = useState(false);
   const [view, setViewState] = useState(() => {
     // Si on revient d'une fiche détail → restaurer la vue précédente
     const returnView = sessionStorage.getItem("mdr_back_view");
@@ -1538,8 +1540,6 @@ function AppContent() {
     if (saved) return saved;
     return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
   });
-  const [suggestionText, setSuggestionText] = useState("");
-  const [suggestionName, setSuggestionName] = useState("");
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [hasNewDemandes, setHasNewDemandes] = useState(false);
@@ -2955,11 +2955,7 @@ const PHONE_EXAMPLE = {
     setModal({ type:"edit", data:post });
   };
 
-  const submitSuggestion = () => {
-    if (!suggestionText.trim()) { notify("Écrivez votre suggestion","error"); return; }
-    setSuggestions(s=>[{ id:Date.now(), text:suggestionText, author:suggestionName||"Visiteur anonyme", date:new Date().toISOString().slice(0,10), status:"en attente" },...s]);
-    setSuggestionText(""); setSuggestionName(""); setModal(null); notify("Merci pour votre suggestion !");
-  };
+
 
   const addBeaute = async (forcedExpiresAt) => {
     if (checkBlacklist(shopForm.name) || checkBlacklist(shopForm.description)) { notify("⚠️ Votre annonce contient des termes non autorisés.", "error"); return; }
@@ -3497,7 +3493,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               { label:t.stats, action:()=>{setView("stats");setShowMoreMenu(false);} },
               { label:t.parrainage, action:()=>{setView("parrainage");setShowMoreMenu(false);} },
               { label:t.newsletter, action:()=>{setModal({type:"newsletter"});setShowMoreMenu(false);} },
-              { label:t.suggestion, action:()=>{setModal({type:"suggestion"});setShowMoreMenu(false);} },
+              { label:"💬 Suggestion / Avis", action:()=>{setShowFeedback(true);setShowMoreMenu(false);} },
               { label:"⚡ Show Faster", action:()=>{setModal({type:"showFaster"});setShowMoreMenu(false);} },
               { label:t.apropos, action:()=>{setView("about");setShowMoreMenu(false);} },
               { label:t.cgu, action:()=>{setView("terms");setShowMoreMenu(false);} },
@@ -6799,28 +6795,16 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               </>
             )}
 
-            {modal.type==="suggestion"&&(
-              <>
-                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
-                  <h3 style={{ fontWeight:800,fontSize:20,color:theme.text }}>💡 Envoyer une suggestion</h3>
-                  <button onClick={()=>setModal(null)} style={{ background:"transparent",border:"none",color:theme.sub }}><Icon name="x" size={20}/></button>
-                </div>
-                <p style={{ color:theme.sub,fontSize:14,marginBottom:24,lineHeight:1.5 }}>Partagez vos idées pour améliorer MarchéduRoi ! Toutes les suggestions sont lues par l'équipe.</p>
-                <div style={{ marginBottom:16 }}>
-                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre nom (optionnel)</label>
-                  <input value={suggestionName} onChange={e=>setSuggestionName(e.target.value)} placeholder="Visiteur anonyme" style={inputStyle}/>
-                </div>
-                <div style={{ marginBottom:24 }}>
-                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Votre suggestion *</label>
-                  <textarea value={suggestionText} onChange={e=>setSuggestionText(e.target.value)} rows={4} placeholder="Décrivez votre idée..." style={{ ...inputStyle,resize:"vertical" }}/>
-                </div>
-                <button onClick={submitSuggestion} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-                  Envoyer ma suggestion
-                </button>
-              </>
-            )}
           </div>
         </div>
+      )}
+    {showFeedback && (
+        <FeedbackModal
+          user={user}
+          theme={theme}
+          notify={notify}
+          onClose={()=>setShowFeedback(false)}
+        />
       )}
     </div>
   );
