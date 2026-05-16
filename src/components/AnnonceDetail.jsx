@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { supabase } from "../supabase";
 import VideoCardPlayer from "./VideoCardPlayer";
+import { usePresence } from "../hooks/usePresence.jsx";
 
 // Données de fallback (si Supabase indisponible)
 const INITIAL_POSTS = [];
@@ -63,6 +64,7 @@ function AnnonceDetail() {
   const pathname = window.location.pathname;
   // Extraire l'id depuis l'URL directement (route /* ne fournit pas useParams)
   const id = pathname.split("/").pop();
+  const onlineCount = usePresence(id ? `annonce:${id}` : null);
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -196,6 +198,11 @@ function AnnonceDetail() {
         <span style={{ background:`${color}22`,color,padding:"4px 14px",borderRadius:20,fontSize:12,fontWeight:700 }}>
           {labelMap[type]}{item.type?` · ${item.type}`:""}{item.category?` · ${item.category}`:""}
         </span>
+        {onlineCount >= 2 && (
+          <span style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",color:"#EF4444",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,marginLeft:8 }}>
+            🔴 {onlineCount} en ligne
+          </span>
+        )}
         {(item.sponsored || item.urgent) && (
           <div style={{ display:"inline-flex",gap:8,marginLeft:8 }}>
             {item.sponsored && <span style={{ background:"rgba(255,215,0,0.2)",color:"#FFD700",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🌟 Sponsorisé</span>}
