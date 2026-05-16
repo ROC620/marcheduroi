@@ -1,68 +1,67 @@
-// src/hooks/usePresence.js
-// Compteur temps réel via Supabase Realtime Presence
-// Chaque visiteur s'annonce sur le channel de la page
+// src/hooks/usePresence.jsx
+// Compteur visiteurs en temps réel via table presence_sessions
 
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
 
-export function usePresence(channelName) {
+const getVisitorId = () => {
+  let id = localStorage.getItem("mdr_visitor_id");
+  if (!id) {
+    id = "v_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem("mdr_visitor_id", id);
+  }
+  return id;
+};
+
+export function usePresence(pageId) {
   const [count, setCount] = useState(0);
-  const channelRef = useRef(null);
+  const intervalRef = useRef(null);
+  const visitorId = getVisitorId();
+
+  const upsertSession = async () => {
+    await supabase.from("presence_sessions").upsert(
+      { page_id: pageId, visitor_id: visitorId, last_seen: new Date().toISOString() },
+      { onConflict: "page_id,visitor_id" }
+    );
+  };
+
+  const fetchCount = async () => {
+    const since = new Date(Date.now() - 90000).toISOString();
+    const { count: c } = await supabase
+      .from("presence_sessions")
+      .select("*", { count: "exact", head: true })
+      .eq("page_id", pageId)
+      .gte("last_seen", since);
+    setCount(c || 0);
+  };
+
+  const deleteSession = async () => {
+    await supabase.from("presence_sessions")
+      .delete()
+      .eq("page_id", pageId)
+      .eq("visitor_id", visitorId);
+  };
 
   useEffect(() => {
-    if (!channelName) return;
+    if (!pageId) return;
 
-    // Identifiant unique pour ce visiteur dans cette session
-    const visitorId = localStorage.getItem("mdr_visitor_id") ||
-      "v_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    localStorage.setItem("mdr_visitor_id", visitorId);
+    upsertSession();
+    fetchCount();
 
-    const channel = supabase.channel(`presence:${channelName}`, {
-      config: { presence: { key: visitorId } }
-    });
+    intervalRef.current = setInterval(() => {
+      upsertSession();
+      fetchCount();
+    }, 30000);
 
-    channel
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState();
-        setCount(Object.keys(state).length);
-      })
-      .on("presence", { event: "join" }, () => {
-        const state = channel.presenceState();
-        setCount(Object.keys(state).length);
-      })
-      .on("presence", { event: "leave" }, () => {
-        const state = channel.presenceState();
-        setCount(Object.keys(state).length);
-      })
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({ visitor: visitorId, joined_at: Date.now() });
-        }
-      });
-
-    channelRef.current = channel;
+    const handleUnload = () => deleteSession();
+    window.addEventListener("beforeunload", handleUnload);
 
     return () => {
-      channel.untrack();
-      supabase.removeChannel(channel);
+      clearInterval(intervalRef.current);
+      window.removeEventListener("beforeunload", handleUnload);
+      deleteSession();
     };
-  }, [channelName]);
+  }, [pageId]);
 
   return count;
-}
-
-// Hook simplifié pour les cartes (liste d'annonces/boutiques)
-// Ne s'abonne pas — juste affiche le count passé en prop
-export function PresenceBadge({ count, theme }) {
-  if (!count || count < 2) return null;
-  return (
-    <span style={{
-      display:"inline-flex", alignItems:"center", gap:4,
-      background:"rgba(239,68,68,0.12)", border:"1px solid rgba(239,68,68,0.3)",
-      color:"#EF4444", borderRadius:20, padding:"2px 8px",
-      fontSize:11, fontWeight:700
-    }}>
-      🔴 {count} en ligne
-    </span>
-  );
 }
