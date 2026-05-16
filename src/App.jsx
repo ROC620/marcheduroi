@@ -1744,8 +1744,6 @@ function AppContent() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const recoverySessionRef = React.useRef(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [pwaPrompt, setPwaPrompt] = useState(null);
-  const [showPwaBanner, setShowPwaBanner] = useState(false);
   const [adForm, setAdForm] = useState({ entreprise:"", slogan:"", logo_url:"", lien:"", couleur1:"#6C63FF", couleur2:"#8B84FF", fin:"" });
   const [adSaving, setAdSaving] = useState(false);
   const [adEditing, setAdEditing] = useState(null);
@@ -1857,13 +1855,7 @@ function AppContent() {
     }
     }
     // PWA install prompt
-    const handleInstallPrompt = (e) => {
-      e.preventDefault();
-      setPwaPrompt(e);
-      const dismissed = localStorage.getItem("mdr_pwa_dismissed");
-      if (!dismissed) setShowPwaBanner(true);
-    };
-    window.addEventListener("beforeinstallprompt", handleInstallPrompt);
+
 
     // Bouton Retour mobile — restaurer la vue précédente
     const handlePopState = (e) => {
@@ -1890,7 +1882,6 @@ function AppContent() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
-      window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
       window.removeEventListener("popstate", handlePopState);
     };
   }, []);
@@ -3658,30 +3649,6 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
           Vous êtes hors ligne — Les dernières annonces chargées restent disponibles
         </div>
       )}
-
-      {/* Bannière PWA — installer l'application */}
-      {showPwaBanner && (
-        <div style={{ position:"fixed",bottom:80,left:12,right:12,zIndex:997,background:"linear-gradient(135deg,#1A1D30,#2A2D45)",border:"1px solid #6C63FF",borderRadius:16,padding:"14px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 8px 32px rgba(108,99,255,0.4)",maxWidth:480,margin:"0 auto" }}>
-          <img src="/marcheduRoi-icon.svg" alt="" style={{ width:44,height:44,borderRadius:10,flexShrink:0 }}/>
-          <div style={{ flex:1,minWidth:0 }}>
-            <p style={{ fontWeight:800,fontSize:14,color:"#E8E8F0",marginBottom:2 }}>Installer MarchéduRoi</p>
-            <p style={{ fontSize:12,color:"#9A9AB0" }}>Accès rapide · Fonctionne hors ligne</p>
-          </div>
-          <button onClick={async()=>{
-            if (pwaPrompt) {
-              pwaPrompt.prompt();
-              const result = await pwaPrompt.userChoice;
-              if (result.outcome === "accepted") notify("✅ Application installée !");
-            }
-            setShowPwaBanner(false);
-            localStorage.setItem("mdr_pwa_dismissed","1");
-          }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",flexShrink:0 }}>
-            Installer
-          </button>
-          <button onClick={()=>{ setShowPwaBanner(false); localStorage.setItem("mdr_pwa_dismissed","1"); }} style={{ background:"transparent",border:"none",color:"#9A9AB0",fontSize:18,cursor:"pointer",flexShrink:0,lineHeight:1 }}>✕</button>
-        </div>
-      )}
-
       {/* Bannière erreur Supabase */}
       {isOnline && postsLoaded && posts.length === 0 && (
         <div style={{ position:"fixed",top:64,left:0,right:0,zIndex:997,background:"rgba(255,140,0,0.95)",color:"#fff",padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"center",gap:10,fontSize:14,fontWeight:600 }}>
