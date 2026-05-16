@@ -2045,20 +2045,7 @@ function AppContent() {
 
   // WhatsApp tooltip — affiché une seule fois dans la vie de l'utilisateur
 
-  // Compteur visiteurs temps réel basé sur les vues
-  React.useEffect(() => {
-    const updateViewers = () => {
-      const viewers = {};
-      posts.filter(p=>(p.views||0)>5).slice(0,10).forEach(p => {
-        const base = Math.min(Math.floor((p.views||0) / 10), 12);
-        if (base > 0) viewers[p.id] = base + Math.floor(Math.random() * 3);
-      });
-      setLiveViewers(viewers);
-    };
-    updateViewers();
-    const interval = setInterval(updateViewers, 30000);
-    return () => clearInterval(interval);
-  }, [posts]);
+  // liveViewers remplacé par usePresence dans AnnonceDetail
 
   const login = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });

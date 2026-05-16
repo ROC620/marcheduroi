@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useVitrineStats } from "../hooks/useVitrineStats";
+import { usePresence } from "../hooks/usePresence.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabase";
 import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } from "../vitrineConstants";
@@ -31,6 +32,7 @@ function VitrineDetail() {
   const [structure, setStructure] = useState(null);
   const [loading,   setLoading]   = useState(true);
   const { stats, liked, track, toggleLike } = useVitrineStats(structure?.id);
+  const onlineCount = usePresence(slug ? `vitrine:${slug}` : null);
   const [notFound,  setNotFound]  = useState(false);
   const [isOwner,   setIsOwner]   = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
