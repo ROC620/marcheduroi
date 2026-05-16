@@ -1,6 +1,4 @@
 // src/hooks/usePresence.jsx
-// Compteur visiteurs en temps réel via table presence_sessions
-
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
 
@@ -19,10 +17,13 @@ export function usePresence(pageId) {
   const visitorId = getVisitorId();
 
   const upsertSession = async () => {
-    await supabase.from("presence_sessions").upsert(
-      { page_id: pageId, visitor_id: visitorId, last_seen: new Date().toISOString() },
-      { onConflict: "page_id,visitor_id" }
-    );
+    // Supprimer l'ancienne session puis insérer la nouvelle
+    await supabase.from("presence_sessions")
+      .delete()
+      .eq("page_id", pageId)
+      .eq("visitor_id", visitorId);
+    await supabase.from("presence_sessions")
+      .insert({ page_id: pageId, visitor_id: visitorId, last_seen: new Date().toISOString() });
   };
 
   const fetchCount = async () => {
@@ -35,30 +36,28 @@ export function usePresence(pageId) {
     setCount(c || 0);
   };
 
-  const deleteSession = async () => {
-    await supabase.from("presence_sessions")
+  const deleteSession = () => {
+    supabase.from("presence_sessions")
       .delete()
       .eq("page_id", pageId)
-      .eq("visitor_id", visitorId);
+      .eq("visitor_id", visitorId)
+      .then(() => {});
   };
 
   useEffect(() => {
     if (!pageId) return;
 
-    upsertSession();
-    fetchCount();
+    upsertSession().then(fetchCount);
 
     intervalRef.current = setInterval(() => {
-      upsertSession();
-      fetchCount();
+      upsertSession().then(fetchCount);
     }, 30000);
 
-    const handleUnload = () => deleteSession();
-    window.addEventListener("beforeunload", handleUnload);
+    window.addEventListener("beforeunload", deleteSession);
 
     return () => {
       clearInterval(intervalRef.current);
-      window.removeEventListener("beforeunload", handleUnload);
+      window.removeEventListener("beforeunload", deleteSession);
       deleteSession();
     };
   }, [pageId]);
