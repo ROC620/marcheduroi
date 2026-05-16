@@ -1,5 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import PhotoCarousel from "./PhotoCarousel";
+
+// ── Gestionnaire global : une seule vidéo autoPlay active à la fois ─────────
+const activeVideoId = { current: null };
+// Bloquer l'autoplay après un scroll programmatique (ex: lien partagé)
+const autoPlayBlocked = { current: false };
+const blockAutoPlay = (ms = 4000) => {
+  autoPlayBlocked.current = true;
+  setTimeout(() => { autoPlayBlocked.current = false; }, ms);
+};
+
+// ── Composant vidéo auto-play sur les cartes ─────────────────────────────────
 
 function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false }) {
   const [playing, setPlaying] = React.useState(false);
@@ -156,7 +167,6 @@ function VideoCardPlayer({ video, photos = [], maxSeconds = 60, autoPlay = false
     </div>
   );
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 
 export default VideoCardPlayer;
