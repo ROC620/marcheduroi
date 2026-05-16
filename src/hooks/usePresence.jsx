@@ -16,16 +16,6 @@ export function usePresence(pageId) {
   const intervalRef = useRef(null);
   const visitorId = getVisitorId();
 
-  const upsertSession = async () => {
-    // Supprimer l'ancienne session puis insérer la nouvelle
-    await supabase.from("presence_sessions")
-      .delete()
-      .eq("page_id", pageId)
-      .eq("visitor_id", visitorId);
-    await supabase.from("presence_sessions")
-      .insert({ page_id: pageId, visitor_id: visitorId, last_seen: new Date().toISOString() });
-  };
-
   const fetchCount = async () => {
     const since = new Date(Date.now() - 90000).toISOString();
     const { count: c } = await supabase
@@ -33,7 +23,19 @@ export function usePresence(pageId) {
       .select("*", { count: "exact", head: true })
       .eq("page_id", pageId)
       .gte("last_seen", since);
-    setCount(c || 0);
+    if (c !== null) setCount(c);
+  };
+
+  const upsertSession = async () => {
+    await supabase.from("presence_sessions")
+      .delete()
+      .eq("page_id", pageId)
+      .eq("visitor_id", visitorId);
+    await supabase.from("presence_sessions")
+      .insert({ page_id: pageId, visitor_id: visitorId, last_seen: new Date().toISOString() });
+    // Attendre 500ms pour que l'insert soit propagé avant de compter
+    await new Promise(r => setTimeout(r, 500));
+    await fetchCount();
   };
 
   const deleteSession = () => {
@@ -47,11 +49,13 @@ export function usePresence(pageId) {
   useEffect(() => {
     if (!pageId) return;
 
-    upsertSession().then(fetchCount);
+    // Enregistrer et compter immédiatement
+    upsertSession();
 
+    // Rafraîchir toutes les 15 secondes (plus fréquent)
     intervalRef.current = setInterval(() => {
-      upsertSession().then(fetchCount);
-    }, 30000);
+      upsertSession();
+    }, 15000);
 
     window.addEventListener("beforeunload", deleteSession);
 

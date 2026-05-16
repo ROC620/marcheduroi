@@ -194,24 +194,24 @@ function AnnonceDetail() {
           </div>
         )}
 
-        {/* Badge + titre */}
-        <span style={{ background:`${color}22`,color,padding:"4px 14px",borderRadius:20,fontSize:12,fontWeight:700 }}>
-          {labelMap[type]}{item.type?` · ${item.type}`:""}{item.category?` · ${item.category}`:""}
-        </span>
-        {onlineCount >= 2 && (
-          <span style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",color:"#EF4444",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,marginLeft:8 }}>
-            🔴 {onlineCount} en ligne
+        {/* Badge catégorie + badges URGENT/Sponsorisé */}
+        <div style={{ display:"flex",alignItems:"center",flexWrap:"wrap",gap:8,marginBottom:8 }}>
+          <span style={{ background:`${color}22`,color,padding:"4px 14px",borderRadius:20,fontSize:12,fontWeight:700 }}>
+            {labelMap[type]}{item.type?` · ${item.type}`:""}{item.category?` · ${item.category}`:""}
           </span>
-        )}
-        {(item.sponsored || item.urgent) && (
-          <div style={{ display:"inline-flex",gap:8,marginLeft:8 }}>
-            {item.sponsored && <span style={{ background:"rgba(255,215,0,0.2)",color:"#FFD700",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🌟 Sponsorisé</span>}
-            {item.urgent && <span style={{ background:"rgba(255,71,87,0.2)",color:"#FF4757",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🔥 URGENT</span>}
-          </div>
-        )}
+          {item.sponsored && <span style={{ background:"rgba(255,215,0,0.2)",color:"#FFD700",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🌟 Sponsorisé</span>}
+          {item.urgent && <span style={{ background:"rgba(255,71,87,0.2)",color:"#FF4757",padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700 }}>🔥 URGENT</span>}
+        </div>
 
-        <h1 style={{ fontSize:28,fontWeight:800,margin:"14px 0 8px" }}>{title}</h1>
-        {item.price && <p style={{ fontSize:22,fontWeight:800,color:"#43C6AC",marginBottom:8 }}>{item.price}</p>}
+        {/* Prix + badge en ligne */}
+        <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:14 }}>
+          {item.price && <p style={{ fontSize:22,fontWeight:800,color:"#43C6AC",margin:0 }}>{item.price}</p>}
+          {onlineCount >= 1 && (
+            <span style={{ display:"inline-flex",alignItems:"center",gap:4,background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",color:"#EF4444",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700 }}>
+              🔴 {onlineCount} en ligne
+            </span>
+          )}
+        </div>
         {item.prixMoyen && <p style={{ fontSize:16,color:"#FF8C00",fontWeight:600,marginBottom:8 }}>Prix moyen : {item.prixMoyen}</p>}
         <p style={{ color:"#9A9AB0",lineHeight:1.8,marginBottom:20,fontSize:15 }}>{item.description}</p>
 
