@@ -2045,7 +2045,28 @@ function AppContent() {
 
   // WhatsApp tooltip — affiché une seule fois dans la vie de l'utilisateur
 
-  // liveViewers remplacé par usePresence dans AnnonceDetail
+  // Charger les compteurs de présence pour les annonces visibles
+  React.useEffect(() => {
+    const loadPresence = async () => {
+      const since = new Date(Date.now() - 90000).toISOString();
+      const { data } = await supabase
+        .from("presence_sessions")
+        .select("page_id")
+        .gte("last_seen", since);
+      if (!data) return;
+      const counts = {};
+      data.forEach(r => {
+        if (r.page_id.startsWith("annonce:")) {
+          const id = r.page_id.replace("annonce:", "");
+          counts[id] = (counts[id] || 0) + 1;
+        }
+      });
+      setLiveViewers(counts);
+    };
+    loadPresence();
+    const interval = setInterval(loadPresence, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const login = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });
