@@ -483,7 +483,7 @@ function UrgentBanner({ posts, boutiques, ateliers, restos, beaute, theme, navig
       style={{ flexShrink:0, width:cardW, marginRight:GAP, borderRadius:14, overflow:"hidden", cursor:"pointer", border:"2px solid #FF4757", background:theme.card, position:"relative" }}>
       <div style={{ width:"100%", aspectRatio:"4/3", background:"linear-gradient(135deg,#1a1d30,#2a2d45)", position:"relative", overflow:"hidden" }}>
         {post.photos&&post.photos[0] ? <img src={post.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/> : <div style={{ width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32 }}>📦</div>}
-        <div style={{ position:"absolute",top:8,left:8,background:"#FF4757",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800 }}>🔥 URGENT</div>
+        <div style={{ position:"absolute",top:6,left:6,fontSize:18,lineHeight:1 }}>🔥</div>
         {post._urgentType!=="annonce"&&<div style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700 }}>{post._urgentIcon} {post._urgentLabel}</div>}
       </div>
       <div style={{ padding:"10px 12px" }}>
@@ -579,7 +579,7 @@ function SponsoredBanner({ posts, boutiques, ateliers, restos, beaute, theme, na
         {item.photos&&item.photos[0]
           ? <img src={item.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
           : <div style={{ width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32 }}>📦</div>}
-        <div style={{ position:"absolute",top:8,left:8,background:"#FFD700",color:"#000",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:800 }}>🌟 SPONSORISÉ</div>
+        <div style={{ position:"absolute",top:6,left:6,fontSize:18,lineHeight:1 }}>🌟</div>
         {item._type!=="annonce"&&<div style={{ position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.55)",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700 }}>{item._icon} {item._label}</div>}
       </div>
       <div style={{ padding:"10px 12px" }}>
@@ -718,7 +718,7 @@ function EstablishmentUrgentBanner({ boutiques, ateliers, restos, beaute, theme,
               {item.photos&&item.photos[0]
                 ? <img src={item.photos[0]} alt="" style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
                 : <div style={{ width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:48 }}>{item._icon}</div>}
-              <div style={{ position:"absolute",top:10,left:10,background:"#FF4757",color:"#fff",borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:800,letterSpacing:0.5 }}>🔥 URGENT</div>
+              <div style={{ position:"absolute",top:6,left:6,fontSize:20,lineHeight:1 }}>🔥</div>
               <div style={{ position:"absolute",top:10,right:10,background:"rgba(0,0,0,0.6)",color:"#fff",borderRadius:8,padding:"3px 8px",fontSize:10,fontWeight:700 }}>{item._icon} {item._label}</div>
             </div>
 
