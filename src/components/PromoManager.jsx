@@ -113,14 +113,11 @@ export default function PromoManager({ theme, notify }) {
 
       {/* Header */}
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
-        <div>
-          <h2 style={{ color:theme.text, fontSize:20, fontWeight:800, margin:0 }}>🎁 Promotions</h2>
-          <p style={{ color:theme.sub, fontSize:13, margin:"4px 0 0" }}>Gérez les réductions sur tous les paiements</p>
-        </div>
+        <h2 style={{ color:theme.text, fontSize:18, fontWeight:800, margin:0 }}>🎁 Promotions</h2>
         <button
           onClick={() => { setForm(emptyForm); setEditing(null); setShowForm(true); }}
           style={{ background:"linear-gradient(135deg,#10B981,#059669)", border:"none", color:"#fff",
-            padding:"10px 20px", borderRadius:10, fontWeight:700, fontSize:14, cursor:"pointer" }}>
+            padding:"8px 16px", borderRadius:10, fontWeight:700, fontSize:13, cursor:"pointer" }}>
           + Nouvelle promo
         </button>
       </div>

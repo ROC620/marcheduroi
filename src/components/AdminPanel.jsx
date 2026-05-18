@@ -167,6 +167,9 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
       <button onClick={()=>{ const el=document.getElementById("admin-bannières"); if(el) el.scrollIntoView({behavior:"smooth"}); }} style={{ background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
         📢 Gérer les bannières
       </button>
+      <button onClick={()=>{ const el=document.getElementById("admin-vitrines"); if(el) el.scrollIntoView({behavior:"smooth"}); }} style={{ background:"linear-gradient(135deg,#10B981,#059669)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6 }}>
+        🏛️ Gérer vitrines
+      </button>
     </div>
   </div>
 
@@ -448,19 +451,18 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
       </div>
       <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
         {!post.sponsored
-          ? <button onClick={e=>{e.stopPropagation();setModal({type:"sponsor",data:post});}} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>🌟 Sponsoriser</button>
-          : <button onClick={()=>unsponsorPost(post.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>✅ Sponsorisé jusqu'au {post.sponsoredUntil} · Retirer</button>
+          ? <button onClick={e=>{e.stopPropagation();setModal({type:"sponsor",data:post});}} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>🌟</button>
+          : <button onClick={()=>unsponsorPost(post.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>✅</button>
         }
         {!(post.urgent&&new Date(post.urgentUntil)>new Date())
-          ? <button onClick={async()=>{ const until=new Date(); until.setDate(until.getDate()+7); const u=until.toISOString().slice(0,10); await supabase.from("posts").update({urgent:true,urgent_until:u}).eq("id",post.id); setPosts(p=>p.map(x=>x.id===post.id?{...x,urgent:true,urgentUntil:u}:x)); notify("🔥 Badge Urgent activé 7j !"); }} style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🔥 Mettre Urgent</button>
-          : <button onClick={()=>removeUrgent(post.id)} style={{ background:"rgba(255,71,87,0.2)",border:"2px solid #FF4757",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>✅ Urgent jusqu'au {post.urgentUntil} · Retirer</button>
+          ? <button onClick={async()=>{ const until=new Date(); until.setDate(until.getDate()+7); const u=until.toISOString().slice(0,10); await supabase.from("posts").update({urgent:true,urgent_until:u}).eq("id",post.id); setPosts(p=>p.map(x=>x.id===post.id?{...x,urgent:true,urgentUntil:u}:x)); notify("🔥 Badge Urgent activé 7j !"); }} style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🔥</button>
+          : <button onClick={()=>removeUrgent(post.id)} style={{ background:"rgba(255,71,87,0.2)",border:"2px solid #FF4757",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>🔥✅</button>
         }
-        <button onClick={()=>toggleFeatured(post.id)} style={{ background:featuredPosts.includes(post.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>{featuredPosts.includes(post.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
+        <button onClick={()=>toggleFeatured(post.id)} style={{ background:featuredPosts.includes(post.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13 }}>🏆</button>
         <button onClick={()=>toggleCertified(post.authorId||post.author_id, post.author)} style={{ background:isCertified(post.authorId||post.author_id)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6 }}>
-          <CertifiedBadge size={16}/>{isCertified(post.authorId||post.author_id)?"Certifié ✓":"Certifier"}
-        </button>
-        <button onClick={e=>{e.stopPropagation();openEdit(post);}} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
-        <button onClick={e=>{e.stopPropagation();setModal({type:"delete",data:post});}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>Supprimer</button>
+          <CertifiedBadge size={16}/>✅</button>
+        <button onClick={e=>{e.stopPropagation();openEdit(post);}} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️</button>
+        <button onClick={e=>{e.stopPropagation();setModal({type:"delete",data:post});}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 16px",borderRadius:8,fontWeight:600,fontSize:13 }}>🗑️</button>
       </div>
     </div>
   ))}
@@ -473,11 +475,11 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
         <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.sousType||b.type}</p></div>
       </div>
       <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-        <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"✅ Certifié":"Certifier"}</button>
-        <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(b.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
-        {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
-        <button onClick={()=>{ openEditShop(b,"boutique", editShop); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
-        <button onClick={e=>{e.stopPropagation();setModal({type:"deleteshop",data:b,shopType:"boutique"});}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
+        <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✅</button>
+        <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🏆</button>
+        {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅</button>}
+        <button onClick={()=>{ openEditShop(b,"boutique", editShop); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️</button>
+        <button onClick={e=>{e.stopPropagation();setModal({type:"deleteshop",data:b,shopType:"boutique"});}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🗑️</button>
       </div>
     </div>
   ))}
@@ -491,11 +493,11 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
         <div><p style={{ fontWeight:700,color:theme.text }}>{a.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {a.author} · {a.type}</p></div>
       </div>
       <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-        <button onClick={()=>toggleCertified(a.authorId, a.author)} style={{ background:isCertified(a.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(a.authorId)?"✅ Certifié":"Certifier"}</button>
-        <button onClick={()=>toggleFeatured(a.id)} style={{ background:featuredPosts.includes(a.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(a.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
-        {!a.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...a,title:a.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(a.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
-        <button onClick={()=>{ openEditShop(a,"atelier", editShop); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
-        <button onClick={e=>{e.stopPropagation();setModal({type:"deleteshop",data:a,shopType:"atelier"});}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
+        <button onClick={()=>toggleCertified(a.authorId, a.author)} style={{ background:isCertified(a.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✅</button>
+        <button onClick={()=>toggleFeatured(a.id)} style={{ background:featuredPosts.includes(a.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🏆</button>
+        {!a.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...a,title:a.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟</button> : <button onClick={()=>unsponsorPost(a.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅</button>}
+        <button onClick={()=>{ openEditShop(a,"atelier", editShop); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️</button>
+        <button onClick={e=>{e.stopPropagation();setModal({type:"deleteshop",data:a,shopType:"atelier"});}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🗑️</button>
       </div>
     </div>
   ))}
@@ -509,11 +511,11 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
         <div><p style={{ fontWeight:700,color:theme.text }}>{r.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {r.author} · {r.type}</p></div>
       </div>
       <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-        <button onClick={()=>toggleCertified(r.authorId, r.author)} style={{ background:isCertified(r.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(r.authorId)?"✅ Certifié":"Certifier"}</button>
-        <button onClick={()=>toggleFeatured(r.id)} style={{ background:featuredPosts.includes(r.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(r.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
-        {!r.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...r,title:r.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(r.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
-        <button onClick={()=>{ openEditShop(r,"resto", editResto); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
-        <button onClick={e=>{e.stopPropagation();setModal({type:"deleteshop",data:r,shopType:"resto"});}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
+        <button onClick={()=>toggleCertified(r.authorId, r.author)} style={{ background:isCertified(r.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✅</button>
+        <button onClick={()=>toggleFeatured(r.id)} style={{ background:featuredPosts.includes(r.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🏆</button>
+        {!r.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...r,title:r.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟</button> : <button onClick={()=>unsponsorPost(r.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅</button>}
+        <button onClick={()=>{ openEditShop(r,"resto", editResto); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️</button>
+        <button onClick={e=>{e.stopPropagation();setModal({type:"deleteshop",data:r,shopType:"resto"});}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🗑️</button>
       </div>
     </div>
   ))}
@@ -527,11 +529,11 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
         <div><p style={{ fontWeight:700,color:theme.text }}>{b.name}</p><p style={{ color:theme.sub,fontSize:12 }}>Par {b.author} · {b.sousType||b.type}</p></div>
       </div>
       <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
-        <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{isCertified(b.authorId)?"✅ Certifié":"Certifier"}</button>
-        <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>{featuredPosts.includes(b.id)?"🏆 Vedette ✓":"🏆 Vedette"}</button>
-        {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟 Sponsoriser</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅ Sponsorisé · Retirer</button>}
-        <button onClick={()=>{ openEditShop(b,"beaute", editBeaute); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
-        <button onClick={e=>{e.stopPropagation();setModal({type:"deleteshop",data:b,shopType:"beaute"});}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>Supprimer</button>
+        <button onClick={()=>toggleCertified(b.authorId, b.author)} style={{ background:isCertified(b.authorId)?"rgba(108,99,255,0.2)":"rgba(108,99,255,0.05)",border:"none",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✅</button>
+        <button onClick={()=>toggleFeatured(b.id)} style={{ background:featuredPosts.includes(b.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.05)",border:"none",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🏆</button>
+        {!b.sponsored ? <button onClick={()=>setModal({type:"sponsor",data:{...b,title:b.name}})} style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🌟</button> : <button onClick={()=>unsponsorPost(b.id)} style={{ background:"rgba(255,215,0,0.2)",border:"2px solid #FFD700",color:"#FFD700",padding:"8px 14px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>✅</button>}
+        <button onClick={()=>{ openEditShop(b,"beaute", editBeaute); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️</button>
+        <button onClick={e=>{e.stopPropagation();setModal({type:"deleteshop",data:b,shopType:"beaute"});}} style={{ background:"rgba(255,71,87,0.1)",border:"none",color:"#FF4757",padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>🗑️</button>
       </div>
     </div>
   ))}
@@ -730,7 +732,7 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
           </div>
         </div>
         <div style={{ display:"flex",gap:8,flexShrink:0,flexWrap:"wrap" }}>
-          <button onClick={()=>{ setAdEditing(ad.id); setAdForm({ entreprise:ad.entreprise||"", slogan:ad.slogan||"", logo_url:ad.logo_url||"", lien:ad.lien||"", couleur1:ad.couleur1||"#6C63FF", couleur2:ad.couleur2||"#8B84FF", fin:ad.fin||"" }); setShowAdForm(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"7px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️ Modifier</button>
+          <button onClick={()=>{ setAdEditing(ad.id); setAdForm({ entreprise:ad.entreprise||"", slogan:ad.slogan||"", logo_url:ad.logo_url||"", lien:ad.lien||"", couleur1:ad.couleur1||"#6C63FF", couleur2:ad.couleur2||"#8B84FF", fin:ad.fin||"" }); setShowAdForm(true); }} style={{ background:"rgba(108,99,255,0.1)",border:"1px solid rgba(108,99,255,0.3)",color:"#6C63FF",padding:"7px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>✏️</button>
           <button onClick={async()=>{
             await supabase.from("ads").update({actif:!ad.actif}).eq("id",ad.id);
             setAds(prev=>prev.map(a=>a.id===ad.id?{...a,actif:!a.actif}:a));

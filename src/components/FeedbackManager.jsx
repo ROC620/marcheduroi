@@ -91,21 +91,16 @@ export default function FeedbackManager({ theme, notify }) {
 
   return (
     <div style={{ padding:"24px 0" }}>
-      <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
-        <div>
-          <h2 style={{ color:theme.text,fontSize:20,fontWeight:800,margin:0 }}>💬 Feedbacks clients</h2>
-          <p style={{ color:theme.sub,fontSize:13,margin:"4px 0 0" }}>Avis et suggestions sur MarchéduRoi</p>
+      <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16 }}>
+        <h2 style={{ color:theme.text,fontSize:18,fontWeight:800,margin:0 }}>💬 Feedbacks clients</h2>
+        <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+          {["nouveau","lu","repondu","tous"].map(s=>(
+            <button key={s} onClick={()=>setFilter(s)}
+              style={{ padding:"6px 12px",borderRadius:8,border:`1px solid ${filter===s?STATUT_COLORS[s]||"#6C63FF":theme.border}`,background:filter===s?`${STATUT_COLORS[s]||"#6C63FF"}18`:"transparent",color:filter===s?STATUT_COLORS[s]||"#6C63FF":theme.sub,fontWeight:filter===s?700:400,cursor:"pointer",fontSize:12 }}>
+              {s.charAt(0).toUpperCase()+s.slice(1)}{s!=="tous"&&counts[s]?` (${counts[s]})`:""} 
+            </button>
+          ))}
         </div>
-      </div>
-
-      {/* Filtres */}
-      <div style={{ display:"flex",gap:8,marginBottom:20,flexWrap:"wrap" }}>
-        {["nouveau","lu","repondu","tous"].map(s=>(
-          <button key={s} onClick={()=>setFilter(s)}
-            style={{ padding:"8px 14px",borderRadius:8,border:`1px solid ${filter===s?STATUT_COLORS[s]||"#6C63FF":theme.border}`,background:filter===s?`${STATUT_COLORS[s]||"#6C63FF"}18`:"transparent",color:filter===s?STATUT_COLORS[s]||"#6C63FF":theme.sub,fontWeight:filter===s?700:400,cursor:"pointer",fontSize:13 }}>
-            {s.charAt(0).toUpperCase()+s.slice(1)} {s!=="tous"&&counts[s]?`(${counts[s]})`:""} 
-          </button>
-        ))}
       </div>
 
       {/* Liste */}
