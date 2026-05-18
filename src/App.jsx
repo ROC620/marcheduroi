@@ -4213,7 +4213,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 <span style={{ fontSize:10,color:theme.sub,opacity:0.7 }}>›</span>
               </div>
               <div style={{ display:"flex",gap:5,overflowX:"auto",flexWrap:"nowrap",padding:"2px 0",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-                {CATEGORIES.filter(c=>c!=="Mode"&&c!=="Agro-alimentaire").map(c=>{
+                {CATEGORIES.map(c=>{
                   const cc = CATEGORY_COLORS[c]||{bg:"rgba(108,99,255,0.12)",border:"rgba(108,99,255,0.3)",text:"#6C63FF",icon:"🏷️"};
                   const isActive = category === c;
                   return (
