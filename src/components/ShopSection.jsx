@@ -47,6 +47,18 @@ export default function ShopSection({ view, theme, boutiques, ateliers, restos, 
     <>
       {view==="boutiques"&&(
         <div className="page-content" style={{ width:"100%",padding:"32px 24px",animation:"fadeIn 0.4s ease" }}>
+          {/* Navigation établissements */}
+          <div style={{ display:"flex",gap:8,marginBottom:20,flexWrap:"wrap" }}>
+            {[{label:"🛍️ Boutiques",v:"boutiques",count:boutiques.length},{label:"🔧 Ateliers",v:"ateliers",count:ateliers.length},{label:"🍽️ Restos",v:"restos",count:restos.length},{label:"💇 Beauté",v:"beaute",count:beaute.length}].map(tab=>(
+              <button key={tab.v} onClick={()=>setView(tab.v)}
+                style={{ padding:"8px 16px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,
+                  background:view===tab.v?"linear-gradient(135deg,#FF6584,#FFB347)":"transparent",
+                  border:view===tab.v?"none":`1px solid ${theme.border}`,
+                  color:view===tab.v?"#fff":theme.sub }}>
+                {tab.label} <span style={{ background:"rgba(255,255,255,0.25)",borderRadius:10,padding:"1px 7px",fontSize:11 }}>{tab.count}</span>
+              </button>
+            ))}
+          </div>
           {/* Carousel urgent établissements */}
           <EstablishmentUrgentBanner boutiques={boutiques} ateliers={ateliers} restos={restos} beaute={beaute} theme={theme} navigate={navigate} windowWidth={windowWidth} sessionSeed={sessionSeed}/>
           <div style={{ textAlign:"center",marginBottom:40 }}>
@@ -163,6 +175,19 @@ export default function ShopSection({ view, theme, boutiques, ateliers, restos, 
       {/* ATELIERS */}
       {view==="ateliers"&&(
         <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
+          {/* Navigation établissements */}
+          <div style={{ display:"flex",gap:8,marginBottom:20,flexWrap:"wrap" }}>
+            {[{label:"🛍️ Boutiques",v:"boutiques",count:boutiques.length},{label:"🔧 Ateliers",v:"ateliers",count:ateliers.length},{label:"🍽️ Restos",v:"restos",count:restos.length},{label:"💇 Beauté",v:"beaute",count:beaute.length}].map(tab=>(
+              <button key={tab.v} onClick={()=>setView(tab.v)}
+                style={{ padding:"8px 16px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,
+                  background:view===tab.v?"linear-gradient(135deg,#43C6AC,#6C63FF)":"transparent",
+                  border:view===tab.v?"none":`1px solid ${theme.border}`,
+                  color:view===tab.v?"#fff":theme.sub }}>
+                {tab.label} <span style={{ background:"rgba(255,255,255,0.2)",borderRadius:10,padding:"1px 7px",fontSize:11 }}>{tab.count}</span>
+              </button>
+            ))}
+          </div>
+
           <div style={{ textAlign:"center",marginBottom:40 }}>
             <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>🔧 <span style={{ background:"linear-gradient(135deg,#43C6AC,#6C63FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Ateliers</span></h1>
             <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Trouvez l'artisan qu'il vous faut · Cliquez sur Publier mon atelier</p>
@@ -276,6 +301,19 @@ export default function ShopSection({ view, theme, boutiques, ateliers, restos, 
       {/* RESTAURANTS & BARS */}
       {view==="restos"&&(
         <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
+          {/* Navigation établissements */}
+          <div style={{ display:"flex",gap:8,marginBottom:20,flexWrap:"wrap" }}>
+            {[{label:"🛍️ Boutiques",v:"boutiques",count:boutiques.length},{label:"🔧 Ateliers",v:"ateliers",count:ateliers.length},{label:"🍽️ Restos",v:"restos",count:restos.length},{label:"💇 Beauté",v:"beaute",count:beaute.length}].map(tab=>(
+              <button key={tab.v} onClick={()=>setView(tab.v)}
+                style={{ padding:"8px 16px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,
+                  background:view===tab.v?"linear-gradient(135deg,#FF8C00,#FF6584)":"transparent",
+                  border:view===tab.v?"none":`1px solid ${theme.border}`,
+                  color:view===tab.v?"#fff":theme.sub }}>
+                {tab.label} <span style={{ background:"rgba(255,255,255,0.2)",borderRadius:10,padding:"1px 7px",fontSize:11 }}>{tab.count}</span>
+              </button>
+            ))}
+          </div>
+
           <div style={{ textAlign:"center",marginBottom:40 }}>
             <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>🍽️ <span style={{ background:"linear-gradient(135deg,#FF8C00,#FF6584)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Restaurants & Bars</span></h1>
             <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Rendez votre établissement visible partout · Cliquez sur Publier mon établissement</p>
@@ -395,6 +433,19 @@ export default function ShopSection({ view, theme, boutiques, ateliers, restos, 
       {/* BEAUTÉ & COIFFURE */}
       {view==="beaute"&&(
         <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
+          {/* Navigation établissements */}
+          <div style={{ display:"flex",gap:8,marginBottom:20,flexWrap:"wrap" }}>
+            {[{label:"🛍️ Boutiques",v:"boutiques",count:boutiques.length},{label:"🔧 Ateliers",v:"ateliers",count:ateliers.length},{label:"🍽️ Restos",v:"restos",count:restos.length},{label:"💇 Beauté",v:"beaute",count:beaute.length}].map(tab=>(
+              <button key={tab.v} onClick={()=>setView(tab.v)}
+                style={{ padding:"8px 16px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:6,
+                  background:view===tab.v?"linear-gradient(135deg,#FF69B4,#FF1493)":"transparent",
+                  border:view===tab.v?"none":`1px solid ${theme.border}`,
+                  color:view===tab.v?"#fff":theme.sub }}>
+                {tab.label} <span style={{ background:"rgba(255,255,255,0.2)",borderRadius:10,padding:"1px 7px",fontSize:11 }}>{tab.count}</span>
+              </button>
+            ))}
+          </div>
+
           <div style={{ textAlign:"center",marginBottom:40 }}>
             <h1 style={{ fontSize:46,fontWeight:800,marginBottom:12,color:theme.text }}>💇 <span style={{ background:"linear-gradient(135deg,#FF69B4,#FF1493)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Beauté & Coiffure</span></h1>
             <p style={{ color:theme.sub,fontSize:16,marginBottom:20 }}>Rendez votre salon visible partout · Cliquez sur Publier mon salon</p>
