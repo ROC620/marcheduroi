@@ -4207,28 +4207,6 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               </div>
             </div>
 
-            {/* Boutiques Ateliers Restos — défilement horizontal */}
-            <div style={{ position:"relative",marginBottom:8 }}>
-              <div style={{ position:"absolute",right:0,top:0,bottom:0,width:36,background:`linear-gradient(to left,${theme.bg} 30%,transparent)`,zIndex:2,pointerEvents:"none",display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:4 }}>
-                <span style={{ fontSize:10,color:theme.sub,opacity:0.7 }}>›</span>
-              </div>
-              <div style={{ display:"flex",gap:6,overflowX:"auto",flexWrap:"nowrap",padding:"2px 0",scrollbarWidth:"none",WebkitOverflowScrolling:"touch" }}>
-                {[
-                  { label:`🛍️ ${t.boutiques}`, count:boutiques.length, bg:"linear-gradient(135deg,#FF6584,#FFB347)", action:()=>setView("boutiques") },
-                  { label:`🔧 ${t.ateliers}`,   count:ateliers.length,  bg:"linear-gradient(135deg,#43C6AC,#6C63FF)", action:()=>setView("ateliers") },
-                  { label:`🍽️ ${t.restos}`,     count:restos.length,    bg:"linear-gradient(135deg,#FF8C00,#FF6584)", action:()=>setView("restos") },
-                  { label:`💇 ${t.beaute}`,     count:beaute.length,    bg:"linear-gradient(135deg,#FF69B4,#FF1493)", action:()=>setView("beaute") },
-                  { label:"👗 Mode",            count:null, bg:"linear-gradient(135deg,#9A78CF,#6C63FF)", action:()=>setCategory("Mode") },
-                  { label:"🌾 Agro-alimentaire",count:null, bg:"linear-gradient(135deg,#16A34A,#43C6AC)", action:()=>setCategory("Agro-alimentaire") },
-                ].map(s=>(
-                  <button key={s.label} onClick={s.action}
-                    style={{ background:s.bg,border:"none",color:"#fff",padding:"6px 14px",borderRadius:18,fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap" }}>
-                    {s.label} <span style={{ background:"rgba(255,255,255,0.3)",borderRadius:10,padding:"1px 6px",fontSize:11 }}>{s.count}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Catégories — défilement horizontal */}
             <div style={{ position:"relative",marginBottom:8 }}>
               <div style={{ position:"absolute",right:0,top:0,bottom:0,width:36,background:`linear-gradient(to left,${theme.bg} 30%,transparent)`,zIndex:2,pointerEvents:"none",display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:4 }}>
