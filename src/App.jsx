@@ -6369,22 +6369,21 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     </>
                   ) : (
                     <>
+                      {referralStats.credits === 0 && (
+                        <div onClick={()=>{ setModal(null); setView("parrainage"); }}
+                          style={{ background:"rgba(108,99,255,0.06)",border:"1px dashed rgba(108,99,255,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:12,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+                          <span style={{ fontSize:16 }}>💡</span>
+                          <span style={{ color:"#6C63FF",fontSize:12,fontWeight:600 }}>
+                            Parrainez un ami et obtenez 1 service gratuit ! <span style={{ textDecoration:"underline" }}>Voir le parrainage</span>
+                          </span>
+                        </div>
+                      )}
                       {[
                         { dur:"week",     days:7,   price:500,  label:"7 jours",   color:"#FFD700", popular:false },
                         { dur:"month",    days:30,  price:1500, label:"30 jours",  color:"#FFA500", popular:true  },
                         { dur:"3months",  days:90,  price:3500, label:"90 jours",  color:"#FF8C00", popular:false },
                         { dur:"6months",  days:180, price:6000, label:"180 jours", color:"#FF6B35", popular:false },
                       ].map(opt=>(
-
-                {referralStats.credits === 0 && (
-                  <div onClick={()=>{ setModal(null); setView("parrainage"); }}
-                    style={{ background:"rgba(108,99,255,0.06)",border:"1px dashed rgba(108,99,255,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:12,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
-                    <span style={{ fontSize:16 }}>💡</span>
-                    <span style={{ color:"#6C63FF",fontSize:12,fontWeight:600 }}>
-                      Parrainez un ami et obtenez 1 service gratuit ! <span style={{ textDecoration:"underline" }}>Voir le parrainage</span>
-                    </span>
-                  </div>
-                )}
                         <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Sponsoring ${opt.label} sur MarchéduRoi`,async()=>{
                           await sponsorPost(modal.data.id,opt.dur);
                           setModal({type:"sponsor_success",data:modal.data,duration:opt.label});
