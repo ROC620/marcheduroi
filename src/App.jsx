@@ -6094,16 +6094,16 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
       }
     }
                   }
-
-                {referralStats.credits === 0 && (
-                  <div onClick={()=>{ setModal(null); setView("parrainage"); }}
-                    style={{ background:"rgba(108,99,255,0.06)",border:"1px dashed rgba(108,99,255,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:10,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
-                    <span style={{ fontSize:16 }}>💡</span>
-                    <span style={{ color:"#6C63FF",fontSize:12,fontWeight:600 }}>
-                      Parrainez un ami et obtenez 1 service gratuit ! <span style={{ textDecoration:"underline" }}>Voir le parrainage</span>
-                    </span>
-                  </div>
-                )}
+                  {referralStats.credits === 0 && selectedTarif !== -1 && !modal.data?.editing && (
+                    <div onClick={()=>{ setModal(null); setView("parrainage"); }}
+                      style={{ background:"rgba(108,99,255,0.06)",border:"1px dashed rgba(108,99,255,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:10,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+                      <span style={{ fontSize:16 }}>💡</span>
+                      <span style={{ color:"#6C63FF",fontSize:12,fontWeight:600 }}>
+                        Parrainez un ami et obtenez 1 service gratuit ! <span style={{ textDecoration:"underline" }}>Voir le parrainage</span>
+                      </span>
+                    </div>
+                  )}
+                  <button
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:shopMode==="boutique"?"linear-gradient(135deg,#FF6584,#FFB347)":"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
                   {modal.data?.editing?"✅ Appliquer les modifications":user?.role==="admin"?`Publier ${shopMode==="boutique"?"la boutique":"l'atelier"}`:selectedTarif===-1?"🎁 Publier gratuitement (4 jours)":referralStats.credits>0?"🎁 Utiliser mon crédit parrainage":`💳 Payer & Publier · ${(TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]).price.toLocaleString()} FCFA`}
