@@ -954,6 +954,11 @@ function AppContent() {
   // Navigation avec historique — remplace setView partout
   const setView = (newView) => {
     if (newView === view) return;
+    // Vider la recherche quand on change de contexte (annonces ↔ établissements)
+    const SHOPS = ["boutiques","ateliers","restos","beaute"];
+    const fromShop = SHOPS.includes(view);
+    const toShop   = SHOPS.includes(newView);
+    if (fromShop !== toShop) setSearch("");
     history.pushState({ view: newView }, "", window.location.pathname);
     setViewState(newView);
     window.scrollTo(0, 0);
@@ -2554,13 +2559,16 @@ const PHONE_EXAMPLE = {
     // Appliquer la promo si disponible
     const { prixFinal } = cible ? applyPromo(amountXOF, cible) : { prixFinal: amountXOF };
     const montant = prixFinal;
-    // Vérifier si l'utilisateur a un crédit parrainage disponible
-    const creditUsed = await useCredit();
-    if (creditUsed) {
-      notify("🎁 Crédit parrainage utilisé — Publication gratuite !");
-      notifyAdmin({ type: cible||"paiement", nom: user?.name||"Utilisateur", montant: 0, details: description + " (crédit parrainage)" });
-      onSuccess();
-      return;
+    // Crédits parrainage — uniquement sur les services payants (pas les annonces gratuites)
+    const CIBLES_PAYANTES = ["boutique","atelier","resto","beaute","sponsoring","urgent","pro","vitrine","renouvellement","modification","demande"];
+    if (cible && CIBLES_PAYANTES.includes(cible)) {
+      const creditUsed = await useCredit();
+      if (creditUsed) {
+        notify("🎁 Crédit parrainage utilisé — Service gratuit !");
+        notifyAdmin({ type: cible, nom: user?.name||"Utilisateur", montant: 0, details: description + " (crédit parrainage)" });
+        onSuccess();
+        return;
+      }
     }
     // Wrapper onSuccess pour notifier admin après paiement
     const onSuccessWithNotif = (...args) => {
@@ -6086,9 +6094,19 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
       }
     }
                   }
+
+                {referralStats.credits === 0 && (
+                  <div onClick={()=>{ setModal(null); setView("parrainage"); }}
+                    style={{ background:"rgba(108,99,255,0.06)",border:"1px dashed rgba(108,99,255,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:10,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+                    <span style={{ fontSize:16 }}>💡</span>
+                    <span style={{ color:"#6C63FF",fontSize:12,fontWeight:600 }}>
+                      Parrainez un ami et obtenez 1 service gratuit ! <span style={{ textDecoration:"underline" }}>Voir le parrainage</span>
+                    </span>
+                  </div>
+                )}
                   className="btn-glow"
                   style={{ width:"100%",padding:"14px",background:shopMode==="boutique"?"linear-gradient(135deg,#FF6584,#FFB347)":"linear-gradient(135deg,#43C6AC,#6C63FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,transition:"box-shadow 0.2s" }}>
-                  {modal.data?.editing?"✅ Appliquer les modifications":user?.role==="admin"?`Publier ${shopMode==="boutique"?"la boutique":"l'atelier"}`:selectedTarif===-1?"🎁 Publier gratuitement (4 jours)":`💳 Payer & Publier · ${(TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]).price.toLocaleString()} FCFA`}
+                  {modal.data?.editing?"✅ Appliquer les modifications":user?.role==="admin"?`Publier ${shopMode==="boutique"?"la boutique":"l'atelier"}`:selectedTarif===-1?"🎁 Publier gratuitement (4 jours)":referralStats.credits>0?"🎁 Utiliser mon crédit parrainage":`💳 Payer & Publier · ${(TARIFS_BOUTIQUE[selectedTarif]||TARIFS_BOUTIQUE[0]).price.toLocaleString()} FCFA`}
                 </button>
               </>
             )}
@@ -6360,6 +6378,16 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                         { dur:"3months",  days:90,  price:3500, label:"90 jours",  color:"#FF8C00", popular:false },
                         { dur:"6months",  days:180, price:6000, label:"180 jours", color:"#FF6B35", popular:false },
                       ].map(opt=>(
+
+                {referralStats.credits === 0 && (
+                  <div onClick={()=>{ setModal(null); setView("parrainage"); }}
+                    style={{ background:"rgba(108,99,255,0.06)",border:"1px dashed rgba(108,99,255,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:12,cursor:"pointer",display:"flex",alignItems:"center",gap:8 }}>
+                    <span style={{ fontSize:16 }}>💡</span>
+                    <span style={{ color:"#6C63FF",fontSize:12,fontWeight:600 }}>
+                      Parrainez un ami et obtenez 1 service gratuit ! <span style={{ textDecoration:"underline" }}>Voir le parrainage</span>
+                    </span>
+                  </div>
+                )}
                         <div key={opt.dur} onClick={()=>handlePayment(opt.price,`Sponsoring ${opt.label} sur MarchéduRoi`,async()=>{
                           await sponsorPost(modal.data.id,opt.dur);
                           setModal({type:"sponsor_success",data:modal.data,duration:opt.label});
@@ -6552,6 +6580,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:5 }}>📸 Photo (optionnel)</label>
                   <PhotoUploader photos={promoPhotos} setPhotos={setPromoPhotos} theme={theme} folder="annonces"/>
                 </div>
+                {referralStats.credits > 0 && (
+                  <div style={{ background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:10,display:"flex",alignItems:"center",gap:8 }}>
+                    <span style={{ color:"#10B981",fontSize:13,fontWeight:600 }}>
+                      🎁 Vous avez {referralStats.credits} crédit{referralStats.credits>1?"s":""} parrainage — ce service sera gratuit !
+                    </span>
+                  </div>
+                )}
                 <button onClick={()=>handlePayment(500,"Publication Promo/Nouveauté sur MarchéduRoi",()=>addPromo(modal.data, modal.shopType), "boutique")}
                   className="btn-glow"
                   style={{ width:"100%",padding:"13px",background:"linear-gradient(135deg,#FF8C00,#FFD700)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:14,cursor:"pointer" }}>
