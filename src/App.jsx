@@ -1879,7 +1879,7 @@ function AppContent() {
 
     // Initialiser l'historique avec la vue de départ
     if (!history.state?.view) {
-      history.replaceState({ view: "landing" }, "", window.location.pathname);
+      history.replaceState({ view: "landing" }, "", window.location.pathname + window.location.search);
     }
 
     return () => {
