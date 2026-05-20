@@ -1952,6 +1952,13 @@ function AppContent() {
     if (!hasOgPost && !returnView && window.location.pathname === "/") {
       setViewState("landing");
     }
+    // Gérer le lien de parrainage
+    const refFromUrl = new URLSearchParams(window.location.search).get("ref");
+    if (refFromUrl) {
+      localStorage.setItem("mdr_ref", refFromUrl);
+      setAuthForm(a => ({...a, referralCode: refFromUrl}));
+      setTimeout(() => setViewState("register"), 300);
+    }
     if (window.location.pathname === "/reset-password") {
       setViewState("reset-password");
       // Lire params depuis sessionStorage (capturés avant React dans index.html)
@@ -2184,13 +2191,6 @@ const PHONE_EXAMPLE = {
     const phoneRx = PHONE_REGEX[authForm.country];
     if (phoneRx && !phoneRx.test(authForm.phone.trim())) {
       notify("Numéro invalide pour ce pays — ex: "+(PHONE_EXAMPLE[authForm.country]||"+XXX XX XX XX XX"), "error"); return;
-    }
-
-    const refFromUrl = new URLSearchParams(window.location.search).get("ref");
-    if (refFromUrl) {
-      localStorage.setItem("mdr_ref", refFromUrl);
-      setAuthForm(a => ({...a, referralCode: refFromUrl}));
-      setTimeout(() => setViewState("register"), 300);
     }
 
     const { data, error } = await supabase.auth.signUp({
