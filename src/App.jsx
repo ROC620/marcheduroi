@@ -1953,7 +1953,9 @@ function AppContent() {
     if (refFromUrl) {
       localStorage.setItem("mdr_ref", refFromUrl);
       setAuthForm(a => ({...a, referralCode: refFromUrl}));
-      setTimeout(() => setViewState("register"), 300);
+      // Garder le ?ref dans l'URL et forcer la vue register
+      setViewState("register");
+      // Empêcher getSession de rediriger vers home
     } else {
       const hasOgPost = new URLSearchParams(window.location.search).get("mdr_post");
       if (!hasOgPost && !returnView && window.location.pathname === "/") {
@@ -1983,7 +1985,8 @@ function AppContent() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         const isNewConfirmation = session.user.email_confirmed_at &&
-          (Date.now() - new Date(session.user.email_confirmed_at).getTime()) < 30000; // Confirmé dans les 30 dernières secondes
+          (Date.now() - new Date(session.user.email_confirmed_at).getTime()) < 30000;
+        const hasRef = new URLSearchParams(window.location.search).get("ref");
         supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
           .then(({ data }) => {
             if (data) {
@@ -1999,6 +2002,9 @@ function AppContent() {
                     .then(() => localStorage.removeItem("mdr_ref"))
                     .catch(() => {});
                 }
+              } else if (!hasRef) {
+                // Ne pas rediriger si on arrive via un lien de parrainage
+                setView("home");
               }
             }
           });
