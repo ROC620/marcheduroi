@@ -2036,24 +2036,25 @@ function AppContent() {
       }
       if (event === "SIGNED_IN" || event === "USER_UPDATED") {
         if (window.location.pathname === "/reset-password") return;
-        // Détecter si c'est une confirmation d'email (token dans l'URL)
         const hash = window.location.hash;
         const isEmailConfirmation = hash.includes("type=signup") || hash.includes("type=email_change") || event === "USER_UPDATED";
-        setTimeout(() => {
-          supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
-            .then(({ data }) => {
-              if (data) {
-                setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
-                localStorage.setItem("mdr_user_role", data.role||"user");
-                setView("home");
-                if (isEmailConfirmation) {
-                  notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
-                  // Nettoyer le hash de l'URL
-                  window.history.replaceState(null, "", window.location.pathname);
-                }
-              }
-            });
-        }, 500);
+        
+        // Retry jusqu'à 5 fois pour attendre que le profil soit disponible
+        const tryLoadProfile = async (attempts = 0) => {
+          const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle();
+          if (data) {
+            setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
+            localStorage.setItem("mdr_user_role", data.role||"user");
+            setView("home");
+            if (isEmailConfirmation) {
+              notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
+              window.history.replaceState(null, "", window.location.pathname);
+            }
+          } else if (attempts < 5) {
+            setTimeout(() => tryLoadProfile(attempts + 1), 800);
+          }
+        };
+        setTimeout(() => tryLoadProfile(), 500);
       }
     });
   }, []);
@@ -2086,9 +2087,15 @@ function AppContent() {
   const login = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email:authForm.email, password:authForm.password });
     if (error) {
+      // Vérifier si c'est un email non confirmé
+      if (error.message?.toLowerCase().includes("email not confirmed")) {
+        setLoginError("email_not_confirmed");
+        return;
+      }
       // Vérifier si l'email existe dans la base
       const { count } = await supabase.from("profiles").select("email", {count:"exact", head:true}).eq("email", authForm.email.toLowerCase().trim());
       if (count === 0) {
+        // Vérifier aussi dans auth.users via une inscription test
         setLoginError("unknown_email");
       } else {
         setLoginError("wrong_password");
@@ -4852,6 +4859,19 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
             <button onClick={login} className="btn-glow" style={{ width:"100%",padding:"14px",background:"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s" }}>Se connecter</button>
 
             {/* Message d'erreur inline */}
+            {loginError==="email_not_confirmed" && (
+              <div style={{ marginTop:14,padding:"14px 16px",background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:12,textAlign:"center" }}>
+                <p style={{ color:"#10B981",fontWeight:700,fontSize:14,marginBottom:6 }}>📧 Email non confirmé</p>
+                <p style={{ color:theme.sub,fontSize:12,marginBottom:10 }}>Vous êtes bien inscrit ! Vérifiez votre boîte mail et cliquez sur le lien de confirmation avant de vous connecter.</p>
+                <button onClick={async()=>{
+                  const { error } = await supabase.auth.resend({ type:"signup", email:authForm.email });
+                  if (!error) notify("📧 Email de confirmation renvoyé !");
+                  else notify("Erreur lors du renvoi","error");
+                }} style={{ background:"linear-gradient(135deg,#10B981,#059669)",border:"none",color:"#fff",padding:"8px 20px",borderRadius:20,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                  📨 Renvoyer l'email de confirmation
+                </button>
+              </div>
+            )}
             {loginError==="unknown_email" && (
               <div style={{ marginTop:14,padding:"14px 16px",background:"rgba(255,71,87,0.08)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:12,textAlign:"center" }}>
                 <p style={{ color:"#FF4757",fontWeight:700,fontSize:14,marginBottom:6 }}>❌ Cet email n'est pas encore inscrit</p>
