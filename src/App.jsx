@@ -3319,7 +3319,8 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
         </div>
       )}
 
-      {/* Filigrane MarchéduRoi */}
+      {/* Filigrane MarchéduRoi — desktop seulement */}
+      {windowWidth > 600 && (
       <div aria-hidden="true" style={{ position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden",
         backgroundImage:`repeating-linear-gradient(-30deg, transparent, transparent 120px, rgba(108,99,255,0.012) 120px, rgba(108,99,255,0.012) 121px)`,
         opacity:0.5 }}>
@@ -3331,6 +3332,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
           ))}
         </div>
       </div>
+      )}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
