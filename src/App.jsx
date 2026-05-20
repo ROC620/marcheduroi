@@ -1948,16 +1948,17 @@ function AppContent() {
       }
     }
     // Forcer la page d'accueil à chaque rechargement (sauf retour depuis fiche ou lien partagé)
-    const hasOgPost = new URLSearchParams(window.location.search).get("mdr_post");
-    if (!hasOgPost && !returnView && window.location.pathname === "/") {
-      setViewState("landing");
-    }
-    // Gérer le lien de parrainage
+    // Gérer le lien de parrainage — priorité sur landing
     const refFromUrl = new URLSearchParams(window.location.search).get("ref");
     if (refFromUrl) {
       localStorage.setItem("mdr_ref", refFromUrl);
       setAuthForm(a => ({...a, referralCode: refFromUrl}));
       setTimeout(() => setViewState("register"), 300);
+    } else {
+      const hasOgPost = new URLSearchParams(window.location.search).get("mdr_post");
+      if (!hasOgPost && !returnView && window.location.pathname === "/") {
+        setViewState("landing");
+      }
     }
     if (window.location.pathname === "/reset-password") {
       setViewState("reset-password");
