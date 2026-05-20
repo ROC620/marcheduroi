@@ -958,7 +958,10 @@ function AppContent() {
     const SHOPS = ["boutiques","ateliers","restos","beaute"];
     const fromShop = SHOPS.includes(view);
     const toShop   = SHOPS.includes(newView);
-    if (fromShop !== toShop) setSearch("");
+    if (fromShop !== toShop) {
+      setSearch("");
+      setCategory("Toutes");
+    }
     history.pushState({ view: newView }, "", window.location.pathname);
     setViewState(newView);
     window.scrollTo(0, 0);
@@ -4298,7 +4301,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   const cc = CATEGORY_COLORS[c]||{bg:"rgba(108,99,255,0.12)",border:"rgba(108,99,255,0.3)",text:"#6C63FF",icon:"🏷️"};
                   const isActive = category === c;
                   return (
-                    <button key={c} onClick={()=>setCategory(c)}
+                    <button key={c} onClick={()=>{ setCategory(c); if(c==="Toutes") setSearch(""); }}
                       style={{
                         background: isActive ? cc.text : cc.bg,
                         border: `1px solid ${isActive ? cc.text : cc.border}`,
