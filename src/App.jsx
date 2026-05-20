@@ -1991,6 +1991,7 @@ function AppContent() {
           .then(({ data }) => {
             if (data) {
               setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
+              if (data.ref_code) setReferralStats(s => ({...s, refCode: data.ref_code}));
               localStorage.setItem("mdr_user_role", data.role||"user");
               if (isNewConfirmation) {
                 setView("home");
@@ -2071,6 +2072,7 @@ function AppContent() {
           const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle();
           if (data) {
             setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
+              if (data.ref_code) setReferralStats(s => ({...s, refCode: data.ref_code}));
             localStorage.setItem("mdr_user_role", data.role||"user");
             setView("home");
             if (isEmailConfirmation) {
@@ -2221,7 +2223,13 @@ const PHONE_EXAMPLE = {
     if (!data.user) { notify("Erreur lors de la création du compte","error"); return; }
 
     // Créer le profil
-    await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ", phone:authForm.phone||null, email:authForm.email.toLowerCase().trim() });
+    // Générer un code de parrainage unique (6 caractères)
+    const genRefCode = () => {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      return Array.from({length:6}, () => chars[Math.floor(Math.random()*chars.length)]).join("");
+    };
+    const refCode = genRefCode();
+    await supabase.from("profiles").insert({ id:data.user.id, name:authForm.name, role:"user", country:authForm.country||"BJ", phone:authForm.phone||null, email:authForm.email.toLowerCase().trim(), ref_code:refCode });
 
     // NE PAS connecter l'utilisateur — attendre confirmation email
     setTurnstileToken("");
@@ -2232,7 +2240,15 @@ const PHONE_EXAMPLE = {
   };
 
   // ─── SYSTÈME DE PARRAINAGE ───────────────────────────────────────────────────
-  const processReferral = async (referrerId, referredId) => {
+  const processReferral = async (referrerIdOrCode, referredId) => {
+    // Résoudre ref_code → user_id si nécessaire
+    let referrerId = referrerIdOrCode;
+    if (referrerIdOrCode && referrerIdOrCode.length <= 8) {
+      // C'est un code court — chercher l'UUID correspondant
+      const { data: profile } = await supabase.from("profiles").select("id").eq("ref_code", referrerIdOrCode.toUpperCase()).maybeSingle();
+      if (!profile) return; // Code invalide
+      referrerId = profile.id;
+    }
     // Éviter les doublons
     const { data: existing } = await supabase
       .from("referrals")
@@ -2280,7 +2296,7 @@ const PHONE_EXAMPLE = {
   };
 
   // Récupérer les stats de parrainage d'un utilisateur
-  const [referralStats, setReferralStats] = useState({ count:0, credits:0, saved:0 });
+  const [referralStats, setReferralStats] = useState({ count:0, credits:0, saved:0, refCode:"" });
 
   useEffect(() => {
     if (!user) return;
@@ -2294,6 +2310,11 @@ const PHONE_EXAMPLE = {
         .from("credits")
         .select("months, used")
         .eq("user_id", user.id);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("ref_code")
+        .eq("id", user.id)
+        .maybeSingle();
       const count = refs?.length || 0;
       const totalCredits = creds?.reduce((a,c) => a + (c.used ? 0 : c.months), 0) || 0;
       const usedCredits = creds?.reduce((a,c) => a + (c.used ? c.months : 0), 0) || 0;
@@ -2301,6 +2322,7 @@ const PHONE_EXAMPLE = {
         count,
         credits: totalCredits,
         saved: usedCredits * 1500,
+        refCode: profile?.ref_code || "",
       });
     };
     loadReferralStats();
