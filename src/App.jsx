@@ -3320,17 +3320,16 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
       )}
 
       {/* Filigrane MarchéduRoi */}
-      <div aria-hidden="true" style={{ position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden" }}>
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="mdr-watermark" x="0" y="0" width="280" height="180" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
-              <image href="/marcheduRoi-icon.svg" x="85" y="8" width="36" height="32" opacity="0.055"/>
-              <text x="50" y="80" fontFamily="Sora,sans-serif" fontSize="16" fontWeight="700" fill="currentColor" opacity="0.045" letterSpacing="1">MarchéduRoi</text>
-              <text x="60" y="100" fontFamily="Sora,sans-serif" fontSize="10" fontWeight="400" fill="currentColor" opacity="0.03" letterSpacing="0.5">marcheduroi.com</text>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#mdr-watermark)"/>
-        </svg>
+      <div aria-hidden="true" style={{ position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden",
+        backgroundImage:`repeating-linear-gradient(-30deg, transparent, transparent 120px, rgba(108,99,255,0.012) 120px, rgba(108,99,255,0.012) 121px)`,
+        opacity:0.5 }}>
+        <div style={{ position:"absolute",inset:0,display:"flex",flexWrap:"wrap",alignContent:"flex-start",gap:0 }}>
+          {Array.from({length:60}).map((_,i)=>(
+            <div key={i} style={{ width:"25%",padding:"18px 0",textAlign:"center",color:"currentColor",opacity:0.035,fontSize:11,fontWeight:700,letterSpacing:1,transform:"rotate(-30deg)",whiteSpace:"nowrap",overflow:"hidden",userSelect:"none" }}>
+              MarchéduRoi
+            </div>
+          ))}
+        </div>
       </div>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
