@@ -2180,7 +2180,13 @@ const PHONE_EXAMPLE = {
     }
 
     const refFromUrl = new URLSearchParams(window.location.search).get("ref");
-    if (refFromUrl) localStorage.setItem("mdr_ref", refFromUrl);
+    if (refFromUrl) {
+      localStorage.setItem("mdr_ref", refFromUrl);
+      // Rediriger vers l'inscription si pas connecté
+      if (!localStorage.getItem("mdr_user_role")) {
+        setTimeout(() => setViewState("register"), 300);
+      }
+    }
 
     const { data, error } = await supabase.auth.signUp({
       email: authForm.email,
