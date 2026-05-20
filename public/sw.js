@@ -1,7 +1,7 @@
-const CACHE_NAME = "marcheduroi-v22";
+const CACHE_NAME = "marcheduroi-v23";
 const STATIC_ASSETS = ["/", "/index.html"];
 self.addEventListener("install", (event) => {
-  self.skipWaiting(); // Forcer remplacement immédiat
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
@@ -10,24 +10,28 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim()) // Prendre le contrôle immédiatement
+    ).then(() => self.clients.claim())
   );
 });
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
-  // Ignorer les requêtes non-GET
   if (event.request.method !== "GET") return;
-  // Ignorer les APIs externes
   const externalDomains = [
     "supabase.co", "fedapay.com", "flutterwave.com",
     "cloudflare.com", "cloudinary.com", "resend.com",
     "googleapis.com", "gstatic.com", "youtube.com", "youtu.be"
   ];
   if (externalDomains.some(d => url.hostname.includes(d))) return;
-  // URLs à laisser au réseau (pages HTML séparées, APIs Vercel)
   const bypassRoutes = ["/demandes", "/api/"];
   if (bypassRoutes.some(r => url.pathname.startsWith(r))) return;
-  // Routes SPA → toujours servir index.html
+
+  // Si l'URL contient des paramètres importants (ref, code, token) → réseau direct
+  const importantParams = ["ref", "code", "token", "mdr_post"];
+  if (importantParams.some(p => url.searchParams.has(p))) {
+    event.respondWith(fetch(event.request).catch(() => caches.match("/index.html")));
+    return;
+  }
+
   const spaRoutes = ["/annonce/", "/boutique/", "/atelier/", "/resto/", "/beaute/", "/structure/", "/vitrine", "/vitrines", "/reset-password"];
   if (url.pathname === "/" || spaRoutes.some(r => url.pathname.startsWith(r))) {
     event.respondWith(
@@ -37,7 +41,6 @@ self.addEventListener("fetch", (event) => {
     );
     return;
   }
-  // Assets statiques → cache first, network fallback
   if (url.hostname === self.location.hostname) {
     event.respondWith(
       caches.match(event.request).then(cached => {
