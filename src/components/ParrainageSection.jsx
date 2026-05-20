@@ -9,22 +9,23 @@ export default function ParrainageSection({ theme, user, setView, setModal, noti
     <div style={{ textAlign:"center",marginBottom:40 }}>
       <p style={{ fontSize:48,marginBottom:12 }}>🎁</p>
       <h1 style={{ fontSize:38,fontWeight:800,marginBottom:12,color:theme.text }}>Programme de <span style={{ background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>Parrainage</span></h1>
-      <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez <strong style={{ color:"#FFD700" }}>10 amis</strong> sur MarchéduRoi et gagnez <strong style={{ color:"#FFD700" }}>1 mois de publication gratuit</strong> !</p>
+      <p style={{ color:theme.sub,fontSize:16,lineHeight:1.7 }}>Invitez <strong style={{ color:"#FFD700" }}>10 amis</strong> sur MarchéduRoi et gagnez <strong style={{ color:"#FFD700" }}>1 mois de service gratuit</strong> !</p>
       <div style={{ background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:12,padding:"12px 20px",marginTop:12,display:"inline-block" }}>
-        <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>🎁 10 parrainages = 1 annonce simple gratuite (valeur 1 000 FCFA)</p>
-        <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>⚠️ Valable uniquement pour les annonces simples · Non applicable aux boutiques, ateliers, restos et salons</p>
+        <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>🎁 10 parrainages = 1 mois gratuit · 150 parrainages = 1 an de VitrineWeb</p>
+        <p style={{ color:theme.sub,fontSize:12,marginTop:4 }}>Valable sur boutiques, sponsoring, badge URGENT et plus</p>
       </div>
     </div>
     {/* Règles claires */}
     <div style={{ ...cardStyle,borderRadius:16,padding:24,marginBottom:24 }}>
       <h3 style={{ fontWeight:800,fontSize:16,color:theme.text,marginBottom:16 }}>📋 Comment ça marche ?</h3>
       {[
-        { num:"1", text:"Partagez votre lien unique à vos amis et contacts" },
+        { num:"1", text:"Partagez votre lien ou code unique à vos amis et contacts" },
         { num:"2", text:"Chaque ami qui s'inscrit via votre lien compte comme 1 parrainage" },
-        { num:"3", text:"Après 10 parrainages confirmés, vous gagnez 1 annonce simple gratuite (30 jours)" },
-        { num:"4", text:"Valable uniquement pour 1 annonce simple (valeur 1 000 FCFA)" },
-        { num:"5", text:"Non applicable aux boutiques, ateliers, restos et salons de beauté" },
-        { num:"6", text:"Les crédits ne sont pas transférables ni remboursables en argent" },
+        { num:"3", text:"Après 10 parrainages confirmés, vous gagnez 1 crédit" },
+        { num:"4", text:"1 crédit = 1 mois gratuit au choix (boutique, sponsoring, badge URGENT...)" },
+        { num:"5", text:"Pour gagner 1 an de VitrineWeb, il faut 150 parrainages" },
+        { num:"6", text:"Les crédits s'utilisent automatiquement lors de votre prochain paiement" },
+        { num:"7", text:"Les crédits ne sont pas transférables ni remboursables en argent" },
       ].map(r=>(
         <div key={r.num} style={{ display:"flex",gap:12,marginBottom:12,alignItems:"flex-start" }}>
           <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#FFD700,#FFA500)",display:"flex",alignItems:"center",justifyContent:"center",color:"#000",fontWeight:800,fontSize:13,flexShrink:0 }}>{r.num}</div>
@@ -32,7 +33,7 @@ export default function ParrainageSection({ theme, user, setView, setModal, noti
         </div>
       ))}
       <div style={{ background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:10,padding:"12px 16px",marginTop:8,textAlign:"center" }}>
-        <p style={{ color:"#FFD700",fontWeight:800,fontSize:16 }}>🎯 10 parrainages = 1 annonce gratuite (valeur 1 000 FCFA)</p>
+        <p style={{ color:"#FFD700",fontWeight:800,fontSize:16 }}>🎯 10 parrainages = 1 mois gratuit · 150 = 1 an VitrineWeb</p>
       </div>
     </div>
     {user ? (
@@ -65,7 +66,7 @@ export default function ParrainageSection({ theme, user, setView, setModal, noti
         {referralStats.count > 0 && (
           <div style={{ marginTop:16,background:"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.3)",borderRadius:10,padding:"10px 16px",textAlign:"center" }}>
             <p style={{ color:"#FFD700",fontSize:13,fontWeight:600 }}>
-              🎯 Plus que {10 - (referralStats.count % 10)} parrainage{10-(referralStats.count%10)>1?"s":""} pour gagner 1 mois gratuit !
+              🎯 Plus que {10 - (referralStats.count % 10)} parrainage{10-(referralStats.count%10)>1?"s":""} pour gagner 1 crédit !
             </p>
           </div>
         )}

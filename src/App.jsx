@@ -2635,7 +2635,7 @@ const PHONE_EXAMPLE = {
     const { prixFinal } = cible ? applyPromo(amountXOF, cible) : { prixFinal: amountXOF };
     const montant = prixFinal;
     // Crédits parrainage — uniquement sur les services payants (pas les annonces gratuites)
-    const CIBLES_PAYANTES = ["boutique","atelier","resto","beaute","sponsoring","urgent","pro","vitrine","renouvellement","modification","demande"];
+    const CIBLES_PAYANTES = ["boutique","atelier","resto","beaute","sponsoring","urgent","pro","modification","demande"];
     if (cible && CIBLES_PAYANTES.includes(cible)) {
       const creditUsed = await useCredit();
       if (creditUsed) {
