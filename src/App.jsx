@@ -1984,6 +1984,13 @@ function AppContent() {
               if (isNewConfirmation) {
                 setView("home");
                 notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
+                // Traiter le parrainage après confirmation
+                const pendingRef = localStorage.getItem("mdr_ref");
+                if (pendingRef && pendingRef !== session.user.id) {
+                  processReferral(pendingRef, session.user.id)
+                    .then(() => localStorage.removeItem("mdr_ref"))
+                    .catch(() => {});
+                }
               }
             }
           });
@@ -2182,10 +2189,8 @@ const PHONE_EXAMPLE = {
     const refFromUrl = new URLSearchParams(window.location.search).get("ref");
     if (refFromUrl) {
       localStorage.setItem("mdr_ref", refFromUrl);
-      // Rediriger vers l'inscription si pas connecté
-      if (!localStorage.getItem("mdr_user_role")) {
-        setTimeout(() => setViewState("register"), 300);
-      }
+      // Toujours rediriger vers l'inscription avec un lien de parrainage
+      setTimeout(() => setViewState("register"), 300);
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -4964,6 +4969,22 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 inputMode="tel"
                 style={inputStyle}
               />
+            </div>
+
+            {/* Code de parrainage */}
+            <div style={{ marginBottom:16 }}>
+              <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎁 Code de parrainage <span style={{ color:theme.sub,fontSize:11,fontWeight:400 }}>(optionnel)</span></label>
+              <input
+                type="text"
+                value={authForm.referralCode||localStorage.getItem("mdr_ref")||""}
+                onChange={e=>setAuthForm(a=>({...a,referralCode:e.target.value}))}
+                placeholder="Code de votre parrain"
+                maxLength={60}
+                style={{ ...inputStyle, background: localStorage.getItem("mdr_ref") ? "rgba(255,215,0,0.05)" : inputStyle.background, border: localStorage.getItem("mdr_ref") ? "1px solid rgba(255,215,0,0.4)" : inputStyle.border }}
+              />
+              {localStorage.getItem("mdr_ref") && (
+                <p style={{ color:"#FFD700",fontSize:11,marginTop:4 }}>🎁 Code de parrainage détecté automatiquement</p>
+              )}
             </div>
 
             <button onClick={register} className="btn-glow" disabled={!authForm.name||!authForm.email||!authForm.password||!authForm.phone} style={{ width:"100%",padding:"14px",background:(!authForm.name||!authForm.email||!authForm.password||!authForm.phone)?"rgba(108,99,255,0.4)":"linear-gradient(135deg,#6C63FF,#8B84FF)",border:"none",color:"#fff",borderRadius:12,fontWeight:700,fontSize:15,marginTop:8,transition:"box-shadow 0.2s",cursor:(!authForm.name||!authForm.email||!authForm.password||!authForm.phone)?"not-allowed":"pointer" }}>Créer mon compte</button>
