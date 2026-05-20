@@ -1974,12 +1974,18 @@ function AppContent() {
     }
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
+        const isNewConfirmation = session.user.email_confirmed_at &&
+          (Date.now() - new Date(session.user.email_confirmed_at).getTime()) < 30000; // Confirmé dans les 30 dernières secondes
         supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle()
           .then(({ data }) => {
             if (data) {
-            setUser({ id:session.user.id, name:data.name, role:data.role||"user" });
-            localStorage.setItem("mdr_user_role", data.role||"user");
-          }
+              setUser({ id:session.user.id, name:data.name, role:data.role||"user", emailConfirmed:true });
+              localStorage.setItem("mdr_user_role", data.role||"user");
+              if (isNewConfirmation) {
+                setView("home");
+                notify("✅ Email confirmé ! Bienvenue sur MarchéduRoi 🎉");
+              }
+            }
           });
       }
     });
