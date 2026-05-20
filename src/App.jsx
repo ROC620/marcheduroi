@@ -5076,7 +5076,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
       {/* PARRAINAGE */}
       {view==="parrainage"&&(
         <ParrainageSection
-          theme={theme} user={user} setView={setView} setModal={setModal} notify={notify} t={t} boutiques={boutiques} ateliers={ateliers} restos={restos} view={view} inputStyle={inputStyle} cardStyle={cardStyle}
+          theme={theme} user={user} setView={setView} setModal={setModal} notify={notify} t={t} boutiques={boutiques} ateliers={ateliers} restos={restos} view={view} inputStyle={inputStyle} cardStyle={cardStyle} referralStats={referralStats}
         />
       )}
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { normalizeText, isUrgentActive, getPhonePrefix } from "../utils";
 
-export default function ParrainageSection({ theme, user, setView, setModal, notify, t, boutiques, ateliers, restos, view, inputStyle, cardStyle }) {
+export default function ParrainageSection({ theme, user, setView, setModal, notify, t, boutiques, ateliers, restos, view, inputStyle, cardStyle, referralStats }) {
   return (
     <>
 {view==="parrainage"&&(
