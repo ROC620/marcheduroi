@@ -1455,7 +1455,7 @@ function AppContent() {
       return updated;
     });
   };
-  const [authForm, setAuthForm] = useState({ email:"",password:"",name:"",country:"BJ",phone:"" });
+  const [authForm, setAuthForm] = useState({ email:"",password:"",name:"",country:"BJ",phone:"", referralCode: localStorage.getItem("mdr_ref")||"" });
   const [loginError, setLoginError] = useState(null); // null | "unknown_email" | "wrong_password"
   const [turnstileToken, setTurnstileToken] = useState("");
   const turnstileRef = React.useRef(null);
@@ -2189,7 +2189,7 @@ const PHONE_EXAMPLE = {
     const refFromUrl = new URLSearchParams(window.location.search).get("ref");
     if (refFromUrl) {
       localStorage.setItem("mdr_ref", refFromUrl);
-      // Toujours rediriger vers l'inscription avec un lien de parrainage
+      setAuthForm(a => ({...a, referralCode: refFromUrl}));
       setTimeout(() => setViewState("register"), 300);
     }
 
@@ -4976,13 +4976,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
               <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>🎁 Code de parrainage <span style={{ color:theme.sub,fontSize:11,fontWeight:400 }}>(optionnel)</span></label>
               <input
                 type="text"
-                value={authForm.referralCode||localStorage.getItem("mdr_ref")||""}
+                value={authForm.referralCode}
                 onChange={e=>setAuthForm(a=>({...a,referralCode:e.target.value}))}
                 placeholder="Code de votre parrain"
                 maxLength={60}
-                style={{ ...inputStyle, background: localStorage.getItem("mdr_ref") ? "rgba(255,215,0,0.05)" : inputStyle.background, border: localStorage.getItem("mdr_ref") ? "1px solid rgba(255,215,0,0.4)" : inputStyle.border }}
+                style={{ ...inputStyle, background: authForm.referralCode ? "rgba(255,215,0,0.05)" : inputStyle.background, border: authForm.referralCode ? "1px solid rgba(255,215,0,0.4)" : inputStyle.border }}
               />
-              {localStorage.getItem("mdr_ref") && (
+              {authForm.referralCode && (
                 <p style={{ color:"#FFD700",fontSize:11,marginTop:4 }}>🎁 Code de parrainage détecté automatiquement</p>
               )}
             </div>
