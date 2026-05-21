@@ -1,14 +1,9 @@
-// api/vitrine-redirect.js
-// Détecte les scrapers sociaux et sert les bonnes balises OG
-// Route : /vitrine/:slug (configurée dans vercel.json)
-
 export const config = { runtime: "edge" };
 
 const SUPABASE_URL  = "https://mvkcgrextvxlzkqsyscm.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12a2NncmV4dHZ4bHprcXN5c2NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMjIwNDcsImV4cCI6MjA4ODc5ODA0N30.dvVbB0E5F-vhZMYlzIl4r-N1jOrRgrNZsp4xbDI_Nho";
 const DOMAIN        = "https://marcheduroi.com";
 
-// User-agents des scrapers sociaux
 const SOCIAL_BOTS = [
   "facebookexternalhit", "facebot", "twitterbot", "whatsapp",
   "telegrambot", "linkedinbot", "slackbot", "discordbot",
@@ -18,27 +13,38 @@ const SOCIAL_BOTS = [
 export default async function handler(req) {
   const url      = new URL(req.url);
   const segments = url.pathname.split("/").filter(Boolean);
-  const slug     = segments[1]; // /vitrine/:slug
+  const slug     = segments[1];
 
   if (!slug) {
-    return new Response(null, { status: 302, headers: { Location: DOMAIN } });
+    return new Response(null, { 
+      status: 301, 
+      headers: { 
+        "Location": DOMAIN,
+        "Cache-Control": "public, max-age=31536000"
+      } 
+    });
   }
 
   const ua = (req.headers.get("user-agent") || "").toLowerCase();
   const isBot = SOCIAL_BOTS.some(bot => ua.includes(bot));
 
-  // Si c'est un scraper → servir les balises OG avec photo de la vitrine
   if (isBot) {
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/structures?slug=eq.${slug}&select=name,type,slogan,ville,logo_url,cover_url,photos,active&limit=1`,
+        `${SUPABASE_URL}/rest/v1/structures?slug=eq.${encodeURIComponent(slug)}&select=name,type,slogan,ville,logo_url,cover_url,photos,active&limit=1`,
         { headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` } }
       );
       const data = await res.json();
       const s = data?.[0];
 
       if (!s || !s.active) {
-        return new Response(null, { status: 302, headers: { Location: `${DOMAIN}/vitrines` } });
+        return new Response(null, { 
+          status: 301, 
+          headers: { 
+            "Location": `${DOMAIN}/`,
+            "Cache-Control": "public, max-age=86400"
+          } 
+        });
       }
 
       const photo = s.cover_url || (s.photos?.[0]) || s.logo_url || `${DOMAIN}/marcheduRoi-icon.svg`;
@@ -47,9 +53,10 @@ export default async function handler(req) {
       const pageUrl = `${DOMAIN}/vitrine/${slug}`;
 
       const html = `<!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
   <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>${title}</title>
   <meta name="description" content="${desc}"/>
   <meta property="og:title" content="${title}"/>
@@ -64,7 +71,7 @@ export default async function handler(req) {
   <meta name="twitter:title" content="${title}"/>
   <meta name="twitter:description" content="${desc}"/>
   <meta name="twitter:image" content="${photo}"/>
-  <meta http-equiv="refresh" content="0;url=${pageUrl}"/>
+  <link rel="canonical" href="${pageUrl}"/>
 </head>
 <body>
   <p><a href="${pageUrl}">${title}</a></p>
@@ -73,19 +80,39 @@ export default async function handler(req) {
 
       return new Response(html, {
         status: 200,
-        headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=300" }
+        headers: { 
+          "Content-Type": "text/html; charset=utf-8", 
+          "Cache-Control": "public, max-age=300, stale-while-revalidate=86400"
+        }
       });
 
     } catch (e) {
-      return new Response(null, { status: 302, headers: { Location: `${DOMAIN}/vitrine/${slug}` } });
+      return new Response(null, { 
+        status: 301, 
+        headers: { 
+          "Location": `${DOMAIN}/vitrine/${slug}`,
+          "Cache-Control": "public, max-age=300"
+        } 
+      });
     }
   }
 
-  // Si c'est un utilisateur normal → servir index.html directement (pas de redirection)
-  const indexRes = await fetch(`${DOMAIN}/index.html`);
-  const indexHtml = await indexRes.text();
-  return new Response(indexHtml, {
-    status: 200,
-    headers: { "Content-Type": "text/html; charset=utf-8" }
-  });
+  try {
+    const indexRes = await fetch(`${DOMAIN}/index.html`);
+    if (!indexRes.ok) throw new Error("index.html not found");
+    
+    const indexHtml = await indexRes.text();
+    return new Response(indexHtml, {
+      status: 200,
+      headers: { 
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=3600"
+      }
+    });
+  } catch (e) {
+    return new Response(null, { 
+      status: 302, 
+      headers: { "Location": `${DOMAIN}/vitrine/${slug}` } 
+    });
+  }
 }

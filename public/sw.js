@@ -25,14 +25,13 @@ self.addEventListener("fetch", (event) => {
   const bypassRoutes = ["/demandes", "/api/"];
   if (bypassRoutes.some(r => url.pathname.startsWith(r))) return;
 
-  // Si l'URL contient des paramètres importants (ref, code, token) → réseau direct
   const importantParams = ["ref", "code", "token", "mdr_post"];
   if (importantParams.some(p => url.searchParams.has(p))) {
     event.respondWith(fetch(event.request).catch(() => caches.match("/index.html")));
     return;
   }
 
-  const spaRoutes = ["/annonce/", "/boutique/", "/atelier/", "/resto/", "/beaute/", "/structure/", "/vitrine", "/vitrines", "/reset-password"];
+  const spaRoutes = ["/annonce/", "/boutique/", "/atelier/", "/resto/", "/beaute/", "/structure/", "/reset-password"];
   if (url.pathname === "/" || spaRoutes.some(r => url.pathname.startsWith(r))) {
     event.respondWith(
       caches.match("/index.html")

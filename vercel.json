@@ -1,4 +1,16 @@
 {
+  "redirects": [
+    {
+      "source": "/vitrine",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/vitrines",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/og-image/annonce/:id",
@@ -80,6 +92,15 @@
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=31536000; includeSubDomains"
+        }
+      ]
+    },
+    {
+      "source": "/vitrine/:slug",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=86400"
         }
       ]
     }
