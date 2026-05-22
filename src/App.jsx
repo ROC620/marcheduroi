@@ -2874,6 +2874,8 @@ const PHONE_EXAMPLE = {
       lat: updatedPost.lat || null,
       lng: updatedPost.lng || null,
       immo: updatedPost.category==="Immobilier" ? immoForm : (updatedPost.immo || null),
+      ville: postForm.ville || updatedPost.ville || "",
+      quartier: postForm.quartier || updatedPost.quartier || "",
     }).eq("id", modal.data.id).select();
     if (error) {
       console.error("Erreur modification:", error);
@@ -3050,9 +3052,8 @@ const PHONE_EXAMPLE = {
   };
 
   const openEdit = (post) => {
-    // Admin peut modifier sans restriction
     if (user?.role === "admin") {
-      setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"" });
+      setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"", ville:post.ville||"", quartier:post.quartier||"" });
       setPostPhotos(post.photos||[]);
       setPostVideo(post.video||"");
       setVehicleForm(post.vehicle||{});
@@ -3060,7 +3061,7 @@ const PHONE_EXAMPLE = {
       setModal({ type:"edit", data:post });
       return;
     }
-    setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"" });
+    setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"", ville:post.ville||"", quartier:post.quartier||"" });
     setPostPhotos(post.photos||[]);
     setPostVideo(post.video||"");
     setVehicleForm(post.vehicle||{});
