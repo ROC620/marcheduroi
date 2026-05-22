@@ -67,7 +67,7 @@ async function fetchFromSupabase(table, paysCode, villeParam) {
   try {
     // Récupérer TOUS les listings (pas juste top 5)
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?country=eq.${paysCode}&or=(ville.ilike.%25${villeParam}%25,ville.is.null)&order=created_at.desc&limit=500&select=id,name,title,description,photos,ville,created_at,likes`,
+      `${SUPABASE_URL}/rest/v1/${table}?country=eq.${paysCode}&ville=ilike.*${villeParam}*&order=created_at.desc&limit=500&select=id,name,title,description,photos,ville,created_at,likes`,
       {
         headers: {
           apikey: SUPABASE_ANON,

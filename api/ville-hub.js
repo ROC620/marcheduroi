@@ -47,7 +47,7 @@ async function fetchFromSupabase(table, paysCode, villeParam) {
     // IMPORTANT: Filtre ville avec ILIKE (case-insensitive) OU ville IS NULL (nationwide)
     // Limit 5 pour le hub
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?country=eq.${paysCode}&or=(ville.ilike.%25${villeParam}%25,ville.is.null)&order=created_at.desc&limit=5&select=id,name,title,description,photos,ville,created_at`,
+      `${SUPABASE_URL}/rest/v1/${table}?country=eq.${paysCode}&ville=ilike.*${villeParam}*&order=created_at.desc&limit=5&select=id,name,title,description,photos,ville,created_at`,
       {
         headers: {
           apikey: SUPABASE_ANON,
