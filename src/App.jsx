@@ -1,4 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
+
+// ── Villes par pays ─────────────────────────────────────────────────────────
+const VILLES_PAR_PAYS = {
+  BJ: ["Cotonou","Porto-Novo","Parakou","Abomey-Calavi","Ouidah","Bohicon","Natitingou","Kandi","Lokossa","Abomey","Djougou","Malanville","Savalou","Nikki","Tchaourou","Allada","Dogbo","Comè","Aplahoué","Kétou","Pobè","Zagnanado","Azovè","Bembèrèkè","Bassila"],
+  TG: ["Lomé","Sokodé","Kara","Atakpamé","Bassar","Tsévié","Aného","Mango","Dapaong","Notse","Kpalimé","Badou"],
+  SN: ["Dakar","Thiès","Saint-Louis","Kaolack","Ziguinchor","Touba","Mbour","Rufisque","Diourbel","Louga","Tambacounda","Kolda"],
+  CI: ["Abidjan","Bouaké","Daloa","Yamoussoukro","San-Pédro","Korhogo","Man","Gagnoa","Divo","Abengourou"],
+  CM: ["Yaoundé","Douala","Garoua","Bamenda","Bafoussam","Maroua","Nkongsamba","Bertoua","Loum","Kumba"],
+  ML: ["Bamako","Sikasso","Mopti","Koutiala","Kayes","Ségou","Gao","Kidal","Tombouctou"],
+  BF: ["Ouagadougou","Bobo-Dioulasso","Koudougou","Ouahigouya","Banfora","Dédougou","Kaya","Tenkodogo"],
+  NE: ["Niamey","Zinder","Maradi","Tahoua","Agadez","Dosso","Diffa","Tillabéri"],
+  GN: ["Conakry","Nzérékoré","Kankan","Kindia","Labé","Guéckédou","Siguiri"],
+  GA: ["Libreville","Port-Gentil","Franceville","Oyem","Moanda","Mouila"],
+  CG: ["Brazzaville","Pointe-Noire","Dolisie","Nkayi","Impfondo","Owando"],
+  CD: ["Kinshasa","Lubumbashi","Mbuji-Mayi","Kananga","Kisangani","Bukavu","Goma"],
+  MG: ["Antananarivo","Toamasina","Antsiranana","Fianarantsoa","Mahajanga","Toliara"],
+};
+
+const getVilles = (country) => VILLES_PAR_PAYS[country] || VILLES_PAR_PAYS["BJ"];
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { usePromo } from "./hooks/usePromo";
 import { useNotifyAdmin } from "./hooks/useNotifyAdmin";
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from "react-router-dom";
@@ -1540,7 +1561,7 @@ function AppContent() {
     setModifHistory(updated);
     localStorage.setItem("mf_modifs", JSON.stringify(updated));
   };
-  const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"" });
+  const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"",ville:"",quartier:"" });
   const [agroForm, setAgroForm] = useState({ sousCategorie:"", quantite:"", unite:"sac de 50 kg", prixUnitaire:"", qualite:"Standard / Grade B", disponibilite:"Toute l'année", lieuEnlevement:"", saisonRecolte:"" });
   const [postPhotos, setPostPhotos] = useState([]);
   const [postVideo, setPostVideo] = useState("");
@@ -2819,11 +2840,13 @@ const PHONE_EXAMPLE = {
       price_week: postForm.priceWeek || null,
       price_month: postForm.priceMonth || null,
       agro: isAgroPost ? {...agroForm} : null,
+      ville: postForm.ville || "",
+      quartier: postForm.quartier || "",
     });
     if (error) { console.error("Supabase error:", error); notify("Erreur de sauvegarde","error"); return; }
     setPosts(p=>[newPost,...p]);
     setModal(null);
-    setPostForm({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"" });
+    setPostForm({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"",ville:"",quartier:"" });
     setAgroForm({ sousCategorie:"", quantite:"", unite:"sac de 50 kg", prixUnitaire:"", qualite:"Standard / Grade B", disponibilite:"Toute l'année", lieuEnlevement:"", saisonRecolte:"" });
     setPostPhotos([]); setPostVideo(""); setVehicleForm({}); setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" }); setMonths(1); setSelectedTarif(0);
     notify(isAdmin ? "✅ Annonce publiée !" : expiresAt ? `✅ Annonce publiée jusqu'au ${expiresAt} !` : "✅ Annonce publiée !");
@@ -5236,6 +5259,21 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   </div>
                 ))}
 
+                {/* Ville et Quartier */}
+                <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16 }}>
+                  <div>
+                    <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Ville</label>
+                    <select value={postForm.ville} onChange={e=>setPostForm(p=>({...p,ville:e.target.value}))} style={{ ...inputStyle,cursor:"pointer" }}>
+                      <option value="">-- Choisir --</option>
+                      {getVilles(user?.country||detectedCountry).map(v=><option key={v} value={v}>{v}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Quartier</label>
+                    <input value={postForm.quartier} onChange={e=>setPostForm(p=>({...p,quartier:cleanText(e.target.value,50)}))} placeholder="Ex: Akpakpa" maxLength={50} style={inputStyle}/>
+                  </div>
+                </div>
+
                 {/* Champs tarifs location */}
                 {postForm.category==="Location de véhicules"&&(
                   <div style={{ marginTop:8 }}>
@@ -6154,12 +6192,17 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   </button>
                   {!shopForm.lat && <p style={{ color:"#FF8C00",fontSize:11,marginBottom:10,textAlign:"center" }}>⚠️ Sans GPS votre publication n'apparaîtra pas dans le tri "Près de moi"</p>}
                   <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
-                    {[{label:"Ville *",key:"ville",placeholder:"Ex: Cotonou"},{label:"Quartier",key:"quartier",placeholder:"Ex: Akpakpa"}].map(f=>(
-                      <div key={f.key}>
-                        <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>{f.label}</label>
-                        <input value={shopForm[f.key]||""} onChange={e=>setShopForm(s=>({...s,[f.key]:cleanText(e.target.value,50)}))} placeholder={f.placeholder} maxLength={50} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
-                      </div>
-                    ))}
+                    <div>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Ville *</label>
+                      <select value={shopForm.ville||""} onChange={e=>setShopForm(s=>({...s,ville:e.target.value}))} style={{ ...inputStyle,padding:"10px 14px",fontSize:13,cursor:"pointer" }}>
+                        <option value="">-- Choisir une ville --</option>
+                        {getVilles(user?.country||detectedCountry).map(v=><option key={v} value={v}>{v}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Quartier</label>
+                      <input value={shopForm.quartier||""} onChange={e=>setShopForm(s=>({...s,quartier:cleanText(e.target.value,50)}))} placeholder="Ex: Akpakpa" maxLength={50} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>
+                    </div>
                     <div style={{ gridColumn:"1/-1" }}>
                       <label style={{ fontSize:12,fontWeight:600,color:theme.sub,display:"block",marginBottom:4 }}>Von de...</label>
                       <input value={shopForm.von||""} onChange={e=>setShopForm(s=>({...s,von:cleanText(e.target.value,100)}))} placeholder="Ex: Von du marché central, Von de la pharmacie..." maxLength={100} style={{ ...inputStyle,padding:"10px 14px",fontSize:13 }}/>

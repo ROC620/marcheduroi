@@ -1,17 +1,9 @@
 {
-  "redirects": [
-    {
-      "source": "/vitrine",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/vitrines",
-      "destination": "/",
-      "permanent": true
-    }
-  ],
   "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap.xml"
+    },
     {
       "source": "/api/og-image/annonce/:id",
       "destination": "/api/og-image?path=/annonce/:id"
@@ -61,6 +53,14 @@
       "destination": "/api/vitrine-redirect?slug=:slug"
     },
     {
+      "source": "/:pays/:ville/:type",
+      "destination": "/api/listings-par-ville?pays=:pays&ville=:ville&type=:type"
+    },
+    {
+      "source": "/:pays/:ville",
+      "destination": "/api/ville-hub?pays=:pays&ville=:ville"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
@@ -92,15 +92,6 @@
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=31536000; includeSubDomains"
-        }
-      ]
-    },
-    {
-      "source": "/vitrine/:slug",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=300, stale-while-revalidate=86400"
         }
       ]
     }
