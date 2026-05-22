@@ -44,10 +44,15 @@ const PAYS_NOMS = {
 
 async function fetchFromSupabase(table, paysCode, villeParam) {
   try {
-    // IMPORTANT: Filtre ville avec ILIKE (case-insensitive) OU ville IS NULL (nationwide)
-    // Limit 5 pour le hub
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?country=eq.${paysCode}&ville=ilike.*${villeParam}*&order=created_at.desc&limit=5&select=id,name,title,description,photos,ville,created_at`,
+    // Construire l'URL manuellement pour éviter l'encodage des wildcards
+    const villeFilter = "ilike.*" + villeParam + "*";
+    const url = SUPABASE_URL + "/rest/v1/" + table +
+      "?country=eq." + paysCode +
+      "&ville=" + villeFilter +
+      "&order=created_at.desc" +
+      "&limit=5" +
+      "&select=id,name,title,description,photos,ville,created_at";
+    const response = await fetch(url,
       {
         headers: {
           apikey: SUPABASE_ANON,

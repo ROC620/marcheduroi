@@ -65,9 +65,15 @@ const TYPE_LABELS = {
 
 async function fetchFromSupabase(table, paysCode, villeParam) {
   try {
-    // Récupérer TOUS les listings (pas juste top 5)
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?country=eq.${paysCode}&ville=ilike.*${villeParam}*&order=created_at.desc&limit=500&select=id,name,title,description,photos,ville,created_at,likes`,
+    // Construire l'URL manuellement pour éviter l'encodage des wildcards
+    const villeFilter = "ilike.*" + villeParam + "*";
+    const url = SUPABASE_URL + "/rest/v1/" + table +
+      "?country=eq." + paysCode +
+      "&ville=" + villeFilter +
+      "&order=created_at.desc" +
+      "&limit=500" +
+      "&select=id,name,title,description,photos,ville,created_at,likes";
+    const response = await fetch(url,
       {
         headers: {
           apikey: SUPABASE_ANON,
