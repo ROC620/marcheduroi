@@ -1184,14 +1184,17 @@ function AppContent() {
           urgentActivatedAt: x.urgent_activated_at, photos, likes: x.likes||0,
           sousType: x.sous_type||x.sousType||""};
       };
+      const today = new Date().toISOString().slice(0,10);
+      const filterExpired = (items) => items.filter(x => !x.expires_at || x.expires_at >= today);
+
       const { data: bData } = await supabase.from("boutiques").select("*").order("created_at", { ascending: false }).range(0, 99);
-      if (bData && bData.length > 0) setBoutiques(bData.map(mapItem));
+      if (bData && bData.length > 0) setBoutiques(filterExpired(bData).map(mapItem));
       const { data: aData } = await supabase.from("ateliers").select("*").order("created_at", { ascending: false }).range(0, 99);
-      if (aData && aData.length > 0) setAteliers(aData.map(mapItem));
+      if (aData && aData.length > 0) setAteliers(filterExpired(aData).map(mapItem));
       const { data: rData } = await supabase.from("restos").select("*").order("created_at", { ascending: false }).range(0, 99);
-      if (rData && rData.length > 0) setRestos(rData.map(mapItem));
+      if (rData && rData.length > 0) setRestos(filterExpired(rData).map(mapItem));
       const { data: beData } = await supabase.from("beaute").select("*").order("created_at", { ascending: false }).range(0, 99);
-      if (beData && beData.length > 0) setBeaute(beData.map(mapItem));
+      if (beData && beData.length > 0) setBeaute(filterExpired(beData).map(mapItem));
     } catch(err) {
       console.error("Erreur chargement boutiques:", err);
     }
@@ -3356,6 +3359,14 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
   ] : [];
 
   const myPosts = user?posts.filter(p=>p.authorId===user.id):[];
+  const today = new Date().toISOString().slice(0,10);
+  const isShopExpired = (item) => item.expires_at && item.expires_at < today;
+  const myShops = user ? [
+    ...boutiques.filter(b=>b.authorId===user.id||b.author_id===user.id),
+    ...ateliers.filter(a=>a.authorId===user.id||a.author_id===user.id),
+    ...restos.filter(r=>r.authorId===user.id||r.author_id===user.id),
+    ...beaute.filter(b=>b.authorId===user.id||b.author_id===user.id),
+  ] : [];
 
   const inputStyle = { width:"100%",padding:"12px 16px",background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:10,color:theme.text,fontSize:14,fontFamily:"inherit" };
   const cardStyle = { background:theme.card, border:`1px solid ${theme.border}` };
@@ -4824,6 +4835,38 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     </div>
                     <button onClick={()=>{ notify("💡 Choisissez une durée pour republier cette annonce."); setModal({type:"sponsor",data:{...post,expiresAt:null}}); }} style={{ background:"linear-gradient(135deg,rgba(108,99,255,0.2),rgba(255,101,132,0.1))",border:"1px solid rgba(108,99,255,0.4)",color:"#6C63FF",padding:"7px 12px",borderRadius:8,fontWeight:700,fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5 }}>
                       🔄 Republier
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Établissements expirés */}
+          {myShops.filter(s=>isShopExpired(s)).length > 0 && (
+            <div style={{ marginBottom:24 }}>
+              <h3 style={{ fontWeight:700,fontSize:16,marginBottom:12,color:"#FF4757",display:"flex",alignItems:"center",gap:8 }}>
+                ⚠️ Établissements expirés ({myShops.filter(s=>isShopExpired(s)).length})
+              </h3>
+              {myShops.filter(s=>isShopExpired(s)).map(shop=>(
+                <div key={shop.id} style={{ background:"rgba(255,71,87,0.06)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:12,padding:14,marginBottom:8 }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap" }}>
+                    <div>
+                      <p style={{ fontWeight:700,color:theme.text,marginBottom:2 }}>{shop.name}</p>
+                      <p style={{ color:"#FF4757",fontSize:12,fontWeight:600 }}>⚠️ Expiré le {shop.expires_at} — Non visible au public</p>
+                    </div>
+                    <button onClick={()=>{
+                      const type = boutiques.some(b=>b.id===shop.id) ? "boutique" :
+                                   ateliers.some(a=>a.id===shop.id) ? "atelier" :
+                                   restos.some(r=>r.id===shop.id) ? "resto" : "beaute";
+                      setShopMode(type==="atelier"?"atelier":"boutique");
+                      setShopForm({name:shop.name||"",type:shop.type||"",sousType:shop.sous_type||"",description:shop.description||"",services:shop.services||"",phone:shop.phone||getPhonePrefix(),ville:shop.ville||"",quartier:shop.quartier||"",latitude:shop.latitude||null,longitude:shop.longitude||null,horaires:shop.horaires||"",tarifs:shop.tarifs||""});
+                      setShopPhotos(shop.photos||[]);
+                      setSelectedTarif(0);
+                      setModal({type:type==="resto"?"addresto":type==="beaute"?"addbeaute":"addshop", data:{...shop, renewing:true}});
+                    }}
+                      style={{ background:"linear-gradient(135deg,#FF4757,#FF6584)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>
+                      🔄 Renouveler
                     </button>
                   </div>
                 </div>
