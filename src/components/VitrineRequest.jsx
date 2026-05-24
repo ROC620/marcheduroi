@@ -95,7 +95,7 @@ function VitrineRequest() {
   const handlePaymentSuccess = async () => {
     setPaying(true);
     const finalSlug = slug || toSlug(form.name) + "-" + Date.now();
-    const photos = form.photos.split("\n").map(l=>l.trim()).filter(Boolean).slice(0,10);
+    const photos = form.photos.split("\n").map(l=>l.trim()).filter(Boolean).slice(0,20);
     const now = new Date();
     // Récupérer l'ID de l'utilisateur connecté
     const { data: { session } } = await supabase.auth.getSession();
@@ -367,7 +367,7 @@ function VitrineRequest() {
         <input style={inp} value={form.logo_url} onChange={e=>setForm(f=>({...f,logo_url:e.target.value}))} placeholder="https://i.ibb.co/.../logo.png"/>
         <label style={lbl}>Photo de couverture (lien URL)</label>
         <input style={inp} value={form.cover_url} onChange={e=>setForm(f=>({...f,cover_url:e.target.value}))} placeholder="https://i.ibb.co/.../banniere.jpg"/>
-        <label style={lbl}>Photos galerie — un lien par ligne (max 10)</label>
+        <label style={lbl}>Photos galerie — un lien par ligne (max 20)</label>
           <p style={{ color:"#9A9AB0",fontSize:11,margin:"4px 0 8px",lineHeight:1.7 }}>
             📐 <strong style={{color:"#10B981"}}>Dimensions recommandées</strong> — Logo : <strong style={{color:"#E8E8F0"}}>400×400px</strong> (carré) · Couverture : <strong style={{color:"#E8E8F0"}}>1920×600px</strong> · Galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3) · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong>
           </p>

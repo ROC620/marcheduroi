@@ -74,7 +74,7 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
 
   const handleSave = async () => {
     setSaving(true); setSaveError(null);
-    const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean).slice(0,10);
+    const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean).slice(0,20);
     const today = new Date().toISOString().slice(0,10);
     const { error } = await supabase.from("structures").update({
       slogan: form.slogan || null, description: form.description || null,
@@ -256,7 +256,7 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
         </VitrineSection>
 
         <VitrineSection id="photos" icon="🖼️" title="Photos" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
-          <label style={lbl}>Un lien par ligne (max 10)</label>
+          <label style={lbl}>Un lien par ligne (max 20)</label>
           <p style={{ color:"#9A9AB0",fontSize:11,margin:"4px 0 8px",lineHeight:1.7 }}>
             📐 <strong style={{color:"#10B981"}}>Dimensions recommandées</strong> — Logo : <strong style={{color:"#E8E8F0"}}>400×400px</strong> (carré) · Couverture : <strong style={{color:"#E8E8F0"}}>1920×600px</strong> · Galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3) · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong>
           </p>
