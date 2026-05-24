@@ -44,25 +44,32 @@ const PAYS_NOMS = {
 
 async function fetchFromSupabase(table, paysCode, villeParam) {
   try {
-    // Construire l'URL manuellement pour éviter l'encodage des wildcards
-    const villeFilter = "ilike.*" + villeParam + "*";
+    // Fix bug Edge Runtime : fetch() encode * en %2A, PostgREST ne le reconnait pas
+    // comme wildcard ilike. On filtre par pays dans Supabase, ville en JavaScript.
     const url = SUPABASE_URL + "/rest/v1/" + table +
       "?country=eq." + paysCode +
-      "&ville=" + villeFilter +
       "&order=created_at.desc" +
-      "&limit=5" +
+      "&limit=200" +
       "&select=id,name,title,description,photos,ville,created_at";
-    const response = await fetch(url,
-      {
-        headers: {
-          apikey: SUPABASE_ANON,
-          Authorization: `Bearer ${SUPABASE_ANON}`,
-        },
-      }
-    );
+
+    const response = await fetch(url, {
+      headers: {
+        apikey: SUPABASE_ANON,
+        Authorization: `Bearer ${SUPABASE_ANON}`,
+      },
+    });
 
     if (!response.ok) return [];
-    return await response.json();
+
+    const data = await response.json();
+
+    // Filtrage ville cote JavaScript — insensible a la casse
+    const search = villeParam.toLowerCase();
+    const filtered = data.filter(item =>
+      item.ville?.toLowerCase().includes(search)
+    );
+
+    return filtered.slice(0, 5); // top 5 pour la page hub
   } catch (e) {
     console.error(`Error fetching ${table}:`, e);
     return [];
