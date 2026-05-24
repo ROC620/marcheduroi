@@ -1564,7 +1564,7 @@ function AppContent() {
     setModifHistory(updated);
     localStorage.setItem("mf_modifs", JSON.stringify(updated));
   };
-  const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"",ville:"",quartier:"" });
+  const [postForm, setPostForm] = useState({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"",ville:"",quartier:"",zone_livraison:"" });
   const [agroForm, setAgroForm] = useState({ sousCategorie:"", quantite:"", unite:"sac de 50 kg", prixUnitaire:"", qualite:"Standard / Grade B", disponibilite:"Toute l'année", lieuEnlevement:"", saisonRecolte:"" });
   const [postPhotos, setPostPhotos] = useState([]);
   const [postVideo, setPostVideo] = useState("");
@@ -2802,6 +2802,7 @@ const PHONE_EXAMPLE = {
   const addPost = async (expiresAt) => {
     // Validation déjà faite avant le paiement — on garde juste une vérif de sécurité
     if (!postForm.title?.trim()||!postForm.description?.trim()) { notify("Titre et description requis","error"); return; }
+    if (!postForm.ville) { notify("Veuillez choisir une ville","error"); return; }
     const isAdmin = user.role === "admin";
     const postId = "post_" + Date.now();
     const isLocation = postForm.category === "Location de véhicules";
@@ -2845,11 +2846,12 @@ const PHONE_EXAMPLE = {
       agro: isAgroPost ? {...agroForm} : null,
       ville: postForm.ville || "",
       quartier: postForm.quartier || "",
+      zone_livraison: postForm.zone_livraison || "",
     });
     if (error) { console.error("Supabase error:", error); notify("Erreur de sauvegarde","error"); return; }
     setPosts(p=>[newPost,...p]);
     setModal(null);
-    setPostForm({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"",ville:"",quartier:"" });
+    setPostForm({ title:"",category:"Autre",description:"",price:"",priceDay:"",priceWeek:"",priceMonth:"",contact:"",phone:getPhonePrefix(),lat:"",lng:"",ville:"",quartier:"",zone_livraison:"" });
     setAgroForm({ sousCategorie:"", quantite:"", unite:"sac de 50 kg", prixUnitaire:"", qualite:"Standard / Grade B", disponibilite:"Toute l'année", lieuEnlevement:"", saisonRecolte:"" });
     setPostPhotos([]); setPostVideo(""); setVehicleForm({}); setImmoForm({ sousType:"Maison",transaction:"Vente",superficie:"",pieces:"",titre:"",ville:"",quartier:"",von:"",eau:"Oui",electricite:"Oui",etat:"Bon état",recasee:"",autres:"" }); setMonths(1); setSelectedTarif(0);
     notify(isAdmin ? "✅ Annonce publiée !" : expiresAt ? `✅ Annonce publiée jusqu'au ${expiresAt} !` : "✅ Annonce publiée !");
@@ -2879,6 +2881,7 @@ const PHONE_EXAMPLE = {
       immo: updatedPost.category==="Immobilier" ? immoForm : (updatedPost.immo || null),
       ville: postForm.ville || updatedPost.ville || "",
       quartier: postForm.quartier || updatedPost.quartier || "",
+      zone_livraison: postForm.zone_livraison || updatedPost.zone_livraison || "",
     }).eq("id", modal.data.id).select();
     if (error) {
       console.error("Erreur modification:", error);
@@ -5304,10 +5307,10 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                 ))}
 
                 {/* Ville et Quartier */}
-                <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16 }}>
+                <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12 }}>
                   <div>
-                    <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Ville</label>
-                    <select value={postForm.ville} onChange={e=>setPostForm(p=>({...p,ville:e.target.value}))} style={{ ...inputStyle,cursor:"pointer" }}>
+                    <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Ville <span style={{ color:"#FF4757" }}>*</span></label>
+                    <select value={postForm.ville} onChange={e=>setPostForm(p=>({...p,ville:e.target.value}))} style={{ ...inputStyle,cursor:"pointer",borderColor:!postForm.ville?"rgba(255,71,87,0.4)":undefined }}>
                       <option value="">-- Choisir --</option>
                       {getVilles(user?.country||detectedCountry).map(v=><option key={v} value={v}>{v}</option>)}
                     </select>
@@ -5316,6 +5319,10 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                     <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Quartier</label>
                     <input value={postForm.quartier} onChange={e=>setPostForm(p=>({...p,quartier:cleanText(e.target.value,50)}))} placeholder="Ex: Akpakpa" maxLength={50} style={inputStyle}/>
                   </div>
+                </div>
+                <div style={{ marginBottom:16 }}>
+                  <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Zone de livraison / intervention <span style={{ fontWeight:400,opacity:0.7 }}>(optionnel)</span></label>
+                  <input value={postForm.zone_livraison||""} onChange={e=>setPostForm(p=>({...p,zone_livraison:cleanText(e.target.value,120)}))} placeholder="Ex: Livraison possible à Cotonou, Porto-Novo et Abomey-Calavi" maxLength={120} style={inputStyle}/>
                 </div>
 
                 {/* Champs tarifs location */}
