@@ -43,35 +43,33 @@ const PAYS_NOMS = {
 };
 
 async function fetchFromSupabase(table, paysCode, villeParam) {
+  const headers = {
+    apikey: SUPABASE_ANON,
+    Authorization: `Bearer ${SUPABASE_ANON}`,
+  };
+  const base = SUPABASE_URL + "/rest/v1/" + table;
+  const select = "&order=created_at.desc&limit=200&select=id,name,title,description,photos,ville,created_at";
+  const search = villeParam.toLowerCase();
+
+  const filterByVille = (data) =>
+    data.filter(item => item.ville?.toLowerCase().includes(search)).slice(0, 5);
+
   try {
-    // Fix bug Edge Runtime : fetch() encode * en %2A, PostgREST ne le reconnait pas
-    // comme wildcard ilike. On filtre par pays dans Supabase, ville en JavaScript.
-    const url = SUPABASE_URL + "/rest/v1/" + table +
-      "?country=eq." + paysCode +
-      "&order=created_at.desc" +
-      "&limit=200" +
-      "&select=id,name,title,description,photos,ville,created_at";
+    // Tentative 1 : filtre par pays
+    const r1 = await fetch(base + "?country=eq." + paysCode + select, { headers });
+    if (r1.ok) {
+      const d1 = await r1.json();
+      const result = filterByVille(d1);
+      if (result.length > 0) return result;
+    }
 
-    const response = await fetch(url, {
-      headers: {
-        apikey: SUPABASE_ANON,
-        Authorization: `Bearer ${SUPABASE_ANON}`,
-      },
-    });
-
-    if (!response.ok) return [];
-
-    const data = await response.json();
-
-    // Filtrage ville cote JavaScript — insensible a la casse
-    const search = villeParam.toLowerCase();
-    const filtered = data.filter(item =>
-      item.ville?.toLowerCase().includes(search)
-    );
-
-    return filtered.slice(0, 5); // top 5 pour la page hub
+    // Tentative 2 : sans filtre pays (colonne absente ou donnees manquantes)
+    const r2 = await fetch(base + "?order=created_at.desc&limit=200&select=id,name,title,description,photos,ville,created_at", { headers });
+    if (!r2.ok) return [];
+    const d2 = await r2.json();
+    return filterByVille(d2);
   } catch (e) {
-    console.error(`Error fetching ${table}:`, e);
+    console.error("Error fetching " + table + ":", e);
     return [];
   }
 }

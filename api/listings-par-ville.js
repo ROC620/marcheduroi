@@ -64,33 +64,33 @@ const TYPE_LABELS = {
 };
 
 async function fetchFromSupabase(table, paysCode, villeParam) {
+  const headers = {
+    apikey: SUPABASE_ANON,
+    Authorization: `Bearer ${SUPABASE_ANON}`,
+  };
+  const base = SUPABASE_URL + "/rest/v1/" + table;
+  const select = "&order=created_at.desc&limit=1000&select=id,name,title,description,photos,ville,created_at,likes";
+  const search = villeParam.toLowerCase();
+
+  const filterByVille = (data) =>
+    data.filter(item => item.ville?.toLowerCase().includes(search));
+
   try {
-    // Fix bug Edge Runtime : fetch() encode * en %2A, PostgREST ne le reconnait pas
-    // comme wildcard ilike. On filtre par pays dans Supabase, ville en JavaScript.
-    const url = SUPABASE_URL + "/rest/v1/" + table +
-      "?country=eq." + paysCode +
-      "&order=created_at.desc" +
-      "&limit=1000" +
-      "&select=id,name,title,description,photos,ville,created_at,likes";
+    // Tentative 1 : filtre par pays
+    const r1 = await fetch(base + "?country=eq." + paysCode + select, { headers });
+    if (r1.ok) {
+      const d1 = await r1.json();
+      const result = filterByVille(d1);
+      if (result.length > 0) return result;
+    }
 
-    const response = await fetch(url, {
-      headers: {
-        apikey: SUPABASE_ANON,
-        Authorization: `Bearer ${SUPABASE_ANON}`,
-      },
-    });
-
-    if (!response.ok) return [];
-
-    const data = await response.json();
-
-    // Filtrage ville cote JavaScript — insensible a la casse
-    const search = villeParam.toLowerCase();
-    return data.filter(item =>
-      item.ville?.toLowerCase().includes(search)
-    );
+    // Tentative 2 : sans filtre pays (colonne absente ou donnees manquantes)
+    const r2 = await fetch(base + "?order=created_at.desc&limit=1000&select=id,name,title,description,photos,ville,created_at,likes", { headers });
+    if (!r2.ok) return [];
+    const d2 = await r2.json();
+    return filterByVille(d2);
   } catch (e) {
-    console.error(`Error fetching ${table}:`, e);
+    console.error("Error fetching " + table + ":", e);
     return [];
   }
 }
@@ -115,10 +115,12 @@ export default async function handler(req) {
   const listings = await fetchFromSupabase(tableName, paysCode, villeParam);
 
   if (listings.length === 0) {
-    return new Response(
-      `Aucune ${TYPE_LABELS[tableName].label.toLowerCase()} trouvée à ${villeParam}, ${paysNom}`,
-      { status: 404 }
-    );
+    const typeInfo2 = TYPE_LABELS[tableName];
+    const villeDisplay = villeParam.charAt(0).toUpperCase() + villeParam.slice(1);
+    return new Response(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>Aucun résultat — MarchéduRoi</title></head><body style="font-family:Arial,sans-serif;max-width:600px;margin:60px auto;text-align:center;color:#333"><h2>${typeInfo2.emoji} Aucune ${typeInfo2.label.toLowerCase()} trouvée</h2><p>Aucun résultat pour <strong>${villeDisplay}</strong>, ${paysNom}.</p><a href="https://marcheduroi.com" style="color:#43C6AC;font-weight:600">← Retour à MarchéduRoi</a></body></html>`, {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
   }
 
   const typeInfo = TYPE_LABELS[tableName];
