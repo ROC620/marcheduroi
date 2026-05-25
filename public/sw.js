@@ -1,4 +1,4 @@
-const CACHE_NAME = "marcheduroi-v32";
+const CACHE_NAME = "marcheduroi-v33";
 const STATIC_ASSETS = ["/", "/index.html"];
 self.addEventListener("install", (event) => {
   self.skipWaiting();

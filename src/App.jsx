@@ -3059,7 +3059,7 @@ const PHONE_EXAMPLE = {
 
   const openEdit = (post) => {
     if (user?.role === "admin") {
-      setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"", ville:post.ville||"", quartier:post.quartier||"" });
+      setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"", ville:post.ville||"", quartier:post.quartier||"", zone_livraison:post.zone_livraison||"" });
       setPostPhotos(post.photos||[]);
       setPostVideo(post.video||"");
       setVehicleForm(post.vehicle||{});
@@ -3067,7 +3067,7 @@ const PHONE_EXAMPLE = {
       setModal({ type:"edit", data:post });
       return;
     }
-    setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"", ville:post.ville||"", quartier:post.quartier||"" });
+    setPostForm({ title:post.title, category:post.category, description:post.description, price:post.price||"", contact:post.contact||"", phone:post.phone||"", ville:post.ville||"", quartier:post.quartier||"", zone_livraison:post.zone_livraison||"" });
     setPostPhotos(post.photos||[]);
     setPostVideo(post.video||"");
     setVehicleForm(post.vehicle||{});
