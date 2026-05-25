@@ -111,6 +111,20 @@ export default async function handler(req) {
     return new Response("Type non valide", { status: 400 });
   }
 
+  // Mode debug temporaire : ?debug=1
+  if (url.searchParams.get("debug") === "1") {
+    const headers = { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` };
+    const base = SUPABASE_URL + "/rest/v1/" + tableName;
+    const r1 = await fetch(base + "?country=eq." + paysCode + "&order=created_at.desc&limit=10&select=id,title,name,ville,country", { headers });
+    const d1 = r1.ok ? await r1.json() : { error: r1.status };
+    const search = villeParam.toLowerCase();
+    const filtered = Array.isArray(d1) ? d1.filter(i => i.ville?.toLowerCase().includes(search)) : [];
+    return new Response(JSON.stringify({ paysCode, villeParam, search, total: Array.isArray(d1) ? d1.length : 0, filtered: filtered.length, raw: d1 }, null, 2), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   // Récupérer les données
   const listings = await fetchFromSupabase(tableName, paysCode, villeParam);
 
