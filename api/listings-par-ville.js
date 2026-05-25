@@ -69,7 +69,10 @@ async function fetchFromSupabase(table, paysCode, villeParam) {
     Authorization: `Bearer ${SUPABASE_ANON}`,
   };
   const base = SUPABASE_URL + "/rest/v1/" + table;
-  const select = "&order=created_at.desc&limit=1000&select=id,name,title,description,photos,ville,created_at,likes";
+  // posts a "title", les etablissements ont "name" — selects differents pour eviter 400
+  const nameField = table === "posts" ? "title" : "name";
+  const selectFields = `id,${nameField},description,photos,ville,created_at,likes`;
+  const select = `&order=created_at.desc&limit=1000&select=${selectFields}`;
   const search = villeParam.toLowerCase();
 
   const filterByVille = (data) =>
@@ -85,7 +88,7 @@ async function fetchFromSupabase(table, paysCode, villeParam) {
     }
 
     // Tentative 2 : sans filtre pays (colonne absente ou donnees manquantes)
-    const r2 = await fetch(base + "?order=created_at.desc&limit=1000&select=id,name,title,description,photos,ville,created_at,likes", { headers });
+    const r2 = await fetch(base + "?" + select.slice(1), { headers });
     if (!r2.ok) return [];
     const d2 = await r2.json();
     return filterByVille(d2);
@@ -115,7 +118,8 @@ export default async function handler(req) {
   if (url.searchParams.get("debug") === "1") {
     const headers = { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` };
     const base = SUPABASE_URL + "/rest/v1/" + tableName;
-    const r1 = await fetch(base + "?country=eq." + paysCode + "&order=created_at.desc&limit=10&select=id,title,name,ville,country", { headers });
+    const nameField2 = tableName === "posts" ? "title" : "name";
+    const r1 = await fetch(base + "?country=eq." + paysCode + "&order=created_at.desc&limit=10&select=id," + nameField2 + ",ville,country", { headers });
     const d1 = r1.ok ? await r1.json() : { error: r1.status };
     const search = villeParam.toLowerCase();
     const filtered = Array.isArray(d1) ? d1.filter(i => i.ville?.toLowerCase().includes(search)) : [];
