@@ -95,6 +95,7 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
   const editBeaute = (item) => openEditShop(item, "beaute");
 
   return (
+    <>
 <div style={{ width:"100%",padding:"16px 12px",animation:"fadeIn 0.4s ease" }}>
   <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:8 }}>
     <h2 style={{ fontWeight:800,fontSize:28,color:theme.text }}>Panneau Admin</h2>
@@ -815,6 +816,6 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
       </div>
     </div>
   )}
-
+    </>
   );
 }
