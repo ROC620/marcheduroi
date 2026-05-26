@@ -24,7 +24,7 @@ export default async function handler(req) {
   if (slug) {
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/structures?slug=eq.${encodeURIComponent(slug)}&active=eq.true&select=name,type,slogan,description,cover_url,logo_url,photos,ville&limit=1`,
+        `${SUPABASE_URL}/rest/v1/structures?slug=eq.${encodeURIComponent(slug)}&active=is.true&select=name,type,slogan,description,cover_url,logo_url,photos,ville&limit=1`,
         {
           headers: {
             "apikey":        SUPABASE_KEY,
@@ -81,7 +81,7 @@ export default async function handler(req) {
   return new Response(html, {
     headers: {
       "Content-Type":  "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=300, stale-while-revalidate=3600",
     },
   });
 }
