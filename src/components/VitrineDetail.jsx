@@ -127,7 +127,7 @@ function VitrineDetail() {
 
   const handleShare = () => {
     track("partage");
-    const ogUrl = `https://marcheduroi.com/api/vitrine-og?slug=${slug}`;
+    const ogUrl = `https://marcheduroi.com/vitrine/${slug}`;
     const text  = (structure?.name || "Structure") + " est sur MarchéduRoi 👑";
     if (navigator.share) navigator.share({ title: structure?.name, text, url: ogUrl });
     else { navigator.clipboard.writeText(ogUrl); alert("Lien copié !"); }
@@ -467,7 +467,7 @@ function VitrineDetail() {
             📤 Suggérer à un ami
           </a>
           {/* Facebook — utilise vitrine-og pour avoir la bonne image */}
-          <a href={"https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(`https://marcheduroi.com/api/vitrine-og?slug=${slug}`)}
+          <a href={"https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(`https://marcheduroi.com/vitrine/${slug}`)}
             target="_blank" rel="noopener noreferrer"
             style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:"rgba(24,119,242,0.1)",border:"1px solid rgba(24,119,242,0.3)",borderRadius:12,padding:12,color:"#1877F2",textDecoration:"none",fontWeight:700,fontSize:14,minWidth:100 }}>
             📘 Facebook
