@@ -16,6 +16,8 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
   const [suggestions,    setSuggestions]    = useState([]);
   const [featuredPosts,  setFeaturedPosts]  = useState(() => { try { return JSON.parse(localStorage.getItem("mf_featured")||"[]"); } catch { return []; } });
   const [certifiedUsers, setCertifiedUsers] = useState(() => { try { return JSON.parse(localStorage.getItem("mf_certified")||"[]"); } catch { return []; } });
+  const [prolongModal,    setProlongModal]    = useState(null);
+  const [prolongDays,     setProlongDays]     = useState(30);
 
   // Styles locaux
   const cardStyle  = { background:theme.card, border:`1px solid ${theme.border}` };
@@ -776,5 +778,43 @@ export default function AdminPanel({ theme, notify, posts, setPosts, boutiques, 
     ))}
   </div>
 </div>
+
+  {/* ── Modal prolongation durée ── */}
+  {prolongModal && (
+    <div onClick={()=>setProlongModal(null)} style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16 }}>
+      <div onClick={e=>e.stopPropagation()} style={{ background:theme.card,borderRadius:16,padding:24,width:"100%",maxWidth:360,boxShadow:"0 8px 40px rgba(0,0,0,0.3)" }}>
+        <h3 style={{ fontWeight:800,fontSize:18,color:theme.text,margin:"0 0 4px 0" }}>⏳ Prolonger la durée</h3>
+        <p style={{ fontSize:13,color:theme.sub,margin:"0 0 16px 0" }}>
+          {prolongModal.item.title || prolongModal.item.name}
+        </p>
+        {prolongModal.item.expires_at && (
+          <p style={{ fontSize:12,color:"#FF8C00",marginBottom:12 }}>
+            📆 Expire actuellement le {prolongModal.item.expires_at}
+          </p>
+        )}
+        <label style={{ fontSize:13,fontWeight:600,color:theme.sub,display:"block",marginBottom:6 }}>Nombre de jours à ajouter</label>
+        <div style={{ display:"flex",gap:8,marginBottom:12,flexWrap:"wrap" }}>
+          {[7,15,30,60,90,180,360].map(d => (
+            <button key={d} onClick={()=>setProlongDays(d)}
+              style={{ padding:"6px 12px",borderRadius:8,border:`1px solid ${prolongDays===d?"#10B981":theme.border}`,background:prolongDays===d?"rgba(16,185,129,0.15)":"transparent",color:prolongDays===d?"#10B981":theme.sub,fontWeight:600,fontSize:12,cursor:"pointer" }}>
+              {d}j
+            </button>
+          ))}
+        </div>
+        <input type="number" min={1} max={365} value={prolongDays} onChange={e=>setProlongDays(Number(e.target.value))}
+          style={{ background:theme.card,border:`1px solid ${theme.border}`,borderRadius:10,padding:"10px 14px",color:theme.text,fontSize:14,width:"100%",boxSizing:"border-box",marginBottom:16,outline:"none" }}/>
+        <p style={{ fontSize:12,color:"#10B981",marginBottom:16 }}>
+          ✅ Nouvelle expiration : {(() => { const base = prolongModal.item.expires_at && new Date(prolongModal.item.expires_at) > new Date() ? new Date(prolongModal.item.expires_at) : new Date(); base.setDate(base.getDate()+prolongDays); return base.toISOString().slice(0,10); })()}
+        </p>
+        <div style={{ display:"flex",gap:8 }}>
+          <button onClick={()=>setProlongModal(null)}
+            style={{ flex:1,padding:"10px 0",borderRadius:10,border:`1px solid ${theme.border}`,background:"transparent",color:theme.sub,fontWeight:600,fontSize:14,cursor:"pointer" }}>Annuler</button>
+          <button onClick={()=>handleProlong(prolongDays)}
+            style={{ flex:2,padding:"10px 0",borderRadius:10,border:"none",background:"#10B981",color:"#fff",fontWeight:700,fontSize:14,cursor:"pointer" }}>✅ Confirmer</button>
+        </div>
+      </div>
+    </div>
+  )}
+
   );
 }
