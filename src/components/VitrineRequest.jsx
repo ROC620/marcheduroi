@@ -53,6 +53,7 @@ function VitrineRequest() {
   const [paying,  setPaying]  = React.useState(false);
   const [done,    setDone]    = React.useState(false);
   const [error,   setError]   = React.useState(null);
+  const errorRef = React.useRef(null);
   const [slug,    setSlug]    = React.useState("");
   const [authChecked, setAuthChecked] = React.useState(false);
   const [isLoggedIn,  setIsLoggedIn]  = React.useState(false);
@@ -92,9 +93,17 @@ function VitrineRequest() {
     document.head.appendChild(s);
   });
 
+  const setErrorAndScroll = (msg) => {
+    setError(msg);
+    setTimeout(() => errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
+  };
+
   const handlePaymentSuccess = async () => {
     setPaying(true);
     const finalSlug = slug || toSlug(form.name) + "-" + Date.now();
+    // Protection doublon : vérifier que la vitrine n'existe pas déjà
+    const { data: existing } = await supabase.from("structures").select("id").eq("slug", finalSlug).maybeSingle();
+    if (existing) { setDone(true); setPaying(false); return; } // déjà enregistrée
     const photos = form.photos.split("\n").map(l=>l.trim()).filter(Boolean).slice(0,20);
     const now = new Date();
     // Récupérer l'ID de l'utilisateur connecté
@@ -144,8 +153,10 @@ function VitrineRequest() {
 
   const launchPayment = async () => {
     // Validation
-    if (!form.name.trim()) { setError("Le nom de la structure est obligatoire."); return; }
-    if (!form.phone.trim()) { setError("Le numéro de téléphone est obligatoire."); return; }
+    if (!form.name.trim()) { setErrorAndScroll("Le nom de la structure est obligatoire."); return; }
+    if (!form.type) { setErrorAndScroll("Le type de structure est obligatoire."); return; }
+    if (!form.ville) { setErrorAndScroll("La ville est obligatoire."); return; }
+    if (!form.phone.trim()) { setErrorAndScroll("Le numéro de téléphone est obligatoire."); return; }
     setError(null);
     // Admin → activation directe sans paiement
     if (isAdmin) { handlePaymentSuccess(); return; }
@@ -157,9 +168,13 @@ function VitrineRequest() {
         transaction: { amount: applyPromo(isPack ? PACK_PRICE : SOLO_PRICE, "vitrine").prixFinal, description: `VitrineWeb — Création de vitrine : ${form.name}` },
         customer:    { email: form.email || "client@marcheduroi.com" },
         onComplete(resp, reason) {
-          const ok = reason === FP.TRANSACTION_APPROVED || reason === "transaction_approved" || reason === "approved";
+          console.log("[FedaPay] reason:", reason, "resp:", resp);
+          const ok = reason === FP.TRANSACTION_APPROVED
+            || reason === "transaction_approved"
+            || reason === "approved"
+            || resp?.transaction?.status === "approved";
           if (ok) handlePaymentSuccess();
-          else setError("Paiement annulé. Réessayez quand vous voulez.");
+          else setErrorAndScroll("Paiement annulé ou échoué. Réessayez quand vous voulez.");
         }
       }).open();
     } catch {
@@ -367,7 +382,7 @@ function VitrineRequest() {
         <input style={inp} value={form.logo_url} onChange={e=>setForm(f=>({...f,logo_url:e.target.value}))} placeholder="https://i.ibb.co/.../logo.png"/>
         <label style={lbl}>Photo de couverture (lien URL)</label>
         <input style={inp} value={form.cover_url} onChange={e=>setForm(f=>({...f,cover_url:e.target.value}))} placeholder="https://i.ibb.co/.../banniere.jpg"/>
-        <label style={lbl}>Photos galerie — un lien par ligne (max 20)</label>
+        <label style={lbl}>Photos galerie — un lien par ligne (max 10)</label>
           <p style={{ color:"#9A9AB0",fontSize:11,margin:"4px 0 8px",lineHeight:1.7 }}>
             📐 <strong style={{color:"#10B981"}}>Dimensions recommandées</strong> — Logo : <strong style={{color:"#E8E8F0"}}>400×400px</strong> (carré) · Couverture : <strong style={{color:"#E8E8F0"}}>1920×600px</strong> · Galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3) · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong>
           </p>
@@ -383,7 +398,7 @@ function VitrineRequest() {
 
         {/* Erreur */}
         {error && (
-          <div style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:12,padding:14,marginTop:20 }}>
+          <div ref={errorRef} style={{ background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:12,padding:14,marginTop:20 }}>
             <p style={{ margin:0,color:"#FF4757",fontWeight:600,fontSize:14 }}>❌ {error}</p>
           </div>
         )}
