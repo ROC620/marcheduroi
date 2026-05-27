@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { usePromo } from "../hooks/usePromo";
 import { useNotifyAdmin } from "../hooks/useNotifyAdmin";
+import { useVitrineAds } from "../hooks/useVitrineAds";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabase";
 import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } from "../vitrineConstants";
@@ -8,6 +9,7 @@ import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } fr
 function VitrineRenewal({ structure, token, onDone }) {
   const { applyPromo, promoLabel } = usePromo();
   const { notifyAdmin } = useNotifyAdmin();
+  const { insertVitrineBanner } = useVitrineAds();
   const COLOR = "#10B981";
   const [tokenValid, setTokenValid] = React.useState(false);
   const [checking,   setChecking]   = React.useState(true);
@@ -39,6 +41,7 @@ function VitrineRenewal({ structure, token, onDone }) {
     if (error) setError("Paiement reçu mais erreur d'activation. Contactez contact@marcheduroi.com");
     else {
       notifyAdmin({ type:"renouvellement", nom:structure.name, montant:applyPromo(structure.renewal_amount||18000,"vitrine").prixFinal, details:`Renouvellement vitrine — ${structure.ville||""}` });
+      await insertVitrineBanner(structure, "renouvellement");
       setDone(true);
       setTimeout(onDone, 2500);
     }
