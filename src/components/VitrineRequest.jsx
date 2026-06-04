@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabase";
 import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } from "../vitrineConstants";
 import { VitrineCarousel, VitrineSection } from "./VitrineCarousel";
+import { SingleUploader, GalleryUploader } from "./ImgBBUploader";
 
 const PHONE_CODES = {"BJ":"+229","TG":"+228","CI":"+225","SN":"+221","ML":"+223","BF":"+226","NE":"+227","GN":"+224","NG":"+234","CM":"+237","CG":"+242","CD":"+243","GA":"+241","MG":"+261","RW":"+250","BI":"+257","TD":"+235","MR":"+222","FR":"+33","BE":"+32","CH":"+41","CA":"+1","US":"+1","GB":"+44"};
 const PHONE_PLACEHOLDERS = {"BJ":"+229 0100000000","TG":"+228 90000000","CI":"+225 0100000000","SN":"+221 700000000","NG":"+234 8000000000","CM":"+237 600000000","FR":"+33 600000000","BE":"+32 470000000","GB":"+44 7000000000"};
@@ -378,23 +379,30 @@ function VitrineRequest() {
 
         {/* MÉDIAS */}
         <p style={sec}>🖼️ Médias <span style={{ color:T.sub,fontSize:12,fontWeight:400 }}>(optionnel — modifiable après)</span></p>
-        <label style={lbl}>Logo (lien URL)</label>
-        <input style={inp} value={form.logo_url} onChange={e=>setForm(f=>({...f,logo_url:e.target.value}))} placeholder="https://i.ibb.co/.../logo.png"/>
-        <label style={lbl}>Photo de couverture (lien URL)</label>
-        <input style={inp} value={form.cover_url} onChange={e=>setForm(f=>({...f,cover_url:e.target.value}))} placeholder="https://i.ibb.co/.../banniere.jpg"/>
-        <label style={lbl}>Photos galerie — un lien par ligne (max 10)</label>
-          <p style={{ color:"#9A9AB0",fontSize:11,margin:"4px 0 8px",lineHeight:1.7 }}>
-            📐 <strong style={{color:"#10B981"}}>Dimensions recommandées</strong> — Logo : <strong style={{color:"#E8E8F0"}}>400×400px</strong> (carré) · Couverture : <strong style={{color:"#E8E8F0"}}>1920×600px</strong> · Galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3) · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong>
-          </p>
-        <textarea style={{...inp,minHeight:80,resize:"vertical",fontFamily:"monospace",fontSize:12}} value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))} placeholder={"https://i.ibb.co/.../photo1.jpg\nhttps://i.ibb.co/.../photo2.jpg"}/>
+        <SingleUploader
+          value={form.logo_url}
+          onChange={url=>setForm(f=>({...f,logo_url:url}))}
+          label="Logo"
+          hint="Format idéal : 400×400px, carré, fond opaque."
+          placeholder="https://i.ibb.co/.../logo.png"
+          theme={T}
+        />
+        <SingleUploader
+          value={form.cover_url}
+          onChange={url=>setForm(f=>({...f,cover_url:url}))}
+          label="Photo de couverture"
+          hint="Grande bannière en haut de votre vitrine. Format idéal : 1920×600px. Aussi affichée lors du partage WhatsApp."
+          placeholder="https://i.ibb.co/.../banniere.jpg"
+          theme={T}
+        />
+        <GalleryUploader
+          value={form.photos}
+          onChange={val=>setForm(f=>({...f,photos:val}))}
+          max={20}
+          theme={T}
+        />
         <label style={lbl}>Vidéo YouTube (lien)</label>
         <input style={inp} value={form.video} onChange={e=>setForm(f=>({...f,video:e.target.value}))} placeholder="https://www.youtube.com/watch?v=..."/>
-
-        <div style={{ background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.15)",borderRadius:12,padding:14,marginTop:16 }}>
-          <p style={{ color:T.sub,fontSize:12,margin:0,lineHeight:1.7 }}>
-            💡 <strong style={{ color:T.text }}>Pour les médias :</strong> hébergez vos photos sur <strong style={{ color:COLOR }}>imgbb.com</strong> (gratuit) et copiez les liens ici. Vous pourrez les modifier à tout moment après activation.
-          </p>
-        </div>
 
         {/* Erreur */}
         {error && (

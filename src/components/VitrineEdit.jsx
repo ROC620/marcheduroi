@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabase";
 import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } from "../vitrineConstants";
 import { VitrineCarousel, VitrineSection } from "./VitrineCarousel";
+import { SingleUploader, GalleryUploader } from "./ImgBBUploader";
 
 const getThemeFromStorage = () => {
   const t = localStorage.getItem("mdr_theme");
@@ -25,6 +26,8 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
     instagram: structure.instagram || "",
     website:  structure.website  || "",
     hours:    structure.hours    || "",
+    logo_url: structure.logo_url  || "",
+    cover_url: structure.cover_url || "",
     video:    structure.video    || "",
     photos:   (structure.photos  || []).join("\n"),
     services: structure.services || "",
@@ -74,13 +77,14 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
 
   const handleSave = async () => {
     setSaving(true); setSaveError(null);
-    const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean).slice(0,20);
+    const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean).slice(0,10);
     const today = new Date().toISOString().slice(0,10);
     const { error } = await supabase.from("structures").update({
       slogan: form.slogan || null, description: form.description || null,
       phone: form.phone, phone2: form.phone2, whatsapp: form.whatsapp,
       email: form.email, facebook: form.facebook, instagram: form.instagram || null,
       website: form.website || null, hours: form.hours,
+      logo_url: form.logo_url || null, cover_url: form.cover_url || null,
       video: form.video, photos: photosArray, services: form.services,
       news, updated_at: new Date().toISOString(),
       theme:         form.theme    || "dark",
@@ -255,20 +259,30 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
             placeholder="Consultations générales, urgences 24h/24…" disabled={editBlocked}/>
         </VitrineSection>
 
-        <VitrineSection id="photos" icon="🖼️" title="Photos" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
-          <label style={lbl}>Un lien par ligne (max 20)</label>
-          <p style={{ color:"#9A9AB0",fontSize:11,margin:"4px 0 8px",lineHeight:1.7 }}>
-            📐 <strong style={{color:"#10B981"}}>Dimensions recommandées</strong> — Logo : <strong style={{color:"#E8E8F0"}}>400×400px</strong> (carré) · Couverture : <strong style={{color:"#E8E8F0"}}>1920×600px</strong> · Galerie : <strong style={{color:"#E8E8F0"}}>1200×900px</strong> (ratio 4:3) · Hébergez sur <strong style={{color:"#E8E8F0"}}>ImgBB.com</strong>
-          </p>
-          <textarea style={{...inp,minHeight:130,resize:"vertical",fontFamily:"monospace",fontSize:12}}
-            value={form.photos} onChange={e=>setForm(f=>({...f,photos:e.target.value}))}
-            placeholder={"https://i.ibb.co/xyz/facade.jpg\nhttps://i.ibb.co/abc/salle.jpg"} disabled={editBlocked}/>
-          <div style={{ background:T.card,border:`1px solid ${T.border}`,borderRadius:10,padding:12,marginTop:8 }}>
-            <p style={{ margin:0,color:T.sub,fontSize:12,lineHeight:1.7 }}>
-              💡 Hébergez vos photos sur <strong style={{ color:COLOR }}>imgbb.com</strong> → copiez le lien direct.<br/>
-              ⚠️ Ne supprimez jamais vos photos de ImgBB.
-            </p>
-          </div>
+        <VitrineSection id="photos" icon="🖼️" title="Photos & Logo" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
+          <SingleUploader
+            value={form.logo_url||""}
+            onChange={url=>setForm(f=>({...f,logo_url:url}))}
+            label="Logo"
+            hint="Format idéal : 400×400px, carré, fond opaque."
+            placeholder="https://i.ibb.co/.../logo.png"
+            theme={T}
+          />
+          <SingleUploader
+            value={form.cover_url||""}
+            onChange={url=>setForm(f=>({...f,cover_url:url}))}
+            label="Photo de couverture"
+            hint="Format idéal : 1920×600px. Aussi affichée lors du partage WhatsApp."
+            placeholder="https://i.ibb.co/.../banniere.jpg"
+            theme={T}
+          />
+          <GalleryUploader
+            value={form.photos||""}
+            onChange={val=>setForm(f=>({...f,photos:val}))}
+            max={20}
+            theme={T}
+            disabled={editBlocked}
+          />
         </VitrineSection>
 
         <VitrineSection id="video" icon="🎬" title="Vidéo YouTube" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
