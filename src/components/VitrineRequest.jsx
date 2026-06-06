@@ -35,7 +35,7 @@ function VitrineRequest() {
     ville:"", quartier:"", von:"", address:"",
     gps_lat:"", gps_lng:"",
     phone:getPhonePrefix(), whatsapp:getPhonePrefix(), email:"", facebook:"",
-    logo_url:"", cover_url:"", photos:"", video:"",
+    logo_url:"", cover_url:"", photos:[], video:"",
     hours:"", services:"",
   });
 
@@ -105,7 +105,7 @@ function VitrineRequest() {
     // Protection doublon : vérifier que la vitrine n'existe pas déjà
     const { data: existing } = await supabase.from("structures").select("id").eq("slug", finalSlug).maybeSingle();
     if (existing) { setDone(true); setPaying(false); return; } // déjà enregistrée
-    const photos = form.photos.split("\n").map(l=>l.trim()).filter(Boolean).slice(0,20);
+    const photos = Array.isArray(form.photos) ? form.photos.filter(p => p.url || typeof p === "string").slice(0,20) : [];
     const now = new Date();
     // Récupérer l'ID de l'utilisateur connecté
     const { data: { session } } = await supabase.auth.getSession();
@@ -397,7 +397,7 @@ function VitrineRequest() {
         />
         <GalleryUploader
           value={form.photos}
-          onChange={val=>setForm(f=>({...f,photos:val}))}
+          onChange={arr=>setForm(f=>({...f,photos:arr}))}
           max={20}
           theme={T}
         />

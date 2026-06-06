@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 
+// Helper compat : string ou {url,caption}
+const photoUrl     = (p) => typeof p === "string" ? p : (p?.url || "");
+const photoCaption = (p) => typeof p === "string" ? "" : (p?.caption || "");
+
 function VitrineCarousel({ photos, borderColor }) {
   const COLOR = "#10B981";
   const [current,   setCurrent]   = React.useState(0);
@@ -11,7 +15,6 @@ function VitrineCarousel({ photos, borderColor }) {
   const prev = () => setCurrent(c => (c - 1 + total) % total);
   const next = () => setCurrent(c => (c + 1) % total);
 
-  // Swipe tactile
   const onTouchStart = e => { touchStartRef.current = e.targetTouches[0].clientX; touchEndRef.current = null; };
   const onTouchMove  = e => { touchEndRef.current   = e.targetTouches[0].clientX; };
   const onTouchEnd   = () => {
@@ -20,7 +23,6 @@ function VitrineCarousel({ photos, borderColor }) {
     if (Math.abs(diff) > 40) diff > 0 ? next() : prev();
   };
 
-  // Clavier
   React.useEffect(() => {
     const handler = e => {
       if (!lightbox) return;
@@ -34,6 +36,9 @@ function VitrineCarousel({ photos, borderColor }) {
 
   if (total === 0) return null;
 
+  const curUrl     = photoUrl(photos[current]);
+  const curCaption = photoCaption(photos[current]);
+
   return (
     <>
       {/* Carousel principal */}
@@ -42,20 +47,17 @@ function VitrineCarousel({ photos, borderColor }) {
 
         {/* Image */}
         <div style={{ position:"relative",width:"100%",paddingBottom:"60%",background:"#1A1D30" }}>
-          <img src={photos[current]} alt={`photo ${current+1}`}
+          <img src={curUrl} alt={curCaption || `photo ${current+1}`}
             style={{ position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",cursor:"zoom-in" }}
             onClick={()=>setLightbox(true)}
             onError={e=>e.target.style.opacity="0"}/>
 
-          {/* Flèche gauche */}
           {total > 1 && (
             <button onClick={e=>{e.stopPropagation();prev();}}
               style={{ position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)",border:"none",color:"#fff",width:36,height:36,borderRadius:"50%",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",zIndex:2 }}>
               ‹
             </button>
           )}
-
-          {/* Flèche droite */}
           {total > 1 && (
             <button onClick={e=>{e.stopPropagation();next();}}
               style={{ position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)",border:"none",color:"#fff",width:36,height:36,borderRadius:"50%",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",zIndex:2 }}>
@@ -63,16 +65,22 @@ function VitrineCarousel({ photos, borderColor }) {
             </button>
           )}
 
-          {/* Compteur */}
           <div style={{ position:"absolute",top:10,right:10,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)",borderRadius:20,padding:"3px 10px",fontSize:12,color:"#fff",fontFamily:"Sora,sans-serif",fontWeight:600 }}>
             {current+1} / {total}
           </div>
-
-          {/* Icône zoom */}
           <div style={{ position:"absolute",bottom:10,right:10,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)",borderRadius:8,padding:"4px 8px",fontSize:11,color:"#fff",fontFamily:"Sora,sans-serif" }}>
             🔍 Agrandir
           </div>
         </div>
+
+        {/* Légende sous l'image */}
+        {curCaption && (
+          <div style={{ padding:"10px 16px",background:"rgba(0,0,0,0.5)",borderTop:`1px solid rgba(255,255,255,0.06)` }}>
+            <p style={{ margin:0,color:"rgba(255,255,255,0.85)",fontSize:13,fontFamily:"Sora,sans-serif",lineHeight:1.5,fontStyle:"italic" }}>
+              {curCaption}
+            </p>
+          </div>
+        )}
 
         {/* Points indicateurs */}
         {total > 1 && (
@@ -91,23 +99,28 @@ function VitrineCarousel({ photos, borderColor }) {
           onClick={()=>setLightbox(false)}
           onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={()=>{ onTouchEnd(); }}>
 
-          {/* Bouton fermer */}
           <button onClick={()=>setLightbox(false)}
             style={{ position:"absolute",top:20,right:20,background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"#fff",width:44,height:44,borderRadius:"50%",fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1 }}>
             ✕
           </button>
 
-          {/* Compteur */}
           <div style={{ position:"absolute",top:24,left:"50%",transform:"translateX(-50%)",color:"rgba(255,255,255,0.7)",fontSize:13,fontFamily:"Sora,sans-serif" }}>
             {current+1} / {total}
           </div>
 
-          {/* Image plein écran */}
-          <img src={photos[current]} alt={`photo ${current+1}`}
-            style={{ maxWidth:"92vw",maxHeight:"82vh",objectFit:"contain",borderRadius:8 }}
+          <img src={curUrl} alt={curCaption || `photo ${current+1}`}
+            style={{ maxWidth:"92vw",maxHeight:"72vh",objectFit:"contain",borderRadius:8 }}
             onClick={e=>e.stopPropagation()}/>
 
-          {/* Flèches lightbox */}
+          {/* Description dans le lightbox */}
+          {curCaption && (
+            <div style={{ maxWidth:"92vw",marginTop:12,textAlign:"center" }} onClick={e=>e.stopPropagation()}>
+              <p style={{ margin:0,color:"rgba(255,255,255,0.85)",fontSize:14,fontFamily:"Sora,sans-serif",lineHeight:1.6,fontStyle:"italic",background:"rgba(255,255,255,0.08)",padding:"8px 16px",borderRadius:8 }}>
+                {curCaption}
+              </p>
+            </div>
+          )}
+
           {total > 1 && (
             <>
               <button onClick={e=>{e.stopPropagation();prev();}}
@@ -124,8 +137,8 @@ function VitrineCarousel({ photos, borderColor }) {
           {/* Miniatures */}
           {total > 1 && (
             <div style={{ display:"flex",gap:8,marginTop:16,padding:"0 16px",overflowX:"auto",maxWidth:"100vw" }}>
-              {photos.map((url,i) => (
-                <img key={i} src={url} alt={`miniature ${i+1}`}
+              {photos.map((p,i) => (
+                <img key={i} src={photoUrl(p)} alt={photoCaption(p) || `miniature ${i+1}`}
                   onClick={e=>{e.stopPropagation();setCurrent(i);}}
                   style={{ width:60,height:45,objectFit:"cover",borderRadius:6,cursor:"pointer",border:i===current?`2px solid ${COLOR}`:"2px solid transparent",opacity:i===current?1:0.6,flexShrink:0,transition:"all 0.2s" }}/>
               ))}

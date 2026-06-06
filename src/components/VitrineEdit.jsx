@@ -29,7 +29,7 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
     logo_url: structure.logo_url  || "",
     cover_url: structure.cover_url || "",
     video:    structure.video    || "",
-    photos:   (structure.photos  || []).join("\n"),
+    photos:   structure.photos || [],
     services: structure.services || "",
     news_title:"", news_content:"", news_type:"Actualité",
     theme:    structure.theme    || "dark",
@@ -77,7 +77,7 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
 
   const handleSave = async () => {
     setSaving(true); setSaveError(null);
-    const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean).slice(0,10);
+    const photosArray = Array.isArray(form.photos) ? form.photos.filter(p => p.url || typeof p === "string").slice(0,20) : [];
     const today = new Date().toISOString().slice(0,10);
     const { error } = await supabase.from("structures").update({
       slogan: form.slogan || null, description: form.description || null,
@@ -277,8 +277,8 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
             theme={T}
           />
           <GalleryUploader
-            value={form.photos||""}
-            onChange={val=>setForm(f=>({...f,photos:val}))}
+            value={form.photos||[]}
+            onChange={arr=>setForm(f=>({...f,photos:arr}))}
             max={20}
             theme={T}
             disabled={editBlocked}
