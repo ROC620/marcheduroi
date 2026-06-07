@@ -46,6 +46,7 @@ import VideoCardPlayer from "./components/VideoCardPlayer";
 import VitrineRequest from "./components/VitrineRequest";
 import VitrineDetail from "./components/VitrineDetail";
 import VitrineDirectory from "./components/VitrineDirectory";
+import CarteVisite from "./components/CarteVisite";
 import {
   CATEGORIES, CATEGORY_COLORS, BACKGROUNDS, VEHICLE_FIELDS, MOTO_FIELDS,
   RESTO_TYPES, BEAUTE_TYPES, MAX_MODIFS,
@@ -1185,7 +1186,7 @@ function AppContent() {
           sousType: x.sous_type||x.sousType||""};
       };
       const today = new Date().toISOString().slice(0,10);
-      const filterExpired = (items) => items.filter(x => (!x.expires_at || x.expires_at >= today) && !x.deleted_at);
+      const filterExpired = (items) => items.filter(x => !x.expires_at || x.expires_at >= today);
 
       const { data: bData } = await supabase.from("boutiques").select("*").order("created_at", { ascending: false }).range(0, 99);
       if (bData && bData.length > 0) setBoutiques(filterExpired(bData).map(mapItem));
@@ -1205,7 +1206,6 @@ function AppContent() {
       const { data, error } = await supabase
         .from("posts")
         .select("*")
-        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .range(0, 199); // max 200 annonces par chargement
       if (error) throw error;
@@ -2900,20 +2900,19 @@ const PHONE_EXAMPLE = {
   };
 
   const deletePost = async (id) => {
-    const deletedAt = new Date().toISOString();
-    const { error } = await supabase.from("posts").update({ deleted_at: deletedAt }).eq("id", id);
+    const post = posts.find(p => p.id === id);
+    // Supprimer les photos du Storage
+    if (post?.photos?.length > 0) {
+      const paths = post.photos
+        .filter(url => url.includes("/storage/v1/object/public/photos/"))
+        .map(url => url.split("/storage/v1/object/public/photos/")[1]);
+      if (paths.length > 0) await supabase.storage.from("photos").remove(paths).catch(()=>{});
+    }
+    const { error } = await supabase.from("posts").delete().eq("id", id);
     if (error) { console.error("Delete error:", error); notify("Erreur suppression : " + error.message, "error"); return; }
-    // Retirer de la liste publique, garder dans myPosts avec deleted_at
-    setPosts(p => p.map(post => post.id === id ? { ...post, deleted_at: deletedAt } : post));
+    setPosts(p=>p.filter(post=>post.id!==id));
     setModal(null);
-    notify("✅ Annonce supprimée. Vous pouvez la restaurer dans votre profil pendant 3 mois.");
-  };
-
-  const restorePost = async (id) => {
-    const { error } = await supabase.from("posts").update({ deleted_at: null }).eq("id", id);
-    if (error) { notify("Erreur restauration", "error"); return; }
-    setPosts(p => p.map(post => post.id === id ? { ...post, deleted_at: null } : post));
-    notify("✅ Annonce restaurée !");
+    notify("✅ Annonce supprimée.");
   };
 
   const likePost = async (id) => {
@@ -3364,8 +3363,6 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
   ] : [];
 
   const myPosts = user?posts.filter(p=>p.authorId===user.id):[];
-  const myDeletedPosts = myPosts.filter(p=>p.deleted_at);
-  const myActivePosts = myPosts.filter(p=>!p.deleted_at);
   const today = new Date().toISOString().slice(0,10);
   const isShopExpired = (item) => item.expires_at && item.expires_at < today;
   const myShops = user ? [
@@ -3374,8 +3371,6 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
     ...restos.filter(r=>r.authorId===user.id||r.author_id===user.id),
     ...beaute.filter(b=>b.authorId===user.id||b.author_id===user.id),
   ] : [];
-  const myDeletedShops = myShops.filter(s=>s.deleted_at);
-  const myActiveShops = myShops.filter(s=>!s.deleted_at);
 
   const inputStyle = { width:"100%",padding:"12px 16px",background:theme.bg,border:`1px solid ${theme.border}`,borderRadius:10,color:theme.text,fontSize:14,fontFamily:"inherit" };
   const cardStyle = { background:theme.card, border:`1px solid ${theme.border}` };
@@ -4851,34 +4846,6 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
             </div>
           )}
 
-          {/* Annonces supprimées — période de grâce 3 mois */}
-          {myDeletedPosts.length > 0 && (
-            <div style={{ marginBottom:24 }}>
-              <h3 style={{ fontWeight:700,fontSize:16,marginBottom:12,color:"#FF4757",display:"flex",alignItems:"center",gap:8 }}>
-                🗑️ Annonces supprimées ({myDeletedPosts.length})
-              </h3>
-              {myDeletedPosts.map(post=>{
-                const purgeDate = new Date(post.deleted_at);
-                purgeDate.setMonth(purgeDate.getMonth()+3);
-                const purgeDateStr = purgeDate.toISOString().slice(0,10);
-                return (
-                  <div key={post.id} style={{ background:"rgba(255,71,87,0.06)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:12,padding:14,marginBottom:8 }}>
-                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                      <div>
-                        <p style={{ fontWeight:700,color:theme.text,marginBottom:2 }}>{post.title}</p>
-                        <p style={{ color:"#FF4757",fontSize:12,fontWeight:600 }}>🗑️ Supprimée — effacement définitif le {purgeDateStr}</p>
-                      </div>
-                      <button onClick={()=>restorePost(post.id)}
-                        style={{ background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.4)",color:"#10B981",padding:"8px 16px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>
-                        🔄 Restaurer
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
           {/* Établissements expirés */}
           {myShops.filter(s=>isShopExpired(s)).length > 0 && (
             <div style={{ marginBottom:24 }}>
@@ -4928,48 +4895,8 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
             ))}
           </div>
 
-          {/* Établissements supprimés — période de grâce 3 mois */}
-          {myDeletedShops.length > 0 && (
-            <div style={{ marginBottom:24 }}>
-              <h3 style={{ fontWeight:700,fontSize:16,marginBottom:12,color:"#FF4757",display:"flex",alignItems:"center",gap:8 }}>
-                🗑️ Établissements supprimés ({myDeletedShops.length})
-              </h3>
-              {myDeletedShops.map(shop=>{
-                const purgeDate = new Date(shop.deleted_at);
-                purgeDate.setMonth(purgeDate.getMonth()+3);
-                const purgeDateStr = purgeDate.toISOString().slice(0,10);
-                const tableMap = {boutique:"boutiques",atelier:"ateliers",resto:"restos",beaute:"beaute"};
-                const restoreShop = async () => {
-                  const type = boutiques.some(b=>b.id===shop.id)?"boutiques":ateliers.some(a=>a.id===shop.id)?"ateliers":restos.some(r=>r.id===shop.id)?"restos":"beaute";
-                  const { error } = await supabase.from(type).update({ deleted_at: null }).eq("id", shop.id);
-                  if (error) { notify("Erreur restauration","error"); return; }
-                  const restore = arr => arr.map(x=>x.id===shop.id?{...x,deleted_at:null}:x);
-                  if(type==="boutiques") setBoutiques(restore);
-                  else if(type==="ateliers") setAteliers(restore);
-                  else if(type==="restos") setRestos(restore);
-                  else setBeaute(restore);
-                  notify("✅ Établissement restauré !");
-                };
-                return (
-                  <div key={shop.id} style={{ background:"rgba(255,71,87,0.06)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:12,padding:14,marginBottom:8 }}>
-                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                      <div>
-                        <p style={{ fontWeight:700,color:theme.text,marginBottom:2 }}>{shop.name}</p>
-                        <p style={{ color:"#FF4757",fontSize:12,fontWeight:600 }}>🗑️ Supprimé — effacement définitif le {purgeDateStr}</p>
-                      </div>
-                      <button onClick={restoreShop}
-                        style={{ background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.4)",color:"#10B981",padding:"8px 16px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer" }}>
-                        🔄 Restaurer
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text }}>Mes annonces ({myActivePosts.length})</h3>
-          {myActivePosts.map(post=>(
+          <h3 style={{ fontWeight:700,fontSize:18,marginBottom:16,color:theme.text }}>Mes annonces ({myPosts.length})</h3>
+          {myPosts.map(post=>(
             <div key={post.id} style={{ ...cardStyle,borderRadius:14,padding:16,marginBottom:12 }}>
               <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,flexWrap:"wrap",marginBottom:12 }}>
                 <div style={{ display:"flex",gap:12,alignItems:"center" }}>
@@ -6514,17 +6441,15 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
                   <button onClick={async ()=>{
                     const tableMap = {boutique:"boutiques", atelier:"ateliers", resto:"restos", beaute:"beaute"};
                     const table = tableMap[modal.shopType];
-                    const deletedAt = new Date().toISOString();
                     if(table) {
-                      const { error } = await supabase.from(table).update({ deleted_at: deletedAt }).eq("id", modal.data.id);
+                      const { error } = await supabase.from(table).delete().eq("id", modal.data.id);
                       if(error) { notify("Erreur lors de la suppression","error"); console.error(error); return; }
                     }
-                    const markDeleted = arr => arr.map(x => x.id===modal.data.id ? {...x, deleted_at: deletedAt} : x);
-                    if(modal.shopType==="boutique") setBoutiques(markDeleted);
-                    else if(modal.shopType==="atelier") setAteliers(markDeleted);
-                    else if(modal.shopType==="resto") setRestos(markDeleted);
-                    else if(modal.shopType==="beaute") setBeaute(markDeleted);
-                    setModal(null); notify("✅ Établissement supprimé. Restaurable depuis votre profil pendant 3 mois.");
+                    if(modal.shopType==="boutique") setBoutiques(b=>b.filter(x=>x.id!==modal.data.id));
+                    else if(modal.shopType==="atelier") setAteliers(a=>a.filter(x=>x.id!==modal.data.id));
+                    else if(modal.shopType==="resto") setRestos(r=>r.filter(x=>x.id!==modal.data.id));
+                    else if(modal.shopType==="beaute") setBeaute(b=>b.filter(x=>x.id!==modal.data.id));
+                    setModal(null); notify("Supprimé avec succès !");
                   }} style={{ flex:1,padding:"12px",background:"linear-gradient(135deg,#FF4757,#FF6584)",border:"none",color:"#fff",borderRadius:12,fontWeight:700 }}>Supprimer</button>
                 </div>
               </>
@@ -7089,6 +7014,7 @@ function PersistentLayout() {
   const isVitrineReq  = segments[0] === "vitrine"  && segments.length === 1;
   // /vitrine/slug (+ /modifier ou /payer optionnel) → page publique
   const isVitrineSlug = segments[0] === "vitrine"  && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
+  const isVitrineCarte= segments[0] === "vitrine"  && segments[2] === "carte";
   // /vitrines → annuaire
   const isVitrineDir  = segments[0] === "vitrines" && segments.length === 1;
   // Sous-domaine : slug.vitrine.marcheduroi.com
@@ -7096,11 +7022,12 @@ function PersistentLayout() {
 
   return (
     <>
-      <div style={{ display: (isDetail || isVitrineReq || isVitrineSlug || isVitrineSub || isVitrineDir) ? "none" : "block" }}>
+      <div style={{ display: (isDetail || isVitrineReq || isVitrineSlug || isVitrineSub || isVitrineDir || isVitrineCarte) ? "none" : "block" }}>
         <AppContent/>
       </div>
       {isDetail                        && <AnnonceDetail/>}
-      {(isVitrineSlug || isVitrineSub) && <VitrineDetail/>}
+      {(isVitrineSlug || isVitrineSub) && !isVitrineCarte && <VitrineDetail/>}
+      {isVitrineCarte && <CarteVisite/>}
       {isVitrineReq                    && <VitrineRequest/>}
       {isVitrineDir                    && <VitrineDirectory/>}
     </>

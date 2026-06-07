@@ -53,6 +53,10 @@
       "destination": "/api/vitrine-redirect?slug=:slug"
     },
     {
+      "source": "/vitrine/:slug/carte",
+      "destination": "/index.html"
+    },
+    {
       "source": "/:pays/:ville/:type",
       "destination": "/api/listings-par-ville?pays=:pays&ville=:ville&type=:type"
     },
