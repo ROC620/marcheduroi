@@ -35,7 +35,7 @@ function VitrineRequest() {
     ville:"", quartier:"", von:"", address:"",
     gps_lat:"", gps_lng:"",
     phone:getPhonePrefix(), whatsapp:getPhonePrefix(), email:"", facebook:"",
-    logo_url:"", cover_url:"", photos:[], video:"",
+    logo_url:"", cover_url:"", photos:"", video:"",
     hours:"", services:"",
   });
 
@@ -105,7 +105,7 @@ function VitrineRequest() {
     // Protection doublon : vérifier que la vitrine n'existe pas déjà
     const { data: existing } = await supabase.from("structures").select("id").eq("slug", finalSlug).maybeSingle();
     if (existing) { setDone(true); setPaying(false); return; } // déjà enregistrée
-    const photos = Array.isArray(form.photos) ? form.photos.filter(p => p.url || typeof p === "string").slice(0,20) : [];
+    const photos = form.photos.split("\n").map(l=>l.trim()).filter(Boolean).slice(0,20);
     const now = new Date();
     // Récupérer l'ID de l'utilisateur connecté
     const { data: { session } } = await supabase.auth.getSession();
@@ -311,9 +311,12 @@ function VitrineRequest() {
         {slug && <p style={{ color:T.sub,fontSize:11,marginTop:4 }}>URL : <span style={{ color:COLOR }}>marcheduroi.com/vitrine/{slug}</span></p>}
 
         <label style={lbl}>Type de structure *</label>
-        <select style={{...inp,cursor:"pointer"}} value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value}))}>
-          {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
-        </select>
+        <input style={{...inp,cursor:"text"}} list="vitrine-types" value={form.type}
+          onChange={e=>setForm(f=>({...f,type:e.target.value}))}
+          placeholder="Choisissez ou écrivez votre type..."/>
+        <datalist id="vitrine-types">
+          {TYPES.map(t=><option key={t} value={t}/>)}
+        </datalist>
 
         <label style={lbl}>Slogan / Mission</label>
         <input style={inp} value={form.slogan} onChange={e=>setForm(f=>({...f,slogan:e.target.value}))} placeholder="Former les leaders de demain"/>
@@ -397,7 +400,7 @@ function VitrineRequest() {
         />
         <GalleryUploader
           value={form.photos}
-          onChange={arr=>setForm(f=>({...f,photos:arr}))}
+          onChange={val=>setForm(f=>({...f,photos:val}))}
           max={20}
           theme={T}
         />
