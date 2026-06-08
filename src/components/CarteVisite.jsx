@@ -169,7 +169,7 @@ function CarteVisite({ structure: structureProp, slug: slugProp, onClose }) {
 
       {/* Footer MarchéduRoi */}
       <div style={{ background:`${COLOR}18`, borderTop:`1px solid ${COLOR}33`, padding:"10px 28px", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-        <img src="/marcheduRoi-icon.svg" alt="MarchéduRoi"
+        <img src="https://marcheduroi.com/marcheduRoi-icon.svg" alt="MarchéduRoi"
           style={{ height:20, opacity:0.7 }}
           crossOrigin="anonymous"/>
         <span style={{ fontSize:11, color:VT.sub||"#9A9AB0", fontWeight:600 }}>marcheduroi.com</span>
