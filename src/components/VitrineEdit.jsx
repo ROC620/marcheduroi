@@ -29,9 +29,10 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
     logo_url: structure.logo_url  || "",
     cover_url: structure.cover_url || "",
     video:    structure.video    || "",
-    photos:   structure.photos || [],
+    photos:   (structure.photos  || []).join("\n"),
     services: structure.services || "",
     news_title:"", news_content:"", news_type:"Actualité",
+    faq: structure.faq || [],
     theme:    structure.theme    || "dark",
     bg_image: structure.bg_image || "",
   });
@@ -77,7 +78,7 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
 
   const handleSave = async () => {
     setSaving(true); setSaveError(null);
-    const photosArray = Array.isArray(form.photos) ? form.photos.filter(p => p.url || typeof p === "string").slice(0,20) : [];
+    const photosArray = form.photos.split("\n").map(l => l.trim()).filter(Boolean).slice(0,10);
     const today = new Date().toISOString().slice(0,10);
     const { error } = await supabase.from("structures").update({
       slogan: form.slogan || null, description: form.description || null,
@@ -90,6 +91,7 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
       theme:         form.theme    || "dark",
       bg_image:      form.bg_image || null,
       custom_fields: customFields,
+      faq: form.faq || [],
       last_edit_date: today,
     }).eq("id", structure.id).eq("edit_token", token);
     if (error) setSaveError("Erreur lors de la sauvegarde. Réessayez.");
@@ -277,12 +279,52 @@ function VitrineEdit({ structure, token, tokenPreValidated, onDone }) {
             theme={T}
           />
           <GalleryUploader
-            value={form.photos||[]}
-            onChange={arr=>setForm(f=>({...f,photos:arr}))}
+            value={form.photos||""}
+            onChange={val=>setForm(f=>({...f,photos:val}))}
             max={20}
             theme={T}
             disabled={editBlocked}
           />
+        </VitrineSection>
+
+        <VitrineSection id="faq" icon="❓" title="FAQ — Questions fréquentes" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>
+          <p style={{ fontSize:12,color:T.sub,margin:"0 0 12px",lineHeight:1.6 }}>
+            Ajoutez les questions que vos clients posent souvent. Bon pour Google et pratique pour vos visiteurs.
+          </p>
+          {(form.faq||[]).map((item,i) => (
+            <div key={i} style={{ background:T.bg,border:`1px solid ${T.border}`,borderRadius:10,padding:12,marginBottom:8 }}>
+              <input
+                value={item.question}
+                onChange={e=>setForm(f=>({...f,faq:f.faq.map((q,j)=>j===i?{...q,question:e.target.value}:q)}))}
+                placeholder={`Question ${i+1} — Ex: Acceptez-vous les paiements MTN Money ?`}
+                maxLength={120}
+                disabled={editBlocked}
+                style={{...inp,marginBottom:6,fontWeight:600}}
+              />
+              <textarea
+                value={item.reponse}
+                onChange={e=>setForm(f=>({...f,faq:f.faq.map((q,j)=>j===i?{...q,reponse:e.target.value}:q)}))}
+                placeholder="Votre réponse..."
+                maxLength={300}
+                rows={2}
+                disabled={editBlocked}
+                style={{...inp,resize:"none",fontSize:13}}
+              />
+              {!editBlocked && (
+                <button type="button" onClick={()=>setForm(f=>({...f,faq:f.faq.filter((_,j)=>j!==i)}))}
+                  style={{background:"transparent",border:"1px solid rgba(255,71,87,0.4)",color:"#FF4757",padding:"4px 12px",borderRadius:6,fontSize:12,cursor:"pointer",marginTop:6,fontWeight:600}}>
+                  🗑️ Supprimer
+                </button>
+              )}
+            </div>
+          ))}
+          {(form.faq||[]).length < 10 && !editBlocked && (
+            <button type="button"
+              onClick={()=>setForm(f=>({...f,faq:[...(f.faq||[]),{question:"",reponse:""}]}))}
+              style={{background:`rgba(16,185,129,0.12)`,border:`1px solid rgba(16,185,129,0.4)`,color:COLOR,padding:"10px 20px",borderRadius:8,fontWeight:700,fontSize:13,cursor:"pointer",width:"100%"}}>
+              + Ajouter une question ({(form.faq||[]).length}/10)
+            </button>
+          )}
         </VitrineSection>
 
         <VitrineSection id="video" icon="🎬" title="Vidéo YouTube" openSection={openSection} setOpenSection={setOpenSection} COLOR={COLOR} T={T}>

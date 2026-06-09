@@ -4,7 +4,6 @@ import { usePresence } from "../hooks/usePresence.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabase";
 import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } from "../vitrineConstants";
-import CarteVisite from "./CarteVisite";
 import { VitrineCarousel, VitrineSection } from "./VitrineCarousel";
 
 import VitrineEdit from "./VitrineEdit";
@@ -41,7 +40,6 @@ function VitrineDetail() {
   const [userRating,setUserRating]= useState(0);
   const [ratingComment,setRatingComment] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
-  const [showCarte,   setShowCarte]   = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
 
   // Vérifier si l'utilisateur connecté est le propriétaire
@@ -205,7 +203,6 @@ function VitrineDetail() {
     : null;
 
   return (
-    <>
     <div style={{ background: structure.bg_image ? `linear-gradient(${VT.bg}CC,${VT.bg}CC), url(${structure.bg_image}) center/cover fixed` : VT.bg, minHeight:"100vh",fontFamily:"Sora,sans-serif",color:VT.text }}>
 
       {/* ---- Navbar ---- */}
@@ -220,9 +217,6 @@ function VitrineDetail() {
           </button>
           <button onClick={handleShare} style={{ background:`rgba(16,185,129,0.12)`,border:`1px solid rgba(16,185,129,0.3)`,color:COLOR,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             🔗 Partager
-          </button>
-          <button onClick={()=>setShowCarte(true)} style={{ background:`rgba(16,185,129,0.12)`,border:`1px solid rgba(16,185,129,0.3)`,color:COLOR,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
-            🪪 Carte de visite
           </button>
           <button onClick={()=>navigate("/")} style={{ background:"transparent",border:`1px solid ${VT.border}`,color:VT.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             ← Retour
@@ -362,6 +356,24 @@ function VitrineDetail() {
           <div style={{ background:VT.card,border:`1px solid ${VT.border}`,borderRadius:14,padding:16,marginBottom:16 }}>
             <p style={{ fontWeight:700,color:VT.text,margin:"0 0 8px" }}>🕐 Horaires d'ouverture</p>
             <p style={{ color:VT.sub,margin:0,lineHeight:1.8,whiteSpace:"pre-line",fontSize:14 }}>{structure.hours}</p>
+          </div>
+        )}
+
+        {/* ---- FAQ ---- */}
+        {structure.faq && structure.faq.length > 0 && (
+          <div style={{ marginBottom:24 }}>
+            <p style={{ fontWeight:700,color:VT.text,marginBottom:12 }}>❓ Questions fréquentes</p>
+            {structure.faq.map((item,i) => (
+              <details key={i} style={{ background:VT.card,border:`1px solid ${VT.border}`,borderRadius:10,marginBottom:8,overflow:"hidden" }}>
+                <summary style={{ padding:"12px 16px",cursor:"pointer",fontWeight:700,color:VT.text,fontSize:14,listStyle:"none",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                  <span>{item.question}</span>
+                  <span style={{ color:VT.sub,fontSize:16,flexShrink:0,marginLeft:8 }}>＋</span>
+                </summary>
+                <div style={{ padding:"0 16px 12px",color:VT.sub,fontSize:13,lineHeight:1.7,borderTop:`1px solid ${VT.border}` }}>
+                  <p style={{ margin:"10px 0 0" }}>{item.reponse}</p>
+                </div>
+              </details>
+            ))}
           </div>
         )}
 
@@ -566,10 +578,6 @@ function VitrineDetail() {
 
       </div>
     </div>
-    {showCarte && (
-      <CarteVisite structure={structure} onClose={()=>setShowCarte(false)}/>
-    )}
-    </>
   );
 }
 
