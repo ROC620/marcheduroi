@@ -57,6 +57,14 @@
       "destination": "/index.html"
     },
     {
+      "source": "/vitrine/:slug/modifier",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/vitrine/:slug/payer",
+      "destination": "/index.html"
+    },
+    {
       "source": "/:pays/:ville/:type",
       "destination": "/api/listings-par-ville?pays=:pays&ville=:ville&type=:type"
     },
