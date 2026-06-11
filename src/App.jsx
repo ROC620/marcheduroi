@@ -46,7 +46,7 @@ import VideoCardPlayer from "./components/VideoCardPlayer";
 import VitrineRequest from "./components/VitrineRequest";
 import VitrineDetail from "./components/VitrineDetail";
 import VitrineDirectory from "./components/VitrineDirectory";
-import CarteVisite from "./components/CarteVisite";
+import LikeButton from "./components/LikeButton";
 import {
   CATEGORIES, CATEGORY_COLORS, BACKGROUNDS, VEHICLE_FIELDS, MOTO_FIELDS,
   RESTO_TYPES, BEAUTE_TYPES, MAX_MODIFS,
@@ -3511,9 +3511,13 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
               {/* J'aime + Favoris + Partage */}
               <div style={{ display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${theme.border}` }}>
-                <button onClick={()=>likePost(contactDrawer.id)} style={{ background:likedPosts.includes(contactDrawer.id)?"rgba(255,101,132,0.2)":"rgba(255,101,132,0.08)",border:"1px solid rgba(255,101,132,0.2)",color:likedPosts.includes(contactDrawer.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:10,fontSize:13,fontWeight:600,cursor:"pointer" }}>
-                  <Icon name="heart" size={14}/> {contactDrawer.likes||0}
-                </button>
+                <LikeButton
+                  table={contactDrawer.id?.startsWith("boutique")?"boutiques":contactDrawer.id?.startsWith("atelier")?"ateliers":contactDrawer.id?.startsWith("resto")?"restos":contactDrawer.id?.startsWith("beaute")?"beaute":"posts"}
+                  itemId={contactDrawer.id}
+                  likes={contactDrawer.likes||0}
+                  user={user}
+                  theme={theme}
+                />
                 <button onClick={()=>toggleFavorite(contactDrawer.id)} style={{ background:favorites.includes(contactDrawer.id)?"rgba(255,215,0,0.2)":"rgba(255,215,0,0.08)",border:"1px solid rgba(255,215,0,0.2)",color:favorites.includes(contactDrawer.id)?"#FFD700":theme.sub,padding:"8px 14px",borderRadius:10,fontSize:16,cursor:"pointer" }}>
                   {favorites.includes(contactDrawer.id)?"★":"☆"}
                 </button>
@@ -4643,7 +4647,7 @@ Disponibilité : ${cvForm.disponibilite||"Immédiate"}`,
 
                       {/* Likes + Favoris + Partage */}
                       <div style={{ display:"flex",gap:4,alignItems:"center",flexWrap:"wrap",marginBottom:10 }}>
-                        <button onClick={e=>{e.stopPropagation();likePost(post.id);}} style={{ background:likedPosts.includes(post.id)?"rgba(255,101,132,0.2)":"transparent",border:"none",color:likedPosts.includes(post.id)?"#FF6584":theme.sub,display:"flex",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,fontSize:12,fontWeight:600 }}><Icon name="heart" size={13}/>{post.likes}</button>
+                        <LikeButton table="posts" itemId={post.id} likes={post.likes||0} user={user} theme={theme} size="small"/>
                         <button onClick={e=>{e.stopPropagation();toggleFavorite(post.id);}} style={{ background:favorites.includes(post.id)?"rgba(255,215,0,0.2)":"transparent",border:"none",color:favorites.includes(post.id)?"#FFD700":theme.sub,padding:"6px 8px",borderRadius:8,fontSize:16,cursor:"pointer" }}>{favorites.includes(post.id)?"★":"☆"}</button>
                         <a href={"https://wa.me/?text="+encodeURIComponent("*"+post.title+"*"+"\nPrix: "+((post.price||"Non précisé").toString().includes("FCFA")?(post.price||"Non précisé"):(post.price||"Non précisé")+" FCFA")+"\nVoir: https://marcheduroi.com/annonce/"+post.id+"\n\"Sur MarchéduRoi, vous êtes le Roi du Marché 👑\"")} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none" }}>
                           <div style={{ background:"rgba(37,211,102,0.1)",color:"#25D366",padding:"6px 10px",borderRadius:8,fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4,cursor:"pointer" }}>
@@ -7014,7 +7018,6 @@ function PersistentLayout() {
   const isVitrineReq  = segments[0] === "vitrine"  && segments.length === 1;
   // /vitrine/slug (+ /modifier ou /payer optionnel) → page publique
   const isVitrineSlug = segments[0] === "vitrine"  && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
-  const isVitrineCarte= segments[0] === "vitrine"  && segments[2] === "carte";
   // /vitrines → annuaire
   const isVitrineDir  = segments[0] === "vitrines" && segments.length === 1;
   // Sous-domaine : slug.vitrine.marcheduroi.com
@@ -7022,12 +7025,11 @@ function PersistentLayout() {
 
   return (
     <>
-      <div style={{ display: (isDetail || isVitrineReq || isVitrineSlug || isVitrineSub || isVitrineDir || isVitrineCarte) ? "none" : "block" }}>
+      <div style={{ display: (isDetail || isVitrineReq || isVitrineSlug || isVitrineSub || isVitrineDir) ? "none" : "block" }}>
         <AppContent/>
       </div>
       {isDetail                        && <AnnonceDetail/>}
-      {(isVitrineSlug || isVitrineSub) && !isVitrineCarte && <VitrineDetail/>}
-      {isVitrineCarte && <CarteVisite/>}
+      {(isVitrineSlug || isVitrineSub) && <VitrineDetail/>}
       {isVitrineReq                    && <VitrineRequest/>}
       {isVitrineDir                    && <VitrineDirectory/>}
     </>

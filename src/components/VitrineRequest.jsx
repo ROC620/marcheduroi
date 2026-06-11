@@ -311,12 +311,18 @@ function VitrineRequest() {
         {slug && <p style={{ color:T.sub,fontSize:11,marginTop:4 }}>URL : <span style={{ color:COLOR }}>marcheduroi.com/vitrine/{slug}</span></p>}
 
         <label style={lbl}>Type de structure *</label>
-        <input style={{...inp,cursor:"text"}} list="vitrine-types" value={form.type}
-          onChange={e=>setForm(f=>({...f,type:e.target.value}))}
-          placeholder="Choisissez ou écrivez votre type..."/>
-        <datalist id="vitrine-types">
-          {TYPES.map(t=><option key={t} value={t}/>)}
-        </datalist>
+        <select style={{...inp,cursor:"pointer"}} value={TYPES.includes(form.type)?form.type:"Autre"}
+          onChange={e=>{ if(e.target.value==="Autre") setForm(f=>({...f,type:""})); else setForm(f=>({...f,type:e.target.value})); }}>
+          {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+          <option value="Autre">Autre (précisez ci-dessous)</option>
+        </select>
+        {(!TYPES.includes(form.type)) && (
+          <input style={{...inp,marginTop:6}} value={form.type}
+            onChange={e=>setForm(f=>({...f,type:e.target.value}))}
+            placeholder="Ex: Pharmacie, Agence de voyage, Centre sportif..."
+            maxLength={60}
+            autoFocus/>
+        )}
 
         <label style={lbl}>Slogan / Mission</label>
         <input style={inp} value={form.slogan} onChange={e=>setForm(f=>({...f,slogan:e.target.value}))} placeholder="Former les leaders de demain"/>
