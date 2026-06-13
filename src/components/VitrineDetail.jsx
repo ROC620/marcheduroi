@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabase";
 import { VITRINE_THEMES, VITRINE_TYPES, NEWS_TYPES, getVitrineTheme, toSlug } from "../vitrineConstants";
 import { VitrineCarousel, VitrineSection } from "./VitrineCarousel";
+import CarteVisite from "./CarteVisite";
 
 import VitrineEdit from "./VitrineEdit";
 import VitrineDashboard from "./VitrineDashboard";
@@ -40,6 +41,7 @@ function VitrineDetail() {
   const [userRating,setUserRating]= useState(0);
   const [ratingComment,setRatingComment] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
+  const [showCarte,   setShowCarte]   = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
 
   // Vérifier si l'utilisateur connecté est le propriétaire
@@ -203,6 +205,7 @@ function VitrineDetail() {
     : null;
 
   return (
+    <>
     <div style={{ background: structure.bg_image ? `linear-gradient(${VT.bg}CC,${VT.bg}CC), url(${structure.bg_image}) center/cover fixed` : VT.bg, minHeight:"100vh",fontFamily:"Sora,sans-serif",color:VT.text }}>
 
       {/* ---- Navbar ---- */}
@@ -217,6 +220,9 @@ function VitrineDetail() {
           </button>
           <button onClick={handleShare} style={{ background:`rgba(16,185,129,0.12)`,border:`1px solid rgba(16,185,129,0.3)`,color:COLOR,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             🔗 Partager
+          </button>
+          <button onClick={()=>setShowCarte(true)} style={{ background:`rgba(16,185,129,0.12)`,border:`1px solid rgba(16,185,129,0.3)`,color:COLOR,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
+            🪪 Carte de visite
           </button>
           <button onClick={()=>navigate("/")} style={{ background:"transparent",border:`1px solid ${VT.border}`,color:VT.sub,padding:"8px 14px",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer" }}>
             ← Retour
@@ -578,6 +584,10 @@ function VitrineDetail() {
 
       </div>
     </div>
+    {showCarte && (
+      <CarteVisite structure={structure} onClose={()=>setShowCarte(false)}/>
+    )}
+    </>
   );
 }
 

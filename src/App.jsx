@@ -46,6 +46,7 @@ import VideoCardPlayer from "./components/VideoCardPlayer";
 import VitrineRequest from "./components/VitrineRequest";
 import VitrineDetail from "./components/VitrineDetail";
 import VitrineDirectory from "./components/VitrineDirectory";
+import CarteVisite from "./components/CarteVisite";
 import LikeButton from "./components/LikeButton";
 import {
   CATEGORIES, CATEGORY_COLORS, BACKGROUNDS, VEHICLE_FIELDS, MOTO_FIELDS,
@@ -7018,6 +7019,7 @@ function PersistentLayout() {
   const isVitrineReq  = segments[0] === "vitrine"  && segments.length === 1;
   // /vitrine/slug (+ /modifier ou /payer optionnel) → page publique
   const isVitrineSlug = segments[0] === "vitrine"  && segments.length >= 2 && segments[1] && segments[1] !== "undefined";
+  const isVitrineCarte= segments[0] === "vitrine"  && segments[2] === "carte";
   // /vitrines → annuaire
   const isVitrineDir  = segments[0] === "vitrines" && segments.length === 1;
   // Sous-domaine : slug.vitrine.marcheduroi.com
@@ -7025,11 +7027,12 @@ function PersistentLayout() {
 
   return (
     <>
-      <div style={{ display: (isDetail || isVitrineReq || isVitrineSlug || isVitrineSub || isVitrineDir) ? "none" : "block" }}>
+      <div style={{ display: (isDetail || isVitrineReq || isVitrineSlug || isVitrineSub || isVitrineDir || isVitrineCarte) ? "none" : "block" }}>
         <AppContent/>
       </div>
       {isDetail                        && <AnnonceDetail/>}
-      {(isVitrineSlug || isVitrineSub) && <VitrineDetail/>}
+      {(isVitrineSlug || isVitrineSub) && !isVitrineCarte && <VitrineDetail/>}
+      {isVitrineCarte && <CarteVisite/>}
       {isVitrineReq                    && <VitrineRequest/>}
       {isVitrineDir                    && <VitrineDirectory/>}
     </>
